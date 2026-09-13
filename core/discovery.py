@@ -13,6 +13,7 @@ from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, ur
 from urllib.request import Request, urlopen
 
 from core.match import article_matches, candidate_model_match, model_match, normalize_model, normalize_text
+from core.identity import ProductIdentity, base_model_in_text, identity_verification_signals
 
 
 class Candidate(TypedDict):
@@ -27,6 +28,8 @@ class Candidate(TypedDict):
     market_scope: str
     model_match: str
     score: int
+    identity_relation: str
+    identity_verification_evidence: list[str]
 
 
 SearchResult = tuple[str, str]
@@ -286,6 +289,8 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
             "market_scope": "unknown",
             "model_match": match,
             "score": score_candidate(url, title, source_type, authority_status, match, model, article),
+            "identity_relation": "unknown",
+            "identity_verification_evidence": [],
         }
         previous = candidates.get(url)
         if previous is None or candidate["score"] > previous["score"]:
@@ -585,3 +590,84 @@ def discover(brand: str, model: str, article: str | None = None,
         return run(searcher)
     with GoogleSearchSession(market) as session:
         return run(session.search)
+
+
+def _source_identity_relation(identity: ProductIdentity, candidate: Candidate) -> str:
+    match = candidate["model_match"]
+    if match == "mismatch":
+        return "different_model"
+    if match not in {"exact", "likely_variant", "likely"}:
+        if not base_model_in_text(
+            identity.base_model,
+            f"{candidate['title']} {urlparse(candidate['url']).path}",
+        ):
+            return "unknown"
+    if identity.variant_suffix:
+        full_model = f"{identity.base_model}/{identity.variant_suffix}"
+        if model_match(full_model, f"{candidate['title']} {candidate['url']}") == "exact":
+            return "exact_variant"
+    return "same_base_model"
+
+
+def _source_verification_evidence(
+    identity: ProductIdentity,
+    candidate: Candidate,
+) -> list[str]:
+    haystack = f"{candidate['title']} {candidate['url']}"
+    normalized_haystack = normalize_text(haystack)
+    found: list[str] = []
+    signals = identity_verification_signals(identity)
+    for name, value in signals.items():
+        if name in {"ram", "storage"}:
+            continue
+        if name == "color":
+            if normalize_text(value) in normalized_haystack.split():
+                found.append(f"color={value}")
+        elif article_matches(value, haystack):
+            found.append(f"{name}={value}")
+    ram = identity.configuration.get("ram")
+    storage = identity.configuration.get("storage")
+    if ram and storage:
+        ram_number = re.sub(r"\D", "", ram)
+        storage_number = re.sub(r"\D", "", storage)
+        if re.search(
+            rf"(?<!\d){re.escape(ram_number)}\s*(?:GB\s*)?(?:\+|/)\s*"
+            rf"{re.escape(storage_number)}\s*(?:GB)?(?!\d)",
+            haystack,
+            re.IGNORECASE,
+        ):
+            found.append(f"configuration={ram}+{storage}")
+    return found
+
+
+def discover_identity(
+    identity: ProductIdentity,
+    market: str = "global",
+    searcher: Searcher | None = None,
+) -> list[Candidate]:
+    """Discover by base model and retain variant fields as verification signals."""
+    model = identity.base_model or identity.commercial_model
+    if not model:
+        raise ValueError("identity must contain a base_model or commercial_model")
+    article = identity.manufacturer_article or identity.product_code or identity.sku
+    if not article and identity.candidate_identifiers:
+        article = identity.candidate_identifiers[0]
+    candidates = discover(identity.brand, model, article, market, searcher)
+    for candidate in candidates:
+        if (
+            candidate["model_match"] in {"unknown", "mismatch"}
+            and base_model_in_text(identity.base_model, candidate["title"])
+        ):
+            candidate["model_match"] = "exact"
+            candidate["product_match_evidence"] = (
+                "Equivalent complete base-model phrase found in title/snippet."
+            )
+            candidate["score"] = score_candidate(
+                candidate["url"], candidate["title"], candidate["source_type"],
+                candidate["authority_status"], "exact", model, article,
+            )
+        candidate["identity_relation"] = _source_identity_relation(identity, candidate)
+        candidate["identity_verification_evidence"] = _source_verification_evidence(
+            identity, candidate,
+        )
+    return candidates
