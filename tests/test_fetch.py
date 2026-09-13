@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import requests
 
-from core.fetch import fetch_source
+from core.fetch import _html_content_complete, fetch_source
 
 
 class FakeResponse:
@@ -52,6 +52,45 @@ class FetchSourceTests(unittest.TestCase):
         self.assertEqual(result["fetch_method"], "playwright")
         self.assertIn("Rendered product content", result["text"])
         browser.assert_called_once()
+
+    def test_empty_spec_values_require_playwright(self):
+        shell = """<html><body><section class='product-specifications'>
+          <div class='spec-row'><h3 class='spec-label'>Power</h3><div class='spec-value' data-value='4600 W'></div></div>
+          <div class='spec-row'><h3 class='spec-label'>Width</h3><div class='spec-value'></div></div>
+          <div class='spec-row'><h3 class='spec-label'>Weight</h3><div class='spec-value'></div></div>
+        </section></body></html>"""
+        rendered = """<html><body><section class='product-specifications'>
+          <div class='spec-row'><h3>Power</h3><div>4600 W</div></div>
+          <div class='spec-row'><h3>Width</h3><div>592 mm</div></div>
+          <div class='spec-row'><h3>Weight</h3><div>10 kg</div></div>
+        </section></body></html>"""
+        text = "Power Width Weight " + "product specifications " * 20
+        self.assertFalse(_html_content_complete(shell, text))
+        with patch("core.fetch._fetch_with_playwright", return_value=("https://example.com/p", 200, rendered)) as browser:
+            result = fetch_source("https://example.com/p", session=FakeSession(html_response(shell)))
+        self.assertEqual(result["fetch_method"], "playwright")
+        browser.assert_called_once()
+
+    def test_meaningful_product_json_ld_does_not_require_playwright(self):
+        body = """<html><body><section class='product-specifications'><h3>Power</h3></section>
+        <script type='application/ld+json'>{"@type":"Product","mpn":"X100",
+          "additionalProperty":[{"@type":"PropertyValue","name":"Power","value":"4600 W"}]}</script>
+        </body></html>"""
+        with patch("core.fetch._fetch_with_playwright") as browser:
+            result = fetch_source("https://example.com/p", session=FakeSession(html_response(body)))
+        self.assertEqual(result["fetch_method"], "requests")
+        browser.assert_not_called()
+
+    def test_broad_product_detail_container_with_incidental_empty_ui_is_complete(self):
+        body = """<html><body><main class='product-detail'>
+          <div><h2>Technical data</h2><p>Power: 4600 W</p><p>Width: 592 mm</p>
+          <p>Weight: 10 kg</p><div class='content'></div><div class='value'></div>
+          <div class='description'></div><p>Useful complete product information is available in this section.</p>
+          </div></main></body></html>"""
+        with patch("core.fetch._fetch_with_playwright") as browser:
+            result = fetch_source("https://example.com/p", session=FakeSession(html_response(body)))
+        self.assertEqual(result["fetch_method"], "requests")
+        browser.assert_not_called()
 
     def test_block_pages_are_structured(self):
         cases = {

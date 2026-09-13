@@ -9,6 +9,7 @@ them. GTIN/EAN/UPC remains an optional strong identity signal.
 from __future__ import annotations
 
 from io import BytesIO
+import json
 import os
 import re
 from typing import Literal, TypedDict
@@ -136,11 +137,98 @@ def _blocked_reason(value: str) -> str | None:
 
 
 def _html_needs_browser(html: str, text: str) -> bool:
+    return not _html_content_complete(html, text)
+
+
+def _tag_signals(node: object) -> str:
+    if not hasattr(node, "get"):
+        return ""
+    node_id = str(node.get("id") or "")  # type: ignore[attr-defined]
+    classes = node.get("class") or []  # type: ignore[attr-defined]
+    if isinstance(classes, str):
+        classes = [classes]
+    return " ".join([node_id, *(str(value) for value in classes)]).casefold()
+
+
+def _meaningful_product_json_ld(soup: BeautifulSoup) -> bool:
+    for script in soup.find_all("script", attrs={"type": re.compile(r"application/ld\+json", re.I)}):
+        raw = script.string or script.get_text() or ""
+        if len(raw) > 1_000_000:
+            continue
+        try:
+            payload = json.loads(raw)
+        except (json.JSONDecodeError, TypeError):
+            continue
+        pending = [payload]
+        while pending:
+            node = pending.pop()
+            if isinstance(node, list):
+                pending.extend(node)
+                continue
+            if not isinstance(node, dict):
+                continue
+            node_type = node.get("@type", [])
+            node_types = node_type if isinstance(node_type, list) else [node_type]
+            if any(str(value).casefold() == "product" for value in node_types) and any(
+                key in node for key in (
+                    "additionalProperty", "mpn", "gtin", "gtin8", "gtin12",
+                    "gtin13", "gtin14", "weight", "width", "height", "depth",
+                )
+            ):
+                return True
+            pending.extend(node.values())
+    return False
+
+
+def _html_content_complete(html: str, text: str) -> bool:
+    """Conservatively detect HTML shells whose specification values still need JS."""
     low = (html or "").lower()
-    return len(text.strip()) < 80 or (
+    soup = BeautifulSoup(html or "", "html.parser")
+    if _meaningful_product_json_ld(soup):
+        return True
+    if len(text.strip()) < 80 or (
         len(text.strip()) < 500
         and any(marker in low for marker in ("enable javascript", "javascript is required", "id=\"root\"", "id=\"app\""))
-    )
+    ):
+        return False
+
+    spec_marker = re.compile(r"spec|attribute|characteristic|parameter|product[-_ ]?detail", re.I)
+    label_marker = re.compile(r"label|name|key|title|heading", re.I)
+    value_marker = re.compile(r"value|description|desc|content|data", re.I)
+    skeleton_marker = re.compile(r"skeleton|placeholder|loading|shimmer", re.I)
+
+    spec_nodes = [node for node in soup.find_all(True) if spec_marker.search(_tag_signals(node))]
+    if not spec_nodes:
+        return True
+
+    pending_values = 0
+    empty_values = 0
+    labels = 0
+    skeletons = 0
+    for node in soup.find_all(True):
+        signals = _tag_signals(node)
+        if skeleton_marker.search(signals):
+            skeletons += 1
+        inside_specs = spec_marker.search(signals) or any(
+            spec_marker.search(_tag_signals(parent)) for parent in node.parents
+        )
+        if not inside_specs:
+            continue
+        visible = node.get_text(" ", strip=True)
+        if (label_marker.search(signals) or node.name in {"h2", "h3", "h4", "dt"}) and visible:
+            labels += 1
+        if value_marker.search(signals) and not visible:
+            empty_values += 1
+            if str(node.get("data-value") or "").strip():
+                pending_values += 1
+
+    if skeletons >= 2:
+        return False
+    if labels >= 3 and (
+        pending_values >= 3 or (len(spec_nodes) >= 5 and empty_values >= 3)
+    ):
+        return False
+    return True
 
 
 def _browser_headless() -> bool:
