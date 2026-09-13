@@ -150,6 +150,8 @@ def _contextual_target(raw: RawAttribute, definitions: dict[str, AttributeDefini
         return "battery_capacity", "contextual:battery_section+capacity"
     if label == "size" and DISPLAY_CONTEXT.search(context) and "display_size" in definitions:
         return "display_size", "contextual:display_section+size"
+    if label == "type" and DISPLAY_CONTEXT.search(context) and "display_type" in definitions:
+        return "display_type", "contextual:display_section+type"
     if label == "weight" and PACKAGE_CONTEXT.search(context) and "gross_weight" in definitions:
         return "gross_weight", "contextual:packaging_section+weight"
     if label in {"dimensions", "dimension"}:

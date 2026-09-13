@@ -89,6 +89,28 @@ class ExtractTests(unittest.TestCase):
                          ("Shuttle type", "Vertical"), ("Operations", "12"),
                          ("Lighting", "LED")} <= pairs)
 
+    def test_inline_bold_feature_rows_do_not_leak_into_weak_colon_pairs(self):
+        html = """<div class='product-detail-text'>
+          <p><b>Features</b> Suction power - 25 000 Pa. 4 operating modes:
+            Self-cleaning with hot water at 90°C and drying with hot air for 30 min at 95°C.</p>
+          <p><b>Self-cleaning mode</b> Yes</p>
+          <p><b>Roller brush drying</b> Yes</p>
+          <p><b>Maximum suction power, kPa</b> 25</p>
+        </div>"""
+
+        attrs = extract_attributes(fetched(html=html))
+        pairs = {(item.name, item.raw_value) for item in attrs}
+
+        self.assertIn(("Self-cleaning mode", "Yes"), pairs)
+        self.assertIn(("Roller brush drying", "Yes"), pairs)
+        self.assertIn(("Maximum suction power, kPa", "25"), pairs)
+        self.assertIn(("drying", "95°C"), pairs)
+        self.assertFalse(any(item.name.startswith("Suction power - 25 000") for item in attrs))
+        self.assertFalse(any(
+            item.extraction_method == "spec_block" and "Self-cleaning" in item.raw_value
+            for item in attrs
+        ))
+
     def test_repeated_pairs_preserve_semantic_section_context(self):
         html = """<section class='products-spec-component-level-1'>
           <div class='products-spec-component-title'>Dimensions and Weight</div>

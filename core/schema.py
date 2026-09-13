@@ -8,7 +8,7 @@ import unicodedata
 from typing import Any, Iterable, Literal, Protocol
 
 from core.category import CATEGORY_NAMES, CategoryResult
-from core.identity import AttributeScope
+from core.identity import AttributeScope, ProductIdentity
 
 
 SchemaScope = Literal["universal", "category_specific", "discovered"]
@@ -64,6 +64,18 @@ class SchemaDiagnostics:
     present: dict[str, list[object]] = field(default_factory=dict)
     missing: list[str] = field(default_factory=list)
     discovered: list[object] = field(default_factory=list)
+    identity_facts: list["IdentitySchemaFact"] = field(default_factory=list)
+
+
+@dataclass(frozen=True, slots=True)
+class IdentitySchemaFact:
+    """A canonical coverage fact carried from an already-resolved identity."""
+
+    canonical_name: str
+    value: str
+    identity_field: str
+    identity_confidence: str
+    identity_evidence: tuple[str, ...]
 
 
 def _definition(
@@ -144,7 +156,7 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
         _definition("surface_material", ("surface material", "basic surface material", "surface type", "материал поверхности"), value_type="enum", priority="medium"),
         _definition("control_type", ("control type", "type of control", "управление"), value_type="enum", priority="medium"),
         _definition("timer", ("timer", "таймер"), value_type="boolean", priority="medium"),
-        _definition("safety_features", ("safety features", "child lock", "residual heat indicator", "защитные функции"), value_type="list", priority="high"),
+        _definition("safety_features", ("safety features", "child lock", "childlock", "residual heat indicator", "защитные функции"), value_type="list", priority="high"),
     ),
     "smartphone": (
         _definition("display_size", ("display size", "screen size", "screen diagonal"), value_type="dimension", unit_family="display_size", priority="critical"),
@@ -194,7 +206,7 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
         _definition("cord_length", ("cord length", "длина сетевого шнура", "длина сетевого кабеля", "длина кабеля"), value_type="dimension", unit_family="length", priority="medium"),
     ),
     "wet_dry_vacuum": (
-        _definition("suction_power", ("suction power", "suction pressure", "мощность всасывания", "შესრუტვის სიმძლავრე 25 000 პა 4 სამუშაო რეჟიმი", "შესრუტვის მაქსიმალური სიმძლავრე კპა"), value_type="power", unit_family="pressure_or_power", priority="critical"),
+        _definition("suction_power", ("suction power", "suction pressure", "мощность всасывания", "შესრუტვის მაქსიმალური სიმძლავრე კპა"), value_type="power", unit_family="pressure_or_power", priority="critical"),
         _definition("rated_power", ("rated power", "power", "номинальная мощность", "სიმძლავრე"), value_type="power", unit_family="power", priority="high"),
         _definition("battery_capacity", ("battery capacity", "აკუმულატორის ტევადობა"), value_type="capacity", unit_family="electric_charge", attribute_scope="variant_level", priority="critical"),
         _definition("runtime", ("runtime", "run time", "operating time", "время работы", "ავტონომიური მუშაობის დრო"), value_type="duration", unit_family="time", priority="critical"),
@@ -202,8 +214,8 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
         _definition("clean_water_tank", ("clean water tank", "clean water tank capacity", "бак для чистой воды", "სუფთა წყლის კონტეინერის მოცულობა ლ"), value_type="capacity", unit_family="volume", priority="critical"),
         _definition("dirty_water_tank", ("dirty water tank", "dirty water tank capacity", "бак для грязной воды", "ჭუჭყიანი წყლის კონტეინერის მოცულობა ლ"), value_type="capacity", unit_family="volume", priority="critical"),
         _definition("modes", ("modes", "cleaning modes", "режимы", "წმენდის რეჟიმების რაოდენობა"), value_type="list", priority="high"),
-        _definition("self_cleaning", ("self cleaning", "self-cleaning", "самоочистка"), value_type="boolean", priority="high"),
-        _definition("drying_temperature", ("drying temperature", "температура сушки"), value_type="number", unit_family="temperature", priority="medium"),
+        _definition("self_cleaning", ("self cleaning", "self-cleaning", "self-cleaning mode", "самоочистка", "თვითწმენდის რეჟიმი"), value_type="boolean", priority="high"),
+        _definition("drying_temperature", ("drying temperature", "drying", "температура сушки", "сушка", "გაშრობა"), value_type="number", unit_family="temperature", priority="medium"),
         _definition("weight", ("weight", "вес", "წონა"), value_type="weight", unit_family="mass", priority="high", notes="Generic product weight; never infer gross weight from this label."),
         _definition("dimensions", ("dimensions", "габариты"), value_type="dimension", unit_family="length", priority="high", notes="Generic product dimensions; never infer package dimensions from this label."),
     ),
@@ -260,6 +272,8 @@ def resolve_attribute_definition(
 def analyze_schema_coverage(
     category: str | CategoryResult,
     attributes: Iterable[AttributeLike | str] | Any,
+    *,
+    identity: ProductIdentity | None = None,
 ) -> SchemaDiagnostics:
     """Diagnose coverage while preserving every unknown valid extracted fact."""
     mapping_result = all(
@@ -282,12 +296,50 @@ def analyze_schema_coverage(
             discovered.append(item)
             continue
         present.setdefault(definition.canonical_name, []).append(item)
+    identity_facts: list[IdentitySchemaFact] = []
+    if identity is not None:
+        fields = (
+            ("brand", "brand", identity.brand),
+            ("model", "commercial_model", identity.commercial_model),
+            ("model", "base_model", identity.base_model),
+            ("manufacturer_article", "manufacturer_article", identity.manufacturer_article),
+            ("product_code", "product_code", identity.product_code),
+            ("sku", "sku", identity.sku),
+            ("gtin", "gtin", identity.gtin),
+            ("color", "color", identity.color),
+            ("ram", "configuration.ram", identity.configuration.get("ram")),
+            ("storage", "configuration.storage", identity.configuration.get("storage")),
+        )
+        schema_names = {item.canonical_name for item in get_attribute_schema(category)}
+        seen_identity_values: set[tuple[str, str]] = set()
+        for canonical_name, identity_field, value in fields:
+            if canonical_name not in schema_names or not value:
+                continue
+            value_key = _alias_key(value)
+            semantic_key = (canonical_name, value_key)
+            if semantic_key in seen_identity_values:
+                continue
+            seen_identity_values.add(semantic_key)
+            fact = IdentitySchemaFact(
+                canonical_name=canonical_name,
+                value=value,
+                identity_field=identity_field,
+                identity_confidence=identity.confidence,
+                identity_evidence=tuple(identity.evidence),
+            )
+            identity_facts.append(fact)
+            existing_values = {
+                _alias_key(str(getattr(existing, "value", existing)))
+                for existing in present.get(canonical_name, [])
+            }
+            if value_key not in existing_values:
+                present.setdefault(canonical_name, []).append(fact)
     missing = [
         definition.canonical_name
         for definition in get_expected_attributes(category)
         if definition.canonical_name not in present
     ]
-    return SchemaDiagnostics(present, missing, discovered)
+    return SchemaDiagnostics(present, missing, discovered, identity_facts)
 
 
 def extend_schema_with_discovered(

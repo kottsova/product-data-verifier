@@ -12,7 +12,7 @@ from io import BytesIO
 import json
 import os
 import re
-from typing import Literal, TypedDict
+from typing import Literal, Mapping, TypedDict
 from urllib.parse import urlparse
 
 import requests
@@ -40,6 +40,12 @@ class FetchResult(TypedDict):
     text_status: TextStatus
     blocked_reason: str | None
     error: str | None
+    source_type: str | None
+    authority_status: str | None
+    authority_evidence_url: str | None
+    model_relevance: str | None
+    identity_relation: str | None
+    discovery_metadata: dict[str, object]
 
 
 def _result(source_url: str, **updates: object) -> FetchResult:
@@ -58,6 +64,12 @@ def _result(source_url: str, **updates: object) -> FetchResult:
         "text_status": "not_applicable",
         "blocked_reason": None,
         "error": None,
+        "source_type": None,
+        "authority_status": None,
+        "authority_evidence_url": None,
+        "model_relevance": None,
+        "identity_relation": None,
+        "discovery_metadata": {},
     }
     result.update(updates)  # type: ignore[typeddict-item]
     return result
@@ -385,3 +397,30 @@ def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
                    content_type="text/html", document_type="html", html=rendered_html,
                    content=rendered_html.encode("utf-8"), text=rendered_text,
                    text_status="available")
+
+
+def fetch_candidate(
+    candidate: Mapping[str, object],
+    *,
+    timeout: float = 30,
+    max_bytes: int = 25_000_000,
+    session: requests.Session | None = None,
+) -> FetchResult:
+    """Fetch one Discovery candidate and preserve its explicit source metadata."""
+    result = fetch_source(
+        str(candidate.get("url") or ""),
+        timeout=timeout,
+        max_bytes=max_bytes,
+        session=session,
+    )
+    result["discovery_metadata"] = dict(candidate)
+    for field in (
+        "source_type",
+        "authority_status",
+        "authority_evidence_url",
+        "model_relevance",
+        "identity_relation",
+    ):
+        value = candidate.get(field)
+        result[field] = str(value) if value is not None else None  # type: ignore[literal-required]
+    return result

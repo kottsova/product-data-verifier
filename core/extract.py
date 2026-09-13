@@ -74,6 +74,15 @@ SAFE_PDF_CONTINUATION = re.compile(
     rf"^[-+]?\d[\d\s.,;:+/x×%\-–—]*(?:{UNIT_TOKEN})?[)\]]+$",
     re.IGNORECASE,
 )
+FEATURE_GROUP_LABEL_PATTERN = re.compile(
+    r"^(?:features?|specifications?|характеристики|მახასიათებლები)$",
+    re.IGNORECASE,
+)
+DRYING_TERM_PATTERN = re.compile(
+    r"\bdry(?:ing)?\b|сушк\w*|გაშრობ\w*",
+    re.IGNORECASE,
+)
+TEMPERATURE_VALUE_PATTERN = re.compile(r"[-+]?\d+(?:[.,]\d+)?\s*°\s*[CF]", re.IGNORECASE)
 
 
 @dataclass(frozen=True, slots=True)
@@ -362,6 +371,95 @@ def _row_pair(row: Tag) -> tuple[str, str] | None:
     return name, value
 
 
+def _inline_label_pair(row: Tag) -> tuple[str, str] | None:
+    """Read a direct bold/strong label followed by text in the same row."""
+    children = _direct_element_children(row)
+    if not children or children[0].name not in {"b", "strong"}:
+        return None
+    raw_label = _clean(children[0].get_text(" ", strip=True))
+    full_text = _clean(row.get_text(" ", strip=True))
+    if not raw_label or not full_text.startswith(raw_label):
+        return None
+    value = full_text[len(raw_label):].lstrip(" :–—-")
+    label = raw_label.rstrip(":").strip()
+    if not label or not value or len(label) > 120:
+        return None
+    return label, value
+
+
+def _proven_inline_label_rows(soup: BeautifulSoup) -> list[tuple[Tag, tuple[str, str]]]:
+    """Return inline label rows only when siblings prove a repeated fact structure."""
+    found: list[tuple[Tag, tuple[str, str]]] = []
+    consumed: set[int] = set()
+    for container in soup.find_all(["div", "section", "ul", "ol"]):
+        if _inside_ui_region(container) or _high_link_density(container):
+            continue
+        rows = [
+            row for row in _direct_element_children(container)
+            if row.name in {"p", "li", "div"}
+        ]
+        if len(rows) < 3:
+            continue
+        valid = [(row, _inline_label_pair(row)) for row in rows]
+        pairs = [(row, pair) for row, pair in valid if pair is not None]
+        if len(pairs) < 3 or len(pairs) / len(rows) < 0.4:
+            continue
+        for row, pair in pairs:
+            if id(row) not in consumed:
+                consumed.add(id(row))
+                found.append((row, pair))
+    return found
+
+
+def _extract_feature_temperatures(
+    row: Tag,
+    group_value: str,
+    source_url: str,
+    source_type: str | None,
+) -> list[RawAttribute]:
+    """Extract an explicit drying temperature inside a proven Features row."""
+    found: list[RawAttribute] = []
+    for drying in DRYING_TERM_PATTERN.finditer(group_value):
+        clause = re.split(r"[.!?;]", group_value[drying.start():], maxsplit=1)[0]
+        temperatures = list(TEMPERATURE_VALUE_PATTERN.finditer(clause))
+        if not temperatures:
+            continue
+        temperature = temperatures[-1]
+        source_label = drying.group(0)
+        item = _attribute(
+            source_label,
+            temperature.group(0),
+            source_url,
+            source_type,
+            "label_value",
+            "medium",
+            evidence=_clean(clause)[:300],
+            generic=True,
+            context=_context_for_tag(row, source_label),
+        )
+        if item:
+            found.append(item)
+    return found
+
+
+def _extract_inline_label_blocks(
+    soup: BeautifulSoup,
+    source_url: str,
+    source_type: str | None,
+) -> list[RawAttribute]:
+    found: list[RawAttribute] = []
+    for row, (name, value) in _proven_inline_label_rows(soup):
+        item = _attribute(
+            name, value, source_url, source_type, "label_value", "medium",
+            generic=True, context=_context_for_tag(row, name),
+        )
+        if item:
+            found.append(item)
+        if FEATURE_GROUP_LABEL_PATTERN.fullmatch(name):
+            found.extend(_extract_feature_temperatures(row, value, source_url, source_type))
+    return found
+
+
 def _extract_repeated_blocks(soup: BeautifulSoup, source_url: str,
                              source_type: str | None) -> list[RawAttribute]:
     """Extract repeated two-column/block pairs only inside a proven sequence."""
@@ -448,6 +546,7 @@ def _extract_embedded_structures(soup: BeautifulSoup, source_url: str,
             found.extend(_extract_definitions(fragment, source_url, source_type))
             found.extend(_extract_label_values(fragment, source_url, source_type))
             found.extend(_extract_repeated_blocks(fragment, source_url, source_type))
+            found.extend(_extract_inline_label_blocks(fragment, source_url, source_type))
     return found
 
 
@@ -524,6 +623,8 @@ def _high_link_density(tag: Tag) -> bool:
 
 def _generic_html_text(soup: BeautifulSoup) -> str:
     generic_soup = BeautifulSoup(str(soup), "html.parser")
+    for row, _pair in _proven_inline_label_rows(generic_soup):
+        row.decompose()
     for tag in list(generic_soup.find_all(True)):
         if tag.parent is None:
             continue
@@ -576,6 +677,7 @@ def extract_attributes(fetch_result: dict[str, Any]) -> list[RawAttribute]:
         attributes.extend(_extract_definitions(soup, source_url, source_type))
         attributes.extend(_extract_label_values(soup, source_url, source_type))
         attributes.extend(_extract_repeated_blocks(soup, source_url, source_type))
+        attributes.extend(_extract_inline_label_blocks(soup, source_url, source_type))
         attributes.extend(_extract_embedded_structures(soup, source_url, source_type))
         attributes.extend(_pairs_from_lines(_generic_html_text(soup), "spec_block", "low",
                                             source_url, source_type))

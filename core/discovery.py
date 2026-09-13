@@ -767,6 +767,7 @@ def discover_identity_with_status(
         candidate["identity_verification_evidence"] = _source_verification_evidence(
             identity, candidate,
         )
+    outcome.candidates.sort(key=lambda item: (-item["score"], item["url"]))
     return outcome
 
 

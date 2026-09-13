@@ -10,7 +10,7 @@ from core.identity import (
     identity_verification_signals,
     resolve_product_identity,
 )
-from core.discovery import discover_identity, discover_identity_with_status
+from core.discovery import clear_official_domain_cache, discover_identity, discover_identity_with_status
 
 
 class IdentityParsingTests(unittest.TestCase):
@@ -187,6 +187,30 @@ class IdentityDiscoveryTests(unittest.TestCase):
         candidate = discover_identity(identity, searcher=searcher)[0]
         self.assertEqual(candidate["identity_relation"], "same_base_model")
         self.assertEqual(candidate["model_match"], "exact")
+
+    def test_identity_aware_rescoring_re_reranks_candidates(self) -> None:
+        clear_official_domain_cache()
+        identity = resolve_product_identity(
+            "Janome Sakura 95",
+            brand="Janome",
+            evidence=[IdentityEvidence("commercial_model", "Sakura 95", "input model")],
+        )
+        homepage = ("https://janome.example/", "Janome Official Website")
+        product = (
+            "https://janome.example/shveynaya-mashina-janome-sakura-95-kupit",
+            "Швейная машина Janome Sakura 95",
+        )
+
+        def searcher(query):
+            if query == "Janome official website":
+                return [homepage]
+            return [product]
+
+        outcome = discover_identity_with_status(identity, searcher=searcher)
+
+        self.assertIn("sakura-95", outcome.candidates[0]["url"])
+        self.assertEqual(outcome.candidates[0]["model_relevance"], "exact_base_model")
+        self.assertGreater(outcome.candidates[0]["score"], outcome.candidates[1]["score"])
 
     def test_model_extension_does_not_become_exact_base_phrase(self) -> None:
         identity = resolve_product_identity("Apple iPhone 18")

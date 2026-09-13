@@ -3,7 +3,8 @@ from unittest.mock import patch
 
 import requests
 
-from core.fetch import _html_content_complete, fetch_source
+from core.extract import extract_attributes
+from core.fetch import _html_content_complete, fetch_candidate, fetch_source
 
 
 class FakeResponse:
@@ -33,6 +34,32 @@ def html_response(body, status=200):
 
 
 class FetchSourceTests(unittest.TestCase):
+    def test_discovery_metadata_is_explicitly_preserved_for_extraction(self):
+        body = (
+            "<html><head><title>Model X100</title></head><body>"
+            "<table><tr><td>Power</td><td>4600 W</td></tr></table><p>"
+            + "Useful product information. " * 8
+            + "</p></body></html>"
+        )
+        candidate = {
+            "url": "https://example.com/product",
+            "source_type": "manufacturer",
+            "authority_status": "verified",
+            "authority_evidence_url": "https://example.com/about",
+            "model_relevance": "exact_base_model",
+            "identity_relation": "same_base_model",
+        }
+
+        result = fetch_candidate(candidate, session=FakeSession(html_response(body)))
+
+        self.assertEqual(result["source_type"], "manufacturer")
+        self.assertEqual(result["authority_status"], "verified")
+        self.assertEqual(result["authority_evidence_url"], "https://example.com/about")
+        self.assertEqual(result["model_relevance"], "exact_base_model")
+        self.assertEqual(result["identity_relation"], "same_base_model")
+        self.assertEqual(result["discovery_metadata"], candidate)
+        self.assertEqual(extract_attributes(result)[0].source_type, "manufacturer")
+
     def test_normal_html_returns_meaningful_text_without_playwright(self):
         body = "<html><head><title>Model X100</title><meta name='description' content='Product description'></head><body><script>bad()</script><h1>Model X100</h1><table><tr><td>Weight</td><td>10 kg</td></tr></table><p>" + "Useful product information. " * 5 + "</p></body></html>"
         with patch("core.fetch._fetch_with_playwright") as browser:

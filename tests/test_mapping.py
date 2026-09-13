@@ -1,8 +1,9 @@
 import unittest
 
 from core.extract import RawAttribute
+from core.identity import IdentityEvidence, ProductIdentity, resolve_product_identity
 from core.mapping import DimensionValue, map_attributes
-from core.schema import analyze_schema_coverage
+from core.schema import IdentitySchemaFact, analyze_schema_coverage
 
 
 def raw(
@@ -30,6 +31,28 @@ def raw(
 
 
 class DirectMappingTests(unittest.TestCase):
+    def test_childlock_maps_to_generic_safety_features(self) -> None:
+        item = raw("ChildLock", "Yes")
+        mapped = map_attributes([item], category="cooktop").mapped[0]
+        self.assertEqual(mapped.canonical_name, "safety_features")
+        self.assertEqual(mapped.raw_label, "ChildLock")
+        self.assertEqual(mapped.raw_value, "Yes")
+        self.assertEqual(mapped.fact_evidence, item.evidence)
+
+    def test_structured_cleaning_and_drying_facts_map_separately(self) -> None:
+        cleaning = raw("თვითწმენდის რეჟიმი", "აქვს")
+        drying = raw("გაშრობა", "95°C", value="95", unit="°C")
+        result = map_attributes([cleaning, drying], category="wet_dry_vacuum")
+
+        self.assertEqual(
+            {item.canonical_name for item in result.mapped},
+            {"self_cleaning", "drying_temperature"},
+        )
+        self.assertEqual(
+            next(item for item in result.mapped if item.canonical_name == "drying_temperature").raw_value,
+            "95°C",
+        )
+
     def test_strong_weight_aliases(self) -> None:
         cases = (
             ("Net weight", "net_weight"),
@@ -121,6 +144,20 @@ class ContextualMappingTests(unittest.TestCase):
         self.assertEqual(result.mapped[0].canonical_name, "display_size")
         self.assertEqual(result.mapped[0].mapping_reason, "contextual:display_section+size")
 
+    def test_display_type_context(self) -> None:
+        result = map_attributes(
+            [raw("Type", "AMOLED", context="Display")],
+            category="smartphone",
+        )
+        self.assertEqual(result.mapped[0].canonical_name, "display_type")
+        self.assertEqual(result.mapped[0].mapping_reason, "contextual:display_section+type")
+
+    def test_bare_type_is_not_globally_mapped(self) -> None:
+        item = raw("Type", "AMOLED")
+        result = map_attributes([item], category="smartphone")
+        self.assertEqual(result.mapped, [])
+        self.assertEqual(result.unmapped, [item])
+
     def test_packaging_weight_context(self) -> None:
         result = map_attributes(
             [raw("Weight", "5 kg", context="Packaging")],
@@ -189,6 +226,81 @@ class CompositeDimensionTests(unittest.TestCase):
 
 
 class SchemaIntegrationTests(unittest.TestCase):
+    def test_resolved_identity_satisfies_coverage_with_provenance(self) -> None:
+        identity = resolve_product_identity(
+            "HONOR X8d",
+            evidence=[IdentityEvidence("commercial_model", "X8d", "user input")],
+        )
+        diagnostics = analyze_schema_coverage(
+            "smartphone", map_attributes([], category="smartphone"), identity=identity,
+        )
+
+        self.assertIn("brand", diagnostics.present)
+        self.assertIn("model", diagnostics.present)
+        model_fact = diagnostics.present["model"][0]
+        self.assertIsInstance(model_fact, IdentitySchemaFact)
+        self.assertEqual(model_fact.identity_field, "commercial_model")
+        self.assertIn("Evidence commercial_model=X8d (user input).", model_fact.identity_evidence)
+        self.assertNotIn("brand", diagnostics.missing)
+        self.assertNotIn("model", diagnostics.missing)
+
+    def test_unresolved_candidate_identifier_does_not_satisfy_model(self) -> None:
+        identity = ProductIdentity(
+            brand="Gressel",
+            raw_name="Gressel GAF-1825",
+            confidence="low",
+            candidate_identifiers=["GAF-1825"],
+            evidence=["Unresolved identifier retained."],
+        )
+        diagnostics = analyze_schema_coverage(
+            "air_fryer", map_attributes([], category="air_fryer"), identity=identity,
+        )
+
+        self.assertIn("brand", diagnostics.present)
+        self.assertIn("model", diagnostics.missing)
+        self.assertNotIn("model", diagnostics.present)
+        self.assertFalse(any(fact.value == "GAF-1825" for fact in diagnostics.identity_facts))
+
+    def test_identity_does_not_overwrite_or_duplicate_source_fact(self) -> None:
+        source_model = raw("Model", "X8d Pro")
+        identity = resolve_product_identity(
+            "HONOR X8d",
+            evidence=[IdentityEvidence("commercial_model", "X8d", "user input")],
+        )
+        result = map_attributes([source_model], category="smartphone")
+        diagnostics = analyze_schema_coverage("smartphone", result, identity=identity)
+
+        self.assertEqual(
+            {str(item.value) for item in diagnostics.present["model"]},
+            {"X8d Pro", "X8d"},
+        )
+        same = resolve_product_identity(
+            "HONOR X8d Pro",
+            evidence=[IdentityEvidence("commercial_model", "X8d Pro", "user input")],
+        )
+        same_diagnostics = analyze_schema_coverage("smartphone", result, identity=same)
+        self.assertEqual(len(same_diagnostics.present["model"]), 1)
+
+    def test_identity_keeps_distinct_base_and_commercial_model_facts(self) -> None:
+        identity = ProductIdentity(
+            brand="Acme",
+            raw_name="Acme Phone Pro",
+            base_model="Phone",
+            commercial_model="Phone Pro",
+            confidence="high",
+            evidence=["Both model fields were explicitly supplied."],
+        )
+        diagnostics = analyze_schema_coverage(
+            "smartphone", map_attributes([], category="smartphone"), identity=identity,
+        )
+
+        model_facts = diagnostics.present["model"]
+        self.assertEqual({fact.value for fact in model_facts}, {"Phone", "Phone Pro"})
+        self.assertEqual(
+            {fact.identity_field for fact in model_facts},
+            {"base_model", "commercial_model"},
+        )
+
     def test_coverage_uses_canonical_mapping_and_keeps_unknown(self) -> None:
         net = raw("Net weight", "4.2 kg")
         unknown = raw("Special coating", "Ceramic X")
