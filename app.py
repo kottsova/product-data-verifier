@@ -1,6 +1,6 @@
 import sys
 
-from core.discovery import discover
+from core.discovery import DiscoverySearchError, discover
 
 
 def main() -> None:
@@ -12,7 +12,11 @@ def main() -> None:
 
     brand, model = sys.argv[1:3]
     article = sys.argv[3] if len(sys.argv) > 3 else None
-    candidates = discover(brand, model, article)
+    try:
+        candidates = discover(brand, model, article)
+    except DiscoverySearchError as error:
+        print(str(error))
+        return
     if not candidates:
         print("No candidates found.")
         return

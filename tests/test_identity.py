@@ -10,7 +10,7 @@ from core.identity import (
     identity_verification_signals,
     resolve_product_identity,
 )
-from core.discovery import discover_identity
+from core.discovery import discover_identity, discover_identity_with_status
 
 
 class IdentityParsingTests(unittest.TestCase):
@@ -155,6 +155,11 @@ class IdentityDiscoveryTests(unittest.TestCase):
         official = next(item for item in candidates if "/spec" in item["url"])
         self.assertEqual(official["identity_relation"], "same_base_model")
         self.assertEqual(official["model_match"], "exact")
+        self.assertEqual(official["model_relevance"], "exact_base_model")
+
+        outcome = discover_identity_with_status(identity, searcher=searcher)
+        self.assertIn("HONOR X8d", outcome.queries)
+        self.assertFalse(any(identity.raw_name in query for query in outcome.queries))
 
     def test_variant_signals_are_optional_secondary_evidence(self) -> None:
         def searcher(query):
@@ -195,6 +200,34 @@ class IdentityDiscoveryTests(unittest.TestCase):
         candidate = discover_identity(identity, searcher=searcher)[0]
         self.assertNotEqual(candidate["model_match"], "exact")
         self.assertNotEqual(candidate["identity_relation"], "same_base_model")
+
+    def test_bosch_suffix_is_variant_relevance_but_same_base_identity(self) -> None:
+        identity = resolve_product_identity("Bosch PUE611BB5E")
+
+        def searcher(query):
+            return [(
+                "https://bosch.example/product/PUE611BB5E-01",
+                "Bosch PUE611BB5E/01",
+            )]
+
+        candidate = discover_identity(identity, searcher=searcher)[0]
+        self.assertEqual(candidate["model_match"], "likely_variant")
+        self.assertEqual(candidate["model_relevance"], "variant_of_base_model")
+        self.assertEqual(candidate["identity_relation"], "same_base_model")
+        self.assertEqual(candidate["market_scope"], "unknown")
+
+    def test_adjacent_bosch_model_is_different(self) -> None:
+        identity = resolve_product_identity("Bosch PUE611BB5E")
+
+        def searcher(query):
+            return [(
+                "https://shop.example/product/PUE611BB5F",
+                "Bosch PUE611BB5F",
+            )]
+
+        candidate = discover_identity(identity, searcher=searcher)[0]
+        self.assertEqual(candidate["model_relevance"], "different_model")
+        self.assertEqual(candidate["identity_relation"], "different_model")
 
 
 if __name__ == "__main__":

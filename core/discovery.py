@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 from html.parser import HTMLParser
 import os
 from pathlib import Path
 import re
 import tempfile
 import time
-from typing import Callable, Iterable, TypedDict
+from typing import Callable, Iterable, Literal, TypedDict
 from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
@@ -17,6 +18,8 @@ from core.identity import ProductIdentity, base_model_in_text, identity_verifica
 
 
 class Candidate(TypedDict):
+    """Ranked source; model_match is legacy, model_relevance is explicit."""
+
     url: str
     domain: str
     title: str
@@ -27,6 +30,7 @@ class Candidate(TypedDict):
     product_match_evidence: str | None
     market_scope: str
     model_match: str
+    model_relevance: str
     score: int
     identity_relation: str
     identity_verification_evidence: list[str]
@@ -34,6 +38,34 @@ class Candidate(TypedDict):
 
 SearchResult = tuple[str, str]
 Searcher = Callable[[str], Iterable[SearchResult]]
+SearchStatus = Literal["success", "partial", "blocked", "error"]
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveryIssue:
+    status: Literal["blocked", "error"]
+    query: str
+    message: str
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveryOutcome:
+    """Structured discovery result; degraded search is never an empty success."""
+
+    candidates: list[Candidate] = field(default_factory=list)
+    search_status: SearchStatus = "success"
+    queries: list[str] = field(default_factory=list)
+    attempted_queries: list[str] = field(default_factory=list)
+    issues: list[DiscoveryIssue] = field(default_factory=list)
+
+
+class DiscoverySearchError(RuntimeError):
+    """Compatibility exception carrying the structured failed outcome."""
+
+    def __init__(self, outcome: DiscoveryOutcome) -> None:
+        self.outcome = outcome
+        detail = outcome.issues[-1].message if outcome.issues else "Search failed."
+        super().__init__(f"Discovery {outcome.search_status}: {detail}")
 
 MARKETPLACE_DOMAINS = {
     "amazon", "aliexpress", "ebay", "ozon", "temu", "wildberries",
@@ -170,10 +202,14 @@ def discover_global_official_domains(brand: str, results: Iterable[SearchResult]
         title_norm = normalize_text(title)
         if not brand_key or (brand_key not in label and label not in brand_key):
             continue
+        brand_in_title = normalize_model(brand) in normalize_model(title)
         official_signal = "official" in title_norm or "официаль" in title_norm
-        if not official_signal and _page_kind(url) != "homepage":
+        # Domain/brand similarity is only a consistency check. Verification
+        # requires an explicit result claim linking this brand to an official
+        # site; a similarly named homepage is not evidence by itself.
+        if not official_signal or not brand_in_title:
             continue
-        ranked.append((100 + (20 if official_signal else 0) - position, domain, canonicalize_url(url)))
+        ranked.append((120 - position, domain, canonicalize_url(url)))
     ranked.sort(reverse=True)
     found: list[tuple[str, str]] = []
     seen: set[str] = set()
@@ -244,6 +280,22 @@ def score_candidate(url: str, title: str, source_type: str, authority_status: st
     return score
 
 
+def _model_relevance(match: str) -> str:
+    """Translate legacy model_match into explicit base-model relevance.
+
+    Compatibility value ``exact`` means exact equality to the model argument.
+    Identity-aware discovery passes the base model, so ``exact`` must not be
+    interpreted downstream as an exact product variant.
+    """
+    return {
+        "exact": "exact_base_model",
+        "likely_variant": "variant_of_base_model",
+        "likely": "probable_base_model",
+        "mismatch": "different_model",
+        "unknown": "unknown",
+    }[match]
+
+
 def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
                     article: str | None = None, official_domain: str | None = None,
                     authority_evidence_url: str | None = None,
@@ -268,7 +320,7 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
         if source_type == "manufacturer" and candidate_evidence:
             authority_status = "verified"
             evidence_url = candidate_evidence
-            authority_reason = "Domain verified from manufacturer-origin official-site results."
+            authority_reason = "Domain verified from an explicit brand official-site result."
             if _is_official_document(url):
                 source_type = "official_document"
         match = candidate_model_match(model, title, urlparse(url).path)
@@ -288,6 +340,7 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
             "product_match_evidence": product_match_evidence,
             "market_scope": "unknown",
             "model_match": match,
+            "model_relevance": _model_relevance(match),
             "score": score_candidate(url, title, source_type, authority_status, match, model, article),
             "identity_relation": "unknown",
             "identity_verification_evidence": [],
@@ -535,8 +588,23 @@ def google_search(query: str, market: str = "global") -> list[SearchResult]:
         return session.search(query)
 
 
-def discover(brand: str, model: str, article: str | None = None,
-             market: str = "global", searcher: Searcher | None = None) -> list[Candidate]:
+def _discovery_issue(query: str, error: RuntimeError) -> DiscoveryIssue:
+    message = str(error) or error.__class__.__name__
+    lowered = message.lower()
+    blocked = any(marker in lowered for marker in (
+        "bot-check", "blocked", "captcha", "recaptcha", "unusual traffic",
+    ))
+    return DiscoveryIssue("blocked" if blocked else "error", query, message)
+
+
+def discover_with_status(
+    brand: str,
+    model: str,
+    article: str | None = None,
+    market: str = "global",
+    searcher: Searcher | None = None,
+) -> DiscoveryOutcome:
+    """Discover sources and retain blocked/error state as structured data."""
     brand = " ".join((brand or "").split())
     model = " ".join((model or "").split())
     article = " ".join(article.split()) if article and article.strip() else None
@@ -545,26 +613,28 @@ def discover(brand: str, model: str, article: str | None = None,
     if market not in SUPPORTED_MARKETS:
         raise ValueError(f"Unsupported market: {market}")
 
-    def run(active_searcher: Searcher) -> list[Candidate]:
+    def run(active_searcher: Searcher) -> DiscoveryOutcome:
         cache_key = (normalize_model(brand), market)
         cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
         official_domains = dict(cached or ())
         raw_results: list[SearchResult] = []
         official_results: list[SearchResult] = []
+        issues: list[DiscoveryIssue] = []
+        attempted_queries: list[str] = []
         base_queries = build_search_queries(brand, model, article)
         queries: list[str] = []
         if not cached:
             queries.extend((f"{brand} official website", f"{brand} official {model}"))
         queries.extend(base_queries)
         for query in queries:
+            attempted_queries.append(query)
             try:
                 found = list(active_searcher(query))
                 raw_results.extend(found)
                 if "official" in query:
                     official_results.extend(found)
-            except RuntimeError:
-                if not raw_results:
-                    raise
+            except RuntimeError as error:
+                issues.append(_discovery_issue(query, error))
                 break
         if not official_domains:
             official_domains = dict(discover_global_official_domains(brand, official_results))
@@ -577,19 +647,45 @@ def discover(brand: str, model: str, article: str | None = None,
         ]
         site_domains = relevant_domains or list(official_domains)[:1]
         for domain in site_domains[:3]:
+            query = f'"{model}" site:{domain}'
+            queries.append(query)
+            attempted_queries.append(query)
             try:
-                raw_results.extend(active_searcher(f'"{model}" site:{domain}'))
-            except RuntimeError:
+                raw_results.extend(active_searcher(query))
+            except RuntimeError as error:
+                issues.append(_discovery_issue(query, error))
                 break
-        return rank_candidates(
+        candidates = rank_candidates(
             raw_results, brand, model, article, market=market,
             official_domains=official_domains,
+        )
+        if issues and raw_results:
+            status: SearchStatus = "partial"
+        elif issues:
+            status = issues[-1].status
+        else:
+            status = "success"
+        return DiscoveryOutcome(
+            candidates=candidates,
+            search_status=status,
+            queries=queries,
+            attempted_queries=attempted_queries,
+            issues=issues,
         )
 
     if searcher is not None:
         return run(searcher)
     with GoogleSearchSession(market) as session:
         return run(session.search)
+
+
+def discover(brand: str, model: str, article: str | None = None,
+             market: str = "global", searcher: Searcher | None = None) -> list[Candidate]:
+    """Compatibility list API; failed empty searches raise with an outcome."""
+    outcome = discover_with_status(brand, model, article, market, searcher)
+    if outcome.search_status != "success" and not outcome.candidates:
+        raise DiscoverySearchError(outcome)
+    return outcome.candidates
 
 
 def _source_identity_relation(identity: ProductIdentity, candidate: Candidate) -> str:
@@ -640,11 +736,11 @@ def _source_verification_evidence(
     return found
 
 
-def discover_identity(
+def discover_identity_with_status(
     identity: ProductIdentity,
     market: str = "global",
     searcher: Searcher | None = None,
-) -> list[Candidate]:
+) -> DiscoveryOutcome:
     """Discover by base model and retain variant fields as verification signals."""
     model = identity.base_model or identity.commercial_model
     if not model:
@@ -652,8 +748,8 @@ def discover_identity(
     article = identity.manufacturer_article or identity.product_code or identity.sku
     if not article and identity.candidate_identifiers:
         article = identity.candidate_identifiers[0]
-    candidates = discover(identity.brand, model, article, market, searcher)
-    for candidate in candidates:
+    outcome = discover_with_status(identity.brand, model, article, market, searcher)
+    for candidate in outcome.candidates:
         if (
             candidate["model_match"] in {"unknown", "mismatch"}
             and base_model_in_text(identity.base_model, candidate["title"])
@@ -666,8 +762,21 @@ def discover_identity(
                 candidate["url"], candidate["title"], candidate["source_type"],
                 candidate["authority_status"], "exact", model, article,
             )
+            candidate["model_relevance"] = "exact_base_model"
         candidate["identity_relation"] = _source_identity_relation(identity, candidate)
         candidate["identity_verification_evidence"] = _source_verification_evidence(
             identity, candidate,
         )
-    return candidates
+    return outcome
+
+
+def discover_identity(
+    identity: ProductIdentity,
+    market: str = "global",
+    searcher: Searcher | None = None,
+) -> list[Candidate]:
+    """Compatibility list view of identity-aware structured discovery."""
+    outcome = discover_identity_with_status(identity, market, searcher)
+    if outcome.search_status != "success" and not outcome.candidates:
+        raise DiscoverySearchError(outcome)
+    return outcome.candidates

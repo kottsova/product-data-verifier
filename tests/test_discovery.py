@@ -2,12 +2,15 @@ import unittest
 from unittest.mock import patch
 
 from core.discovery import (
+    DiscoverySearchError,
     GoogleSearchSession,
     browser_headless,
     canonicalize_url,
     classify_source,
     clear_official_domain_cache,
     discover,
+    discover_global_official_domains,
+    discover_with_status,
     is_obvious_non_product_url,
     rank_candidates,
 )
@@ -150,6 +153,36 @@ class DiscoveryTests(unittest.TestCase):
         self.assertGreater(first_official_calls, 0)
         self.assertFalse(any("official" in query for query in calls))
 
+    def test_brand_like_homepage_is_not_authority_evidence(self) -> None:
+        evidence = discover_global_official_domains("Gressel", [
+            ("https://gressel.ch/", "GRESSEL AG – Spanntechnik und Werkstück-Automation"),
+        ])
+        self.assertEqual(evidence, [])
+        candidate = rank_candidates([
+            ("https://gressel.ch/products/gaf-1825", "Gressel GAF-1825"),
+        ], "Gressel", "GAF-1825", official_domains=dict(evidence))[0]
+        self.assertEqual(candidate["source_type"], "other")
+        self.assertEqual(candidate["authority_status"], "unknown")
+
+    def test_explicit_official_claim_is_authority_evidence(self) -> None:
+        evidence = discover_global_official_domains("Acme", [
+            ("https://acme.example/", "Acme official website"),
+        ])
+        self.assertEqual(evidence, [("acme.example", "https://acme.example/")])
+
+    def test_authority_and_model_relevance_are_independent(self) -> None:
+        candidates = rank_candidates([
+            ("https://acme.example/", "Acme official website"),
+            ("https://mvideo.ru/product/X100", "Acme X100"),
+        ], "Acme", "X100", official_domain="acme.example",
+            authority_evidence_url="https://acme.example/")
+        homepage = next(item for item in candidates if item["domain"] == "acme.example")
+        retailer = next(item for item in candidates if item["domain"] == "mvideo.ru")
+        self.assertEqual(homepage["authority_status"], "verified")
+        self.assertEqual(homepage["model_relevance"], "unknown")
+        self.assertEqual(retailer["authority_status"], "unknown")
+        self.assertEqual(retailer["model_relevance"], "exact_base_model")
+
     def test_headless_is_true_by_default(self) -> None:
         with patch.dict("os.environ", {}, clear=True):
             self.assertTrue(browser_headless())
@@ -187,6 +220,36 @@ class SearchFallbackTests(unittest.TestCase):
         ), patch.object(session, "_playwright_search", return_value=[]) as fallback:
             session.search("model")
             fallback.assert_called_once_with("model")
+
+    def test_bot_check_is_structured_blocked_not_empty_success(self) -> None:
+        clear_official_domain_cache()
+
+        def blocked_searcher(query):
+            raise RuntimeError("Google bot-check blocked the Playwright search.")
+
+        outcome = discover_with_status("Acme", "X100", searcher=blocked_searcher)
+        self.assertEqual(outcome.search_status, "blocked")
+        self.assertEqual(outcome.candidates, [])
+        self.assertEqual(outcome.issues[0].status, "blocked")
+        self.assertEqual(outcome.issues[0].query, "Acme official website")
+        with self.assertRaises(DiscoverySearchError) as raised:
+            discover("Acme", "X100", searcher=blocked_searcher)
+        self.assertEqual(raised.exception.outcome.search_status, "blocked")
+
+    def test_results_before_failure_produce_partial_status(self) -> None:
+        clear_official_domain_cache()
+        calls = 0
+
+        def partial_searcher(query):
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                return [("https://shop.example/product/X100", "Acme X100")]
+            raise RuntimeError("Google bot-check blocked the Playwright search.")
+
+        outcome = discover_with_status("Acme", "X100", searcher=partial_searcher)
+        self.assertEqual(outcome.search_status, "partial")
+        self.assertTrue(outcome.candidates)
 
 
 if __name__ == "__main__":
