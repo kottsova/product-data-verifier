@@ -1,1 +1,1 @@
-# Dependencies will be added later.
+playwright>=1.55,<2
