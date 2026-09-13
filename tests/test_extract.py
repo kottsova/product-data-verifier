@@ -89,6 +89,23 @@ class ExtractTests(unittest.TestCase):
                          ("Shuttle type", "Vertical"), ("Operations", "12"),
                          ("Lighting", "LED")} <= pairs)
 
+    def test_repeated_pairs_preserve_semantic_section_context(self):
+        html = """<section class='products-spec-component-level-1'>
+          <div class='products-spec-component-title'>Dimensions and Weight</div>
+          <div class='products-spec-component-transform-container'>
+            <div class='products-spec-component-list-item-right'>
+              <div><h3>Height</h3><p>162.9 mm</p></div>
+              <div><h3>Width</h3><p>76.31 mm</p></div>
+              <div><h3>Depth</h3><p>7.5 mm</p></div>
+            </div>
+          </div>
+        </section>"""
+        attrs = extract_attributes(fetched(html=html))
+        dimensions = [item for item in attrs if item.name in {"Height", "Width", "Depth"}]
+        self.assertEqual(len(dimensions), 3)
+        self.assertTrue(all(item.context == "Dimensions and Weight" for item in dimensions))
+        self.assertTrue(all("products-spec" not in item.context for item in dimensions))
+
     def test_nested_numbered_spec_pairs_do_not_create_weak_heading_pairs(self):
         html = """<section class='product-specifications'><div class='spec-item'>
           <h3>SIM Card</h3><div></div>

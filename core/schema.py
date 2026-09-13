@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import re
 import unicodedata
-from typing import Iterable, Literal, Protocol
+from typing import Any, Iterable, Literal, Protocol
 
 from core.category import CATEGORY_NAMES, CategoryResult
 from core.identity import AttributeScope
@@ -110,7 +110,7 @@ UNIVERSAL_ATTRIBUTES = (
     _definition("warranty", ("warranty", "warranty period", "гарантия"),
                 scope="universal", value_type="duration", attribute_scope="market_level",
                 priority="medium", expected=False),
-    _definition("product_dimensions", ("product dimensions", "appliance dimensions",
+    _definition("product_dimensions", ("product dimensions", "item dimensions", "device dimensions", "appliance dimensions",
                 "dimensions of the product", "dimensions of the product hxwxd",
                 "габариты изделия", "размеры прибора"), scope="universal",
                 value_type="dimension", unit_family="length", priority="high"),
@@ -123,7 +123,7 @@ UNIVERSAL_ATTRIBUTES = (
     _definition("net_weight", ("net weight", "product net weight", "вес нетто"),
                 scope="universal", value_type="weight", unit_family="mass",
                 priority="high"),
-    _definition("gross_weight", ("gross weight", "packaged weight", "shipping weight",
+    _definition("gross_weight", ("gross weight", "package weight", "packaging weight", "packaged weight", "shipping weight",
                 "вес брутто", "вес с упаковкой"), scope="universal", value_type="weight",
                 unit_family="mass", attribute_scope="market_level", priority="high"),
     _definition("package_contents", ("package contents", "box contents", "комплектация"),
@@ -259,15 +259,25 @@ def resolve_attribute_definition(
 
 def analyze_schema_coverage(
     category: str | CategoryResult,
-    attributes: Iterable[AttributeLike | str],
+    attributes: Iterable[AttributeLike | str] | Any,
 ) -> SchemaDiagnostics:
     """Diagnose coverage while preserving every unknown valid extracted fact."""
-    items = list(attributes)
+    mapping_result = all(
+        hasattr(attributes, name) for name in ("mapped", "derived", "unmapped", "ambiguous")
+    )
+    items = [*attributes.mapped, *attributes.derived] if mapping_result else list(attributes)
     present: dict[str, list[object]] = {}
-    discovered: list[object] = []
+    discovered: list[object] = (
+        [*attributes.unmapped, *(item.raw_attribute for item in attributes.ambiguous)]
+        if mapping_result else []
+    )
     for item in items:
-        name = item if isinstance(item, str) else item.name
-        definition = resolve_attribute_definition(name, category)
+        name = item if isinstance(item, str) else getattr(item, "canonical_name", None) or item.name
+        definition = next(
+            (candidate for candidate in get_attribute_schema(category)
+             if candidate.canonical_name == name),
+            None,
+        ) or resolve_attribute_definition(name, category)
         if definition is None:
             discovered.append(item)
             continue

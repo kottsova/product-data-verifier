@@ -88,6 +88,7 @@ class RawAttribute:
     confidence: str
     raw_value: str
     attribute_kind: str
+    context: str | None = None
 
 
 def _clean(value: Any) -> str:
@@ -161,7 +162,8 @@ def _attribute_kind(name: str, raw_value: str, method: str,
 def _attribute(name: Any, raw_value: Any, source_url: str, source_type: str | None,
                method: str, confidence: str, evidence: str | None = None,
                explicit_unit: str | None = None, *, generic: bool = False,
-               attribute_kind: str | None = None) -> RawAttribute | None:
+               attribute_kind: str | None = None,
+               context: str | None = None) -> RawAttribute | None:
     name, raw_value = _clean(name), _clean(raw_value)
     raw_value = re.sub(r"^\.{2,}\s*", "", raw_value)
     if not _plausible_pair(name, raw_value, generic=generic):
@@ -172,7 +174,52 @@ def _attribute(name: Any, raw_value: Any, source_url: str, source_type: str | No
     return RawAttribute(name, value, unit, source_url, source_type,
                         _clean(evidence)[:300] if evidence else _evidence(name, raw_value),
                         method, confidence, raw_value,
-                        _attribute_kind(name, raw_value, method, attribute_kind))
+                        _attribute_kind(name, raw_value, method, attribute_kind),
+                        _clean(context)[:300] or None)
+
+
+CONTEXT_HEADING_PATTERN = re.compile(
+    r"(?:^|[-_\s])(title|heading|header|section-name|group-name)(?=$|[-_\s])",
+    re.I,
+)
+
+
+def _context_for_tag(tag: Tag, label: str | None = None) -> str | None:
+    """Collect nearby DOM section signals without inventing semantic context."""
+    values: list[str] = []
+    label_key = _clean(label).casefold()
+    current: Tag | None = tag
+    for _ in range(6):
+        if not isinstance(current, Tag):
+            break
+        for key in ("aria-label", "data-section", "data-group"):
+            value = _clean(current.get(key))
+            if value and value.casefold() != label_key:
+                values.append(value)
+        for heading in current.find_all(
+            lambda node: isinstance(node, Tag) and (
+                node.name in {"h1", "h2", "h3", "h4", "h5", "h6", "legend", "caption"}
+                or CONTEXT_HEADING_PATTERN.search(" ".join(node.get("class", [])))
+            ),
+            recursive=False,
+            limit=2,
+        ):
+            text = _clean(heading.get_text(" ", strip=True))
+            if text and len(text) <= 120 and text.casefold() != label_key:
+                values.append(text)
+        for sibling in list(current.previous_siblings)[:3]:
+            if not isinstance(sibling, Tag):
+                continue
+            signals = " ".join(sibling.get("class", []))
+            if sibling.name not in {"h1", "h2", "h3", "h4", "h5", "h6", "legend"} \
+                    and not CONTEXT_HEADING_PATTERN.search(signals):
+                continue
+            text = _clean(sibling.get_text(" ", strip=True))
+            if text and len(text) <= 120 and text.casefold() != label_key:
+                values.append(text)
+        current = current.parent if isinstance(current.parent, Tag) else None
+    unique = list(dict.fromkeys(value for value in values if value))
+    return " | ".join(unique)[:300] or None
 
 
 def _types(node: dict[str, Any]) -> set[str]:
@@ -253,7 +300,8 @@ def _extract_tables(soup: BeautifulSoup, source_url: str, source_type: str | Non
         name, raw = (_clean(cell.get_text(" ", strip=True)) for cell in cells)
         if cells[0].find_all("a") and len(name) > 80:
             continue
-        item = _attribute(name, raw, source_url, source_type, "html_table", "high")
+        item = _attribute(name, raw, source_url, source_type, "html_table", "high",
+                          context=_context_for_tag(row, name))
         if item:
             found.append(item)
     return found
@@ -267,7 +315,8 @@ def _extract_definitions(soup: BeautifulSoup, source_url: str, source_type: str 
         value = term.find_next_sibling("dd")
         if value:
             item = _attribute(term.get_text(" ", strip=True), value.get_text(" ", strip=True),
-                              source_url, source_type, "definition_list", "high")
+                              source_url, source_type, "definition_list", "high",
+                              context=_context_for_tag(term, term.get_text(" ", strip=True)))
             if item:
                 found.append(item)
     return found
@@ -291,7 +340,8 @@ def _extract_label_values(soup: BeautifulSoup, source_url: str, source_type: str
             value = label.find_next_sibling()
         if value is not None:
             item = _attribute(label.get_text(" ", strip=True), value.get_text(" ", strip=True),
-                              source_url, source_type, "label_value", "medium", generic=True)
+                              source_url, source_type, "label_value", "medium", generic=True,
+                              context=_context_for_tag(parent or label, label.get_text(" ", strip=True)))
             if item:
                 found.append(item)
     return found
@@ -345,7 +395,8 @@ def _extract_repeated_blocks(soup: BeautifulSoup, source_url: str,
             consumed.add(marker)
             name, value = pair
             item = _attribute(name, value, source_url, source_type,
-                              "label_value", "medium", generic=True)
+                              "label_value", "medium", generic=True,
+                              context=_context_for_tag(row, name))
             if item:
                 found.append(item)
     return found
