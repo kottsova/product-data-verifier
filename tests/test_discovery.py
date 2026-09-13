@@ -10,10 +10,12 @@ from core.discovery import (
     clear_official_domain_cache,
     discover,
     discover_global_official_domains,
+    discover_identity_query_with_status,
     discover_with_status,
     is_obvious_non_product_url,
     rank_candidates,
 )
+from core.identity import resolve_product_identity
 from core.match import candidate_model_match, model_match, normalize_model
 
 
@@ -192,6 +194,26 @@ class DiscoveryTests(unittest.TestCase):
             canonicalize_url("https://example.com/item?id=7&utm_campaign=x#specs"),
             "https://example.com/item?id=7",
         )
+
+    def test_explicit_targeted_query_reuses_identity_ranking(self) -> None:
+        clear_official_domain_cache()
+        calls = []
+
+        def searcher(query):
+            calls.append(query)
+            if query == "Acme official website":
+                return [("https://acme.example/", "Acme official website")]
+            return [("https://acme.example/product/X100", "Acme X100 net weight")]
+
+        outcome = discover_identity_query_with_status(
+            resolve_product_identity("Acme X100"),
+            "Acme X100 net weight",
+            searcher=searcher,
+        )
+        self.assertEqual(outcome.queries, ["Acme X100 net weight"])
+        self.assertEqual(calls, ["Acme official website", "Acme X100 net weight"])
+        self.assertEqual(outcome.candidates[0]["authority_status"], "verified")
+        self.assertEqual(outcome.candidates[0]["identity_relation"], "same_base_model")
 
 
 class SearchFallbackTests(unittest.TestCase):

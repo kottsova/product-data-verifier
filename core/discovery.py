@@ -736,19 +736,13 @@ def _source_verification_evidence(
     return found
 
 
-def discover_identity_with_status(
+def _annotate_identity_candidates(
+    outcome: DiscoveryOutcome,
     identity: ProductIdentity,
-    market: str = "global",
-    searcher: Searcher | None = None,
+    model: str,
+    article: str | None,
 ) -> DiscoveryOutcome:
-    """Discover by base model and retain variant fields as verification signals."""
-    model = identity.base_model or identity.commercial_model
-    if not model:
-        raise ValueError("identity must contain a base_model or commercial_model")
-    article = identity.manufacturer_article or identity.product_code or identity.sku
-    if not article and identity.candidate_identifiers:
-        article = identity.candidate_identifiers[0]
-    outcome = discover_with_status(identity.brand, model, article, market, searcher)
+    """Apply the same identity annotations to broad and targeted discovery."""
     for candidate in outcome.candidates:
         if (
             candidate["model_match"] in {"unknown", "mismatch"}
@@ -769,6 +763,102 @@ def discover_identity_with_status(
         )
     outcome.candidates.sort(key=lambda item: (-item["score"], item["url"]))
     return outcome
+
+
+def discover_identity_query_with_status(
+    identity: ProductIdentity,
+    query: str,
+    market: str = "global",
+    searcher: Searcher | None = None,
+) -> DiscoveryOutcome:
+    """Run one explicit field query through Stage 1 ranking and identity checks.
+
+    Official-domain discovery remains process-cached, so a targeted run can issue
+    several field queries without repeatedly performing the authority lookup.
+    """
+    model = identity.base_model or identity.commercial_model
+    query = " ".join((query or "").split())
+    if not model:
+        raise ValueError("identity must contain a base_model or commercial_model")
+    if not query:
+        raise ValueError("query is required")
+    if market not in SUPPORTED_MARKETS:
+        raise ValueError(f"Unsupported market: {market}")
+    article = identity.manufacturer_article or identity.product_code or identity.sku
+    if not article and identity.candidate_identifiers:
+        article = identity.candidate_identifiers[0]
+
+    def run(active_searcher: Searcher) -> DiscoveryOutcome:
+        cache_key = (normalize_model(identity.brand), market)
+        cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
+        official_domains = dict(cached or ())
+        issues: list[DiscoveryIssue] = []
+        attempted: list[str] = []
+        raw_results: list[SearchResult] = []
+
+        if not cached:
+            authority_query = f"{identity.brand} official website"
+            attempted.append(authority_query)
+            try:
+                official_results = list(active_searcher(authority_query))
+            except RuntimeError as error:
+                issues.append(_discovery_issue(authority_query, error))
+                official_results = []
+            if not issues:
+                official_domains = dict(
+                    discover_global_official_domains(identity.brand, official_results)
+                )
+                if official_domains:
+                    _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
+
+        if not issues:
+            attempted.append(query)
+            try:
+                raw_results.extend(active_searcher(query))
+            except RuntimeError as error:
+                issues.append(_discovery_issue(query, error))
+
+        candidates = rank_candidates(
+            raw_results,
+            identity.brand,
+            model,
+            article,
+            market=market,
+            official_domains=official_domains,
+        )
+        if issues and raw_results:
+            status: SearchStatus = "partial"
+        elif issues:
+            status = issues[-1].status
+        else:
+            status = "success"
+        return _annotate_identity_candidates(
+            DiscoveryOutcome(candidates, status, [query], attempted, issues),
+            identity,
+            model,
+            article,
+        )
+
+    if searcher is not None:
+        return run(searcher)
+    with GoogleSearchSession(market) as session:
+        return run(session.search)
+
+
+def discover_identity_with_status(
+    identity: ProductIdentity,
+    market: str = "global",
+    searcher: Searcher | None = None,
+) -> DiscoveryOutcome:
+    """Discover by base model and retain variant fields as verification signals."""
+    model = identity.base_model or identity.commercial_model
+    if not model:
+        raise ValueError("identity must contain a base_model or commercial_model")
+    article = identity.manufacturer_article or identity.product_code or identity.sku
+    if not article and identity.candidate_identifiers:
+        article = identity.candidate_identifiers[0]
+    outcome = discover_with_status(identity.brand, model, article, market, searcher)
+    return _annotate_identity_candidates(outcome, identity, model, article)
 
 
 def discover_identity(
