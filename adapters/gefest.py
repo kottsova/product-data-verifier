@@ -1,0 +1,1 @@
+"""Gefest source adapter placeholder."""

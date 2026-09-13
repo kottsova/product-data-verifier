@@ -1,0 +1,1 @@
+"""Product data validation placeholder."""

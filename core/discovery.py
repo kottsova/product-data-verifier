@@ -1,0 +1,1 @@
+"""Product source discovery placeholder."""

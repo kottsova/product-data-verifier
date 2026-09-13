@@ -1,0 +1,1 @@
+"""Gressel source adapter placeholder."""

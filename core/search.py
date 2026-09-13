@@ -1,0 +1,1 @@
+"""Product search placeholder."""

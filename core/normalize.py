@@ -1,0 +1,1 @@
+"""Product data normalization placeholder."""

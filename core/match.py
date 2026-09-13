@@ -1,0 +1,1 @@
+"""Product matching placeholder."""
