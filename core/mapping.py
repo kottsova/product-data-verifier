@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import re
-import unicodedata
 from typing import Iterable, Literal
 
 from core.category import CategoryResult
 from core.extract import RawAttribute
+from core.normalize import attribute_label_variants, normalize_attribute_label
 from core.schema import AttributeDefinition, get_attribute_schema
 
 
@@ -63,6 +63,7 @@ class MappingResult:
 
 AMBIGUOUS_LABELS = {
     "weight", "dimensions", "dimension", "capacity", "size", "color", "colour",
+    "объем",
 }
 BATTERY_CONTEXT = re.compile(r"\bbattery\b|\baccumulator\b|аккумулятор|батаре|ელემენტ|აკუმულატორ", re.I)
 DISPLAY_CONTEXT = re.compile(r"\bdisplay\b|\bscreen\b|экран|диспле|ეკრან", re.I)
@@ -87,8 +88,7 @@ UNIT_ALIASES = {
 
 
 def _key(value: str | None) -> str:
-    text = unicodedata.normalize("NFKC", value or "").casefold()
-    return " ".join(re.findall(r"[\w]+", text))
+    return normalize_attribute_label(value)
 
 
 def _clean(value: str | None) -> str:
@@ -115,7 +115,8 @@ def _alias_index(
     index: dict[str, list[AttributeDefinition]] = {}
     for definition in definitions:
         for alias in (definition.canonical_name, *definition.aliases):
-            index.setdefault(_key(alias), []).append(definition)
+            for key in attribute_label_variants(alias):
+                index.setdefault(key, []).append(definition)
     return index
 
 
@@ -168,6 +169,7 @@ def _ambiguity_candidates(label: str, definitions: dict[str, AttributeDefinition
         "dimensions": ("product_dimensions", "package_dimensions", "dimensions"),
         "dimension": ("product_dimensions", "package_dimensions", "dimensions"),
         "capacity": ("battery_capacity", "capacity", "clean_water_tank", "dirty_water_tank"),
+        "объем": ("battery_capacity", "capacity", "clean_water_tank", "dirty_water_tank"),
         "size": ("display_size", "product_dimensions"),
         "color": ("color",),
         "colour": ("color",),
@@ -273,26 +275,37 @@ def map_attributes(
         if component and _key(raw.name).split()[-1] in COMPONENTS:
             component_items.append((raw, *component))
             continue
-        label = _key(raw.name)
+        labels = attribute_label_variants(raw.name)
+        label = labels[0] if labels else ""
         contextual = _contextual_target(raw, definitions)
         if contextual:
             target, reason = contextual
             mapped.append(_canonical(raw, definitions[target], "medium", reason))
             continue
-        if label in AMBIGUOUS_LABELS:
-            candidates = _ambiguity_candidates(label, definitions)
+        ambiguous_label = next((item for item in labels if item in AMBIGUOUS_LABELS), None)
+        if ambiguous_label:
+            candidates = _ambiguity_candidates(ambiguous_label, definitions)
             if candidates:
-                ambiguous.append(AmbiguousMapping(raw, candidates, f"ambiguous_label:{label}"))
+                ambiguous.append(AmbiguousMapping(raw, candidates, f"ambiguous_label:{ambiguous_label}"))
             else:
                 unmapped.append(raw)
             continue
-        matches = {item.canonical_name: item for item in aliases.get(label, [])}
+        matches = {
+            item.canonical_name: item
+            for candidate_label in labels
+            for item in aliases.get(candidate_label, [])
+        }
         if len(matches) == 1:
             definition = next(iter(matches.values()))
             if definition.canonical_name in {"product_dimensions", "package_dimensions", "net_weight", "gross_weight"}:
                 reason = f"explicit_scope:{definition.canonical_name}"
             else:
-                reason = f"exact_alias:{definition.canonical_name}"
+                direct_matches = {
+                    item.canonical_name
+                    for item in aliases.get(label, [])
+                }
+                prefix = "exact_alias" if definition.canonical_name in direct_matches else "normalized_alias"
+                reason = f"{prefix}:{definition.canonical_name}"
             mapped.append(_canonical(raw, definition, "high", reason))
         elif len(matches) > 1:
             ambiguous.append(AmbiguousMapping(raw, tuple(matches), "ambiguous_alias_collision"))

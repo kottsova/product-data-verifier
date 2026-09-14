@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-import re
-import unicodedata
 from typing import Any, Iterable, Literal, Protocol
 
 from core.category import CATEGORY_NAMES, CategoryResult
 from core.identity import AttributeScope, ProductIdentity
+from core.normalize import attribute_label_variants, normalize_attribute_label
 
 
 SchemaScope = Literal["universal", "category_specific", "discovered"]
@@ -119,7 +118,8 @@ UNIVERSAL_ATTRIBUTES = (
     _definition("country_of_origin", ("country of origin", "country of production",
                 "страна производства", "made in"), scope="universal", value_type="text",
                 priority="medium", expected=False),
-    _definition("warranty", ("warranty", "warranty period", "гарантия"),
+    _definition("warranty", ("warranty", "warranty period", "гарантия",
+                "срок гарантии", "гарантийный срок"),
                 scope="universal", value_type="duration", attribute_scope="market_level",
                 priority="medium", expected=False),
     _definition("product_dimensions", ("product dimensions", "item dimensions", "device dimensions", "appliance dimensions",
@@ -138,7 +138,8 @@ UNIVERSAL_ATTRIBUTES = (
     _definition("gross_weight", ("gross weight", "package weight", "packaging weight", "packaged weight", "shipping weight",
                 "вес брутто", "вес с упаковкой"), scope="universal", value_type="weight",
                 unit_family="mass", attribute_scope="market_level", priority="high"),
-    _definition("package_contents", ("package contents", "box contents", "комплектация"),
+    _definition("package_contents", ("package contents", "box contents", "комплектация",
+                "комплект поставки", "содержимое упаковки"),
                 scope="universal", value_type="list", priority="medium", expected=False),
 )
 
@@ -194,16 +195,16 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
     ),
     "air_fryer": (
         _definition("power", ("power", "мощность"), value_type="power", unit_family="power", priority="critical"),
-        _definition("capacity", ("capacity", "bowl capacity", "capacity of each bowl", "объем каждой чаши", "объем чаши", "емкость чаш"), value_type="capacity", unit_family="volume", priority="critical"),
-        _definition("number_of_bowls", ("number of bowls", "количество чаш"), value_type="count", priority="high"),
-        _definition("program_count", ("program count", "number of programs", "количество программ"), value_type="count", priority="high"),
-        _definition("temperature_range", ("temperature range", "temperature", "температура", "регулировка температуры"), value_type="text", unit_family="temperature", priority="high"),
-        _definition("timer_range", ("timer range", "timer", "таймер"), value_type="duration", unit_family="time", priority="high"),
-        _definition("control_type", ("control type", "control", "управление"), value_type="enum", priority="medium"),
-        _definition("bowl_coating", ("bowl coating", "non-stick coating", "антипригарное покрытие", "покрытие чаш"), value_type="text", priority="medium"),
+        _definition("capacity", ("capacity", "bowl capacity", "capacity of each bowl", "объем каждой чаши", "объем чаши", "емкость чаш", "вместимость чаши"), value_type="capacity", unit_family="volume", priority="critical"),
+        _definition("number_of_bowls", ("number of bowls", "количество чаш", "число чаш"), value_type="count", priority="high"),
+        _definition("program_count", ("program count", "number of programs", "количество программ", "число программ"), value_type="count", priority="high"),
+        _definition("temperature_range", ("temperature range", "temperature", "температура", "регулировка температуры", "диапазон температуры", "диапазон температур", "температурный диапазон"), value_type="text", unit_family="temperature", priority="high"),
+        _definition("timer_range", ("timer range", "timer", "таймер", "диапазон таймера", "время таймера"), value_type="duration", unit_family="time", priority="high"),
+        _definition("control_type", ("control type", "control", "управление", "тип управления"), value_type="enum", priority="medium"),
+        _definition("bowl_coating", ("bowl coating", "non-stick coating", "антипригарное покрытие", "покрытие чаш", "покрытие чаши"), value_type="text", priority="medium"),
         _definition("dimensions", ("dimensions", "габариты", "габариты ш в г"), value_type="dimension", unit_family="length", priority="high", notes="Generic product dimensions; never infer package dimensions from this label."),
         _definition("weight", ("weight", "вес"), value_type="weight", unit_family="mass", priority="high", notes="Generic product weight; never infer gross weight from this label."),
-        _definition("cord_length", ("cord length", "длина сетевого шнура", "длина сетевого кабеля", "длина кабеля"), value_type="dimension", unit_family="length", priority="medium"),
+        _definition("cord_length", ("cord length", "длина сетевого шнура", "длина сетевого кабеля", "длина кабеля", "длина шнура"), value_type="dimension", unit_family="length", priority="medium"),
     ),
     "wet_dry_vacuum": (
         _definition("suction_power", ("suction power", "suction pressure", "мощность всасывания", "შესრუტვის მაქსიმალური სიმძლავრე კპა"), value_type="power", unit_family="pressure_or_power", priority="critical"),
@@ -250,8 +251,7 @@ def get_expected_attributes(category: str | CategoryResult) -> list[AttributeDef
 
 
 def _alias_key(value: str) -> str:
-    text = unicodedata.normalize("NFKC", value).casefold()
-    return " ".join(re.findall(r"[\w]+", text))
+    return normalize_attribute_label(value)
 
 
 def resolve_attribute_definition(
@@ -259,11 +259,15 @@ def resolve_attribute_definition(
     category: str | CategoryResult,
 ) -> AttributeDefinition | None:
     """Resolve only unambiguous aliases within the selected layered schema."""
-    key = _alias_key(name)
+    keys = attribute_label_variants(name)
     matches: list[AttributeDefinition] = []
     for definition in get_attribute_schema(category):
-        keys = {_alias_key(definition.canonical_name), *map(_alias_key, definition.aliases)}
-        if key in keys:
+        definition_keys = {
+            key
+            for alias in (definition.canonical_name, *definition.aliases)
+            for key in attribute_label_variants(alias)
+        }
+        if any(key in definition_keys for key in keys):
             matches.append(definition)
     unique = {item.canonical_name: item for item in matches}
     return next(iter(unique.values())) if len(unique) == 1 else None

@@ -31,6 +31,86 @@ def raw(
 
 
 class DirectMappingTests(unittest.TestCase):
+    def test_russian_air_fryer_aliases_map_to_canonical_fields(self) -> None:
+        cases = (
+            ("Срок гарантии", "warranty"),
+            ("Количество чаш", "number_of_bowls"),
+            ("Число программ", "program_count"),
+            ("Диапазон температур", "temperature_range"),
+            ("Тип управления", "control_type"),
+            ("Покрытие чаши", "bowl_coating"),
+            ("Длина шнура", "cord_length"),
+            ("Комплект поставки", "package_contents"),
+        )
+        for label, expected in cases:
+            with self.subTest(label=label):
+                result = map_attributes([raw(label, "test value")], category="air_fryer")
+                self.assertEqual(result.mapped[0].canonical_name, expected)
+
+    def test_yo_and_ye_are_equivalent_in_attribute_labels(self) -> None:
+        result = map_attributes(
+            [raw("Объём чаши", "4 л")],
+            category="air_fryer",
+        )
+        self.assertEqual(result.mapped[0].canonical_name, "capacity")
+
+    def test_numbered_bowl_capacity_uses_unambiguous_base_alias(self) -> None:
+        result = map_attributes(
+            [raw("Объем чаши 1", "4 л"), raw("Объём чаши 2", "4 л")],
+            category="air_fryer",
+        )
+        self.assertEqual(
+            [item.canonical_name for item in result.mapped],
+            ["capacity", "capacity"],
+        )
+        self.assertTrue(all(item.mapping_reason == "normalized_alias:capacity" for item in result.mapped))
+
+    def test_punctuation_and_unit_suffixes_do_not_break_mapping(self) -> None:
+        cases = (
+            ("• Мощность (Вт)", "power"),
+            ("Таймер, мин", "timer_range"),
+            ("Габариты (Ш×В×Г)", "dimensions"),
+            ("Мощность / power (W)", "power"),
+        )
+        for label, expected in cases:
+            with self.subTest(label=label):
+                result = map_attributes([raw(label, "100")], category="air_fryer")
+                self.assertEqual(result.mapped[0].canonical_name, expected)
+
+    def test_ambiguous_russian_volume_is_not_over_mapped(self) -> None:
+        result = map_attributes([raw("Объём, л", "8")], category="air_fryer")
+        self.assertEqual(result.mapped, [])
+        self.assertEqual(result.ambiguous[0].candidates, ("capacity",))
+
+    def test_existing_english_aliases_remain_unchanged(self) -> None:
+        result = map_attributes(
+            [raw("Number of programs", "9"), raw("Bowl capacity", "4 L")],
+            category="air_fryer",
+        )
+        self.assertEqual(
+            [item.canonical_name for item in result.mapped],
+            ["program_count", "capacity"],
+        )
+
+    def test_gressel_like_labels_align_without_collapsing_total_capacity_scope(self) -> None:
+        total = raw("Общий объем двух чаш", "8 литров")
+        result = map_attributes(
+            [
+                raw("• Мощность", "2700 Вт"),
+                raw("Срок гарантии", "12 месяцев"),
+                raw("• Объем чаши 1", "4 литра"),
+                raw("• Объем чаши 2", "4 литра"),
+                total,
+            ],
+            category="air_fryer",
+        )
+
+        self.assertEqual(
+            [item.canonical_name for item in result.mapped],
+            ["power", "warranty", "capacity", "capacity"],
+        )
+        self.assertEqual(result.unmapped, [total])
+
     def test_childlock_maps_to_generic_safety_features(self) -> None:
         item = raw("ChildLock", "Yes")
         mapped = map_attributes([item], category="cooktop").mapped[0]
