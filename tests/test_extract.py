@@ -368,11 +368,14 @@ Gross weight: 12.8 kg"""
         attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
         self.assertEqual({item.name for item in attrs},
                          {"Connected load", "Cooking zone diameter", "Package dimensions", "Gross weight"})
-        self.assertTrue(all(item.extraction_method == "pdf_text" for item in attrs))
+        self.assertTrue(all(item.extraction_method == "pdf_spec" for item in attrs))
 
     def test_multiline_pdf_pair(self):
-        attrs = extract_attributes(fetched(pdf_text="Net weight\n11.2 kg", document_type="pdf"))
-        self.assertEqual((attrs[0].name, attrs[0].value, attrs[0].unit), ("Net weight", "11.2", "kg"))
+        text = "Net weight\n11.2 kg\nGross weight\n13.5 kg"
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        by_name = {item.name: item for item in attrs}
+        self.assertEqual((by_name["Net weight"].value, by_name["Net weight"].unit), ("11.2", "kg"))
+        self.assertEqual((by_name["Gross weight"].value, by_name["Gross weight"].unit), ("13.5", "kg"))
 
     def test_safe_pdf_continuation_merges_interrupted_dimension(self):
         text = "Required niche size: 51 x 560 x (490 -\n500)\nConnected load: 4600 W"
@@ -385,6 +388,105 @@ Gross weight: 12.8 kg"""
         text = "Net weight\nWidth: 592 mm\nTechnical details\nColor: Black"
         attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
         self.assertEqual({item.name for item in attrs}, {"Width", "Color"})
+
+    def test_pdf_bullet_specification_list_extracted_with_provenance(self):
+        text = (
+            "25\n"
+            "Disposal\n"
+            "Technical specifications\n"
+            "Do not dispose of the appliance with household waste.\n"
+            "• Power: 2700 W\n"
+            "• Voltage: 220-240 V, 50/60 Hz\n"
+            "• Bowl 1 capacity: 4 l\n"
+            "• Bowl 2 capacity: 4 l\n"
+            "• Total capacity of two bowls: 8 l\n"
+            "• Model: GAF-1825\n"
+            "• Protection class: I\n"
+            "EN\n"
+        )
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        by_name = {item.name: item for item in attrs}
+        self.assertEqual(set(by_name), {
+            "Power", "Voltage", "Bowl 1 capacity", "Bowl 2 capacity",
+            "Total capacity of two bowls", "Model", "Protection class",
+        })
+        self.assertEqual((by_name["Power"].value, by_name["Power"].unit), ("2700", "W"))
+        self.assertEqual(by_name["Model"].value, "GAF-1825")
+        self.assertTrue(all(item.extraction_method == "pdf_spec" for item in attrs))
+        self.assertIn("page 25", by_name["Power"].context)
+        self.assertIn("Technical specifications", by_name["Power"].context)
+        # Distinct bowl/total capacities must never collapse into one label.
+        self.assertEqual(by_name["Bowl 1 capacity"].value, "4")
+        self.assertEqual(by_name["Bowl 2 capacity"].value, "4")
+        self.assertEqual(by_name["Total capacity of two bowls"].value, "8")
+
+    def test_pdf_unit_terminated_lines_in_proven_spec_block(self):
+        text = (
+            "25\n"
+            "Technical specifications\n"
+            "Rated power 2700 W.\n"
+            "Bowl capacity 4 l.\n"
+            "Net weight 5 kg.\n"
+        )
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        by_name = {item.name: item for item in attrs}
+        self.assertEqual(set(by_name), {"Rated power", "Bowl capacity", "Net weight"})
+        self.assertEqual((by_name["Rated power"].value, by_name["Rated power"].unit), ("2700", "W"))
+
+    def test_pdf_cyrillic_units_are_split(self):
+        text = (
+            "25\n"
+            "Технические характеристики\n"
+            "• Мощность: 2700 Вт\n"
+            "• Объем чаши: 4 л\n"
+            "• Вес: 5 кг\n"
+        )
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        by_name = {item.name: item for item in attrs}
+        self.assertEqual((by_name["Мощность"].value, by_name["Мощность"].unit), ("2700", "Вт"))
+        self.assertEqual((by_name["Объем чаши"].value, by_name["Объем чаши"].unit), ("4", "л"))
+        self.assertEqual((by_name["Вес"].value, by_name["Вес"].unit), ("5", "кг"))
+
+    def test_pdf_prose_with_incidental_colon_is_ignored(self):
+        text = (
+            "4\n"
+            "General information\n"
+            "• Please read this manual carefully before use.\n"
+            "• Do not immerse the device in water or other liquids.\n"
+            "• This appliance is intended for household use: homes, offices, "
+            "apartments, hotels.\n"
+            "• Keep the device away from children.\n"
+        )
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        self.assertEqual(attrs, [])
+
+    def test_pdf_toc_and_page_numbers_are_ignored(self):
+        text = (
+            "3\n"
+            "Contents\n"
+            "4\n6\n7\n8\n"
+            "Safety instructions .......................... 4\n"
+            "Specifications ................................ 25\n"
+        )
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        self.assertEqual(attrs, [])
+
+    def test_pdf_hotline_and_support_contacts_are_ignored(self):
+        text = (
+            "26\n"
+            "Manufacturer: Example Group Co, Ltd.\n"
+            "Hotline: +1 (555) 123-4567. E-mail: support@example.com\n"
+            "Phone: +1 (555) 765-4321.\n"
+            "Customer service in Region A: +1 (555) 123-4567.\n"
+            "Customer service in Region B: +1 (555) 765-4321.\n"
+        )
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        self.assertEqual(attrs, [])
+
+    def test_pdf_repeated_language_markers_do_not_merge_across_pages(self):
+        text = "Some closing troubleshooting text ends here\n\n25\nEN\n"
+        attrs = extract_attributes(fetched(pdf_text=text, document_type="pdf"))
+        self.assertEqual(attrs, [])
 
     def test_duplicate_prefers_stronger_method(self):
         payload = {"@type": "Product", "additionalProperty": [

@@ -10,12 +10,13 @@ from typing import Any, Iterable
 from bs4 import BeautifulSoup, Tag
 
 METHOD_PRIORITY = {
-    "json_ld": 9,
-    "embedded_json": 8,
-    "structured_data": 7,
-    "html_table": 6,
-    "definition_list": 5,
-    "label_value": 4,
+    "json_ld": 10,
+    "embedded_json": 9,
+    "structured_data": 8,
+    "html_table": 7,
+    "definition_list": 6,
+    "label_value": 5,
+    "pdf_spec": 4,
     "spec_block": 3,
     "pdf_text": 2,
     "plain_text": 1,
@@ -45,7 +46,10 @@ PRODUCT_FIELD_PATTERN = re.compile(
     r"программы?|комплектация)\b",
     re.IGNORECASE,
 )
-UNIT_TOKEN = r"mm|cm|km|m|mg|kg|g|lb|oz|ml|cl|l|mAh|Ah|kW|W|V|A|Hz|MHz|GHz|GB|TB|MB|°C|°F|%|rpm|dB"
+UNIT_TOKEN = (
+    r"mm|cm|km|m|mg|kg|g|lb|oz|ml|cl|l|mAh|Ah|kW|W|V|A|Hz|MHz|GHz|GB|TB|MB|°C|°F|%|rpm|dB|"
+    r"мм|см|км|мг|кг|г|мл|кл|л|мАч|Ач|кВт|Вт|В|Гц|кГц|МГц|мин|об/мин|дБ"
+)
 UNIT_PATTERN = re.compile(
     rf"^\s*([-+]?\d+(?:[.,]\d+)?(?:\s*(?:[x×;]|[-–—])\s*[-+]?\d+(?:[.,]\d+)?)*)\s*({UNIT_TOKEN})\s*$",
     re.IGNORECASE,
@@ -114,6 +118,24 @@ DRYING_TERM_PATTERN = re.compile(
     re.IGNORECASE,
 )
 TEMPERATURE_VALUE_PATTERN = re.compile(r"[-+]?\d+(?:[.,]\d+)?\s*°\s*[CF]", re.IGNORECASE)
+PDF_PAIR_PATTERN = re.compile(r"^(.{1,120}?)\s*:\s*(.{1,300})$")
+PDF_UNIT_TERMINATED_PATTERN = re.compile(
+    rf"^([^:\d]{{1,60}}?)\s+([-+]?\d+(?:[.,]\d+)?\s*(?:{UNIT_TOKEN}))\.?$"
+)
+PDF_BULLET_PREFIX_PATTERN = re.compile(r"^[•▪◦‣·*\-–—]\s+")
+PDF_TOC_DOT_LEADER_PATTERN = re.compile(r"\.{4,}")
+PDF_PAGE_NUMBER_LINE_PATTERN = re.compile(r"^\d{1,3}$")
+PDF_LANGUAGE_MARKER_LINE_PATTERN = re.compile(r"^[A-Z]{2}$")
+PDF_SPEC_HEADING_PATTERN = re.compile(
+    r"specifications?|technical\s+data|technical\s+characteristics?|parameters?|"
+    r"характеристик|параметр|спецификац",
+    re.IGNORECASE,
+)
+PDF_CONTACT_LABEL_PATTERN = re.compile(
+    r"телефон|горяч(?:ей|ая)\s+лини|служба\s+поддержк|эл\.?\s*почта|"
+    r"hotline|customer\s+service|support\s+line|phone\s*(?:number)?|e-?mail",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -194,7 +216,7 @@ def _attribute_kind(name: str, raw_value: str, method: str,
         return "commerce"
     if PRODUCT_FIELD_PATTERN.search(name) or split_value_unit(raw_value)[1] is not None:
         return "product"
-    if method in {"json_ld", "html_table", "label_value", "pdf_text"}:
+    if method in {"json_ld", "html_table", "label_value", "pdf_text", "pdf_spec"}:
         return "product"
     return "unknown"
 
@@ -886,6 +908,136 @@ def _merge_safe_pdf_continuations(lines: list[str]) -> list[str]:
     return merged
 
 
+def _pdf_strip_bullet(text: str) -> str:
+    return PDF_BULLET_PREFIX_PATTERN.sub("", text).strip()
+
+
+def _pdf_page_blocks(text: str) -> list[tuple[str | None, list[str]]]:
+    """Split raw PDF text into page-like blocks, keeping a printed page number.
+
+    ``_extract_pdf_text`` joins page text with a blank line between pages, so
+    splitting on blank lines approximates page boundaries. This is what makes
+    it possible to reject cross-page adjacency (a heading at the bottom of one
+    page followed by the next page's printed number) without inventing page
+    numbers that are not actually present in the document.
+    """
+    blocks: list[tuple[str | None, list[str]]] = []
+    for chunk in re.split(r"\n\s*\n", text or ""):
+        lines = [_clean(line) for line in chunk.splitlines() if _clean(line)]
+        if not lines:
+            continue
+        page_number = None
+        if PDF_PAGE_NUMBER_LINE_PATTERN.fullmatch(lines[0]):
+            page_number = lines[0]
+            lines = lines[1:]
+        lines = [line for line in lines if not PDF_LANGUAGE_MARKER_LINE_PATTERN.fullmatch(line)]
+        if lines:
+            blocks.append((page_number, lines))
+    return blocks
+
+
+def _pdf_candidate_pairs(lines: list[str]) -> list[tuple[str, str]]:
+    """Return structurally pair-shaped (name, value) candidates from one block.
+
+    A candidate is only ever an explicit ``label: value`` line, a digit-free
+    label line immediately followed by a line opening with a number, or a
+    line that is entirely ``label number+unit`` with nothing left over. Each
+    shape requires an explicit unit or colon and never spans an embedded
+    digit inside the label, so a sentence that merely mentions a number in
+    passing cannot qualify. Lines with a TOC-style dot leader are never
+    candidates, since a leader is only ever used to align a heading with a
+    page number.
+    """
+    merged = _merge_safe_pdf_continuations(lines)
+    candidates: list[tuple[str, str]] = []
+    for index, line in enumerate(merged):
+        if PDF_TOC_DOT_LEADER_PATTERN.search(line):
+            continue
+        match = PDF_PAIR_PATTERN.match(line)
+        if match:
+            name, value = match.groups()
+            candidates.append((_pdf_strip_bullet(name), value))
+            continue
+        unit_match = PDF_UNIT_TERMINATED_PATTERN.match(line)
+        if unit_match:
+            name, value = unit_match.groups()
+            candidates.append((_pdf_strip_bullet(name), value))
+            continue
+        if (
+            ":" not in line
+            and len(line) <= 100
+            and not re.search(r"\d", line)
+            and index + 1 < len(merged)
+        ):
+            next_line = merged[index + 1]
+            if (
+                len(next_line) <= 100
+                and not PDF_TOC_DOT_LEADER_PATTERN.search(next_line)
+                and re.match(r"^[-+]?\d", next_line)
+            ):
+                candidates.append((_pdf_strip_bullet(line), next_line))
+    return candidates
+
+
+def _pdf_spec_block_attributes(
+    page_number: str | None,
+    lines: list[str],
+    source_url: str,
+    source_type: str | None,
+) -> list[RawAttribute]:
+    """Extract facts from one page block, only once it proves a spec structure.
+
+    A single accidental colon inside a paragraph (a note, a safety warning, a
+    sentence that happens to introduce a list) must not become a fact. The
+    block must show either an explicit specification heading or a repeated
+    label/value structure before any pair from it is trusted.
+    """
+    heading = next(
+        (
+            line for line in lines
+            if len(line) <= 60
+            and not re.search(r"\d", line)
+            and not PDF_TOC_DOT_LEADER_PATTERN.search(line)
+            and PDF_SPEC_HEADING_PATTERN.search(line)
+        ),
+        None,
+    )
+    plausible: list[tuple[str, str]] = []
+    for name, value in _pdf_candidate_pairs(lines):
+        name, value = _clean(name), _clean(value)
+        if not name or not value or PDF_CONTACT_LABEL_PATTERN.search(name):
+            continue
+        if _plausible_pair(name, value, generic=True):
+            plausible.append((name, value))
+    if not plausible:
+        return []
+    minimum = 1 if heading else 2
+    if len(plausible) < minimum or len(plausible) / len(lines) < 0.35:
+        return []
+
+    context = " | ".join(part for part in (
+        f"page {page_number}" if page_number else None, heading,
+    ) if part) or None
+    found: list[RawAttribute] = []
+    for name, value in plausible:
+        item = _attribute(
+            name, value, source_url, source_type, "pdf_spec", "medium",
+            evidence=f"{name}: {value}", generic=True, context=context,
+        )
+        if item:
+            found.append(item)
+    return found
+
+
+def _extract_pdf_spec_attributes(
+    text: str, source_url: str, source_type: str | None,
+) -> list[RawAttribute]:
+    found: list[RawAttribute] = []
+    for page_number, lines in _pdf_page_blocks(text):
+        found.extend(_pdf_spec_block_attributes(page_number, lines, source_url, source_type))
+    return found
+
+
 def _pairs_from_lines(text: str, method: str, confidence: str, source_url: str,
                       source_type: str | None) -> list[RawAttribute]:
     lines = [_clean(line) for line in (text or "").splitlines() if _clean(line)]
@@ -988,8 +1140,9 @@ def extract_attributes(fetch_result: dict[str, Any]) -> list[RawAttribute]:
     document_type = fetch_result.get("document_type")
     attributes: list[RawAttribute] = []
     if document_type == "pdf":
-        attributes.extend(_pairs_from_lines(fetch_result.get("pdf_text", ""), "pdf_text", "medium",
-                                            source_url, source_type))
+        attributes.extend(_extract_pdf_spec_attributes(
+            fetch_result.get("pdf_text", ""), source_url, source_type,
+        ))
         return _deduplicate(attributes)
     if document_type == "html" and fetch_result.get("html"):
         soup = BeautifulSoup(fetch_result["html"], "html.parser")
