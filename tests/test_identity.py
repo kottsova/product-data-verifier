@@ -210,7 +210,11 @@ class IdentityDiscoveryTests(unittest.TestCase):
 
         self.assertIn("sakura-95", outcome.candidates[0]["url"])
         self.assertEqual(outcome.candidates[0]["model_relevance"], "exact_base_model")
-        self.assertGreater(outcome.candidates[0]["score"], outcome.candidates[1]["score"])
+        self.assertEqual(len(outcome.candidates), 1)
+        self.assertEqual(outcome.rejected_candidates[0]["url"], homepage[0])
+        self.assertEqual(
+            outcome.rejected_candidates[0]["relevance_relation"], "reject",
+        )
 
     def test_model_extension_does_not_become_exact_base_phrase(self) -> None:
         identity = resolve_product_identity("Apple iPhone 18")
@@ -249,9 +253,11 @@ class IdentityDiscoveryTests(unittest.TestCase):
                 "Bosch PUE611BB5F",
             )]
 
-        candidate = discover_identity(identity, searcher=searcher)[0]
+        outcome = discover_identity_with_status(identity, searcher=searcher)
+        self.assertEqual(outcome.candidates, [])
+        candidate = outcome.rejected_candidates[0]
         self.assertEqual(candidate["model_relevance"], "different_model")
-        self.assertEqual(candidate["identity_relation"], "different_model")
+        self.assertEqual(candidate["relevance_relation"], "reject")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,8 @@ import unittest
 from unittest.mock import patch
 
 from core.discovery import (
+    ProviderQueryOutcome,
+    ResilientSearchSession,
     DiscoverySearchError,
     GoogleSearchSession,
     browser_headless,
@@ -237,6 +239,26 @@ class DiscoveryTests(unittest.TestCase):
         self.assertGreater(first_official_calls, 0)
         self.assertFalse(any("official" in query for query in calls))
 
+    def test_negative_official_domain_result_is_cached(self) -> None:
+        clear_official_domain_cache()
+        calls = []
+
+        def searcher(query):
+            calls.append(query)
+            if "official" in query:
+                return []
+            return [("https://shop.example/product/X100", "Acme X100")]
+
+        discover("Acme", "X100", searcher=searcher)
+        calls.clear()
+        discover_identity_query_with_status(
+            resolve_product_identity("Acme X100"),
+            "Acme X100 net weight",
+            searcher=searcher,
+        )
+
+        self.assertEqual(calls, ["Acme X100 net weight"])
+
     def test_brand_like_homepage_is_not_authority_evidence(self) -> None:
         evidence = discover_global_official_domains("Gressel", [
             ("https://gressel.ch/", "GRESSEL AG – Spanntechnik und Werkstück-Automation"),
@@ -297,8 +319,178 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(outcome.candidates[0]["authority_status"], "verified")
         self.assertEqual(outcome.candidates[0]["identity_relation"], "same_base_model")
 
+    def test_person_name_collision_is_rejected_before_fetch_selection(self) -> None:
+        clear_official_domain_cache()
+
+        def searcher(_query):
+            return [
+                (
+                    "https://sports.example/profile/julian-gressel",
+                    "Julian Gressel football player profile and highlights",
+                ),
+                (
+                    "https://appliances.example/product/gaf-1825",
+                    "Gressel GAF-1825 air fryer",
+                ),
+            ]
+
+        outcome = discover_with_status(
+            "Gressel", "GAF-1825", searcher=searcher,
+        )
+
+        self.assertEqual(
+            [item["url"] for item in outcome.candidates],
+            ["https://appliances.example/product/gaf-1825"],
+        )
+        rejected = outcome.rejected_candidates[0]
+        self.assertEqual(rejected["relevance_relation"], "reject")
+        self.assertIn("person, sports", rejected["relevance_reasons"][0])
+
+    def test_same_brand_wrong_models_are_rejected(self) -> None:
+        clear_official_domain_cache()
+
+        def searcher(_query):
+            return [
+                ("https://brand.example/products/x30-ultra", "Dreame X30 Ultra"),
+                ("https://brand.example/products/l20-ultra", "Dreame L20 Ultra"),
+                (
+                    "https://shop.example/products/g12-pro-hhr32a",
+                    "Dreame G12 Pro HHR32A wet dry vacuum",
+                ),
+            ]
+
+        outcome = discover_with_status(
+            "Dreame", "G12 Pro HHR32A", searcher=searcher,
+        )
+
+        self.assertEqual(len(outcome.candidates), 1)
+        self.assertEqual(outcome.candidates[0]["relevance_relation"], "exact")
+        self.assertEqual(len(outcome.rejected_candidates), 2)
+        self.assertTrue(all(
+            "Brand-only evidence is insufficient" in item["relevance_reasons"][0]
+            for item in outcome.rejected_candidates
+        ))
+
+    def test_complete_spaced_model_phrase_overrides_token_mismatch_heuristic(self) -> None:
+        clear_official_domain_cache()
+        outcome = discover_with_status(
+            "Janome",
+            "Sakura 95",
+            searcher=lambda _query: [(
+                "https://shop.example/janome-sakura-95",
+                "Janome Sakura 95 sewing machine",
+            )],
+        )
+
+        self.assertEqual(len(outcome.candidates), 1)
+        self.assertEqual(outcome.candidates[0]["relevance_relation"], "exact")
+        self.assertEqual(outcome.rejected_candidates, [])
+
+    def test_compound_commercial_model_and_mpn_match_across_intervening_words(self) -> None:
+        clear_official_domain_cache()
+        outcome = discover_with_status(
+            "Dreame",
+            "G12 Pro HHR32A",
+            searcher=lambda _query: [
+                (
+                    "https://shop.example/dreame-g12-pro-wet-dry-hhr32a",
+                    "Dreame G12 Pro Wet & Dry (HHR32A)",
+                ),
+                (
+                    "https://brand.example/products/dreame-x30-ultra",
+                    "Dreame X30 Ultra",
+                ),
+            ],
+        )
+
+        self.assertEqual(len(outcome.candidates), 1)
+        self.assertEqual(outcome.candidates[0]["relevance_relation"], "exact")
+        self.assertEqual(len(outcome.rejected_candidates), 1)
+
+    def test_partial_compound_commercial_model_is_weak_not_unrelated(self) -> None:
+        clear_official_domain_cache()
+        outcome = discover_with_status(
+            "Dreame",
+            "G12 Pro HHR32A",
+            searcher=lambda _query: [(
+                "https://brand.example/products/dreame-g12-pro",
+                "Dreame G12 Pro wet dry vacuum",
+            )],
+        )
+
+        self.assertEqual(outcome.candidates[0]["relevance_relation"], "weak")
+
+    def test_exact_model_outranks_and_excludes_brand_only_result(self) -> None:
+        clear_official_domain_cache()
+
+        def searcher(_query):
+            return [
+                ("https://acme.example/products", "Acme product catalog"),
+                ("https://retailer.example/item/x100", "Acme X100 specifications"),
+            ]
+
+        outcome = discover_with_status("Acme", "X100", searcher=searcher)
+
+        self.assertEqual(len(outcome.candidates), 1)
+        self.assertEqual(
+            outcome.candidates[0]["url"],
+            "https://retailer.example/item/x100",
+        )
+        self.assertEqual(outcome.candidates[0]["relevance_relation"], "exact")
+        self.assertEqual(outcome.rejected_candidates[0]["relevance_relation"], "reject")
+
+    def test_accessory_page_with_exact_model_is_rejected(self) -> None:
+        clear_official_domain_cache()
+
+        def searcher(_query):
+            return [
+                (
+                    "https://shop.example/cases/honor-x8d-wallet-cover",
+                    "Wallet case and protective cover for HONOR X8d",
+                ),
+                (
+                    "https://honor.example/phones/honor-x8d",
+                    "HONOR X8d smartphone",
+                ),
+            ]
+
+        outcome = discover_with_status("HONOR", "X8d", searcher=searcher)
+
+        self.assertEqual(len(outcome.candidates), 1)
+        self.assertEqual(len(outcome.rejected_candidates), 1)
+        self.assertIn("accessory", outcome.rejected_candidates[0]["relevance_reasons"][0])
+
+    def test_exact_model_on_generic_toplist_is_weak(self) -> None:
+        candidates = rank_candidates(
+            [(
+                "https://shop.example/producttype/toplist/brand/stovetops",
+                "Bosch PUE611BB5E and other induction hobs",
+            )],
+            "Bosch",
+            "PUE611BB5E",
+        )
+        outcome = discover_with_status(
+            "Bosch", "PUE611BB5E", searcher=lambda _query: [
+                (candidate["url"], candidate["title"]) for candidate in candidates
+            ],
+        )
+
+        self.assertEqual(outcome.candidates[0]["relevance_relation"], "weak")
+
 
 class SearchFallbackTests(unittest.TestCase):
+    class Provider:
+        def __init__(self, name, response):
+            self.name = name
+            self.response = response
+            self.calls = []
+
+        def search(self, query):
+            self.calls.append(query)
+            if isinstance(self.response, Exception):
+                raise self.response
+            return list(self.response)
+
     def test_http_organic_results_skip_playwright(self) -> None:
         session = GoogleSearchSession()
         organic = [("https://example.com/product/model", "Model")]
@@ -354,6 +546,181 @@ class SearchFallbackTests(unittest.TestCase):
         outcome = discover_with_status("Acme", "X100", searcher=partial_searcher)
         self.assertEqual(outcome.search_status, "partial")
         self.assertTrue(outcome.candidates)
+
+    def test_blocked_official_bootstrap_does_not_skip_exact_model_queries(self) -> None:
+        clear_official_domain_cache()
+        calls = []
+
+        def searcher(query):
+            calls.append(query)
+            if query == "Acme official website":
+                raise RuntimeError("Google bot-check blocked the Playwright search.")
+            return [("https://shop.example/product/X100", "Acme X100")]
+
+        outcome = discover_with_status("Acme", "X100", searcher=searcher)
+
+        self.assertIn("Acme X100", calls)
+        self.assertIn('"X100" Acme specifications', calls)
+        self.assertTrue(outcome.candidates)
+        self.assertEqual(outcome.search_status, "partial")
+        self.assertEqual(outcome.issues[0].query, "Acme official website")
+
+    def test_primary_blocked_uses_fallback_and_preserves_attempts(self) -> None:
+        primary = self.Provider("primary", RuntimeError("provider bot-check blocked"))
+        fallback = self.Provider(
+            "fallback",
+            [("https://shop.example/product/X100", "Acme X100")],
+        )
+        session = ResilientSearchSession(providers=(primary, fallback))
+
+        outcome = session.search_with_status("Acme X100")
+
+        self.assertIsInstance(outcome, ProviderQueryOutcome)
+        self.assertEqual([item.status for item in outcome.attempts], ["blocked", "success"])
+        self.assertEqual([item.provider for item in outcome.attempts], ["primary", "fallback"])
+        self.assertFalse(outcome.attempts[0].is_fallback)
+        self.assertTrue(outcome.attempts[1].is_fallback)
+        self.assertEqual(outcome.attempts[1].result_count, 1)
+
+    def test_primary_error_uses_fallback(self) -> None:
+        primary = self.Provider("primary", RuntimeError("transport unavailable"))
+        fallback = self.Provider(
+            "fallback",
+            [("https://shop.example/product/X100", "Acme X100")],
+        )
+        outcome = ResilientSearchSession(
+            providers=(primary, fallback),
+        ).search_with_status("Acme X100")
+
+        self.assertEqual([item.status for item in outcome.attempts], ["error", "success"])
+        self.assertEqual(fallback.calls, ["Acme X100"])
+
+    def test_second_fallback_runs_when_first_fallback_is_blocked(self) -> None:
+        primary = self.Provider("primary", RuntimeError("provider blocked"))
+        first_fallback = self.Provider("fallback_one", RuntimeError("captcha blocked"))
+        second_fallback = self.Provider(
+            "fallback_two",
+            [("https://shop.example/product/X100", "Acme X100")],
+        )
+        outcome = ResilientSearchSession(
+            providers=(primary, first_fallback, second_fallback),
+        ).search_with_status("Acme X100")
+
+        self.assertEqual(
+            [item.status for item in outcome.attempts],
+            ["blocked", "blocked", "success"],
+        )
+        self.assertEqual(
+            [item.provider for item in outcome.attempts],
+            ["primary", "fallback_one", "fallback_two"],
+        )
+
+    def test_blocked_provider_is_not_retried_within_one_session(self) -> None:
+        primary = self.Provider("primary", RuntimeError("provider blocked"))
+        fallback = self.Provider(
+            "fallback",
+            [("https://shop.example/product/X100", "Acme X100")],
+        )
+        session = ResilientSearchSession(providers=(primary, fallback))
+
+        session.search_with_status("Acme X100")
+        second = session.search_with_status("Acme X100 specifications")
+
+        self.assertEqual(primary.calls, ["Acme X100"])
+        self.assertEqual([item.provider for item in second.attempts], ["fallback"])
+        self.assertTrue(second.attempts[0].is_fallback)
+
+    def test_primary_success_does_not_call_fallback(self) -> None:
+        primary = self.Provider(
+            "primary",
+            [("https://shop.example/product/X100", "Acme X100")],
+        )
+        fallback = self.Provider("fallback", RuntimeError("must not run"))
+        outcome = ResilientSearchSession(
+            providers=(primary, fallback),
+        ).search_with_status("Acme X100")
+
+        self.assertEqual(len(outcome.attempts), 1)
+        self.assertEqual(outcome.attempts[0].status, "success")
+        self.assertEqual(fallback.calls, [])
+
+    def test_primary_successful_zero_result_does_not_call_fallback(self) -> None:
+        primary = self.Provider("primary", [])
+        fallback = self.Provider(
+            "fallback",
+            [("https://shop.example/product/X100", "Acme X100")],
+        )
+        outcome = ResilientSearchSession(
+            providers=(primary, fallback),
+        ).search_with_status("Acme X100")
+
+        self.assertEqual(outcome.results, ())
+        self.assertEqual(outcome.attempts[0].status, "success")
+        self.assertEqual(fallback.calls, [])
+
+    def test_fallback_results_use_normal_dedupe_scoring_without_authority_upgrade(self) -> None:
+        primary = self.Provider("primary", RuntimeError("provider blocked"))
+        fallback = self.Provider("fallback", [
+            ("https://amazon.com/dp/X100", "Acme X100"),
+            ("https://acme.example/product/X100?utm_source=fallback", "Acme X100"),
+            ("https://acme.example/product/X100", "Acme X100 duplicate"),
+        ])
+        search = ResilientSearchSession(
+            providers=(primary, fallback),
+        ).search_with_status
+
+        outcome = discover_with_status("Acme", "X100", searcher=search)
+
+        urls = [item["url"] for item in outcome.candidates]
+        self.assertEqual(urls.count("https://acme.example/product/X100"), 1)
+        self.assertEqual(urls[0], "https://acme.example/product/X100")
+        product = outcome.candidates[0]
+        self.assertEqual(product["source_type"], "other")
+        self.assertEqual(product["authority_status"], "unknown")
+        self.assertEqual(product["relevance_relation"], "exact")
+        self.assertTrue(any(item.is_fallback for item in outcome.provider_attempts))
+
+    def test_fallback_brand_only_pollution_is_rejected(self) -> None:
+        primary = self.Provider("primary", RuntimeError("provider blocked"))
+        fallback = self.Provider("fallback", [
+            ("https://sports.example/profile/acme", "Acme football player profile"),
+            ("https://shop.example/product/X100", "Acme X100"),
+        ])
+        search = ResilientSearchSession(
+            providers=(primary, fallback),
+        ).search_with_status
+
+        outcome = discover_with_status("Acme", "X100", searcher=search)
+
+        self.assertEqual(len(outcome.candidates), 1)
+        self.assertEqual(len(outcome.rejected_candidates), 1)
+        self.assertEqual(outcome.candidates[0]["authority_status"], "unknown")
+        self.assertEqual(outcome.rejected_candidates[0]["relevance_relation"], "reject")
+
+    def test_explicit_official_claim_from_fallback_does_not_verify_authority(self) -> None:
+        primary = self.Provider("primary", RuntimeError("provider blocked"))
+
+        class QueryFallback:
+            name = "fallback"
+
+            def search(self, query):
+                if query == "Acme official website":
+                    return [("https://acme.example/", "Acme official website")]
+                return [("https://acme.example/product/X100", "Acme X100")]
+
+        search = ResilientSearchSession(
+            providers=(primary, QueryFallback()),
+        ).search_with_status
+
+        outcome = discover_with_status("Acme", "X100", searcher=search)
+        product = next(
+            item for item in outcome.candidates
+            if item["url"] == "https://acme.example/product/X100"
+        )
+
+        self.assertEqual(product["source_type"], "other")
+        self.assertEqual(product["authority_status"], "unknown")
+        self.assertIsNone(product["authority_evidence_url"])
 
 
 if __name__ == "__main__":

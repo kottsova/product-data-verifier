@@ -2,7 +2,7 @@
 
 import unittest
 
-from core.discovery import DiscoveryOutcome
+from core.discovery import DiscoveryOutcome, ProviderAttempt
 from core.export import profile_rows, profile_to_dict
 from core.extract import RawAttribute
 from core.targeted_search import TargetedSearchConfig
@@ -20,6 +20,7 @@ def candidate(
     source_type="manufacturer",
     authority="verified",
     relation="exact_variant",
+    relevance="exact",
     score=100,
 ):
     return {
@@ -37,6 +38,8 @@ def candidate(
         "score": score,
         "identity_relation": relation,
         "identity_verification_evidence": ["model=X100"],
+        "relevance_relation": relevance,
+        "relevance_reasons": ["Synthetic relevance fixture."],
     }
 
 
@@ -122,6 +125,38 @@ class FixtureServices:
 
 
 class ProductWorkflowTests(unittest.TestCase):
+    def test_relevance_gate_may_select_fewer_sources_and_never_fetches_rejected(self):
+        accepted_url = "https://shop.example/product/X100"
+        rejected_urls = [
+            "https://sports.example/profile/acme",
+            "https://shop.example/product/X200",
+        ]
+        fixtures = FixtureServices(
+            [
+                candidate(accepted_url),
+                candidate(
+                    rejected_urls[0], title="Acme football player profile",
+                    relevance="reject", relation="unknown", score=200,
+                ),
+                candidate(
+                    rejected_urls[1], title="Acme X200", relevance="reject",
+                    relation="different_model", score=190,
+                ),
+            ],
+            {accepted_url: []},
+        )
+
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100", brand="Acme", max_initial_sources=5,
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+
+        self.assertEqual(fixtures.fetch_calls, [accepted_url])
+        self.assertEqual(len(result.selected_candidates), 1)
+
     def test_full_initial_pipeline_builds_final_profile(self):
         url = "https://acme.example/product/X100"
         item = candidate(url, title="Acme Smartphone X100")
@@ -374,6 +409,45 @@ class ProductWorkflowTests(unittest.TestCase):
                 "Acme X100",
                 minimum_search_priority="urgent",  # type: ignore[arg-type]
             )
+
+    def test_provider_provenance_reaches_workflow_metadata(self):
+        url = "https://shop.example/product/X100"
+        item = candidate(
+            url,
+            source_type="other",
+            authority="unknown",
+        )
+        fixtures = FixtureServices([item], {url: []})
+        attempts = [
+            ProviderAttempt(
+                "google", "Acme X100", "blocked",
+                message="Google bot-check blocked", is_fallback=False,
+            ),
+            ProviderAttempt(
+                "duckduckgo_lite", "Acme X100", "success",
+                result_count=1, is_fallback=True,
+            ),
+        ]
+        fixtures.discover_initial = lambda _identity, _market: DiscoveryOutcome(
+            [item], "partial", ["Acme X100"], ["Acme X100"], [], attempts,
+        )
+
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+
+        self.assertEqual(
+            [item["provider"] for item in result.summary["provider_attempts"]],
+            ["google", "duckduckgo_lite"],
+        )
+        self.assertTrue(
+            result.final_profile.metadata["initial_provider_attempts"][1]["is_fallback"]
+        )
 
 
 if __name__ == "__main__":

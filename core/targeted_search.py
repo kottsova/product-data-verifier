@@ -10,7 +10,8 @@ from core.discovery import (
     Candidate,
     DiscoveryIssue,
     DiscoveryOutcome,
-    GoogleSearchSession,
+    ProviderAttempt,
+    ResilientSearchSession,
     Searcher,
     canonicalize_url,
     discover_identity_query_with_status,
@@ -93,6 +94,7 @@ class TargetedQueryResult:
     rejected_candidates: tuple[CandidateRejection, ...] = ()
     discovery_status: str = "success"
     issues: tuple[DiscoveryIssue, ...] = ()
+    provider_attempts: tuple[ProviderAttempt, ...] = ()
     useful_evidence_found: bool = False
 
 
@@ -215,6 +217,9 @@ def _candidate_identity_rejection(
     gap: Gap,
     identity: ProductIdentity,
 ) -> str | None:
+    if candidate.get("relevance_relation") == "reject":
+        reasons = candidate.get("relevance_reasons") or ()
+        return str(next(iter(reasons), "Candidate failed the discovery relevance gate."))
     relation = str(candidate.get("identity_relation") or "unknown")
     relevance = str(candidate.get("model_relevance") or "unknown")
     model_match = str(candidate.get("model_match") or "unknown")
@@ -386,6 +391,7 @@ def _run_targeted_search(
                 rejected_candidates=tuple(rejected),
                 discovery_status=outcome.search_status,
                 issues=tuple(outcome.issues),
+                provider_attempts=tuple(outcome.provider_attempts),
                 useful_evidence_found=useful,
             ))
             if outcome.search_status == "blocked":
@@ -440,8 +446,8 @@ def run_targeted_search(
             item, query, market, searcher,
         )
         return _run_targeted_search(plan, analysis, identity, runner, fetcher, extractor)
-    with GoogleSearchSession(market) as session:
+    with ResilientSearchSession(market) as session:
         runner = lambda item, query: discover_identity_query_with_status(
-            item, query, market, session.search,
+            item, query, market, session.search_with_status,
         )
         return _run_targeted_search(plan, analysis, identity, runner, fetcher, extractor)

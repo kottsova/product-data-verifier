@@ -1,6 +1,6 @@
 import unittest
 
-from core.discovery import DiscoveryIssue, DiscoveryOutcome
+from core.discovery import DiscoveryIssue, DiscoveryOutcome, ProviderAttempt
 from core.extract import RawAttribute
 from core.gaps import analyze_gaps
 from core.identity import ProductIdentity
@@ -136,16 +136,26 @@ class TargetedSearchTests(unittest.TestCase):
     def test_blocked_discovery_is_explicit(self):
         analysis, plan = one_field_plan("net_weight", queries=3)
         issue = DiscoveryIssue("blocked", plan.queries[0].query, "Google bot-check blocked")
+        attempt = ProviderAttempt(
+            "google", plan.queries[0].query, "blocked",
+            message="Google bot-check blocked",
+        )
         result = run_targeted_search(
             plan,
             analysis,
             identity(),
-            discovery=lambda _identity, _query: DiscoveryOutcome([], "blocked", [], [], [issue]),
+            discovery=lambda _identity, _query: DiscoveryOutcome(
+                [], "blocked", [], [], [issue], [attempt],
+            ),
         )
         self.assertTrue(result.blocked)
         self.assertEqual(result.fields[0].search_status, "blocked")
         self.assertEqual(result.fields[0].stop_reason, "discovery_blocked")
         self.assertEqual(result.fields[0].query_results[0].issues, (issue,))
+        self.assertEqual(
+            result.fields[0].query_results[0].provider_attempts,
+            (attempt,),
+        )
 
     def test_same_url_is_fetched_once_across_fields_and_queries(self):
         definitions = [

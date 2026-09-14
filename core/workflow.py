@@ -15,6 +15,8 @@ from core.discovery import (
     SUPPORTED_MARKETS,
     Candidate,
     DiscoveryOutcome,
+    ProviderAttempt,
+    ResilientSearchSession,
     canonicalize_url,
     discover_identity_query_with_status,
     discover_identity_with_status,
@@ -48,6 +50,17 @@ InitialDiscovery = Callable[[ProductIdentity, str], DiscoveryOutcome]
 TargetedDiscovery = Callable[[ProductIdentity, str, str], DiscoveryOutcome]
 Fetcher = Callable[[Mapping[str, object]], FetchResult]
 Extractor = Callable[[dict[str, object]], list[RawAttribute]]
+
+
+def _provider_attempt_data(attempt: ProviderAttempt) -> dict[str, object]:
+    return {
+        "provider": attempt.provider,
+        "query": attempt.query,
+        "status": attempt.status,
+        "result_count": attempt.result_count,
+        "message": attempt.message,
+        "is_fallback": attempt.is_fallback,
+    }
 
 
 def _initial_discovery(identity: ProductIdentity, market: str) -> DiscoveryOutcome:
@@ -159,6 +172,9 @@ class ProductWorkflowResult:
             "workflow_version": WORKFLOW_VERSION,
             "discovery_status": self.discovery.search_status,
             "candidate_count": len(self.discovery.candidates),
+            "provider_attempts": [
+                _provider_attempt_data(item) for item in self.discovery.provider_attempts
+            ],
             "selected_candidate_count": len(self.selected_candidates),
             "initial_fetch_count": len(self.fetched_sources),
             "successful_initial_fetch_count": sum(
@@ -195,6 +211,14 @@ def select_source_candidates(
         raise ValueError("source limit must be positive")
     deduplicated: dict[str, Candidate] = {}
     for candidate in candidates:
+        if candidate.get("relevance_relation") == "reject":
+            continue
+        if (
+            candidate.get("identity_relation") == "different_model"
+            or candidate.get("model_relevance") == "different_model"
+            or candidate.get("model_match") == "mismatch"
+        ):
+            continue
         url = canonicalize_url(candidate["url"])
         if not url:
             continue
@@ -235,13 +259,11 @@ def _candidate_fetch_view(
     return cast(FetchResult, result)
 
 
-def run_product_workflow(
+def _run_product_workflow_with_services(
     request: ProductWorkflowRequest,
-    *,
-    services: WorkflowServices | None = None,
+    active: WorkflowServices,
 ) -> ProductWorkflowResult:
     """Run Stages 1-7 once and retain every stage result for inspection."""
-    active = services or WorkflowServices()
     identity = resolve_product_identity(
         request.raw_name,
         brand=request.brand,
@@ -324,6 +346,13 @@ def run_product_workflow(
             "workflow_version": WORKFLOW_VERSION,
             "discovery_status": discovery.search_status,
             "initial_candidate_count": len(discovery.candidates),
+            "initial_candidate_count_before_relevance_gate": (
+                len(discovery.candidates) + len(discovery.rejected_candidates)
+            ),
+            "initial_rejected_candidate_count": len(discovery.rejected_candidates),
+            "initial_provider_attempts": [
+                _provider_attempt_data(item) for item in discovery.provider_attempts
+            ],
             "selected_candidate_count": len(selected_candidates),
             "initial_fetch_count": len(fetched_sources),
             "targeted_search_enabled": request.targeted_search_enabled,
@@ -348,6 +377,34 @@ def run_product_workflow(
         validated_profile=validated,
         final_profile=profile,
     )
+
+
+def run_product_workflow(
+    request: ProductWorkflowRequest,
+    *,
+    services: WorkflowServices | None = None,
+) -> ProductWorkflowResult:
+    """Run the workflow with one resilient provider session per live request."""
+    if services is not None:
+        return _run_product_workflow_with_services(request, services)
+
+    with ResilientSearchSession(request.market) as search:
+        live_services = WorkflowServices(
+            discover_initial=lambda identity, market: discover_identity_with_status(
+                identity,
+                market,
+                searcher=search.search_with_status,
+            ),
+            discover_targeted=lambda identity, query, market: (
+                discover_identity_query_with_status(
+                    identity,
+                    query,
+                    market,
+                    searcher=search.search_with_status,
+                )
+            ),
+        )
+        return _run_product_workflow_with_services(request, live_services)
 
 
 # Short application-facing alias.

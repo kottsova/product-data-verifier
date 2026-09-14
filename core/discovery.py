@@ -9,7 +9,7 @@ from pathlib import Path
 import re
 import tempfile
 import time
-from typing import Callable, Iterable, Literal, TypedDict
+from typing import Callable, Iterable, Literal, Protocol, TypedDict
 from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
@@ -34,11 +34,43 @@ class Candidate(TypedDict):
     score: int
     identity_relation: str
     identity_verification_evidence: list[str]
+    relevance_relation: str
+    relevance_reasons: list[str]
 
 
 SearchResult = tuple[str, str]
-Searcher = Callable[[str], Iterable[SearchResult]]
 SearchStatus = Literal["success", "partial", "blocked", "error"]
+ProviderStatus = Literal["success", "blocked", "error"]
+RelevanceRelation = Literal["exact", "likely_variant", "weak", "reject"]
+
+
+class SearchProvider(Protocol):
+    """Interchangeable transport for one web-search provider."""
+
+    name: str
+
+    def search(self, query: str) -> Iterable[SearchResult]: ...
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderAttempt:
+    """Search-provider reliability metadata, independent of source authority."""
+
+    provider: str
+    query: str
+    status: ProviderStatus
+    result_count: int = 0
+    message: str | None = None
+    is_fallback: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderQueryOutcome:
+    results: tuple[SearchResult, ...] = ()
+    attempts: tuple[ProviderAttempt, ...] = ()
+
+
+Searcher = Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome]
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +78,7 @@ class DiscoveryIssue:
     status: Literal["blocked", "error"]
     query: str
     message: str
+    provider: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +90,8 @@ class DiscoveryOutcome:
     queries: list[str] = field(default_factory=list)
     attempted_queries: list[str] = field(default_factory=list)
     issues: list[DiscoveryIssue] = field(default_factory=list)
+    provider_attempts: list[ProviderAttempt] = field(default_factory=list)
+    rejected_candidates: list[Candidate] = field(default_factory=list)
 
 
 class DiscoverySearchError(RuntimeError):
@@ -92,7 +127,23 @@ SUPPORT_PATH_HINTS = {
 WEAK_PATH_HINTS = {
     "compare", "comparison", "forum", "forums", "offersofproduct", "questions",
     "review", "reviews", "test", "testbericht", "tests", "threads",
-    "preisvergleich",
+    "preisvergleich", "toplist",
+}
+ACCESSORY_CONTEXT_TERMS = {
+    "assembly", "case", "cover", "digitizer", "protector", "replacement",
+    "spare", "wallet",
+}
+NON_PRODUCT_CONTEXT_TERMS = {
+    "athlete", "biography", "coach", "defender", "football", "forward",
+    "goalkeeper", "highlights", "interview", "midfielder", "player",
+    "roster", "soccer", "sports", "transfer",
+}
+NON_PRODUCT_CONTEXT_DOMAINS = {
+    "espn.com", "fifa.com", "imdb.com", "transfermarkt.com", "wikipedia.org",
+}
+NON_PRODUCT_CONTEXT_PATHS = {
+    "athlete", "biography", "forum", "forums", "people", "person", "profile",
+    "roster", "sports", "wiki",
 }
 TRACKING_PARAMETERS = {"fbclid", "gclid", "srsltid", "yclid"}
 
@@ -149,7 +200,12 @@ def clear_official_domain_cache() -> None:
 def build_search_queries(brand: str, model: str, article: str | None = None) -> list[str]:
     brand = " ".join((brand or "").split())
     model = " ".join((model or "").split())
-    queries = [f"{brand} {model}", f'"{brand} {model}"', f'"{model}" {brand}']
+    queries = [
+        f"{brand} {model}",
+        f'"{brand} {model}"',
+        f'"{model}" {brand}',
+        f'"{model}" {brand} specifications',
+    ]
     if article and article.strip():
         article = " ".join(article.split())
         queries.extend((f'{brand} "{article}"', f'"{model}" "{article}" {brand}'))
@@ -338,6 +394,136 @@ def _model_relevance(match: str) -> str:
     }[match]
 
 
+def _has_non_product_context(url: str, title: str) -> bool:
+    """Detect generic person/sports/wiki/forum context without brand hardcoding."""
+    domain = _host(url)
+    if any(
+        domain == item or domain.endswith(f".{item}")
+        for item in NON_PRODUCT_CONTEXT_DOMAINS
+    ):
+        return True
+    path_tokens = {
+        token
+        for segment in urlparse(url).path.split("/")
+        for token in re.findall(r"[a-z0-9]+", segment.casefold())
+    }
+    text_tokens = set(normalize_text(title).split())
+    return bool(
+        path_tokens & NON_PRODUCT_CONTEXT_PATHS
+        or text_tokens & NON_PRODUCT_CONTEXT_TERMS
+    )
+
+
+def _has_accessory_context(url: str, title: str) -> bool:
+    """Reject accessories and replacement parts that merely name the product."""
+    tokens = set(normalize_text(f"{title} {urlparse(url).path}").split())
+    return bool(tokens & ACCESSORY_CONTEXT_TERMS)
+
+
+def _model_component_relation(model: str, text: str) -> RelevanceRelation | None:
+    """Match compound commercial-model/MPN input across punctuation and prose."""
+    expected = [
+        normalize_model(part)
+        for part in re.findall(r"[\w]+", model)
+        if normalize_model(part)
+    ]
+    if len(expected) < 2:
+        return None
+    actual = {
+        normalize_model(part)
+        for part in re.findall(r"[\w]+", text)
+        if normalize_model(part)
+    }
+    if all(part in actual for part in expected):
+        return "exact"
+    strong_identifiers = [
+        part for part in expected
+        if len(part) >= 5
+        and any(character.isalpha() for character in part)
+        and any(character.isdigit() for character in part)
+    ]
+    if any(part in actual for part in strong_identifiers):
+        return "exact"
+    matched = [part for part in expected if part in actual]
+    if (
+        len(matched) >= 2
+        and any(any(character.isdigit() for character in part) for part in matched)
+    ):
+        return "weak"
+    return None
+
+
+def assess_candidate_relevance(
+    candidate: Candidate,
+    brand: str,
+    model: str,
+    article: str | None = None,
+) -> tuple[RelevanceRelation, list[str]]:
+    """Classify search-level product relevance before any network fetch.
+
+    Authority is deliberately absent from the decision. A provider result must
+    expose the requested model/article in its title/snippet or URL; a brand-only
+    result cannot become relevant through source type or provider reputation.
+    """
+    title = str(candidate.get("title") or "")
+    url = str(candidate.get("url") or "")
+    haystack = f"{title} {url}"
+    match = str(candidate.get("model_match") or "unknown")
+    exact_phrase = base_model_in_text(model, haystack)
+    exact_article = article_matches(article, haystack)
+    component_relation = _model_component_relation(model, haystack)
+
+    if (
+        match == "mismatch"
+        and not exact_phrase
+        and not exact_article
+        and component_relation is None
+    ):
+        return "reject", ["Search result contains a conflicting model identifier."]
+    if _has_non_product_context(url, title):
+        return "reject", ["Search result has person, sports, profile, wiki, or forum context."]
+    if _has_accessory_context(url, title):
+        return "reject", ["Search result describes an accessory or replacement part, not the product."]
+    if match == "likely_variant":
+        return "likely_variant", ["Requested base model appears with an explicit variant suffix."]
+    if match == "exact" or exact_phrase or component_relation == "exact":
+        if _page_kind(url) in {"catalog", "homepage", "weak"}:
+            return "weak", ["Exact model appears only on a generic catalog or weak page."]
+        return "exact", ["Requested exact model appears in the title/snippet or URL."]
+    if exact_article:
+        return "exact", ["Requested article/MPN appears in the title/snippet or URL."]
+    if match == "likely":
+        return "weak", ["Search result contains only a probable base-model relation."]
+    if component_relation == "weak":
+        return "weak", ["Search result contains a distinctive partial commercial-model relation."]
+
+    brand_present = normalize_model(brand) in normalize_model(haystack)
+    reason = "Requested exact model/article is absent from the search result."
+    if brand_present:
+        reason += " Brand-only evidence is insufficient."
+    return "reject", [reason]
+
+
+def _partition_relevance_candidates(
+    candidates: Iterable[Candidate],
+    brand: str,
+    model: str,
+    article: str | None,
+) -> tuple[list[Candidate], list[Candidate]]:
+    accepted: list[Candidate] = []
+    rejected: list[Candidate] = []
+    for candidate in candidates:
+        relation, reasons = assess_candidate_relevance(
+            candidate, brand, model, article,
+        )
+        candidate["relevance_relation"] = relation
+        candidate["relevance_reasons"] = reasons
+        (rejected if relation == "reject" else accepted).append(candidate)
+    accepted.sort(key=lambda item: (-item["score"], item["url"]))
+    rejected.sort(key=lambda item: (-item["score"], item["url"]))
+    return accepted, rejected
+
+
 def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
                     article: str | None = None, official_domain: str | None = None,
                     authority_evidence_url: str | None = None,
@@ -388,6 +574,8 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
             ),
             "identity_relation": "unknown",
             "identity_verification_evidence": [],
+            "relevance_relation": "reject",
+            "relevance_reasons": [],
         }
         previous = candidates.get(url)
         if previous is None or candidate["score"] > previous["score"]:
@@ -483,6 +671,8 @@ def _http_google_search_for_market(query: str, market: str) -> tuple[list[Search
 
 class GoogleSearchSession:
     """HTTP-first Google search with one lazy Playwright browser per discovery."""
+
+    name = "google"
 
     def __init__(self, market: str = "global") -> None:
         if market not in SUPPORTED_MARKETS:
@@ -626,6 +816,258 @@ class GoogleSearchSession:
         return found
 
 
+class _DuckDuckGoLiteParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.results: list[SearchResult] = []
+        self._href = ""
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        classes = set((values.get("class") or "").split())
+        if tag == "a" and "result-link" in classes:
+            self._href = values.get("href") or ""
+            self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != "a" or not self._href:
+            return
+        url = _clean_duckduckgo_result_url(self._href)
+        if url:
+            self.results.append((url, " ".join(self._text).strip()))
+        self._href = ""
+        self._text = []
+
+
+DUCKDUCKGO_MARKETS = {
+    "US": "us-en",
+    "GB": "uk-en",
+    "DE": "de-de",
+    "RU": "ru-ru",
+}
+DUCKDUCKGO_BLOCK_MARKERS = (
+    "challenge-form",
+    "anomaly-modal",
+    "bots use duckduckgo too",
+    "verify you are a human",
+)
+DUCKDUCKGO_MIN_INTERVAL_SECONDS = 2.0
+_DUCKDUCKGO_LAST_REQUEST_AT = 0.0
+
+
+def _clean_duckduckgo_result_url(raw_url: str) -> str:
+    url = (raw_url or "").strip()
+    if url.startswith("//"):
+        url = f"https:{url}"
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if host == "duckduckgo.com" or host.endswith(".duckduckgo.com"):
+        target = (parse_qs(parsed.query).get("uddg") or [""])[0]
+        return canonicalize_url(unquote(target))
+    return canonicalize_url(url)
+
+
+class DuckDuckGoLiteSearchProvider:
+    """Keyless HTML fallback with the same URL/title result contract."""
+
+    name = "duckduckgo_lite"
+
+    def __init__(self, market: str = "global") -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        self.market = market
+
+    def search(self, query: str) -> list[SearchResult]:
+        global _DUCKDUCKGO_LAST_REQUEST_AT
+        remaining = DUCKDUCKGO_MIN_INTERVAL_SECONDS - (
+            time.monotonic() - _DUCKDUCKGO_LAST_REQUEST_AT
+        )
+        if remaining > 0:
+            time.sleep(remaining)
+        params = {"q": query}
+        region = DUCKDUCKGO_MARKETS.get(self.market)
+        if region:
+            params["kl"] = region
+        request = Request(
+            f"https://lite.duckduckgo.com/lite/?{urlencode(params)}",
+            headers={
+                "User-Agent": "Mozilla/5.0",
+                "Accept-Language": "en-US,en;q=0.8",
+            },
+        )
+        try:
+            _DUCKDUCKGO_LAST_REQUEST_AT = time.monotonic()
+            with urlopen(request, timeout=20) as response:
+                html = response.read().decode("utf-8", errors="replace")
+        except Exception as error:
+            raise RuntimeError(f"DuckDuckGo Lite search failed: {error}") from error
+        lowered = html.lower()
+        if any(marker in lowered for marker in DUCKDUCKGO_BLOCK_MARKERS):
+            raise RuntimeError("DuckDuckGo bot-check blocked the Lite search.")
+        parser = _DuckDuckGoLiteParser()
+        parser.feed(html)
+        return parser.results
+
+
+class _NaverParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.results: list[SearchResult] = []
+        self._href = ""
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        classes = set((values.get("class") or "").split())
+        href = values.get("href") or ""
+        if tag != "a" or "fds-anchor-layout" not in classes:
+            return
+        if not href.startswith(("http://", "https://")):
+            return
+        host = _host(href)
+        if host == "naver.com" or host.endswith(".naver.com"):
+            return
+        self._href = href
+        self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != "a" or not self._href:
+            return
+        url = canonicalize_url(self._href)
+        if url:
+            self.results.append((url, " ".join(self._text).strip()))
+        self._href = ""
+        self._text = []
+
+
+class NaverSearchProvider:
+    """Second keyless fallback for resilient public web discovery."""
+
+    name = "naver"
+
+    def __init__(self, market: str = "global") -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        self.market = market
+
+    def search(self, query: str) -> list[SearchResult]:
+        request = Request(
+            f"https://search.naver.com/search.naver?{urlencode({'where': 'web', 'query': query})}",
+            headers={
+                "User-Agent": "Mozilla/5.0",
+                "Accept-Language": "en-US,en;q=0.8",
+            },
+        )
+        try:
+            with urlopen(request, timeout=20) as response:
+                html = response.read().decode("utf-8", errors="replace")
+        except Exception as error:
+            raise RuntimeError(f"Naver search failed: {error}") from error
+        parser = _NaverParser()
+        parser.feed(html)
+        lowered = html.lower()
+        if not parser.results and any(marker in lowered for marker in (
+            "captcha", "verify you are a human", "비정상적인 접근",
+        )):
+            raise RuntimeError("Naver bot-check blocked the search.")
+        return parser.results
+
+
+def _provider_status(error: RuntimeError) -> Literal["blocked", "error"]:
+    lowered = (str(error) or error.__class__.__name__).lower()
+    return "blocked" if any(marker in lowered for marker in (
+        "bot-check", "blocked", "captcha", "recaptcha", "unusual traffic",
+    )) else "error"
+
+
+class ProviderSearchError(RuntimeError):
+    """All configured providers failed for a single query."""
+
+    def __init__(self, query: str, attempts: Iterable[ProviderAttempt]) -> None:
+        self.query = query
+        self.attempts = tuple(attempts)
+        detail = self.attempts[-1].message if self.attempts else "No providers configured."
+        super().__init__(detail)
+
+
+class ResilientSearchSession:
+    """Try fallback providers only after structured primary failure."""
+
+    def __init__(
+        self,
+        market: str = "global",
+        providers: Iterable[SearchProvider] | None = None,
+    ) -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        self.market = market
+        self.providers = tuple(providers) if providers is not None else (
+            GoogleSearchSession(market),
+            DuckDuckGoLiteSearchProvider(market),
+            NaverSearchProvider(market),
+        )
+        self._blocked_providers: set[int] = set()
+
+    def __enter__(self) -> "ResilientSearchSession":
+        for provider in self.providers:
+            enter = getattr(provider, "__enter__", None)
+            if enter is not None:
+                enter()
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        for provider in reversed(self.providers):
+            exit_provider = getattr(provider, "__exit__", None)
+            if exit_provider is not None:
+                exit_provider(*args)
+
+    def search_with_status(self, query: str) -> ProviderQueryOutcome:
+        attempts: list[ProviderAttempt] = []
+        for index, provider in enumerate(self.providers):
+            if index in self._blocked_providers and index < len(self.providers) - 1:
+                continue
+            try:
+                results = tuple(provider.search(query))
+            except RuntimeError as error:
+                status = _provider_status(error)
+                attempts.append(ProviderAttempt(
+                    provider=provider.name,
+                    query=query,
+                    status=status,
+                    message=str(error) or error.__class__.__name__,
+                    is_fallback=index > 0,
+                ))
+                if status == "blocked":
+                    self._blocked_providers.add(index)
+                continue
+            attempts.append(ProviderAttempt(
+                provider=provider.name,
+                query=query,
+                status="success",
+                result_count=len(results),
+                is_fallback=index > 0,
+            ))
+            # A successful empty response is a real zero-result outcome. It is
+            # deliberately not treated as provider failure.
+            return ProviderQueryOutcome(results, tuple(attempts))
+        return ProviderQueryOutcome((), tuple(attempts))
+
+    def search(self, query: str) -> list[SearchResult]:
+        outcome = self.search_with_status(query)
+        if outcome.attempts and all(item.status != "success" for item in outcome.attempts):
+            raise ProviderSearchError(query, outcome.attempts)
+        return list(outcome.results)
+
+
 def google_search(query: str, market: str = "global") -> list[SearchResult]:
     """Search once, closing a fallback browser afterwards if one was needed."""
     with GoogleSearchSession(market) as session:
@@ -634,11 +1076,60 @@ def google_search(query: str, market: str = "global") -> list[SearchResult]:
 
 def _discovery_issue(query: str, error: RuntimeError) -> DiscoveryIssue:
     message = str(error) or error.__class__.__name__
-    lowered = message.lower()
-    blocked = any(marker in lowered for marker in (
-        "bot-check", "blocked", "captcha", "recaptcha", "unusual traffic",
-    ))
-    return DiscoveryIssue("blocked" if blocked else "error", query, message)
+    return DiscoveryIssue(_provider_status(error), query, message)
+
+
+def _searcher_name(searcher: object) -> str:
+    owner = getattr(searcher, "__self__", None)
+    return str(
+        getattr(owner, "name", None)
+        or getattr(searcher, "name", None)
+        or getattr(searcher, "__name__", None)
+        or "injected"
+    )
+
+
+def _search_query(
+    searcher: Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome],
+    query: str,
+) -> tuple[list[SearchResult], list[ProviderAttempt], list[DiscoveryIssue]]:
+    try:
+        response = searcher(query)
+    except ProviderSearchError as error:
+        attempts = list(error.attempts)
+        issues = [
+            DiscoveryIssue(item.status, query, item.message or "Search failed.", item.provider)
+            for item in attempts
+            if item.status != "success"
+        ]
+        return [], attempts, issues
+    except RuntimeError as error:
+        issue = _discovery_issue(query, error)
+        provider = _searcher_name(searcher)
+        issue = DiscoveryIssue(issue.status, issue.query, issue.message, provider)
+        attempt = ProviderAttempt(provider, query, issue.status, message=issue.message)
+        return [], [attempt], [issue]
+
+    if isinstance(response, ProviderQueryOutcome):
+        attempts = list(response.attempts)
+        issues = [
+            DiscoveryIssue(item.status, query, item.message or "Search failed.", item.provider)
+            for item in attempts
+            if item.status != "success"
+        ]
+        return list(response.results), attempts, issues
+
+    results = list(response)
+    provider = _searcher_name(searcher)
+    return results, [ProviderAttempt(provider, query, "success", len(results))], []
+
+
+def _primary_provider_succeeded(attempts: Iterable[ProviderAttempt]) -> bool:
+    """Fallback discovery can find sources but cannot establish authority."""
+    return any(
+        item.status == "success" and not item.is_fallback
+        for item in attempts
+    )
 
 
 def discover_with_status(
@@ -657,33 +1148,33 @@ def discover_with_status(
     if market not in SUPPORTED_MARKETS:
         raise ValueError(f"Unsupported market: {market}")
 
-    def run(active_searcher: Searcher) -> DiscoveryOutcome:
+    def run(
+        active_searcher: Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome],
+    ) -> DiscoveryOutcome:
         cache_key = (normalize_model(brand), market)
         cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
         official_domains = dict(cached or ())
         raw_results: list[SearchResult] = []
         official_results: list[SearchResult] = []
         issues: list[DiscoveryIssue] = []
+        provider_attempts: list[ProviderAttempt] = []
         attempted_queries: list[str] = []
         base_queries = build_search_queries(brand, model, article)
         queries: list[str] = []
-        if not cached:
+        if cached is None:
             queries.extend((f"{brand} official website", f"{brand} official {model}"))
         queries.extend(base_queries)
         for query in queries:
             attempted_queries.append(query)
-            try:
-                found = list(active_searcher(query))
-                raw_results.extend(found)
-                if "official" in query:
-                    official_results.extend(found)
-            except RuntimeError as error:
-                issues.append(_discovery_issue(query, error))
-                break
-        if not official_domains:
+            found, attempts, query_issues = _search_query(active_searcher, query)
+            provider_attempts.extend(attempts)
+            issues.extend(query_issues)
+            raw_results.extend(found)
+            if "official" in query and _primary_provider_succeeded(attempts):
+                official_results.extend(found)
+        if cached is None:
             official_domains = dict(discover_global_official_domains(brand, official_results))
-            if official_domains:
-                _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
+            _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
         relevant_domains = [
             domain for domain in official_domains
             if any(url_belongs_to_domain(url, domain) and model_match(model, f"{title} {url}") == "exact"
@@ -694,14 +1185,16 @@ def discover_with_status(
             query = f'"{model}" site:{domain}'
             queries.append(query)
             attempted_queries.append(query)
-            try:
-                raw_results.extend(active_searcher(query))
-            except RuntimeError as error:
-                issues.append(_discovery_issue(query, error))
-                break
-        candidates = rank_candidates(
+            found, attempts, query_issues = _search_query(active_searcher, query)
+            provider_attempts.extend(attempts)
+            issues.extend(query_issues)
+            raw_results.extend(found)
+        ranked_candidates = rank_candidates(
             raw_results, brand, model, article, market=market,
             official_domains=official_domains,
+        )
+        candidates, rejected_candidates = _partition_relevance_candidates(
+            ranked_candidates, brand, model, article,
         )
         if issues and raw_results:
             status: SearchStatus = "partial"
@@ -715,12 +1208,14 @@ def discover_with_status(
             queries=queries,
             attempted_queries=attempted_queries,
             issues=issues,
+            provider_attempts=provider_attempts,
+            rejected_candidates=rejected_candidates,
         )
 
     if searcher is not None:
         return run(searcher)
-    with GoogleSearchSession(market) as session:
-        return run(session.search)
+    with ResilientSearchSession(market) as session:
+        return run(session.search_with_status)
 
 
 def discover(brand: str, model: str, article: str | None = None,
@@ -832,43 +1327,49 @@ def discover_identity_query_with_status(
     if not article and identity.candidate_identifiers:
         article = identity.candidate_identifiers[0]
 
-    def run(active_searcher: Searcher) -> DiscoveryOutcome:
+    def run(
+        active_searcher: Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome],
+    ) -> DiscoveryOutcome:
         cache_key = (normalize_model(identity.brand), market)
         cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
         official_domains = dict(cached or ())
         issues: list[DiscoveryIssue] = []
+        provider_attempts: list[ProviderAttempt] = []
         attempted: list[str] = []
         raw_results: list[SearchResult] = []
 
-        if not cached:
+        if cached is None:
             authority_query = f"{identity.brand} official website"
             attempted.append(authority_query)
-            try:
-                official_results = list(active_searcher(authority_query))
-            except RuntimeError as error:
-                issues.append(_discovery_issue(authority_query, error))
-                official_results = []
-            if not issues:
-                official_domains = dict(
-                    discover_global_official_domains(identity.brand, official_results)
-                )
-                if official_domains:
-                    _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
+            official_results, attempts, query_issues = _search_query(
+                active_searcher, authority_query,
+            )
+            provider_attempts.extend(attempts)
+            issues.extend(query_issues)
+            authority_results = (
+                official_results if _primary_provider_succeeded(attempts) else ()
+            )
+            official_domains = dict(
+                discover_global_official_domains(identity.brand, authority_results)
+            )
+            _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
 
-        if not issues:
-            attempted.append(query)
-            try:
-                raw_results.extend(active_searcher(query))
-            except RuntimeError as error:
-                issues.append(_discovery_issue(query, error))
+        attempted.append(query)
+        found, attempts, query_issues = _search_query(active_searcher, query)
+        provider_attempts.extend(attempts)
+        issues.extend(query_issues)
+        raw_results.extend(found)
 
-        candidates = rank_candidates(
+        ranked_candidates = rank_candidates(
             raw_results,
             identity.brand,
             model,
             article,
             market=market,
             official_domains=official_domains,
+        )
+        candidates, rejected_candidates = _partition_relevance_candidates(
+            ranked_candidates, identity.brand, model, article,
         )
         if issues and raw_results:
             status: SearchStatus = "partial"
@@ -877,7 +1378,10 @@ def discover_identity_query_with_status(
         else:
             status = "success"
         return _annotate_identity_candidates(
-            DiscoveryOutcome(candidates, status, [query], attempted, issues),
+            DiscoveryOutcome(
+                candidates, status, [query], attempted, issues, provider_attempts,
+                rejected_candidates,
+            ),
             identity,
             model,
             article,
@@ -885,8 +1389,8 @@ def discover_identity_query_with_status(
 
     if searcher is not None:
         return run(searcher)
-    with GoogleSearchSession(market) as session:
-        return run(session.search)
+    with ResilientSearchSession(market) as session:
+        return run(session.search_with_status)
 
 
 def discover_identity_with_status(
