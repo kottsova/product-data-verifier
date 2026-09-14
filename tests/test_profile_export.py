@@ -25,9 +25,19 @@ IDENTITY = ProductIdentity(
 )
 
 
-def definition(name, *, expected=True, priority="high", value_type="text", scope="unknown", unit_family=None):
+def definition(
+    name,
+    *,
+    expected=True,
+    priority="high",
+    value_type="text",
+    scope="unknown",
+    unit_family=None,
+    schema_scope="category_specific",
+):
     return AttributeDefinition(
         name,
+        scope=schema_scope,
         expected=expected,
         priority=priority,
         value_type=value_type,
@@ -129,6 +139,19 @@ class FinalProfileContractTests(unittest.TestCase):
         self.assertFalse(item.expected)
         data = profile_to_dict(profile)
         self.assertIn("peak_brightness", data["discovered"])
+
+    def test_extended_schema_definition_remains_discovered(self):
+        profile = final_profile(
+            [definition(
+                "custom_airflow_mode",
+                expected=False,
+                schema_scope="discovered",
+            )],
+            [candidate("custom_airflow_mode", "Quiet")],
+        )
+        item = profile.by_name["custom_airflow_mode"]
+        self.assertTrue(item.discovered)
+        self.assertFalse(item.expected)
 
     def test_product_and_package_dimensions_remain_separate(self):
         schema = [definition("product_dimensions"), definition("package_dimensions")]

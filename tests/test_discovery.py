@@ -105,6 +105,88 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(candidates[0]["authority_status"], "verified")
         self.assertEqual(candidates[0]["authority_evidence_url"], evidence)
 
+    def test_lower_google_result_official_exact_product_ranks_first(self) -> None:
+        results = [
+            ("https://compare.example/questions/X100", "Acme X100 questions and prices"),
+            ("https://amazon.com/dp/X100", "Acme X100"),
+            ("https://acme.example/product/X100", "Acme X100"),
+        ]
+        candidates = rank_candidates(
+            results,
+            "Acme",
+            "X100",
+            official_domains={"acme.example": "https://acme.example/"},
+        )
+        self.assertEqual(candidates[0]["url"], "https://acme.example/product/X100")
+        self.assertEqual(candidates[0]["authority_status"], "verified")
+
+    def test_official_support_page_is_not_lost_to_product_url_heuristics(self) -> None:
+        results = [
+            ("https://reviews.example/product/X100", "Acme X100 review"),
+            ("https://acme.example/de/supportdetail/X100-01", "Acme X100/01 support"),
+        ]
+        candidates = rank_candidates(
+            results,
+            "Acme",
+            "X100",
+            official_domains={"acme.example": "https://acme.example/"},
+        )
+        self.assertEqual(
+            candidates[0]["url"],
+            "https://acme.example/de/supportdetail/X100-01",
+        )
+        self.assertEqual(candidates[0]["source_type"], "official_document")
+        self.assertEqual(candidates[0]["authority_status"], "verified")
+
+    def test_brand_domain_exact_model_boost_does_not_upgrade_authority(self) -> None:
+        candidates = rank_candidates([
+            ("https://reviews.example/product/X100", "Acme X100 review"),
+            ("https://acme-home.example/productservice/X100-01", "Acme X100/01 service"),
+        ], "Acme", "X100")
+        self.assertEqual(
+            candidates[0]["url"],
+            "https://acme-home.example/productservice/X100-01",
+        )
+        self.assertEqual(candidates[0]["source_type"], "other")
+        self.assertEqual(candidates[0]["authority_status"], "unknown")
+
+    def test_ranking_is_independent_of_raw_google_order(self) -> None:
+        results = [
+            ("https://amazon.com/dp/X100", "Acme X100"),
+            ("https://acme.example/product/X100", "Acme X100"),
+        ]
+        options = {
+            "official_domains": {"acme.example": "https://acme.example/"},
+        }
+        forward = rank_candidates(results, "Acme", "X100", **options)
+        reverse = rank_candidates(reversed(results), "Acme", "X100", **options)
+        self.assertEqual(
+            [item["url"] for item in forward],
+            [item["url"] for item in reverse],
+        )
+
+    def test_candidate_priority_order_is_explicit_in_scores(self) -> None:
+        results = [
+            ("https://forum.example/questions/X100", "Acme X100 questions"),
+            ("https://reference.example/product/X100", "Acme X100"),
+            ("https://otto.example/product/X100", "Acme X100"),
+            ("https://acme.example/support/X100", "Acme X100 support"),
+            ("https://acme.example/product/X100", "Acme X100"),
+        ]
+        candidates = rank_candidates(
+            results,
+            "Acme",
+            "X100",
+            official_domains={"acme.example": "https://acme.example/"},
+        )
+        self.assertEqual([item["url"] for item in candidates], [
+            "https://acme.example/product/X100",
+            "https://acme.example/support/X100",
+            "https://otto.example/product/X100",
+            "https://reference.example/product/X100",
+            "https://forum.example/questions/X100",
+        ])
+
     def test_exact_manufacturer_ranks_above_unknown_manufacturer(self) -> None:
         evidence = "https://example.com/"
         candidates = rank_candidates([

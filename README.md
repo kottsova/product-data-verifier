@@ -5,13 +5,16 @@
 ## Основной сценарий
 
 Brand + Model + Article
+→ Product identity
 → Discover sources
-→ Fetch sources
-→ Match exact product
-→ Extract attributes
-→ Normalize
-→ Validate
-→ Result
+→ Fetch and extract
+→ Detect category
+→ Build and extend schema
+→ Map attributes
+→ Analyze gaps and run bounded targeted search
+→ Validate and resolve conflicts
+→ FinalProductProfile
+→ JSON / CSV / tabular output
 
 ## Результат
 
@@ -23,19 +26,17 @@ Attribute | Value | Status | Source | Evidence
 - Conflict
 - Unresolved
 
-## MVP
+## CLI
 
-1. Project setup
-2. Source discovery
-3. Fetch
-4. Generic extraction
-5. Exact model matching
-6. Attribute normalization
-7. Validation
-8. Full pipeline
-9. Test on 20 products
-10. Streamlit interface
+```text
+python app.py "Bosch" "PUE611BB5E" --format table
+python app.py "Bosch" "PUE611BB5E" --format json --pretty
+python app.py "Bosch" "PUE611BB5E" --format csv
+```
+
+Use `--no-targeted-search` for an initial-source-only run and `--max-sources`
+to bound initial fetches.
 
 ## Current stage
 
-Stage 0 — Project setup.
+Stage 8 — Application orchestration.

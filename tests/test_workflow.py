@@ -1,0 +1,380 @@
+"""Deterministic Stage 8 orchestration tests with no live network access."""
+
+import unittest
+
+from core.discovery import DiscoveryOutcome
+from core.export import profile_rows, profile_to_dict
+from core.extract import RawAttribute
+from core.targeted_search import TargetedSearchConfig
+from core.workflow import (
+    ProductWorkflowRequest,
+    WorkflowServices,
+    run_product_workflow,
+)
+
+
+def candidate(
+    url,
+    *,
+    title="Acme product X100",
+    source_type="manufacturer",
+    authority="verified",
+    relation="exact_variant",
+    score=100,
+):
+    return {
+        "url": url,
+        "domain": url.split("/")[2],
+        "title": title,
+        "source_type": source_type,
+        "authority_status": authority,
+        "authority_evidence_url": url.split("/product")[0],
+        "authority_reason": "Synthetic workflow fixture.",
+        "product_match_evidence": "Synthetic exact-model fixture.",
+        "market_scope": "global",
+        "model_match": "exact",
+        "model_relevance": "exact_base_model",
+        "score": score,
+        "identity_relation": relation,
+        "identity_verification_evidence": ["model=X100"],
+    }
+
+
+def fetch_result(item, *, status="success"):
+    url = item["url"]
+    return {
+        "source_url": url,
+        "final_url": url,
+        "status": status,
+        "http_status": 200 if status == "success" else 503,
+        "fetch_method": "requests",
+        "content_type": "text/html",
+        "document_type": "html",
+        "html": "<html><body>fixture</body></html>",
+        "text": "fixture",
+        "content": b"fixture",
+        "pdf_text": "",
+        "text_status": "available",
+        "blocked_reason": None,
+        "error": None if status == "success" else "Synthetic fetch failure.",
+        "source_type": item["source_type"],
+        "authority_status": item["authority_status"],
+        "authority_evidence_url": item["authority_evidence_url"],
+        "model_relevance": item["model_relevance"],
+        "identity_relation": item["identity_relation"],
+        "discovery_metadata": dict(item),
+    }
+
+
+def raw(name, value, source, *, source_type="manufacturer", context=None):
+    return RawAttribute(
+        name=name,
+        value=value,
+        unit=None,
+        source_url=source,
+        source_type=source_type,
+        evidence=f"{name}: {value}",
+        extraction_method="html_table",
+        confidence="high",
+        raw_value=value,
+        attribute_kind="product",
+        context=context,
+    )
+
+
+class FixtureServices:
+    def __init__(self, initial, attributes, *, targeted=None, failures=()):
+        self.initial = list(initial)
+        self.attributes = attributes
+        self.targeted = targeted or {}
+        self.failures = set(failures)
+        self.fetch_calls = []
+        self.targeted_calls = []
+
+    def discover_initial(self, _identity, _market):
+        return DiscoveryOutcome(self.initial, "success", ["initial"], ["initial"], [])
+
+    def discover_targeted(self, _identity, query, _market):
+        self.targeted_calls.append(query)
+        items = next(
+            (values for marker, values in self.targeted.items() if marker in query.casefold()),
+            [],
+        )
+        return DiscoveryOutcome(list(items), "success", [query], [query], [])
+
+    def fetch(self, item):
+        self.fetch_calls.append(item["url"])
+        return fetch_result(
+            item,
+            status="error" if item["url"] in self.failures else "success",
+        )
+
+    def extract(self, source):
+        return list(self.attributes.get(source["source_url"], ()))
+
+    def services(self):
+        return WorkflowServices(
+            self.discover_initial,
+            self.discover_targeted,
+            self.fetch,
+            self.extract,
+        )
+
+
+class ProductWorkflowTests(unittest.TestCase):
+    def test_full_initial_pipeline_builds_final_profile(self):
+        url = "https://acme.example/product/X100"
+        item = candidate(url, title="Acme Smartphone X100")
+        fixtures = FixtureServices([item], {
+            url: [
+                raw("Brand", "Acme", url),
+                raw("Model", "X100", url),
+                raw("Battery capacity", "5000 mAh", url),
+                raw("Custom airflow mode", "Quiet", url),
+            ],
+        })
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme Smartphone X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+
+        self.assertEqual(result.category.category_id, "smartphone")
+        self.assertEqual(result.final_profile.by_name["battery_capacity"].status, "Confirmed")
+        discovered = result.final_profile.by_name["custom_airflow_mode"]
+        self.assertEqual(discovered.status, "Confirmed")
+        self.assertTrue(discovered.discovered)
+        self.assertFalse(discovered.expected)
+        self.assertEqual(result.final_profile.identity.brand, "Acme")
+        self.assertEqual(result.final_profile.metadata["workflow_version"], "1.0")
+
+    def test_retailer_authority_is_preserved_and_fact_stays_unresolved(self):
+        url = "https://shop.example/product/X100"
+        item = candidate(
+            url,
+            title="Acme Air fryer X100",
+            source_type="retailer",
+            authority="unknown",
+        )
+        fixtures = FixtureServices([item], {
+            url: [raw("Power", "1800 W", url, source_type="retailer")],
+        })
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme Air fryer X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+        power = result.final_profile.by_name["power"]
+        self.assertEqual(power.status, "Unresolved")
+        self.assertEqual(power.authority_status, "unknown")
+        self.assertEqual(power.supporting_sources[0].source_type, "retailer")
+
+    def test_different_official_values_remain_a_visible_conflict(self):
+        first = "https://one.example/product/X100"
+        second = "https://two.example/product/X100"
+        fixtures = FixtureServices(
+            [
+                candidate(first, title="Acme Air fryer X100", score=100),
+                candidate(second, title="Acme Air fryer X100", score=90),
+            ],
+            {
+                first: [raw("Power", "1800 W", first)],
+                second: [raw("Power", "2000 W", second)],
+            },
+        )
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme Air fryer X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+        power = result.final_profile.by_name["power"]
+        self.assertEqual(power.status, "Conflict")
+        rows = [row for row in profile_rows(result.final_profile) if row["Attribute"] == "power"]
+        self.assertEqual({row["Value"] for row in rows}, {"1800 W", "2000 W"})
+        self.assertEqual(len(rows), 2)
+
+    def test_targeted_search_output_reaches_validation_and_profile(self):
+        initial_url = "https://janome.example/product/Sakura-95"
+        reverse_url = "https://janome.example/manual/Sakura-95"
+        initial = candidate(initial_url, title="Janome sewing machine Sakura 95")
+        reverse = candidate(reverse_url, title="Janome Sakura 95 manual")
+        fixtures = FixtureServices(
+            [initial],
+            {
+                initial_url: [
+                    raw("Machine type", "Electromechanical", initial_url),
+                    raw("Operation count", "15", initial_url),
+                ],
+                reverse_url: [raw("Reverse", "Yes", reverse_url)],
+            },
+            targeted={"reverse": [reverse]},
+        )
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Janome sewing machine Sakura 95",
+                brand="Janome",
+                targeted_config=TargetedSearchConfig(
+                    max_queries_per_field=1,
+                    max_candidates_per_query=1,
+                    max_candidates_per_field=1,
+                ),
+            ),
+            services=fixtures.services(),
+        )
+        reverse_fact = result.final_profile.by_name["reverse"]
+        self.assertEqual(reverse_fact.status, "Confirmed")
+        self.assertEqual(reverse_fact.source, reverse_url)
+        self.assertEqual(reverse_fact.supporting_sources[0].origin, "targeted_search")
+        self.assertGreater(len(fixtures.targeted_calls), 0)
+
+    def test_fetch_cache_is_shared_with_targeted_search(self):
+        url = "https://acme.example/product/X100"
+        initial_item = candidate(
+            url,
+            title="Acme Smartphone X100",
+            source_type="other",
+            authority="unknown",
+        )
+        targeted_item = candidate(url, title="Acme Smartphone X100")
+        fixtures = FixtureServices(
+            [initial_item],
+            {url: [raw("Brand", "Acme", url)]},
+            targeted={"battery capacity": [targeted_item]},
+        )
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme Smartphone X100",
+                brand="Acme",
+                targeted_config=TargetedSearchConfig(
+                    max_queries_per_field=1,
+                    max_candidates_per_query=1,
+                    max_candidates_per_field=1,
+                ),
+            ),
+            services=fixtures.services(),
+        )
+        self.assertEqual(fixtures.fetch_calls.count(url), 1)
+        battery_search = next(
+            field for field in result.targeted_search.fields
+            if field.gap.canonical_name == "battery_capacity"
+        )
+        fetched = battery_search.query_results[0].fetched_sources[0]
+        self.assertEqual(fetched["authority_status"], "verified")
+        self.assertEqual(fetched["source_type"], "manufacturer")
+
+    def test_lower_official_candidate_is_selected_before_source_limit(self):
+        urls = [
+            "https://one.example/product/X100",
+            "https://two.example/product/X100",
+        ]
+        fixtures = FixtureServices(
+            [
+                candidate(
+                    urls[0], source_type="other", authority="unknown", score=95,
+                ),
+                candidate(urls[1], score=170),
+            ],
+            {url: [] for url in urls},
+        )
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme Smartphone X100",
+                brand="Acme",
+                max_initial_sources=1,
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+        self.assertEqual(fixtures.fetch_calls, [urls[1]])
+        self.assertEqual(result.selected_candidates[0]["url"], urls[1])
+        self.assertEqual(len(result.fetched_sources), 1)
+
+    def test_fetch_failure_is_retained_and_not_extracted(self):
+        url = "https://broken.example/product/X100"
+        fixtures = FixtureServices(
+            [candidate(url)],
+            {url: [raw("Power", "1000 W", url)]},
+            failures=[url],
+        )
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme Air fryer X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+        self.assertEqual(len(result.fetch_failures), 1)
+        self.assertEqual(result.raw_attributes, ())
+        self.assertEqual(result.summary["successful_initial_fetch_count"], 0)
+
+    def test_exact_candidate_title_can_classify_after_blocked_fetch(self):
+        url = "https://blocked.example/product/X100"
+        fixtures = FixtureServices(
+            [candidate(url, title="Acme Air fryer X100")],
+            {},
+            failures=[url],
+        )
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+        self.assertEqual(result.category.category_id, "air_fryer")
+        self.assertEqual(result.raw_attributes, ())
+
+    def test_empty_discovery_still_returns_an_unresolved_profile(self):
+        fixtures = FixtureServices([], {})
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme Smartphone X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+        self.assertEqual(result.discovery.search_status, "success")
+        self.assertEqual(result.fetched_sources, ())
+        self.assertTrue(result.final_profile.unresolved)
+        self.assertIn("battery_capacity", profile_to_dict(result.final_profile)["unresolved"])
+
+    def test_from_parts_preserves_named_article_as_identity_evidence(self):
+        request = ProductWorkflowRequest.from_parts("Acme", "X100", "ABC-12345")
+        fixtures = FixtureServices([], {})
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                request.raw_name,
+                brand=request.brand,
+                identity_evidence=request.identity_evidence,
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+        self.assertEqual(result.identity.manufacturer_article, "ABC-12345")
+
+    def test_invalid_request_is_rejected_before_discovery(self):
+        with self.assertRaisesRegex(ValueError, "raw_name is required"):
+            ProductWorkflowRequest("   ")
+        with self.assertRaisesRegex(ValueError, "max_initial_sources"):
+            ProductWorkflowRequest("Acme X100", max_initial_sources=0)
+        with self.assertRaisesRegex(ValueError, "minimum_search_priority"):
+            ProductWorkflowRequest(
+                "Acme X100",
+                minimum_search_priority="urgent",  # type: ignore[arg-type]
+            )
+
+
+if __name__ == "__main__":
+    unittest.main()

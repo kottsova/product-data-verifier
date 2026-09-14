@@ -212,7 +212,7 @@ def _attribute(
         attribute_scope=definition.attribute_scope if definition else inferred_scope,
         value_type=definition.value_type if definition else "unknown",
         unit_family=definition.unit_family if definition else None,
-        discovered=definition is None,
+        discovered=definition is None or definition.scope == "discovered",
     )
 
 

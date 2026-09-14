@@ -84,6 +84,16 @@ CATALOG_SEGMENTS = {
     "products", "search", "shop", "tag", "tags",
 }
 PRODUCT_HINTS = {"item", "p", "product", "products", "sku"}
+SUPPORT_PATH_HINTS = {
+    "document", "documents", "download", "downloads", "manual", "manuals",
+    "productservice", "service", "spec", "specification", "specifications",
+    "support", "supportdetail",
+}
+WEAK_PATH_HINTS = {
+    "compare", "comparison", "forum", "forums", "offersofproduct", "questions",
+    "review", "reviews", "test", "testbericht", "tests", "threads",
+    "preisvergleich",
+}
 TRACKING_PARAMETERS = {"fbclid", "gclid", "srsltid", "yclid"}
 
 SCORE_EXACT_MODEL = 60
@@ -102,6 +112,9 @@ SCORE_MODEL_IN_TITLE = 10
 SCORE_MARKETPLACE = -25
 SCORE_HOMEPAGE = -25
 SCORE_CATALOG = -20
+SCORE_SUPPORT_PAGE = 10
+SCORE_WEAK_PAGE = -20
+SCORE_BRAND_DOMAIN_EXACT = 30
 
 SUPPORTED_MARKETS = {"global", "US", "GB", "DE", "RU"}
 MARKET_GOOGLE_PARAMS = {
@@ -180,14 +193,26 @@ def is_obvious_non_product_url(url: str) -> bool:
     return bool(segments & BLOCKED_PATH_SEGMENTS)
 
 
+def _path_has_hint(segments: Iterable[str], hints: set[str]) -> bool:
+    return any(
+        token in hints
+        for segment in segments
+        for token in re.findall(r"[a-z0-9]+", segment.lower())
+    )
+
+
 def _page_kind(url: str) -> str:
     parsed = urlparse(url)
     segments = [segment.lower() for segment in parsed.path.split("/") if segment]
     if not segments or (len(segments) == 1 and len(segments[0]) <= 3):
         return "homepage"
+    if _path_has_hint(segments, SUPPORT_PATH_HINTS) or parsed.path.lower().endswith(".pdf"):
+        return "support"
     if segments[-1] in CATALOG_SEGMENTS or "search" in parse_qs(parsed.query):
         return "catalog"
-    if set(segments) & PRODUCT_HINTS or normalize_model(segments[-1]):
+    if _path_has_hint(segments, WEAK_PATH_HINTS):
+        return "weak"
+    if set(segments) & PRODUCT_HINTS:
         return "product"
     return "other"
 
@@ -234,8 +259,20 @@ def _is_marketplace_domain(domain: str) -> bool:
 def _is_official_document(url: str) -> bool:
     parsed = urlparse(url)
     path = parsed.path.lower()
-    segments = set(path.split("/"))
-    return path.endswith(".pdf") or bool(segments & {"document", "documents", "download", "downloads", "manual", "manuals", "support"})
+    segments = [segment for segment in path.split("/") if segment]
+    return path.endswith(".pdf") or _path_has_hint(segments, SUPPORT_PATH_HINTS)
+
+
+def _brand_domain_match(brand: str | None, domain: str) -> bool:
+    """Return a ranking-only brand/domain affinity signal.
+
+    This never verifies authority or changes source_type. Requiring an exact
+    model match separately prevents an unrelated same-name corporate homepage
+    from receiving a product-source boost.
+    """
+    brand_key = normalize_model(brand).casefold()
+    domain_label = normalize_model(domain.split(".")[0]).casefold()
+    return len(brand_key) >= 4 and domain_label.startswith(brand_key)
 
 
 def classify_source(domain: str, official_domain: str | None) -> str:
@@ -244,15 +281,17 @@ def classify_source(domain: str, official_domain: str | None) -> str:
     if _is_marketplace_domain(domain):
         return "marketplace"
     if any(word in domain for word in (
-        "bestbuy", "citilink", "currys", "dns-shop", "mediamarkt", "mvideo",
-        "shop", "store", "retail", "technopark",
+        "bestbuy", "citilink", "currys", "digitec", "dns-shop", "galaxus",
+        "kaufland", "mediamarkt", "mvideo", "otto", "shop", "store",
+        "retail", "technopark",
     )):
         return "retailer"
     return "other"
 
 
 def score_candidate(url: str, title: str, source_type: str, authority_status: str,
-                    match: str, model: str, article: str | None) -> int:
+                    match: str, model: str, article: str | None,
+                    brand: str | None = None) -> int:
     score = {"exact": SCORE_EXACT_MODEL, "likely_variant": SCORE_LIKELY_VARIANT,
              "likely": SCORE_LIKELY_MODEL, "mismatch": SCORE_MISMATCH,
              "unknown": SCORE_UNKNOWN_MODEL}[match]
@@ -271,12 +310,15 @@ def score_candidate(url: str, title: str, source_type: str, authority_status: st
         score += SCORE_VERIFIED_AUTHORITY
     kind = _page_kind(url)
     score += {"product": SCORE_PRODUCT_PAGE, "homepage": SCORE_HOMEPAGE,
-              "catalog": SCORE_CATALOG, "other": 0}[kind]
+              "catalog": SCORE_CATALOG, "support": SCORE_SUPPORT_PAGE,
+              "weak": SCORE_WEAK_PAGE, "other": 0}[kind]
     expected = normalize_model(model)
     if expected and expected in normalize_model(title):
         score += SCORE_MODEL_IN_TITLE
     if expected and expected in normalize_model(urlparse(url).path):
         score += SCORE_MODEL_IN_URL
+    if match in {"exact", "likely_variant"} and _brand_domain_match(brand, _host(url)):
+        score += SCORE_BRAND_DOMAIN_EXACT
     return score
 
 
@@ -341,7 +383,9 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
             "market_scope": "unknown",
             "model_match": match,
             "model_relevance": _model_relevance(match),
-            "score": score_candidate(url, title, source_type, authority_status, match, model, article),
+            "score": score_candidate(
+                url, title, source_type, authority_status, match, model, article, brand,
+            ),
             "identity_relation": "unknown",
             "identity_verification_evidence": [],
         }
@@ -754,7 +798,7 @@ def _annotate_identity_candidates(
             )
             candidate["score"] = score_candidate(
                 candidate["url"], candidate["title"], candidate["source_type"],
-                candidate["authority_status"], "exact", model, article,
+                candidate["authority_status"], "exact", model, article, identity.brand,
             )
             candidate["model_relevance"] = "exact_base_model"
         candidate["identity_relation"] = _source_identity_relation(identity, candidate)
