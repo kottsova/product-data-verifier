@@ -9,8 +9,17 @@ from typing import Any, Iterable
 
 from bs4 import BeautifulSoup, Tag
 
-METHOD_PRIORITY = {"json_ld": 7, "html_table": 6, "definition_list": 5,
-                   "label_value": 4, "spec_block": 3, "pdf_text": 2, "plain_text": 1}
+METHOD_PRIORITY = {
+    "json_ld": 9,
+    "embedded_json": 8,
+    "structured_data": 7,
+    "html_table": 6,
+    "definition_list": 5,
+    "label_value": 4,
+    "spec_block": 3,
+    "pdf_text": 2,
+    "plain_text": 1,
+}
 IDENTITY_FIELD_PATTERN = re.compile(
     r"^(?:sku|mpn|gtin\d*|ean(?:\s*code)?|upc|article(?:\s*(?:no|number|code))?|"
     r"model(?:\s*(?:no|number|code))?|brand|manufacturer|product\s*(?:id|code)|"
@@ -49,6 +58,28 @@ FACTUAL_JSON_FIELDS = ("sku", "mpn", "gtin", "gtin8", "gtin12", "gtin13", "gtin1
                        "productID", "model", "brand", "color", "material", "weight",
                        "width", "height", "depth", "size", "category")
 OFFER_FIELDS = ("price", "priceCurrency", "availability", "itemCondition")
+PRODUCT_STATE_KEYS = re.compile(
+    r"^(?:product|productdata|productdetail|productdetails|productinfo|pdp)$",
+    re.IGNORECASE,
+)
+SPECIFICATION_KEYS = re.compile(
+    r"^(?:spec|specs|specification|specifications|technicalspecifications|"
+    r"attributes|properties|features)$",
+    re.IGNORECASE,
+)
+STATE_SCRIPT_ID_PATTERN = re.compile(
+    r"^(?:__NEXT_DATA__|__NUXT_DATA__|__INITIAL_STATE__|__APOLLO_STATE__)$",
+    re.IGNORECASE,
+)
+STATE_ASSIGNMENT_PATTERN = re.compile(
+    r"^(?:(?:window\.)?(?:__NUXT__|__INITIAL_STATE__|__APOLLO_STATE__)\s*=\s*)"
+    r"(?P<payload>[\[{].*[\]}])\s*;?\s*$",
+    re.DOTALL,
+)
+STRUCTURED_SPEC_REGION_PATTERN = re.compile(
+    r"spec|feature|attribute|property|detail|parameter|characteristic",
+    re.IGNORECASE,
+)
 SKIP_LABELS = {
     "home", "menu", "more", "next", "previous", "read more", "share", "search",
     "password", "compare", "payment options", "comments / reviews", "review this product",
@@ -295,6 +326,296 @@ def _extract_json_ld(soup: BeautifulSoup, source_url: str, source_type: str | No
                                           attribute_kind="commerce")
                         if item:
                             found.append(item)
+    return found
+
+
+def _state_key(value: Any) -> str:
+    return re.sub(r"[^a-z0-9]", "", _clean(value).casefold())
+
+
+def _state_scalar(value: Any) -> str | None:
+    if value is None or isinstance(value, (dict, list)):
+        return None
+    text = _clean(str(value))
+    return text or None
+
+
+def _walk_json_paths(
+    value: Any,
+    path: tuple[str, ...] = (),
+    depth: int = 0,
+) -> Iterable[tuple[tuple[str, ...], dict[str, Any]]]:
+    if depth > 12:
+        return
+    if isinstance(value, dict):
+        yield path, value
+        for key, child in value.items():
+            yield from _walk_json_paths(child, (*path, _clean(key)), depth + 1)
+    elif isinstance(value, list):
+        for child in value[:2000]:
+            yield from _walk_json_paths(child, path, depth + 1)
+
+
+def _dict_value(node: dict[str, Any], *names: str) -> Any:
+    wanted = {_state_key(name) for name in names}
+    for key, value in node.items():
+        if _state_key(key) in wanted:
+            return value
+    return None
+
+
+def _spec_pair(node: dict[str, Any]) -> tuple[str, str, str | None] | None:
+    name = _dict_value(node, "name", "label", "key", "propertyName", "propertyID")
+    raw_value = _dict_value(node, "value", "displayValue", "text")
+    name_text = _state_scalar(name)
+    if not name_text:
+        return None
+    if isinstance(raw_value, dict):
+        raw, unit = _json_value(raw_value)
+        return (name_text, raw, unit) if raw else None
+    if isinstance(raw_value, list):
+        scalar_values = [_state_scalar(item) for item in raw_value]
+        if not scalar_values or any(item is None for item in scalar_values):
+            return None
+        return name_text, ", ".join(item for item in scalar_values if item), None
+    raw = _state_scalar(raw_value)
+    unit = _state_scalar(_dict_value(node, "unit", "unitText", "unitCode"))
+    return (name_text, raw, unit) if raw else None
+
+
+def _flatten_spec_state(
+    value: Any,
+    source_url: str,
+    source_type: str | None,
+    *,
+    method: str,
+    context: tuple[str, ...] = (),
+    depth: int = 0,
+) -> list[RawAttribute]:
+    if depth > 10:
+        return []
+    found: list[RawAttribute] = []
+    if isinstance(value, list):
+        for child in value[:1000]:
+            found.extend(_flatten_spec_state(
+                child, source_url, source_type, method=method,
+                context=context, depth=depth + 1,
+            ))
+        return found
+    if not isinstance(value, dict):
+        return found
+
+    pair = _spec_pair(value)
+    if pair:
+        name, raw, unit = pair
+        context_text = " | ".join(context) or None
+        item = _attribute(
+            name, raw, source_url, source_type, method, "high",
+            evidence=_evidence(name, raw, f"{method}: "),
+            explicit_unit=unit, generic=True, attribute_kind="product",
+            context=context_text,
+        )
+        return [item] if item else []
+
+    child_keys = {
+        "items", "values", "children", "groups", "sections", "entries",
+        "specs", "specifications", "attributes", "properties", "features",
+    }
+    has_children = any(_state_key(key) in child_keys for key in value)
+    group = _state_scalar(_dict_value(value, "group", "section", "title", "category"))
+    if group is None and has_children:
+        group = _state_scalar(_dict_value(value, "name", "label"))
+    next_context = (*context, group) if group and group not in context else context
+    metadata_keys = {
+        "id", "type", "typename", "icon", "image", "url", "href", "slug",
+        "sort", "sortorder", "order", "description", "disclaimer", "footnote",
+        "name", "label", "group", "section", "title", "category",
+    }
+    for key, child in value.items():
+        normalized = _state_key(key)
+        if normalized in metadata_keys:
+            continue
+        scalar = _state_scalar(child)
+        if scalar is not None:
+            item = _attribute(
+                key, scalar, source_url, source_type, method, "high",
+                evidence=_evidence(key, scalar, f"{method}: "),
+                generic=True, attribute_kind="product",
+                context=" | ".join(next_context) or None,
+            )
+            if item:
+                found.append(item)
+            continue
+        child_context = next_context
+        if normalized not in child_keys and not re.fullmatch(r"\d+", normalized):
+            child_context = (*next_context, _clean(key))
+        found.extend(_flatten_spec_state(
+            child, source_url, source_type, method=method,
+            context=child_context, depth=depth + 1,
+        ))
+    return found
+
+
+def _product_state_attributes(
+    payload: Any,
+    source_url: str,
+    source_type: str | None,
+) -> list[RawAttribute]:
+    found: list[RawAttribute] = []
+    visited: set[int] = set()
+    identity_fields = {
+        "brand": "brand",
+        "manufacturer": "manufacturer",
+        "model": "model",
+        "sku": "sku",
+        "mpn": "mpn",
+        "gtin": "gtin",
+        "gtin8": "gtin8",
+        "gtin12": "gtin12",
+        "gtin13": "gtin13",
+        "gtin14": "gtin14",
+        "productid": "productID",
+        "producttype": "category",
+        "category": "category",
+        "color": "color",
+    }
+    for path, node in _walk_json_paths(payload):
+        path_key = _state_key(path[-1]) if path else ""
+        explicit_product = "product" in _types(node)
+        product_scope = explicit_product or bool(PRODUCT_STATE_KEYS.fullmatch(path_key))
+        spec_keys = [key for key in node if SPECIFICATION_KEYS.fullmatch(_state_key(key))]
+        if not product_scope or (not explicit_product and not spec_keys):
+            continue
+        if id(node) in visited:
+            continue
+        visited.add(id(node))
+
+        for key, value in node.items():
+            label = identity_fields.get(_state_key(key))
+            if label is None:
+                continue
+            raw, unit = _json_value(value)
+            item = _attribute(
+                label, raw, source_url, source_type, "embedded_json", "high",
+                evidence=_evidence(label, raw, "product_state: "),
+                explicit_unit=unit,
+                attribute_kind=(
+                    "identity" if IDENTITY_FIELD_PATTERN.search(label) else "product"
+                ),
+            )
+            if item:
+                found.append(item)
+        for key in spec_keys:
+            found.extend(_flatten_spec_state(
+                node[key], source_url, source_type,
+                method="embedded_json",
+            ))
+    return found
+
+
+def _script_json_payload(script: Tag) -> Any | None:
+    script_type = _clean(script.get("type")).casefold()
+    if script_type == "application/ld+json":
+        return None
+    raw = script.string or script.get_text() or ""
+    if not raw or len(raw) > 2_000_000:
+        return None
+    stripped = raw.strip()
+    script_id = _clean(script.get("id"))
+    if stripped.startswith(("{", "[")) and (
+        script_type in {"application/json", "application/state+json"}
+        or STATE_SCRIPT_ID_PATTERN.fullmatch(script_id)
+        or not script_type
+    ):
+        candidate = stripped
+    else:
+        match = STATE_ASSIGNMENT_PATTERN.fullmatch(stripped)
+        if not match:
+            return None
+        candidate = match.group("payload")
+    try:
+        return json.loads(candidate)
+    except (json.JSONDecodeError, TypeError, RecursionError):
+        return None
+
+
+def _extract_embedded_product_state(
+    soup: BeautifulSoup,
+    source_url: str,
+    source_type: str | None,
+) -> list[RawAttribute]:
+    found: list[RawAttribute] = []
+    for script in soup.find_all("script"):
+        payload = _script_json_payload(script)
+        if payload is not None:
+            found.extend(_product_state_attributes(payload, source_url, source_type))
+    for tag in soup.find_all(True):
+        for attr_name, raw in tag.attrs.items():
+            if not attr_name.startswith("data-") or not re.search(
+                r"product|spec|attribute|feature", attr_name, re.IGNORECASE,
+            ):
+                continue
+            if not isinstance(raw, str) or not raw.lstrip().startswith(("{", "[")):
+                continue
+            try:
+                payload = json.loads(raw)
+            except (json.JSONDecodeError, TypeError, RecursionError):
+                continue
+            if re.search(r"spec|attribute|feature", attr_name, re.IGNORECASE):
+                found.extend(_flatten_spec_state(
+                    payload, source_url, source_type, method="embedded_json",
+                ))
+            else:
+                found.extend(_product_state_attributes(
+                    {"product": payload}, source_url, source_type,
+                ))
+    return found
+
+
+def _extract_structured_data_values(
+    soup: BeautifulSoup,
+    source_url: str,
+    source_type: str | None,
+) -> list[RawAttribute]:
+    """Extract labelled data-value facts only inside proven specification rows."""
+    found: list[RawAttribute] = []
+    for value_node in soup.find_all(attrs={"data-value": True}):
+        raw = _clean(value_node.get("data-value"))
+        data_class = _clean(value_node.get("data-class")).casefold()
+        if not raw or data_class in {"p4", "note", "footnote", "disclaimer"}:
+            continue
+        container: Tag | None = value_node
+        label_node: Tag | None = None
+        for _ in range(7):
+            if not isinstance(container, Tag):
+                break
+            classes = container.get("class") or []
+            if isinstance(classes, str):
+                classes = [classes]
+            signals = " ".join([
+                _clean(container.get("id")),
+                *(_clean(value) for value in classes),
+                _clean(container.get("data-section")),
+                _clean(container.get("data-group")),
+            ])
+            candidate_label = container.find(
+                ["h2", "h3", "h4", "dt", "legend"], recursive=True,
+            )
+            if STRUCTURED_SPEC_REGION_PATTERN.search(signals) and candidate_label:
+                label_node = candidate_label
+                break
+            container = container.parent if isinstance(container.parent, Tag) else None
+        if container is None or label_node is None or _inside_ui_region(container):
+            continue
+        name = _clean(label_node.get_text(" ", strip=True))
+        item = _attribute(
+            name, raw, source_url, source_type, "structured_data", "high",
+            evidence=_evidence(name, raw, "data-value: "),
+            generic=True, attribute_kind="product",
+            context=_context_for_tag(container, name),
+        )
+        if item:
+            found.append(item)
     return found
 
 
@@ -673,6 +994,8 @@ def extract_attributes(fetch_result: dict[str, Any]) -> list[RawAttribute]:
     if document_type == "html" and fetch_result.get("html"):
         soup = BeautifulSoup(fetch_result["html"], "html.parser")
         attributes.extend(_extract_json_ld(soup, source_url, source_type))
+        attributes.extend(_extract_embedded_product_state(soup, source_url, source_type))
+        attributes.extend(_extract_structured_data_values(soup, source_url, source_type))
         attributes.extend(_extract_tables(soup, source_url, source_type))
         attributes.extend(_extract_definitions(soup, source_url, source_type))
         attributes.extend(_extract_label_values(soup, source_url, source_type))

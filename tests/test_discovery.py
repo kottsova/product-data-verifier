@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from core.discovery import (
     ProviderQueryOutcome,
@@ -516,6 +516,56 @@ class SearchFallbackTests(unittest.TestCase):
         ), patch.object(session, "_playwright_search", return_value=[]) as fallback:
             session.search("model")
             fallback.assert_called_once_with("model")
+
+    def test_google_transient_resources_are_closed_and_reset(self) -> None:
+        session = GoogleSearchSession()
+        context = MagicMock()
+        browser = MagicMock()
+        playwright = MagicMock()
+        session._context = context
+        session._browser = browser
+        session._playwright = playwright
+        session._page = object()
+
+        session.release_transient_resources()
+
+        context.close.assert_called_once_with()
+        browser.close.assert_called_once_with()
+        playwright.stop.assert_called_once_with()
+        self.assertIsNone(session._page)
+        self.assertIsNone(session._context)
+        self.assertIsNone(session._browser)
+        self.assertIsNone(session._playwright)
+
+    def test_google_cleanup_finishes_remaining_resources_after_close_error(self) -> None:
+        session = GoogleSearchSession()
+        context = MagicMock()
+        context.close.side_effect = RuntimeError("context close failed")
+        browser = MagicMock()
+        playwright = MagicMock()
+        session._context = context
+        session._browser = browser
+        session._playwright = playwright
+        session._page = object()
+
+        with self.assertRaisesRegex(RuntimeError, "context close failed"):
+            session.release_transient_resources()
+
+        browser.close.assert_called_once_with()
+        playwright.stop.assert_called_once_with()
+        self.assertIsNone(session._page)
+        self.assertIsNone(session._context)
+        self.assertIsNone(session._browser)
+        self.assertIsNone(session._playwright)
+
+    def test_resilient_session_releases_managed_provider_resources(self) -> None:
+        provider = self.Provider("primary", [])
+        provider.release_transient_resources = MagicMock()
+        session = ResilientSearchSession(providers=(provider,))
+
+        session.release_transient_resources()
+
+        provider.release_transient_resources.assert_called_once_with()
 
     def test_bot_check_is_structured_blocked_not_empty_success(self) -> None:
         clear_official_domain_cache()

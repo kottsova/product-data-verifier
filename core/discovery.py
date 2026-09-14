@@ -687,12 +687,27 @@ class GoogleSearchSession:
         return self
 
     def __exit__(self, *_: object) -> None:
-        if self._context is not None:
-            self._context.close()
-        if self._browser is not None:
-            self._browser.close()
-        if self._playwright is not None:
-            self._playwright.stop()
+        self.release_transient_resources()
+
+    def release_transient_resources(self) -> None:
+        """Close the lazy browser lifecycle while keeping provider state reusable."""
+        context = self._context
+        browser = self._browser
+        playwright = self._playwright
+        self._page = None
+        self._context = None
+        self._browser = None
+        self._playwright = None
+        try:
+            if context is not None:
+                context.close()
+        finally:
+            try:
+                if browser is not None:
+                    browser.close()
+            finally:
+                if playwright is not None:
+                    playwright.stop()
 
     def search(self, query: str) -> list[SearchResult]:
         results, html = _http_google_search_for_market(query, self.market)
@@ -1029,6 +1044,22 @@ class ResilientSearchSession:
             exit_provider = getattr(provider, "__exit__", None)
             if exit_provider is not None:
                 exit_provider(*args)
+
+    def release_transient_resources(self) -> None:
+        """Release provider browsers between discovery and document fetching."""
+        errors: list[Exception] = []
+        for provider in reversed(self.providers):
+            release = getattr(provider, "release_transient_resources", None)
+            if release is None:
+                continue
+            try:
+                release()
+            except Exception as error:
+                errors.append(error)
+        if errors:
+            raise RuntimeError(
+                f"Search provider cleanup failed: {errors[0]}"
+            ) from errors[0]
 
     def search_with_status(self, query: str) -> ProviderQueryOutcome:
         attempts: list[ProviderAttempt] = []

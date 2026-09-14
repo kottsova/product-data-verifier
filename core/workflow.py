@@ -379,6 +379,40 @@ def _run_product_workflow_with_services(
     )
 
 
+def _discover_initial_with_released_browser(
+    search: ResilientSearchSession,
+    identity: ProductIdentity,
+    market: str,
+) -> DiscoveryOutcome:
+    """Finish the discovery browser lifecycle before document fetch begins."""
+    try:
+        return discover_identity_with_status(
+            identity,
+            market,
+            searcher=search.search_with_status,
+        )
+    finally:
+        search.release_transient_resources()
+
+
+def _discover_targeted_with_released_browser(
+    search: ResilientSearchSession,
+    identity: ProductIdentity,
+    query: str,
+    market: str,
+) -> DiscoveryOutcome:
+    """Release a targeted discovery browser before its candidate is fetched."""
+    try:
+        return discover_identity_query_with_status(
+            identity,
+            query,
+            market,
+            searcher=search.search_with_status,
+        )
+    finally:
+        search.release_transient_resources()
+
+
 def run_product_workflow(
     request: ProductWorkflowRequest,
     *,
@@ -390,17 +424,12 @@ def run_product_workflow(
 
     with ResilientSearchSession(request.market) as search:
         live_services = WorkflowServices(
-            discover_initial=lambda identity, market: discover_identity_with_status(
-                identity,
-                market,
-                searcher=search.search_with_status,
+            discover_initial=lambda identity, market: _discover_initial_with_released_browser(
+                search, identity, market,
             ),
             discover_targeted=lambda identity, query, market: (
-                discover_identity_query_with_status(
-                    identity,
-                    query,
-                    market,
-                    searcher=search.search_with_status,
+                _discover_targeted_with_released_browser(
+                    search, identity, query, market,
                 )
             ),
         )

@@ -1,6 +1,7 @@
 """Deterministic Stage 8 orchestration tests with no live network access."""
 
 import unittest
+from unittest.mock import MagicMock, patch
 
 from core.discovery import DiscoveryOutcome, ProviderAttempt
 from core.export import profile_rows, profile_to_dict
@@ -9,6 +10,8 @@ from core.targeted_search import TargetedSearchConfig
 from core.workflow import (
     ProductWorkflowRequest,
     WorkflowServices,
+    _discover_initial_with_released_browser,
+    _discover_targeted_with_released_browser,
     run_product_workflow,
 )
 
@@ -448,6 +451,88 @@ class ProductWorkflowTests(unittest.TestCase):
         self.assertTrue(
             result.final_profile.metadata["initial_provider_attempts"][1]["is_fallback"]
         )
+
+
+class WorkflowPlaywrightLifecycleTests(unittest.TestCase):
+    def test_initial_discovery_releases_browser_before_fetch_boundary(self):
+        events = []
+
+        class SearchSession:
+            active = False
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                events.append("session_exit")
+
+            def search_with_status(self, query):
+                self.active = True
+                events.append(f"search:{query}")
+                return []
+
+            def release_transient_resources(self):
+                events.append("release")
+                self.active = False
+
+        search = SearchSession()
+        sentinel = object()
+
+        def initial_discovery(_identity, _market, *, searcher):
+            searcher("initial")
+            return DiscoveryOutcome()
+
+        def targeted_discovery(_identity, query, _market, *, searcher):
+            searcher(query)
+            return DiscoveryOutcome()
+
+        def workflow_runner(request, services):
+            services.discover_initial(object(), request.market)
+            events.append("initial_fetch")
+            self.assertFalse(search.active)
+            services.discover_targeted(object(), "targeted", request.market)
+            events.append("targeted_fetch")
+            self.assertFalse(search.active)
+            return sentinel
+
+        with patch("core.workflow.ResilientSearchSession", return_value=search), \
+                patch("core.workflow.discover_identity_with_status", side_effect=initial_discovery), \
+                patch("core.workflow.discover_identity_query_with_status", side_effect=targeted_discovery), \
+                patch("core.workflow._run_product_workflow_with_services", side_effect=workflow_runner):
+            result = run_product_workflow(ProductWorkflowRequest("Acme X100"))
+
+        self.assertIs(result, sentinel)
+        self.assertEqual(events, [
+            "search:initial", "release", "initial_fetch",
+            "search:targeted", "release", "targeted_fetch", "session_exit",
+        ])
+
+    def test_cleanup_runs_for_structured_blocked_discovery(self):
+        search = MagicMock()
+        blocked = DiscoveryOutcome(search_status="blocked")
+        with patch(
+            "core.workflow.discover_identity_with_status",
+            return_value=blocked,
+        ):
+            result = _discover_initial_with_released_browser(
+                search, object(), "global",
+            )
+
+        self.assertIs(result, blocked)
+        search.release_transient_resources.assert_called_once_with()
+
+    def test_cleanup_runs_when_discovery_raises(self):
+        search = MagicMock()
+        with patch(
+            "core.workflow.discover_identity_query_with_status",
+            side_effect=RuntimeError("discovery error"),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "discovery error"):
+                _discover_targeted_with_released_browser(
+                    search, object(), "query", "global",
+                )
+
+        search.release_transient_resources.assert_called_once_with()
 
 
 if __name__ == "__main__":

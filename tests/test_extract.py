@@ -1,6 +1,7 @@
 import json
 import unittest
 
+from core.category import detect_category
 from core.extract import extract_attributes, split_value_unit
 
 
@@ -53,6 +54,161 @@ class ExtractTests(unittest.TestCase):
         self.assertEqual(by_name["Power"].source_type, "manufacturer")
         self.assertNotIn("description", by_name)
         self.assertIn("price", by_name)
+
+    def test_json_ld_product_preserves_provenance(self):
+        payload = {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "brand": {"@type": "Brand", "name": "Acme"},
+            "model": "Phone 12",
+        }
+        attrs = extract_attributes(fetched(
+            html=f"<script type='application/ld+json'>{json.dumps(payload)}</script>",
+            source_type="manufacturer",
+        ))
+        model = next(item for item in attrs if item.name == "model")
+        self.assertEqual(model.source_url, "https://example.com/product")
+        self.assertEqual(model.source_type, "manufacturer")
+        self.assertEqual(model.extraction_method, "json_ld")
+        self.assertIn("Product:", model.evidence)
+
+    def test_next_data_product_state_and_nested_specifications(self):
+        payload = {
+            "props": {
+                "pageProps": {
+                    "product": {
+                        "brand": {"name": "Acme"},
+                        "model": "Phone 12",
+                        "category": "Smartphone",
+                        "specifications": {
+                            "Display": {
+                                "Size": "6.7 inches",
+                                "Resolution": "1080 x 2400",
+                            },
+                            "Battery": [
+                                {"name": "Capacity", "value": "5000 mAh"},
+                                {"name": "Wired Charging", "value": "45 W"},
+                            ],
+                        },
+                    },
+                },
+            },
+        }
+        html = (
+            "<script id='__NEXT_DATA__' type='application/json'>"
+            f"{json.dumps(payload)}</script>"
+        )
+        attrs = extract_attributes(fetched(html=html, source_type="manufacturer"))
+        by_pair = {(item.name, item.raw_value): item for item in attrs}
+
+        self.assertIn(("brand", "Acme"), by_pair)
+        self.assertIn(("model", "Phone 12"), by_pair)
+        self.assertIn(("Size", "6.7 inches"), by_pair)
+        self.assertIn(("Resolution", "1080 x 2400"), by_pair)
+        self.assertIn(("Capacity", "5000 mAh"), by_pair)
+        self.assertEqual(by_pair[("Size", "6.7 inches")].context, "Display")
+        self.assertEqual(by_pair[("Capacity", "5000 mAh")].context, "Battery")
+        self.assertTrue(all(
+            item.extraction_method == "embedded_json" for item in by_pair.values()
+        ))
+        self.assertTrue(all(
+            item.source_url == "https://example.com/product" for item in by_pair.values()
+        ))
+
+    def test_strict_nuxt_assignment_product_state(self):
+        payload = {
+            "data": [{
+                "product": {
+                    "model": "Phone 12",
+                    "specs": {"Processor": {"CPU Model": "Example 9000"}},
+                },
+            }],
+        }
+        html = f"<script>window.__NUXT__ = {json.dumps(payload)};</script>"
+        attrs = extract_attributes(fetched(html=html))
+        pairs = {(item.name, item.raw_value, item.context) for item in attrs}
+        self.assertIn(("model", "Phone 12", None), pairs)
+        self.assertIn(("CPU Model", "Example 9000", "Processor"), pairs)
+
+    def test_irrelevant_embedded_json_is_not_attributes(self):
+        payload = {
+            "analytics": {"page": "support", "memory": "session"},
+            "user": {"name": "Visitor", "preferences": {"color": "blue"}},
+            "navigation": {"items": ["Phones", "Laptops"]},
+        }
+        html = f"<script type='application/json'>{json.dumps(payload)}</script>"
+        self.assertEqual(extract_attributes(fetched(html=html)), [])
+
+    def test_data_value_specs_are_extracted_without_rendered_text(self):
+        html = """<section class='product-specifications'>
+          <h2>Display</h2>
+          <div class='product-spec-item'>
+            <h3>Size</h3>
+            <div class='spec-description'>
+              <div data-class='p2' data-value='6.77 inches'></div>
+              <div data-class='p4' data-value='Measurement disclaimer'></div>
+            </div>
+          </div>
+          <div class='product-spec-item'>
+            <h3>Resolution</h3>
+            <div data-value='1080 x 2392'></div>
+          </div>
+        </section>"""
+        attrs = extract_attributes(fetched(html=html, source_type="manufacturer"))
+        by_name = {item.name: item for item in attrs}
+        self.assertEqual(set(by_name), {"Size", "Resolution"})
+        self.assertEqual(by_name["Size"].raw_value, "6.77 inches")
+        self.assertEqual(by_name["Size"].context, "Display")
+        self.assertEqual(by_name["Size"].extraction_method, "structured_data")
+        self.assertEqual(by_name["Size"].source_type, "manufacturer")
+        self.assertIn("data-value:", by_name["Size"].evidence)
+
+    def test_data_attribute_json_requires_spec_or_product_scope(self):
+        specs = {"Battery": {"Capacity": "5000 mAh"}}
+        product = {
+            "model": "Phone 12",
+            "specifications": {"Processor": {"CPU Model": "Example 9000"}},
+        }
+        irrelevant = {"preferences": {"Color": "Blue"}}
+        html = (
+            f"<div data-specifications='{json.dumps(specs)}'></div>"
+            f"<div data-product='{json.dumps(product)}'></div>"
+            f"<div data-config='{json.dumps(irrelevant)}'></div>"
+        )
+        attrs = extract_attributes(fetched(html=html))
+        self.assertEqual(
+            {(item.name, item.raw_value, item.context) for item in attrs},
+            {
+                ("Capacity", "5000 mAh", "Battery"),
+                ("model", "Phone 12", None),
+                ("CPU Model", "Example 9000", "Processor"),
+            },
+        )
+
+    def test_structured_smartphone_facts_drive_existing_category_detector(self):
+        payload = {
+            "pageProps": {
+                "product": {
+                    "model": "Phone 12",
+                    "specifications": {
+                        "Processor": {
+                            "CPU Model": "Example 9000",
+                            "GPU": "Example G1",
+                        },
+                        "Camera": {"Rear Camera": "108 MP"},
+                    },
+                },
+            },
+        }
+        attrs = extract_attributes(fetched(
+            html=(
+                "<script id='__NEXT_DATA__' type='application/json'>"
+                f"{json.dumps(payload)}</script>"
+            ),
+        ))
+        category = detect_category(attributes=attrs)
+        self.assertEqual(category.category_id, "smartphone")
+        self.assertEqual(category.source, "extracted_attributes")
 
     def test_html_table_keeps_distinct_dimensions_and_weights(self):
         html = """<table>
