@@ -1,6 +1,12 @@
 import unittest
 
-from core.discovery import DiscoveryIssue, DiscoveryOutcome, ProviderAttempt
+from core.discovery import (
+    DiscoveryIssue,
+    DiscoveryOutcome,
+    ProviderAttempt,
+    clear_official_domain_cache,
+    discover_identity_query_with_status,
+)
 from core.extract import RawAttribute
 from core.gaps import analyze_gaps
 from core.identity import ProductIdentity
@@ -253,6 +259,50 @@ class TargetedSearchTests(unittest.TestCase):
         self.assertEqual(len(discovery_calls), 1)
         self.assertEqual(result.fields[0].stop_reason, "strong_official_evidence")
         self.assertTrue(result.fields[0].useful_evidence_found)
+
+    def test_exact_compound_model_candidate_survives_tight_candidate_limit(self):
+        """A real (non-synthetic) discovery outcome must rank a genuine exact
+        multi-word-model candidate ahead of same-brand partial-match noise,
+        so a tight per-query candidate cap does not starve it out before fetch.
+        """
+        clear_official_domain_cache()
+        product_identity = ProductIdentity(
+            brand="Dreame", raw_name="Dreame G12 Pro HHR32A",
+            base_model="G12 Pro HHR32A", commercial_model="G12 Pro HHR32A",
+            confidence="high",
+        )
+        analysis = analyze_gaps(
+            "wet_dry_vacuum", map_attributes([], category="wet_dry_vacuum"),
+            identity=product_identity,
+            schema=[AttributeDefinition("clean_water_tank", priority="high")],
+        )
+        plan = build_targeted_search_plan(
+            analysis, product_identity,
+            config=TargetedSearchConfig(max_candidates_per_query=2, max_candidates_per_field=2),
+        )
+
+        noise = [
+            (f"https://retailer{index}.example/dreame-g12-pro", "Dreame G12 Pro wet dry vacuum")
+            for index in range(6)
+        ]
+        exact_url = "https://shop.example/dreame-g12-pro-wet-dry-hhr32a"
+        exact = (exact_url, "Dreame G12 Pro Wet & Dry (HHR32A)")
+
+        def discovery(identity_arg, query):
+            return discover_identity_query_with_status(
+                identity_arg, query, searcher=lambda _query: noise + [exact],
+            )
+
+        fetched_urls = []
+
+        def fetcher(candidate_row):
+            fetched_urls.append(candidate_row["url"])
+            return fetched(candidate_row["url"])
+
+        run_targeted_search(
+            plan, analysis, product_identity, discovery=discovery, fetcher=fetcher,
+        )
+        self.assertIn(exact_url, fetched_urls)
 
 
 if __name__ == "__main__":

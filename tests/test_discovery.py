@@ -56,6 +56,20 @@ class MatchTests(unittest.TestCase):
     def test_mismatch(self) -> None:
         self.assertEqual(model_match("PUE611BB5E", "PUE611BB5F"), "mismatch")
 
+    def test_compound_model_match_recognizes_multiword_identity(self) -> None:
+        model = "G12 Pro HHR32A"
+        self.assertEqual(
+            model_match(model, "Dreame G12 Pro HHR32A wet and dry vacuum"), "exact")
+        self.assertEqual(model_match(model, "Dreame HHR32A cordless vacuum"), "exact")
+        self.assertEqual(
+            model_match(model, "Dreame G12 Pro wet and dry vacuum"), "likely")
+        self.assertEqual(model_match(model, "Dreame X30 Ultra"), "unknown")
+
+    def test_compound_model_match_single_word_model_is_unaffected(self) -> None:
+        # len(parts) < 2 for a single-word model, so the compound fallback
+        # must never fire and existing single-word behavior stays identical.
+        self.assertEqual(model_match("PUE611BB5E", "unrelated content"), "unknown")
+
 
 class DiscoveryTests(unittest.TestCase):
     def test_url_deduplication(self) -> None:
@@ -419,6 +433,57 @@ class DiscoveryTests(unittest.TestCase):
         )
 
         self.assertEqual(outcome.candidates[0]["relevance_relation"], "weak")
+
+    def test_compound_model_exact_candidate_outranks_same_brand_wrong_model(self) -> None:
+        candidates = rank_candidates([
+            (
+                "https://shop.example/dreame-g12-pro-wet-dry-hhr32a",
+                "Dreame G12 Pro Wet & Dry (HHR32A)",
+            ),
+            ("https://brand.example/products/dreame-x30-ultra", "Dreame X30 Ultra"),
+        ], "Dreame", "G12 Pro HHR32A")
+        exact = next(item for item in candidates if "hhr32a" in item["url"])
+        wrong = next(item for item in candidates if "x30-ultra" in item["url"])
+        self.assertEqual(exact["model_match"], "exact")
+        self.assertGreater(exact["score"], wrong["score"])
+        self.assertGreater(exact["score"], 0)
+
+    def test_article_mpn_exact_candidate_outranks_same_brand_wrong_model(self) -> None:
+        candidates = rank_candidates([
+            ("https://shop.example/dreame-hhr32a-wet-dry", "Dreame HHR32A Wet & Dry Vacuum"),
+            ("https://brand.example/products/dreame-x30-ultra", "Dreame X30 Ultra"),
+        ], "Dreame", "G12 Pro HHR32A", article="HHR32A")
+        exact = next(item for item in candidates if "hhr32a" in item["url"])
+        wrong = next(item for item in candidates if "x30-ultra" in item["url"])
+        self.assertGreater(exact["score"], wrong["score"])
+        self.assertGreater(exact["score"], 0)
+
+    def test_compound_model_scoring_does_not_promote_authority_or_source_type(self) -> None:
+        row = rank_candidates([
+            ("https://example.test/dreame-g12-pro-hhr32a", "Dreame G12 Pro HHR32A"),
+        ], "Dreame", "G12 Pro HHR32A")[0]
+        self.assertEqual(row["model_match"], "exact")
+        self.assertEqual(row["source_type"], "other")
+        self.assertEqual(row["authority_status"], "unknown")
+
+    def test_compound_model_exact_candidate_ranks_first_among_partial_noise(self) -> None:
+        clear_official_domain_cache()
+        partial_matches = [
+            (f"https://retailer{index}.example/dreame-g12-pro", "Dreame G12 Pro wet dry vacuum")
+            for index in range(6)
+        ]
+        results = partial_matches + [(
+            "https://shop.example/dreame-g12-pro-wet-dry-hhr32a",
+            "Dreame G12 Pro Wet & Dry (HHR32A)",
+        )]
+        outcome = discover_with_status(
+            "Dreame", "G12 Pro HHR32A", searcher=lambda _query: results,
+        )
+        self.assertEqual(
+            outcome.candidates[0]["url"],
+            "https://shop.example/dreame-g12-pro-wet-dry-hhr32a",
+        )
+        self.assertEqual(outcome.candidates[0]["model_match"], "exact")
 
     def test_exact_model_outranks_and_excludes_brand_only_result(self) -> None:
         clear_official_domain_cache()
