@@ -1,21 +1,27 @@
-"""Stage 10 stable application service boundary.
+"""Stage 10 stable application service boundary, with Stage 11 caching.
 
 This module is the only thing a consumer (CLI, future Telegram bot, future
 API) should depend on to verify a product. It wraps the existing pipeline
 (``core.workflow.run_product_workflow``) and the Stage 9 quality gate
 (``core.quality.assess_product_quality``) behind a small, stable,
-JSON-serializable request/result contract.
+JSON-serializable request/result contract, with an optional persistent cache
+(``services.cache``) in front of the live pipeline.
 
 It does not perform discovery, fetch, extraction, mapping, validation, or
 quality scoring itself -- it only calls the existing stages once and reshapes
 their already-decided output. It never changes a fact, a validation status,
-an authority decision, or a quality threshold.
+an authority decision, or a quality threshold. Caching is opt-in: with no
+repository injected, behavior is identical to Stage 10 (always live).
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+import hashlib
+import json
+import time
 from typing import Callable, Literal, Mapping
+import unicodedata
 
 from core.identity import ProductIdentity
 from core.mapping import DimensionValue
@@ -25,6 +31,13 @@ from core.workflow import (
     ProductWorkflowRequest,
     ProductWorkflowResult,
     run_product_workflow,
+)
+from services.cache import (
+    CACHE_SCHEMA_VERSION,
+    CacheEntry,
+    CachePolicy,
+    DEFAULT_CACHE_POLICY,
+    ProductVerificationRepository,
 )
 
 
@@ -42,6 +55,9 @@ class VerifyProductRequest:
     market: str = "global"
     max_sources: int = 5
     targeted_search_enabled: bool = True
+    # Stage 11: bypass a cache hit and force a live re-run. Never part of the
+    # cache key -- the refreshed result is still saved for later requests.
+    force_refresh: bool = False
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -51,6 +67,7 @@ class VerifyProductRequest:
             "market": self.market,
             "max_sources": self.max_sources,
             "targeted_search_enabled": self.targeted_search_enabled,
+            "force_refresh": self.force_refresh,
         }
 
 
@@ -241,6 +258,12 @@ class VerifyProductResult:
     quality: ServiceQuality | None = None
     metadata: Mapping[str, object] = field(default_factory=dict)
     error: VerifyProductError | None = None
+    # Stage 11: backward-compatible cache metadata (all default to "not
+    # cached" so a live result looks identical to Stage 10's shape plus
+    # these three extra keys).
+    served_from_cache: bool = False
+    cache_stored_at: float | None = None
+    cache_age_seconds: float | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -255,7 +278,152 @@ class VerifyProductResult:
             "quality": self.quality.to_dict() if self.quality else None,
             "metadata": dict(self.metadata),
             "error": self.error.to_dict() if self.error else None,
+            "served_from_cache": self.served_from_cache,
+            "cache_stored_at": self.cache_stored_at,
+            "cache_age_seconds": self.cache_age_seconds,
         }
+
+
+# --- Stage 11: reconstruct the stable DTO tree from its own to_dict() shape.
+# Used only to restore a cached VerifyProductResult; never touches core.*.
+
+
+def _service_evidence_from_dict(data: Mapping[str, object]) -> ServiceEvidence:
+    return ServiceEvidence(
+        value=data["value"],
+        unit=data["unit"],
+        source=data["source"],
+        source_type=data["source_type"],
+        evidence=data["evidence"],
+        authority_status=data["authority_status"],
+        confidence=data["confidence"],
+        origin=data["origin"],
+    )
+
+
+def _service_attribute_from_dict(data: Mapping[str, object]) -> ServiceAttribute:
+    return ServiceAttribute(
+        canonical_name=data["canonical_name"],
+        display_name=data["display_name"],
+        value=data["value"],
+        unit=data["unit"],
+        status=data["status"],
+        confidence=data["confidence"],
+        source=data["source"],
+        evidence=data["evidence"],
+        priority=data["priority"],
+        expected=data["expected"],
+        discovered=data["discovered"],
+        supporting_sources=tuple(
+            _service_evidence_from_dict(item) for item in data["supporting_sources"]
+        ),
+        conflicting_values=tuple(
+            _service_evidence_from_dict(item) for item in data["conflicting_values"]
+        ),
+    )
+
+
+def _service_category_from_dict(data: Mapping[str, object]) -> ServiceCategory:
+    return ServiceCategory(
+        category_id=data["category_id"],
+        category_name=data["category_name"],
+        parent_category=data["parent_category"],
+        confidence=data["confidence"],
+    )
+
+
+def _service_identity_from_dict(data: Mapping[str, object]) -> ServiceIdentity:
+    return ServiceIdentity(
+        brand=data["brand"],
+        base_model=data["base_model"],
+        commercial_model=data["commercial_model"],
+        manufacturer_article=data["manufacturer_article"],
+        product_code=data["product_code"],
+        sku=data["sku"],
+        gtin=data["gtin"],
+        color=data["color"],
+        configuration=dict(data["configuration"]),
+        confidence=data["confidence"],
+    )
+
+
+def _service_quality_from_dict(data: Mapping[str, object]) -> ServiceQuality:
+    return ServiceQuality(
+        status=data["status"],
+        coverage_percent=data["coverage_percent"],
+        schema_total=data["schema_total"],
+        schema_found=data["schema_found"],
+        confirmed_count=data["confirmed_count"],
+        unresolved_count=data["unresolved_count"],
+        conflict_count=data["conflict_count"],
+        critical_total=data["critical_total"],
+        critical_found=data["critical_found"],
+        critical_confirmed=data["critical_confirmed"],
+        critical_conflict=data["critical_conflict"],
+        critical_high_authority_confirmed=data["critical_high_authority_confirmed"],
+        category_confidence=data["category_confidence"],
+        identity_confidence=data["identity_confidence"],
+        reasons=tuple(data["reasons"]),
+        warnings=tuple(data["warnings"]),
+    )
+
+
+def _verify_error_from_dict(data: Mapping[str, object]) -> VerifyProductError:
+    return VerifyProductError(kind=data["kind"], message=data["message"], detail=data["detail"])
+
+
+def _verify_request_from_dict(data: Mapping[str, object]) -> VerifyProductRequest:
+    return VerifyProductRequest(
+        brand=data["brand"],
+        model=data["model"],
+        article=data["article"],
+        market=data["market"],
+        max_sources=data["max_sources"],
+        targeted_search_enabled=data["targeted_search_enabled"],
+        force_refresh=bool(data.get("force_refresh", False)),
+    )
+
+
+def _result_from_dict(data: Mapping[str, object]) -> VerifyProductResult:
+    """Reverse of VerifyProductResult.to_dict(). Raises on malformed input --
+    callers must treat that as an unusable cache entry, never a live error."""
+    return VerifyProductResult(
+        success=data["success"],
+        request=_verify_request_from_dict(data["request"]),
+        identity=_service_identity_from_dict(data["identity"]) if data.get("identity") else None,
+        category=_service_category_from_dict(data["category"]) if data.get("category") else None,
+        attributes=tuple(
+            _service_attribute_from_dict(item) for item in data.get("attributes", ())
+        ),
+        unresolved=tuple(data.get("unresolved", ())),
+        conflicts=tuple(data.get("conflicts", ())),
+        discovered=tuple(data.get("discovered", ())),
+        quality=_service_quality_from_dict(data["quality"]) if data.get("quality") else None,
+        metadata=dict(data.get("metadata", {})),
+        error=_verify_error_from_dict(data["error"]) if data.get("error") else None,
+    )
+
+
+def _normalize_key_part(value: object) -> str:
+    return " ".join(unicodedata.normalize("NFKC", str(value or "")).split()).casefold()
+
+
+def _cache_key(request: VerifyProductRequest) -> str:
+    """Deterministic key over exactly the fields that can change the result.
+
+    ``force_refresh`` is deliberately excluded: it controls whether *this*
+    call reads the cache, not which entry the result belongs to.
+    """
+    parts = {
+        "brand": _normalize_key_part(request.brand),
+        "model": _normalize_key_part(request.model),
+        "article": _normalize_key_part(request.article),
+        "market": _normalize_key_part(request.market),
+        "max_sources": request.max_sources,
+        "targeted_search_enabled": request.targeted_search_enabled,
+    }
+    canonical = json.dumps(parts, sort_keys=True, ensure_ascii=True)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _serialize_value(value: object) -> object:
@@ -390,6 +558,7 @@ def _to_result(
 
 
 WorkflowRunner = Callable[[ProductWorkflowRequest], ProductWorkflowResult]
+Clock = Callable[[], float]
 
 
 class ProductVerifierService:
@@ -397,10 +566,26 @@ class ProductVerifierService:
 
     ``run_workflow`` is injectable so tests can substitute a deterministic
     fake and never touch the network; it defaults to the real pipeline.
+
+    Caching is entirely opt-in: with ``repository=None`` (the default),
+    behavior is identical to Stage 10 -- every call runs the live pipeline.
+    Passing a ``ProductVerificationRepository`` turns on the cache lookup/
+    save flow; ``clock`` is injectable so freshness (TTL) is deterministic
+    in tests.
     """
 
-    def __init__(self, *, run_workflow: WorkflowRunner = run_product_workflow) -> None:
+    def __init__(
+        self,
+        *,
+        run_workflow: WorkflowRunner = run_product_workflow,
+        repository: ProductVerificationRepository | None = None,
+        cache_policy: CachePolicy = DEFAULT_CACHE_POLICY,
+        clock: Clock = time.time,
+    ) -> None:
         self._run_workflow = run_workflow
+        self._repository = repository
+        self._cache_policy = cache_policy
+        self._clock = clock
 
     def verify(self, request: VerifyProductRequest) -> VerifyProductResult:
         result, _ = self.verify_with_workflow_result(request)
@@ -418,11 +603,21 @@ class ProductVerifierService:
         contract: a future consumer (Telegram bot, API) must depend on
         ``verify()`` / ``VerifyProductResult`` only, and must never import
         ``ProductWorkflowResult``.
+
+        On a cache hit, no pipeline ran, so the raw workflow result is
+        ``None`` -- only the CLI's no-cache configuration ever relies on the
+        second element being non-``None`` for a successful result.
         """
         try:
             internal_request = _build_internal_request(request)
         except ValueError as error:
             return _failure(request, "invalid_request", str(error)), None
+
+        cache_key = self._cache_key_for(request)
+        if cache_key is not None and not request.force_refresh:
+            cached = self._lookup_cache(cache_key, request)
+            if cached is not None:
+                return cached, None
 
         try:
             workflow_result = self._run_workflow(internal_request)
@@ -438,12 +633,62 @@ class ProductVerifierService:
             ), None
 
         try:
-            return _to_result(request, workflow_result), workflow_result
+            result = _to_result(request, workflow_result)
         except Exception as error:  # noqa: BLE001 - a mapping bug must not crash the boundary
             return _failure(
                 request, "internal_error", f"Unexpected failure while building the result: {error}",
                 detail=type(error).__name__,
             ), None
+
+        if cache_key is not None:
+            self._store_cache(cache_key, result)
+        return result, workflow_result
+
+    def _cache_key_for(self, request: VerifyProductRequest) -> str | None:
+        return _cache_key(request) if self._repository is not None else None
+
+    def _lookup_cache(
+        self, key: str, request: VerifyProductRequest,
+    ) -> VerifyProductResult | None:
+        assert self._repository is not None
+        try:
+            entry = self._repository.get(key)
+        except Exception:  # noqa: BLE001 - a broken store degrades to a live run
+            return None
+        if entry is None or entry.schema_version != CACHE_SCHEMA_VERSION:
+            return None
+        if not entry.success and not self._cache_policy.cache_failures:
+            return None
+        try:
+            cached_result = _result_from_dict(entry.payload)
+        except Exception:  # noqa: BLE001 - corrupted payload -> unusable, not a crash
+            return None
+        now = self._clock()
+        age = max(0.0, now - entry.stored_at)
+        if age > self._cache_policy.ttl_seconds:
+            return None
+        return replace(
+            cached_result,
+            request=request,
+            served_from_cache=True,
+            cache_stored_at=entry.stored_at,
+            cache_age_seconds=age,
+        )
+
+    def _store_cache(self, key: str, result: VerifyProductResult) -> None:
+        assert self._repository is not None
+        if not result.success and not self._cache_policy.cache_failures:
+            return
+        try:
+            self._repository.save(CacheEntry(
+                key=key,
+                schema_version=CACHE_SCHEMA_VERSION,
+                stored_at=self._clock(),
+                success=result.success,
+                payload=result.to_dict(),
+            ))
+        except Exception:  # noqa: BLE001 - caching is best-effort
+            pass
 
 
 def verify_product(

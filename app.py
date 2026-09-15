@@ -89,6 +89,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         max_sources=options.max_sources,
         targeted_search_enabled=not options.no_targeted_search,
     )
+    # Stage 11: caching is opt-in via `repository=`; the CLI intentionally
+    # does not enable it, so a successful call here always ran the live
+    # pipeline and workflow_result is guaranteed non-None below. Enabling
+    # caching for the CLI would require rebuilding table/CSV/JSON formatting
+    # from the stable DTO instead of the raw profile -- deferred, see the
+    # Stage 11 report.
     service = ProductVerifierService(run_workflow=run_product_workflow)
     verify_result, workflow_result = service.verify_with_workflow_result(request)
     if not verify_result.success:
@@ -96,7 +102,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         message = error.message if error else "unknown error"
         print(f"Workflow failed: {message}", file=sys.stderr)
         return 1
-    assert workflow_result is not None  # success implies the internal result is present
+    assert workflow_result is not None  # guaranteed: this service never caches
 
     if options.output_format == "json":
         if options.include_quality:
