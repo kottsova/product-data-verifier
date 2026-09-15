@@ -27,6 +27,7 @@ from core.gaps import GapAnalysisResult, analyze_gaps
 from core.identity import IdentityEvidence, ProductIdentity, resolve_product_identity
 from core.mapping import MappingResult, map_attributes
 from core.profile import FinalProductProfile, build_final_profile
+from core.quality import QualityAssessment, assess_product_quality
 from core.schema import (
     AttributeDefinition,
     Priority,
@@ -158,6 +159,7 @@ class ProductWorkflowResult:
     targeted_search: TargetedSearchResult | None
     validated_profile: ValidatedProductProfile
     final_profile: FinalProductProfile
+    quality: QualityAssessment
 
     @property
     def fetch_failures(self) -> tuple[FetchResult, ...]:
@@ -376,6 +378,7 @@ def _run_product_workflow_with_services(
         targeted_search=targeted_search,
         validated_profile=validated,
         final_profile=profile,
+        quality=assess_product_quality(profile),
     )
 
 

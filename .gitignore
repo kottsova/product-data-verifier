@@ -6,3 +6,4 @@ venv/
 credentials.json
 *.log
 reference/
+.vscode/

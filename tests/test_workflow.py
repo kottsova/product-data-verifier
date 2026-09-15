@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from core.discovery import DiscoveryOutcome, ProviderAttempt
 from core.export import profile_rows, profile_to_dict
 from core.extract import RawAttribute
+from core.quality import assess_product_quality
 from core.targeted_search import TargetedSearchConfig
 from core.workflow import (
     ProductWorkflowRequest,
@@ -188,6 +189,8 @@ class ProductWorkflowTests(unittest.TestCase):
         self.assertFalse(discovered.expected)
         self.assertEqual(result.final_profile.identity.brand, "Acme")
         self.assertEqual(result.final_profile.metadata["workflow_version"], "1.0")
+        self.assertEqual(result.quality, assess_product_quality(result.final_profile))
+        self.assertIn(result.quality.status, ("verified", "partial", "insufficient", "conflicted"))
 
     def test_retailer_authority_is_preserved_and_fact_stays_unresolved(self):
         url = "https://shop.example/product/X100"

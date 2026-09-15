@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from typing import Sequence
 
 from core.discovery import SUPPORTED_MARKETS
-from core.export import export_profile_csv, export_profile_json, profile_rows
+from core.export import export_profile_csv, export_profile_json, profile_rows, profile_to_dict
+from core.quality import assess_product_quality
 from core.workflow import ProductWorkflowRequest, ProductWorkflowResult, run_product_workflow
 
 
@@ -30,6 +32,11 @@ def _parser() -> argparse.ArgumentParser:
         dest="output_format",
     )
     parser.add_argument("--pretty", action="store_true", help="Pretty-print JSON output.")
+    parser.add_argument(
+        "--include-quality",
+        action="store_true",
+        help="Add a top-level 'quality' key with the Stage 9 quality assessment to JSON output.",
+    )
     return parser
 
 
@@ -43,6 +50,11 @@ def _print_table(result: ProductWorkflowResult) -> None:
     print(
         f"Category: {profile.category.category_id} ({profile.category.confidence}) | "
         f"Discovery: {result.discovery.search_status}"
+    )
+    quality = assess_product_quality(profile)
+    print(
+        f"Quality: {quality.status} | coverage: {quality.coverage_percent}% | "
+        f"critical: {quality.critical_confirmed}/{quality.critical_total} confirmed"
     )
     print("Attribute | Value | Status | Source | Evidence")
     for row in profile_rows(profile):
@@ -79,7 +91,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     if options.output_format == "json":
-        print(export_profile_json(result.final_profile, pretty=options.pretty))
+        if options.include_quality:
+            data = profile_to_dict(result.final_profile)
+            data["quality"] = assess_product_quality(result.final_profile).to_dict()
+            indent = 2 if options.pretty else None
+            separators = None if options.pretty else (",", ":")
+            print(json.dumps(data, ensure_ascii=False, indent=indent, separators=separators))
+        else:
+            print(export_profile_json(result.final_profile, pretty=options.pretty))
     elif options.output_format == "csv":
         sys.stdout.write(export_profile_csv(result.final_profile))
     else:
