@@ -425,7 +425,7 @@ class TelegramMainEventTests(unittest.TestCase):
         telegram = TelegramConfig(bot_token="123:main-secret")
 
         class Application:
-            def run_polling(self):
+            def run_polling(self, **kwargs):
                 return None
 
         with (
@@ -434,6 +434,7 @@ class TelegramMainEventTests(unittest.TestCase):
             patch("bot.telegram_bot.configure_logging"),
             patch("bot.telegram_bot.build_product_verifier_service", return_value=object()),
             patch("bot.telegram_bot.build_job_manager", return_value=object()),
+            patch("bot.telegram_bot.validate_runtime_wiring"),
             patch("bot.telegram_bot.build_application", return_value=Application()),
             patch("bot.telegram_bot.log_event") as event,
         ):

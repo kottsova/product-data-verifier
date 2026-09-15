@@ -1,0 +1,20 @@
+# Exact runtime dependency set used by the production image.
+# Keep requirements.txt as the human-maintained compatibility policy.
+anyio==4.13.0
+beautifulsoup4==4.14.3
+certifi==2026.4.22
+charset-normalizer==3.4.7
+greenlet==3.5.0
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.13
+playwright==1.59.0
+pyee==13.0.1
+pypdf==6.14.2
+python-telegram-bot==22.7
+requests==2.33.1
+sniffio==1.3.1
+soupsieve==2.8.3
+typing-extensions==4.15.0
+urllib3==2.7.0

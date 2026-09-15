@@ -1,4 +1,4 @@
-"""Stage 14 Telegram bot entry point.
+"""Stage 16 deployment-ready Telegram bot entry point.
 
 Run with:
     python -m bot.telegram_bot
@@ -18,6 +18,7 @@ was reset.
 from __future__ import annotations
 
 import logging
+import signal
 
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 
@@ -31,11 +32,12 @@ from bot.handlers import (
 from bot.jobs import JobManager
 from bot.service_factory import build_product_verifier_service
 from config import AppConfig, ConfigurationError, TelegramConfig
-from observability import configure_logging, log_event
+from observability import configure_logging, log_event, log_exception_event
 from services.product_verifier import ProductVerifierService
 
 
 SHUTDOWN_TIMEOUT_SECONDS = 30.0
+STOP_SIGNALS = (signal.SIGINT, signal.SIGTERM)
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -81,6 +83,18 @@ def build_application(token: str, manager: JobManager) -> Application:
     return application
 
 
+def validate_runtime_wiring(manager: JobManager) -> None:
+    """Fail before polling when persistence or diagnostics are unavailable."""
+    snapshot = manager.diagnostics().to_dict()
+    repository = snapshot.get("repository", {})
+    if not isinstance(repository, dict):
+        raise RuntimeError("invalid repository diagnostics")
+    if repository.get("configured") is not True:
+        raise RuntimeError("production repository is not configured")
+    if repository.get("available") is not True:
+        raise RuntimeError("configured repository is unavailable")
+
+
 def main() -> None:
     try:
         app_config = AppConfig.from_env()
@@ -88,7 +102,7 @@ def main() -> None:
         configure_logging(AppConfig())
         log_event(
             logger, logging.ERROR, "bot_configuration_failure",
-            error_type=type(error).__name__,
+            reason="invalid_application_config", error_type=type(error).__name__,
         )
         raise SystemExit(1)
 
@@ -99,7 +113,7 @@ def main() -> None:
     except ConfigurationError as error:
         log_event(
             logger, logging.ERROR, "bot_configuration_failure",
-            error_type=type(error).__name__,
+            reason="missing_or_invalid_telegram_token", error_type=type(error).__name__,
         )
         raise SystemExit(1)
 
@@ -107,16 +121,24 @@ def main() -> None:
     # path redacts it. The token itself is never emitted as a field.
     configure_logging(app_config, secrets=(telegram_config.bot_token,))
 
-    service = build_product_verifier_service(app_config)
-    manager = build_job_manager(service, app_config)
-    application = build_application(telegram_config.bot_token, manager)
+    try:
+        service = build_product_verifier_service(app_config)
+        manager = build_job_manager(service, app_config)
+        validate_runtime_wiring(manager)
+        application = build_application(telegram_config.bot_token, manager)
+    except Exception as error:  # noqa: BLE001 - production startup must fail cleanly
+        log_exception_event(
+            logger, "bot_startup_failure",
+            phase="runtime_wiring", error_type=type(error).__name__,
+        )
+        raise SystemExit(1)
     log_event(
         logger, logging.INFO, "bot_polling",
         max_concurrent_jobs=app_config.max_concurrent_jobs,
         job_history_limit=app_config.job_history_limit,
         cache_ttl_seconds=app_config.cache_ttl_seconds,
     )
-    application.run_polling()
+    application.run_polling(stop_signals=STOP_SIGNALS)
 
 
 if __name__ == "__main__":
