@@ -190,7 +190,10 @@ class RepeatabilityAndSchedulingTests(unittest.TestCase):
         records = []
         run_products(
             products,
-            {"concurrency": 1, "timeout_seconds": 0.5},
+            # The deadline includes Windows spawn/import startup. Keep enough
+            # headroom for the fast worker while remaining below the slow
+            # worker's deliberate two-second sleep.
+            {"concurrency": 1, "timeout_seconds": 1.5},
             records.append,
             worker_target=_scheduler_worker,
         )

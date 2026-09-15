@@ -16,3 +16,4 @@ reference/
 .cache/
 data/
 regression/results/
+diagnostics/results/
