@@ -82,6 +82,62 @@ class ApplicationCliTests(unittest.TestCase):
         self.assertEqual(stdout.getvalue(), "")
         self.assertEqual(stderr.getvalue(), "Workflow failed: offline\n")
 
+    def test_invalid_brand_is_rejected_before_the_workflow_runs(self):
+        """Stage 10: request validation happens in the service, not the pipeline."""
+        stdout = StringIO()
+        stderr = StringIO()
+        with (
+            patch("app.run_product_workflow") as run,
+            redirect_stdout(stdout),
+            redirect_stderr(stderr),
+        ):
+            status = app.main(["", "X100"])
+        self.assertEqual(status, 1)
+        self.assertEqual(stdout.getvalue(), "")
+        self.assertIn("Workflow failed:", stderr.getvalue())
+        run.assert_not_called()
+
+    def test_table_mode_still_works_through_the_service_boundary(self):
+        profile = final_profile(
+            [definition("power")],
+            [candidate("power", "1000", unit="W")],
+        )
+        output = StringIO()
+        with (
+            patch(
+                "app.run_product_workflow",
+                return_value=SimpleNamespace(
+                    final_profile=profile,
+                    discovery=SimpleNamespace(search_status="success"),
+                ),
+            ),
+            redirect_stdout(output),
+        ):
+            status = app.main(["Acme", "X100"])
+        self.assertEqual(status, 0)
+        lines = output.getvalue().splitlines()
+        self.assertTrue(lines[0].startswith("Product: Acme"))
+        self.assertTrue(any(line.startswith("Quality:") for line in lines))
+        self.assertIn("power", output.getvalue())
+
+    def test_csv_mode_still_works_through_the_service_boundary(self):
+        profile = final_profile(
+            [definition("power")],
+            [candidate("power", "1000", unit="W")],
+        )
+        output = StringIO()
+        with (
+            patch(
+                "app.run_product_workflow",
+                return_value=SimpleNamespace(final_profile=profile),
+            ),
+            redirect_stdout(output),
+        ):
+            status = app.main(["Acme", "X100", "--format", "csv"])
+        self.assertEqual(status, 0)
+        self.assertIn("power", output.getvalue())
+        self.assertIn("Confirmed", output.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()

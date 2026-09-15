@@ -1,4 +1,4 @@
-"""Small command-line entry point for the Stage 8 application workflow."""
+"""Small command-line entry point for the Stage 10 application service boundary."""
 
 from __future__ import annotations
 
@@ -9,8 +9,12 @@ from typing import Sequence
 
 from core.discovery import SUPPORTED_MARKETS
 from core.export import export_profile_csv, export_profile_json, profile_rows, profile_to_dict
-from core.quality import assess_product_quality
-from core.workflow import ProductWorkflowRequest, ProductWorkflowResult, run_product_workflow
+from core.workflow import ProductWorkflowResult, run_product_workflow
+from services.product_verifier import (
+    ProductVerifierService,
+    VerifyProductRequest,
+    VerifyProductResult,
+)
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -44,18 +48,19 @@ def _single_line(value: str) -> str:
     return " ".join(value.split())
 
 
-def _print_table(result: ProductWorkflowResult) -> None:
-    profile = result.final_profile
+def _print_table(workflow_result: ProductWorkflowResult, verify_result: VerifyProductResult) -> None:
+    profile = workflow_result.final_profile
+    quality = verify_result.quality
     print(f"Product: {profile.identity.brand} {profile.identity.commercial_model or ''}".rstrip())
     print(
         f"Category: {profile.category.category_id} ({profile.category.confidence}) | "
-        f"Discovery: {result.discovery.search_status}"
+        f"Discovery: {workflow_result.discovery.search_status}"
     )
-    quality = assess_product_quality(profile)
-    print(
-        f"Quality: {quality.status} | coverage: {quality.coverage_percent}% | "
-        f"critical: {quality.critical_confirmed}/{quality.critical_total} confirmed"
-    )
+    if quality is not None:
+        print(
+            f"Quality: {quality.status} | coverage: {quality.coverage_percent}% | "
+            f"critical: {quality.critical_confirmed}/{quality.critical_total} confirmed"
+        )
     print("Attribute | Value | Status | Source | Evidence")
     for row in profile_rows(profile):
         print(" | ".join((
@@ -76,33 +81,37 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     options = _parser().parse_args(arguments)
-    try:
-        request = ProductWorkflowRequest.from_parts(
-            options.brand,
-            options.model,
-            options.article,
-            market=options.market,
-            max_initial_sources=options.max_sources,
-            targeted_search_enabled=not options.no_targeted_search,
-        )
-        result = run_product_workflow(request)
-    except (RuntimeError, ValueError) as error:
-        print(f"Workflow failed: {error}", file=sys.stderr)
+    request = VerifyProductRequest(
+        brand=options.brand,
+        model=options.model,
+        article=options.article,
+        market=options.market,
+        max_sources=options.max_sources,
+        targeted_search_enabled=not options.no_targeted_search,
+    )
+    service = ProductVerifierService(run_workflow=run_product_workflow)
+    verify_result, workflow_result = service.verify_with_workflow_result(request)
+    if not verify_result.success:
+        error = verify_result.error
+        message = error.message if error else "unknown error"
+        print(f"Workflow failed: {message}", file=sys.stderr)
         return 1
+    assert workflow_result is not None  # success implies the internal result is present
 
     if options.output_format == "json":
         if options.include_quality:
-            data = profile_to_dict(result.final_profile)
-            data["quality"] = assess_product_quality(result.final_profile).to_dict()
+            data = profile_to_dict(workflow_result.final_profile)
+            quality = verify_result.quality
+            data["quality"] = quality.to_dict() if quality is not None else None
             indent = 2 if options.pretty else None
             separators = None if options.pretty else (",", ":")
             print(json.dumps(data, ensure_ascii=False, indent=indent, separators=separators))
         else:
-            print(export_profile_json(result.final_profile, pretty=options.pretty))
+            print(export_profile_json(workflow_result.final_profile, pretty=options.pretty))
     elif options.output_format == "csv":
-        sys.stdout.write(export_profile_csv(result.final_profile))
+        sys.stdout.write(export_profile_csv(workflow_result.final_profile))
     else:
-        _print_table(result)
+        _print_table(workflow_result, verify_result)
     return 0
 
 
