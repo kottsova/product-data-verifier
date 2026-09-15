@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "baseline_id": "stage9-reference-live-v1",
+  "description": "Known Stage 9 live coverage values supplied for Stage 17 continuity comparison. Ranges are context, not pass/fail thresholds.",
+  "products": [
+    {
+      "product_id": "cooktop-bosch-pue611bb5e",
+      "expected_category": "cooktop",
+      "historical_coverage": "61-69%",
+      "stage9_coverage_percent": 77.8
+    },
+    {
+      "product_id": "smartphone-honor-x8d",
+      "expected_category": "smartphone",
+      "historical_coverage": "43-47%",
+      "stage9_coverage_percent": 60.9
+    },
+    {
+      "product_id": "sewing-janome-sakura95",
+      "expected_category": "sewing_machine",
+      "historical_coverage": "usually 50%+",
+      "stage9_coverage_percent": 68.4
+    },
+    {
+      "product_id": "airfryer-gressel-gaf1825",
+      "expected_category": "air_fryer",
+      "historical_coverage": "about 20%",
+      "stage9_coverage_percent": 29.4
+    },
+    {
+      "product_id": "wetdry-dreame-g12pro-hhr32a",
+      "expected_category": "wet_dry_vacuum",
+      "historical_coverage": "about 53.8%",
+      "stage9_coverage_percent": 66.7
+    }
+  ]
+}
+

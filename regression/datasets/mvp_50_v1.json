@@ -1,0 +1,423 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "mvp-regression-50-v1",
+  "description": "Stage 17 cross-category benchmark: 50 real, publicly documented products. It contains identity/category expectations only, never unverified expected specifications.",
+  "created_at": "2026-09-15",
+  "products": [
+    {
+      "id": "cooktop-bosch-pue611bb5e",
+      "brand": "Bosch",
+      "model": "PUE611BB5E",
+      "market": "DE",
+      "expected_category": "cooktop",
+      "tags": ["reference", "continuity", "europe"],
+      "notes": "Stage 1-16 continuity product."
+    },
+    {
+      "id": "cooktop-siemens-eu611beb5e",
+      "brand": "Siemens",
+      "model": "EU611BEB5E",
+      "market": "DE",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-aeg-ikb64301fb",
+      "brand": "AEG",
+      "model": "IKB64301FB",
+      "market": "GB",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-electrolux-eiv634",
+      "brand": "Electrolux",
+      "model": "EIV634",
+      "market": "DE",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-samsung-nz64m3nm1bb",
+      "brand": "Samsung",
+      "model": "NZ64M3NM1BB",
+      "market": "GB",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-whirlpool-wls5360bfw",
+      "brand": "Whirlpool",
+      "model": "WL S5360 BF/W",
+      "market": "DE",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-teka-iz6415",
+      "brand": "Teka",
+      "model": "IZ 6415",
+      "market": "DE",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-gorenje-it643syb",
+      "brand": "Gorenje",
+      "model": "IT643SYB",
+      "market": "DE",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-beko-hii64200fmt",
+      "brand": "Beko",
+      "model": "HII64200FMT",
+      "market": "GB",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "cooktop-neff-t56fhs1l",
+      "brand": "NEFF",
+      "model": "T56FHS1L",
+      "market": "DE",
+      "expected_category": "cooktop",
+      "tags": ["europe"]
+    },
+    {
+      "id": "smartphone-honor-x8d",
+      "brand": "HONOR",
+      "model": "X8d",
+      "market": "RU",
+      "expected_category": "smartphone",
+      "tags": ["reference", "continuity"]
+    },
+    {
+      "id": "smartphone-apple-iphone15",
+      "brand": "Apple",
+      "model": "iPhone 15",
+      "market": "US",
+      "expected_category": "smartphone",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "smartphone-samsung-galaxys24",
+      "brand": "Samsung",
+      "model": "Galaxy S24",
+      "market": "global",
+      "expected_category": "smartphone",
+      "tags": ["global"]
+    },
+    {
+      "id": "smartphone-google-pixel8",
+      "brand": "Google",
+      "model": "Pixel 8",
+      "market": "US",
+      "expected_category": "smartphone",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "smartphone-xiaomi-redminote13pro5g",
+      "brand": "Xiaomi",
+      "model": "Redmi Note 13 Pro 5G",
+      "market": "GB",
+      "expected_category": "smartphone",
+      "tags": ["europe"]
+    },
+    {
+      "id": "smartphone-oneplus-12",
+      "brand": "OnePlus",
+      "model": "12",
+      "market": "global",
+      "expected_category": "smartphone",
+      "tags": ["global"]
+    },
+    {
+      "id": "smartphone-nothing-phone2",
+      "brand": "Nothing",
+      "model": "Phone (2)",
+      "market": "GB",
+      "expected_category": "smartphone",
+      "tags": ["europe"]
+    },
+    {
+      "id": "smartphone-sony-xperia1v",
+      "brand": "Sony",
+      "model": "Xperia 1 V",
+      "market": "global",
+      "expected_category": "smartphone",
+      "tags": ["global"]
+    },
+    {
+      "id": "smartphone-motorola-edge40",
+      "brand": "Motorola",
+      "model": "Edge 40",
+      "market": "DE",
+      "expected_category": "smartphone",
+      "tags": ["europe"]
+    },
+    {
+      "id": "smartphone-nokia-g425g",
+      "brand": "Nokia",
+      "model": "G42 5G",
+      "market": "GB",
+      "expected_category": "smartphone",
+      "tags": ["europe"]
+    },
+    {
+      "id": "sewing-janome-sakura95",
+      "brand": "Janome",
+      "model": "Sakura 95",
+      "market": "RU",
+      "expected_category": "sewing_machine",
+      "tags": ["reference", "continuity"]
+    },
+    {
+      "id": "sewing-brother-cs7000x",
+      "brand": "Brother",
+      "model": "CS7000X",
+      "market": "US",
+      "expected_category": "sewing_machine",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "sewing-singer-4423",
+      "brand": "Singer",
+      "model": "Heavy Duty 4423",
+      "article": "4423",
+      "market": "US",
+      "expected_category": "sewing_machine",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "sewing-janome-sewist725s",
+      "brand": "Janome",
+      "model": "Sewist 725S",
+      "market": "US",
+      "expected_category": "sewing_machine",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "sewing-juki-hzlf300",
+      "brand": "Juki",
+      "model": "HZL-F300",
+      "market": "US",
+      "expected_category": "sewing_machine",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "sewing-bernette-b35",
+      "brand": "bernette",
+      "model": "b35",
+      "market": "global",
+      "expected_category": "sewing_machine",
+      "tags": ["global"]
+    },
+    {
+      "id": "sewing-brother-innovis-a16",
+      "brand": "Brother",
+      "model": "Innov-is A16",
+      "market": "GB",
+      "expected_category": "sewing_machine",
+      "tags": ["europe"]
+    },
+    {
+      "id": "sewing-singer-9960",
+      "brand": "Singer",
+      "model": "Quantum Stylist 9960",
+      "article": "9960",
+      "market": "US",
+      "expected_category": "sewing_machine",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "sewing-juki-tl2010q",
+      "brand": "Juki",
+      "model": "TL-2010Q",
+      "market": "US",
+      "expected_category": "sewing_machine",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "sewing-bernina-325",
+      "brand": "BERNINA",
+      "model": "325",
+      "market": "global",
+      "expected_category": "sewing_machine",
+      "tags": ["global"]
+    },
+    {
+      "id": "airfryer-gressel-gaf1825",
+      "brand": "Gressel",
+      "model": "GAF-1825",
+      "market": "RU",
+      "expected_category": "air_fryer",
+      "tags": ["reference", "continuity"]
+    },
+    {
+      "id": "airfryer-philips-hd925290",
+      "brand": "Philips",
+      "model": "HD9252/90",
+      "market": "GB",
+      "expected_category": "air_fryer",
+      "tags": ["europe"]
+    },
+    {
+      "id": "airfryer-ninja-af160uk",
+      "brand": "Ninja",
+      "model": "AF160UK",
+      "market": "GB",
+      "expected_category": "air_fryer",
+      "tags": ["europe"]
+    },
+    {
+      "id": "airfryer-cosori-cp158af",
+      "brand": "Cosori",
+      "model": "CP158-AF",
+      "market": "US",
+      "expected_category": "air_fryer",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "airfryer-instant-vortexplus6qt",
+      "brand": "Instant",
+      "model": "Vortex Plus 6QT",
+      "market": "US",
+      "expected_category": "air_fryer",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "airfryer-tefal-ey505d",
+      "brand": "Tefal",
+      "model": "Easy Fry & Grill EY505D",
+      "article": "EY505D",
+      "market": "DE",
+      "expected_category": "air_fryer",
+      "tags": ["europe"]
+    },
+    {
+      "id": "airfryer-xiaomi-maf02",
+      "brand": "Xiaomi",
+      "model": "Smart Air Fryer 3.5L",
+      "article": "MAF02",
+      "market": "global",
+      "expected_category": "air_fryer",
+      "tags": ["global"]
+    },
+    {
+      "id": "airfryer-russellhobbs-26510",
+      "brand": "Russell Hobbs",
+      "model": "Satisfry 26510",
+      "article": "26510",
+      "market": "GB",
+      "expected_category": "air_fryer",
+      "tags": ["europe"]
+    },
+    {
+      "id": "airfryer-moulinex-ez401d10",
+      "brand": "Moulinex",
+      "model": "Easy Fry Deluxe EZ401D10",
+      "article": "EZ401D10",
+      "market": "DE",
+      "expected_category": "air_fryer",
+      "tags": ["europe"]
+    },
+    {
+      "id": "airfryer-gorenje-af1409db",
+      "brand": "Gorenje",
+      "model": "AF1409DB",
+      "market": "DE",
+      "expected_category": "air_fryer",
+      "tags": ["europe"]
+    },
+    {
+      "id": "wetdry-dreame-g12pro-hhr32a",
+      "brand": "Dreame",
+      "model": "G12 Pro",
+      "article": "HHR32A",
+      "market": "RU",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["reference", "continuity"]
+    },
+    {
+      "id": "wetdry-tineco-floorones5",
+      "brand": "Tineco",
+      "model": "FLOOR ONE S5",
+      "market": "US",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "wetdry-bissell-crosswavehydrosteam35151",
+      "brand": "BISSELL",
+      "model": "CrossWave HydroSteam",
+      "article": "35151",
+      "market": "US",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["north-america"]
+    },
+    {
+      "id": "wetdry-karcher-fc7cordless",
+      "brand": "Kärcher",
+      "model": "FC 7 Cordless",
+      "market": "DE",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["europe"]
+    },
+    {
+      "id": "wetdry-roborock-flexipro",
+      "brand": "Roborock",
+      "model": "Flexi Pro",
+      "market": "global",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["global"]
+    },
+    {
+      "id": "wetdry-dyson-washg1-wr01",
+      "brand": "Dyson",
+      "model": "WashG1",
+      "article": "WR01",
+      "market": "GB",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["europe"]
+    },
+    {
+      "id": "wetdry-philips-aquatrio-xw938301",
+      "brand": "Philips",
+      "model": "AquaTrio 9000",
+      "article": "XW9383/01",
+      "market": "GB",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["europe"]
+    },
+    {
+      "id": "wetdry-shark-hydrovac-wd210uk",
+      "brand": "Shark",
+      "model": "HydroVac",
+      "article": "WD210UK",
+      "market": "GB",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["europe"]
+    },
+    {
+      "id": "wetdry-vax-glide2-clhfg2ks",
+      "brand": "Vax",
+      "model": "ONEPWR Glide 2",
+      "article": "CLHF-G2KS",
+      "market": "GB",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["europe"]
+    },
+    {
+      "id": "wetdry-hoover-floormatedeluxe-fh40160",
+      "brand": "Hoover",
+      "model": "FloorMate Deluxe",
+      "article": "FH40160",
+      "market": "US",
+      "expected_category": "wet_dry_vacuum",
+      "tags": ["north-america"]
+    }
+  ]
+}
+

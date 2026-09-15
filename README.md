@@ -175,6 +175,42 @@ docker compose cp bot:/data/product-verifier.sqlite3 ./product-verifier.backup.s
 docker compose start bot
 ```
 
+## Regression benchmark (Stage 17)
+
+The versioned 50-product dataset and the five-product Stage 9 continuity
+baseline live under `regression/`. The runner calls the stable
+`ProductVerifierService`, not the internal workflow, and writes an atomic JSON
+artifact after every product. Runtime results and the benchmark SQLite cache
+are intentionally ignored by Git.
+
+Validate the dataset without network access:
+
+```text
+python -m regression.runner --validate-only
+```
+
+Run the full cold baseline with conservative concurrency and a hard timeout per
+product:
+
+```text
+python -m regression.runner --mode cold --concurrency 2 --timeout 180 \
+  --output regression/results/cold.json
+```
+
+Resume the same output file (successful records are skipped; failures and
+timeouts are retried), or reuse the resulting cache in an explicitly separate
+warm run:
+
+```text
+python -m regression.runner --resume --output regression/results/cold.json
+python -m regression.runner --mode warm --output regression/results/warm.json
+```
+
+Use `--tag reference` for the five continuity products, `--limit N` for a
+bounded sample, and `--dataset PATH` for any valid 50/300/custom JSON dataset.
+See [MVP_REGRESSION_REPORT.md](MVP_REGRESSION_REPORT.md) for the final MVP
+assessment and current live findings.
+
 ## Current stage
 
-Stage 16 — Deployment.
+Stage 17 — Final MVP Regression.

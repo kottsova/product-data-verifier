@@ -15,3 +15,4 @@ reference/
 *.db
 .cache/
 data/
+regression/results/
