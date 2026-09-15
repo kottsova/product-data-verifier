@@ -133,6 +133,54 @@ class ServiceAttribute:
 
 
 @dataclass(frozen=True, slots=True)
+class ServiceQuality:
+    """Public, stable view of the Stage 9 QualityAssessment.
+
+    Mirrors every field of core.quality.QualityAssessment 1:1 -- this is a
+    reshaping boundary only. It never recomputes or reinterprets the Stage 9
+    verdict, thresholds, or reasons; it just stops the internal
+    QualityAssessment type itself from crossing the service boundary.
+    """
+
+    status: str
+    coverage_percent: float
+    schema_total: int
+    schema_found: int
+    confirmed_count: int
+    unresolved_count: int
+    conflict_count: int
+    critical_total: int
+    critical_found: int
+    critical_confirmed: int
+    critical_conflict: int
+    critical_high_authority_confirmed: int
+    category_confidence: str
+    identity_confidence: str
+    reasons: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "status": self.status,
+            "coverage_percent": self.coverage_percent,
+            "schema_total": self.schema_total,
+            "schema_found": self.schema_found,
+            "confirmed_count": self.confirmed_count,
+            "unresolved_count": self.unresolved_count,
+            "conflict_count": self.conflict_count,
+            "critical_total": self.critical_total,
+            "critical_found": self.critical_found,
+            "critical_confirmed": self.critical_confirmed,
+            "critical_conflict": self.critical_conflict,
+            "critical_high_authority_confirmed": self.critical_high_authority_confirmed,
+            "category_confidence": self.category_confidence,
+            "identity_confidence": self.identity_confidence,
+            "reasons": list(self.reasons),
+            "warnings": list(self.warnings),
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class ServiceCategory:
     category_id: str
     category_name: str
@@ -190,7 +238,7 @@ class VerifyProductResult:
     unresolved: tuple[str, ...] = ()
     conflicts: tuple[str, ...] = ()
     discovered: tuple[str, ...] = ()
-    quality: QualityAssessment | None = None
+    quality: ServiceQuality | None = None
     metadata: Mapping[str, object] = field(default_factory=dict)
     error: VerifyProductError | None = None
 
@@ -247,6 +295,27 @@ def _service_attribute(attribute: ProfileAttribute) -> ServiceAttribute:
         discovered=attribute.discovered,
         supporting_sources=tuple(_service_evidence(item) for item in attribute.supporting_sources),
         conflicting_values=tuple(_service_evidence(item) for item in attribute.conflicting_values),
+    )
+
+
+def _service_quality(quality: QualityAssessment) -> ServiceQuality:
+    return ServiceQuality(
+        status=quality.status,
+        coverage_percent=quality.coverage_percent,
+        schema_total=quality.schema_total,
+        schema_found=quality.schema_found,
+        confirmed_count=quality.confirmed_count,
+        unresolved_count=quality.unresolved_count,
+        conflict_count=quality.conflict_count,
+        critical_total=quality.critical_total,
+        critical_found=quality.critical_found,
+        critical_confirmed=quality.critical_confirmed,
+        critical_conflict=quality.critical_conflict,
+        critical_high_authority_confirmed=quality.critical_high_authority_confirmed,
+        category_confidence=quality.category_confidence,
+        identity_confidence=quality.identity_confidence,
+        reasons=tuple(quality.reasons),
+        warnings=tuple(quality.warnings),
     )
 
 
@@ -315,7 +384,7 @@ def _to_result(
         unresolved=tuple(item.canonical_name for item in profile.unresolved),
         conflicts=tuple(item.canonical_name for item in profile.conflicts),
         discovered=tuple(item.canonical_name for item in profile.discovered),
-        quality=quality,
+        quality=_service_quality(quality),
         metadata=dict(profile.metadata),
     )
 

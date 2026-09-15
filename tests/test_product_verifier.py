@@ -2,26 +2,56 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import fields, is_dataclass, replace
 import json
 import unittest
 from types import SimpleNamespace
 
 from core.identity import ProductIdentity
-from core.profile import FinalProductProfile, ProfileAttribute
+from core.profile import EvidenceRecord, FinalProductProfile, ProfileAttribute
 from core.quality import QualityAssessment, assess_product_quality
+from core.validation import ValidatedFact, ValidatedProductProfile
 from core.workflow import ProductWorkflowResult
 from services.product_verifier import (
     ProductVerifierService,
     ServiceAttribute,
     ServiceCategory,
     ServiceIdentity,
+    ServiceQuality,
     VerifyProductError,
     VerifyProductRequest,
     VerifyProductResult,
     verify_product,
 )
 from tests.test_profile_export import candidate, definition, final_profile
+
+
+# Every internal pipeline DTO type that must never be reachable from a
+# VerifyProductResult, directly or nested inside it.
+_INTERNAL_TYPES = (
+    ProductWorkflowResult, FinalProductProfile, ProfileAttribute, EvidenceRecord,
+    ProductIdentity, QualityAssessment, ValidatedFact, ValidatedProductProfile,
+)
+
+
+def _walk(value, seen=None):
+    """Yield every value reachable from `value` through dataclass fields,
+    tuples/lists/sets, and dict keys/values -- for a recursive leak check."""
+    seen = seen if seen is not None else set()
+    if id(value) in seen:
+        return
+    seen.add(id(value))
+    yield value
+    if is_dataclass(value) and not isinstance(value, type):
+        for item in fields(value):
+            yield from _walk(getattr(value, item.name), seen)
+    elif isinstance(value, (list, tuple, set, frozenset)):
+        for item in value:
+            yield from _walk(item, seen)
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            yield from _walk(key, seen)
+            yield from _walk(item, seen)
 
 
 def fake_runner(profile, *, quality=None):
@@ -82,7 +112,38 @@ class ValidRequestMappingTests(unittest.TestCase):
     def test_quality_is_computed_when_the_workflow_result_lacks_it(self):
         service = ProductVerifierService(run_workflow=fake_runner(self.profile))
         result = service.verify(VerifyProductRequest(brand="Acme", model="X100"))
-        self.assertEqual(result.quality, assess_product_quality(self.profile))
+        self.assertEqual(result.quality.to_dict(), assess_product_quality(self.profile).to_dict())
+
+    def test_quality_is_a_service_dto_not_the_internal_quality_assessment(self):
+        service = ProductVerifierService(run_workflow=fake_runner(self.profile))
+        result = service.verify(VerifyProductRequest(brand="Acme", model="X100"))
+        self.assertIsInstance(result.quality, ServiceQuality)
+        self.assertNotIsInstance(result.quality, QualityAssessment)
+
+    def test_full_quality_data_is_preserved_field_by_field(self):
+        assessment = QualityAssessment(
+            status="partial",
+            coverage_percent=42.5,
+            schema_total=10,
+            schema_found=6,
+            confirmed_count=4,
+            unresolved_count=5,
+            conflict_count=1,
+            critical_total=3,
+            critical_found=2,
+            critical_confirmed=1,
+            critical_conflict=0,
+            critical_high_authority_confirmed=1,
+            category_confidence="medium",
+            identity_confidence="high",
+            reasons=("reason one", "reason two"),
+            warnings=("warning one",),
+        )
+        service = ProductVerifierService(run_workflow=fake_runner(self.profile, quality=assessment))
+        result = service.verify(VerifyProductRequest(brand="Acme", model="X100"))
+        self.assertIsInstance(result.quality, ServiceQuality)
+        self.assertNotIsInstance(result.quality, QualityAssessment)
+        self.assertEqual(result.quality.to_dict(), assessment.to_dict())
 
     def test_provenance_and_evidence_are_preserved(self):
         profile = final_profile(
@@ -189,6 +250,23 @@ class NoInternalLeakageTests(unittest.TestCase):
         self.assertNotIsInstance(result, ProductWorkflowResult)
         self.assertNotIsInstance(result, FinalProductProfile)
 
+    def test_no_internal_dto_is_reachable_anywhere_in_the_result_graph(self):
+        """Recursively walk the whole VerifyProductResult and check every node."""
+        precomputed = assess_product_quality(self.profile)
+        service = ProductVerifierService(run_workflow=fake_runner(self.profile, quality=precomputed))
+        result = service.verify(VerifyProductRequest(brand="Acme", model="X100"))
+        offenders = [
+            node for node in _walk(result)
+            if isinstance(node, _INTERNAL_TYPES)
+        ]
+        self.assertEqual(offenders, [])
+
+    def test_no_internal_dto_is_reachable_in_a_failure_result(self):
+        service = ProductVerifierService(run_workflow=raising_runner(RuntimeError("network down")))
+        result = service.verify(VerifyProductRequest(brand="Acme", model="X100"))
+        offenders = [node for node in _walk(result) if isinstance(node, _INTERNAL_TYPES)]
+        self.assertEqual(offenders, [])
+
 
 class SerializationStabilityTests(unittest.TestCase):
     def test_successful_result_serializes_deterministically_and_is_json_safe(self):
@@ -201,6 +279,10 @@ class SerializationStabilityTests(unittest.TestCase):
         round_tripped = json.loads(json.dumps(first.to_dict(), ensure_ascii=False))
         self.assertEqual(round_tripped, first.to_dict())
         self.assertEqual(round_tripped["attributes"][0]["status"], "Confirmed")
+        self.assertIn(round_tripped["quality"]["status"], (
+            "verified", "partial", "insufficient", "conflicted",
+        ))
+        self.assertEqual(round_tripped["quality"], first.quality.to_dict())
 
     def test_failure_result_serializes_deterministically_and_is_json_safe(self):
         service = ProductVerifierService(run_workflow=fake_runner(None))
