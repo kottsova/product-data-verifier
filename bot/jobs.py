@@ -23,10 +23,20 @@ import unicodedata
 import uuid
 from typing import Awaitable, Callable, Literal
 
+from observability import (
+    Diagnostics,
+    MetricsCollector,
+    Stopwatch,
+    collect_diagnostics,
+    log_event,
+    log_exception_event,
+    scoped_id,
+)
 from services.product_verifier import ProductVerifierService, VerifyProductRequest, VerifyProductResult
 
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 JobState = Literal["queued", "running", "completed", "failed", "cancelled"]
 JOB_STATES = {"queued", "running", "completed", "failed", "cancelled"}
@@ -61,6 +71,11 @@ def _normalize(value: object) -> str:
     return " ".join(unicodedata.normalize("NFKC", str(value or "")).split()).casefold()
 
 
+def _product_label(request: VerifyProductRequest) -> str:
+    """Brand/model is product data, not personal data -- safe to log (Stage 15)."""
+    return f"{request.brand} {request.model}".strip()
+
+
 def _request_identity(request: VerifyProductRequest) -> tuple[object, ...]:
     """A bot-layer-local canonical identity, for duplicate-request detection.
 
@@ -90,6 +105,8 @@ class JobManager:
         max_concurrent_jobs: int = 2,
         history_limit: int = 20,
         clock: Callable[[], float] = time.time,
+        duration_clock: Callable[[], float] = time.monotonic,
+        metrics: MetricsCollector | None = None,
     ) -> None:
         if max_concurrent_jobs < 1:
             raise ValueError("max_concurrent_jobs must be at least 1")
@@ -97,6 +114,7 @@ class JobManager:
             raise ValueError("history_limit must be non-negative")
         self._service = service
         self._clock = clock
+        self._duration_clock = duration_clock
         self._history_limit = history_limit
         self._semaphore = asyncio.Semaphore(max_concurrent_jobs)
         self._jobs: dict[str, Job] = {}
@@ -105,7 +123,14 @@ class JobManager:
         self._active_by_identity: dict[tuple, str] = {}
         self._tasks: dict[str, asyncio.Task] = {}
         self._callbacks: dict[str, OnUpdate] = {}
+        self._stopwatches: dict[str, Stopwatch] = {}
         self._accepting = True
+        self._metrics = metrics if metrics is not None else MetricsCollector()
+        self._started_at = self._duration_clock()
+
+    @property
+    def metrics(self) -> MetricsCollector:
+        return self._metrics
 
     def get_job(self, job_id: str) -> Job | None:
         return self._jobs.get(job_id)
@@ -115,6 +140,46 @@ class JobManager:
             self._jobs[job_id] for job_id in self._chat_active.get(chat_id, ())
             if job_id in self._jobs
         ]
+
+    def active_job_count(self) -> int:
+        """Stage 15 diagnostics: global active (queued+running) job count."""
+        return sum(1 for job in self._jobs.values() if job.state in ACTIVE_STATES)
+
+    def queued_job_count(self) -> int:
+        """Stage 15 diagnostics: global queued-only job count."""
+        return sum(1 for job in self._jobs.values() if job.state == "queued")
+
+    def diagnostics(self) -> Diagnostics:
+        """Internal, framework-independent health/operations snapshot."""
+        repository_available = None
+        repository_configured = False
+        probe = getattr(self._service, "repository_available", None)
+        if callable(probe):
+            repository_available = probe()
+            repository_configured = bool(
+                getattr(self._service, "repository_configured", repository_available is not None)
+            )
+        cache_schema_version = getattr(self._service, "cache_schema_version", None)
+        versions = (
+            {"cache_schema": cache_schema_version}
+            if cache_schema_version is not None else {}
+        )
+        return collect_diagnostics(
+            service_name="product-data-verifier",
+            started_at=self._started_at,
+            metrics=self._metrics,
+            active_jobs=self.active_job_count(),
+            queued_jobs=self.queued_job_count(),
+            repository_available=repository_available,
+            clock=self._duration_clock,
+            extra={
+                "repository": {
+                    "configured": repository_configured,
+                    "available": repository_available,
+                },
+                "versions": versions,
+            },
+        )
 
     async def submit(
         self,
@@ -138,8 +203,14 @@ class JobManager:
         self._jobs[job.id] = job
         self._chat_active.setdefault(chat_id, []).append(job.id)
         self._active_by_identity[identity_key] = job.id
+        self._stopwatches[job.id] = Stopwatch(self._duration_clock)
         if on_update is not None:
             self._callbacks[job.id] = on_update
+        self._metrics.increment("jobs_queued")
+        log_event(
+            logger, logging.INFO, "job_queued",
+            job_id=job.id, chat=scoped_id(chat_id), product=_product_label(request),
+        )
         task = asyncio.create_task(self._run(job, identity_key))
         self._tasks[job.id] = task
         return job, False
@@ -163,6 +234,15 @@ class JobManager:
                 task = self._tasks.get(job_id)
                 if task is not None:
                     task.cancel()
+                    # A task cancelled before its coroutine gets its first
+                    # timeslice never enters _run()'s CancelledError handler.
+                    # Give an entered task one turn to finalize itself, then
+                    # finalize the never-started case here.
+                    await asyncio.sleep(0)
+                    if job.state in ACTIVE_STATES:
+                        await self._finalize(
+                            job, (chat_id, _request_identity(job.request)), "cancelled",
+                        )
             cancelled += 1
         return cancelled
 
@@ -173,13 +253,24 @@ class JobManager:
                     raise asyncio.CancelledError
                 job.state = "running"
                 job.started_at = self._clock()
+                log_event(
+                    logger, logging.INFO, "job_started",
+                    job_id=job.id, chat=scoped_id(job.chat_id), product=_product_label(job.request),
+                )
                 await self._notify(job)
                 try:
-                    result = await asyncio.to_thread(self._service.verify, job.request)
+                    if isinstance(self._service, ProductVerifierService):
+                        result = await asyncio.to_thread(
+                            self._service.verify, job.request, correlation_id=job.id,
+                        )
+                    else:
+                        # Stage 13's intentionally tiny duck-typed test/services
+                        # retain their original one-argument public shape.
+                        result = await asyncio.to_thread(self._service.verify, job.request)
                 except asyncio.CancelledError:
                     raise
                 except Exception as error:  # noqa: BLE001 - a broken service must not crash the manager
-                    logger.exception("Unexpected worker failure for job %s", job.id)
+                    log_exception_event(logger, "job_worker_exception", job_id=job.id)
                     await self._finalize(
                         job, identity_key, "failed", error=f"{type(error).__name__}: {error}",
                     )
@@ -213,6 +304,25 @@ class JobManager:
             chat_active.remove(job.id)
         if self._active_by_identity.get(identity_key) == job.id:
             del self._active_by_identity[identity_key]
+
+        stopwatch = self._stopwatches.pop(job.id, None)
+        duration = stopwatch.stop() if stopwatch is not None else None
+        fields: dict[str, object] = {
+            "job_id": job.id, "chat": scoped_id(job.chat_id), "product": _product_label(job.request),
+        }
+        if duration is not None:
+            self._metrics.record_duration("job", duration)
+            fields["duration_seconds"] = round(duration, 6)
+        if state == "completed":
+            self._metrics.increment("jobs_completed")
+            log_event(logger, logging.INFO, "job_completed", **fields)
+        elif state == "failed":
+            self._metrics.increment("jobs_failed")
+            log_event(logger, logging.WARNING, "job_failed", had_error=bool(error), **fields)
+        elif state == "cancelled":
+            self._metrics.increment("jobs_cancelled")
+            log_event(logger, logging.INFO, "job_cancelled", **fields)
+
         await self._notify(job)
         self._callbacks.pop(job.id, None)
         self._record_terminal_history(job)
@@ -224,7 +334,7 @@ class JobManager:
         try:
             await callback(job)
         except Exception:  # noqa: BLE001 - a notification failure must not break the manager
-            logger.exception("Job update callback failed for job %s", job.id)
+            log_exception_event(logger, "job_notification_failure", job_id=job.id)
 
     def _record_terminal_history(self, job: Job) -> None:
         """Bounded retention: this is job state hygiene, not the Stage 11 cache."""
@@ -249,10 +359,14 @@ class JobManager:
         """
         self._accepting = False
         pending = list(self._tasks.items())
+        queued_before_cancel: list[tuple[Job, tuple[object, ...]]] = []
         for job_id, task in pending:
             job = self._jobs.get(job_id)
             if job is not None and job.state == "queued":
                 job.cancel_requested = True
+                queued_before_cancel.append(
+                    (job, (job.chat_id, _request_identity(job.request))),
+                )
                 task.cancel()
         if not pending:
             return
@@ -265,3 +379,9 @@ class JobManager:
                 "threads were not force-killed and may finish in the background.",
                 len(pending),
             )
+        finally:
+            # See cancel_chat_jobs(): a coroutine cancelled before its first
+            # timeslice cannot run its own CancelledError finalizer.
+            for job, identity_key in queued_before_cancel:
+                if job.state in ACTIVE_STATES:
+                    await self._finalize(job, identity_key, "cancelled")

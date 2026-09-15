@@ -38,11 +38,18 @@ DB_PATH_ENV_VAR = "PRODUCT_VERIFIER_DB_PATH"
 MAX_CONCURRENT_JOBS_ENV_VAR = "PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS"
 JOB_HISTORY_LIMIT_ENV_VAR = "PRODUCT_VERIFIER_JOB_HISTORY_LIMIT"
 CACHE_TTL_SECONDS_ENV_VAR = "PRODUCT_VERIFIER_CACHE_TTL_SECONDS"
+LOG_LEVEL_ENV_VAR = "PRODUCT_VERIFIER_LOG_LEVEL"
+LOG_FORMAT_ENV_VAR = "PRODUCT_VERIFIER_LOG_FORMAT"
 
 DEFAULT_DB_PATH = str(Path(__file__).resolve().parent / ".cache" / "product_verifier.sqlite3")
 DEFAULT_MAX_CONCURRENT_JOBS = 2
 DEFAULT_JOB_HISTORY_LIMIT = 20
 DEFAULT_CACHE_TTL_SECONDS = 3600.0
+DEFAULT_LOG_LEVEL = "INFO"
+DEFAULT_LOG_FORMAT = "text"
+
+VALID_LOG_LEVELS = frozenset({"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"})
+VALID_LOG_FORMATS = frozenset({"text", "json"})
 
 
 def _source(env: Mapping[str, str] | None) -> Mapping[str, str]:
@@ -84,6 +91,20 @@ def _resolve_db_path(source: Mapping[str, str]) -> str:
     return raw or DEFAULT_DB_PATH
 
 
+def _resolve_choice(
+    source: Mapping[str, str], var_name: str, default: str, *, valid: frozenset[str], normalize,
+) -> str:
+    raw = source.get(var_name)
+    if raw is None or not raw.strip():
+        return default
+    value = normalize(raw.strip())
+    if value not in valid:
+        raise ConfigurationError(
+            f"{var_name} must be one of {sorted(valid)}, got {raw!r}"
+        )
+    return value
+
+
 @dataclass(frozen=True, slots=True)
 class AppConfig:
     """Typed, validated application settings. Never holds a secret.
@@ -96,6 +117,8 @@ class AppConfig:
     max_concurrent_jobs: int = DEFAULT_MAX_CONCURRENT_JOBS
     job_history_limit: int = DEFAULT_JOB_HISTORY_LIMIT
     cache_ttl_seconds: float = DEFAULT_CACHE_TTL_SECONDS
+    log_level: str = DEFAULT_LOG_LEVEL
+    log_format: str = DEFAULT_LOG_FORMAT
 
     def __post_init__(self) -> None:
         if not self.db_path.strip():
@@ -112,6 +135,14 @@ class AppConfig:
             raise ConfigurationError(
                 f"{CACHE_TTL_SECONDS_ENV_VAR} must be >= 0, got {self.cache_ttl_seconds}"
             )
+        if self.log_level not in VALID_LOG_LEVELS:
+            raise ConfigurationError(
+                f"{LOG_LEVEL_ENV_VAR} must be one of {sorted(VALID_LOG_LEVELS)}, got {self.log_level!r}"
+            )
+        if self.log_format not in VALID_LOG_FORMATS:
+            raise ConfigurationError(
+                f"{LOG_FORMAT_ENV_VAR} must be one of {sorted(VALID_LOG_FORMATS)}, got {self.log_format!r}"
+            )
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> "AppConfig":
@@ -127,6 +158,12 @@ class AppConfig:
             cache_ttl_seconds=_resolve_float(
                 source, CACHE_TTL_SECONDS_ENV_VAR, DEFAULT_CACHE_TTL_SECONDS, minimum=0.0,
             ),
+            log_level=_resolve_choice(
+                source, LOG_LEVEL_ENV_VAR, DEFAULT_LOG_LEVEL, valid=VALID_LOG_LEVELS, normalize=str.upper,
+            ),
+            log_format=_resolve_choice(
+                source, LOG_FORMAT_ENV_VAR, DEFAULT_LOG_FORMAT, valid=VALID_LOG_FORMATS, normalize=str.lower,
+            ),
         )
 
     def to_dict(self) -> dict[str, object]:
@@ -136,6 +173,8 @@ class AppConfig:
             "max_concurrent_jobs": self.max_concurrent_jobs,
             "job_history_limit": self.job_history_limit,
             "cache_ttl_seconds": self.cache_ttl_seconds,
+            "log_level": self.log_level,
+            "log_format": self.log_format,
         }
 
 

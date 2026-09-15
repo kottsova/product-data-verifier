@@ -19,6 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field, replace
 import hashlib
 import json
+import logging
 import time
 from typing import Callable, Literal, Mapping
 import unicodedata
@@ -32,6 +33,13 @@ from core.workflow import (
     ProductWorkflowResult,
     run_product_workflow,
 )
+from observability import (
+    MetricsCollector,
+    Stopwatch,
+    log_event,
+    log_exception_event,
+    new_correlation_id,
+)
 from services.cache import (
     CACHE_SCHEMA_VERSION,
     CacheEntry,
@@ -39,6 +47,10 @@ from services.cache import (
     DEFAULT_CACHE_POLICY,
     ProductVerificationRepository,
 )
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 ErrorKind = Literal["invalid_request", "workflow_failure", "internal_error"]
@@ -581,18 +593,54 @@ class ProductVerifierService:
         repository: ProductVerificationRepository | None = None,
         cache_policy: CachePolicy = DEFAULT_CACHE_POLICY,
         clock: Clock = time.time,
+        metrics: MetricsCollector | None = None,
+        duration_clock: Callable[[], float] = time.monotonic,
     ) -> None:
         self._run_workflow = run_workflow
         self._repository = repository
         self._cache_policy = cache_policy
         self._clock = clock
+        self._metrics = metrics if metrics is not None else MetricsCollector()
+        self._duration_clock = duration_clock
 
-    def verify(self, request: VerifyProductRequest) -> VerifyProductResult:
-        result, _ = self.verify_with_workflow_result(request)
+    @property
+    def metrics(self) -> MetricsCollector:
+        return self._metrics
+
+    @property
+    def cache_schema_version(self) -> int:
+        return CACHE_SCHEMA_VERSION
+
+    @property
+    def repository_configured(self) -> bool:
+        return self._repository is not None
+
+    def repository_available(self) -> bool | None:
+        """Stage 15 diagnostics probe. ``None`` means caching is not enabled
+        at all (no repository configured) -- never crashes on a broken one."""
+        if self._repository is None:
+            return None
+        probe = getattr(self._repository, "is_available", None)
+        if probe is None:
+            return True
+        try:
+            return bool(probe())
+        except Exception as error:  # noqa: BLE001 - a probe must never raise, only report
+            log_event(
+                logger, logging.ERROR, "repository_health_failure",
+                repository=type(self._repository).__name__,
+                error_type=type(error).__name__,
+            )
+            return False
+
+    def verify(
+        self, request: VerifyProductRequest, *, correlation_id: str | None = None,
+    ) -> VerifyProductResult:
+        result, _ = self.verify_with_workflow_result(request, correlation_id=correlation_id)
         return result
 
     def verify_with_workflow_result(
-        self, request: VerifyProductRequest,
+        self, request: VerifyProductRequest, *, correlation_id: str | None = None,
     ) -> tuple[VerifyProductResult, ProductWorkflowResult | None]:
         """Return the stable result alongside the raw internal workflow result.
 
@@ -607,66 +655,170 @@ class ProductVerifierService:
         On a cache hit, no pipeline ran, so the raw workflow result is
         ``None`` -- only the CLI's no-cache configuration ever relies on the
         second element being non-``None`` for a successful result.
+
+        Stage 15: every call gets a correlation id (the caller's, e.g. a
+        Telegram job id, or a freshly generated one) that ties together this
+        call's ``verification_started``/``cache_*``/``verification_completed``
+        log lines and a duration measured on a monotonic clock.
         """
+        correlation_id = correlation_id or new_correlation_id()
+        self._metrics.increment("verification_requests")
+        log_event(
+            logger, logging.INFO, "verification_started",
+            correlation_id=correlation_id, brand=request.brand, model=request.model,
+        )
+        stopwatch = Stopwatch(self._duration_clock)
+        result, workflow_result, workflow_duration = self._verify(request, correlation_id)
+        duration = stopwatch.stop()
+        self._metrics.record_verification_duration(duration)
+
+        timing_fields: dict[str, object] = {
+            "duration_seconds": round(duration, 6),
+        }
+        if workflow_duration is not None:
+            timing_fields["workflow_duration_seconds"] = round(workflow_duration, 6)
+
+        if result.success:
+            self._metrics.increment("verification_success")
+            log_event(
+                logger, logging.INFO, "verification_completed",
+                correlation_id=correlation_id, brand=request.brand, model=request.model,
+                served_from_cache=result.served_from_cache, **timing_fields,
+            )
+        else:
+            self._metrics.increment("verification_failure")
+            error_kind = result.error.kind if result.error else None
+            # workflow_failure/invalid_request are expected operational
+            # outcomes (bad input, an unreachable source) -- only
+            # internal_error indicates an actual bug, so only that gets
+            # ERROR severity here (its traceback was already logged where
+            # it was caught, in self._verify).
+            level = logging.ERROR if error_kind == "internal_error" else logging.WARNING
+            log_event(
+                logger, level, "verification_failed",
+                correlation_id=correlation_id, brand=request.brand, model=request.model,
+                error_kind=error_kind, **timing_fields,
+            )
+        return result, workflow_result
+
+    def _verify(
+        self, request: VerifyProductRequest, correlation_id: str,
+    ) -> tuple[VerifyProductResult, ProductWorkflowResult | None, float | None]:
         try:
             internal_request = _build_internal_request(request)
         except ValueError as error:
-            return _failure(request, "invalid_request", str(error)), None
+            return _failure(request, "invalid_request", str(error)), None, None
 
         cache_key = self._cache_key_for(request)
         if cache_key is not None and not request.force_refresh:
-            cached = self._lookup_cache(cache_key, request)
+            cached = self._lookup_cache(cache_key, request, correlation_id)
             if cached is not None:
-                return cached, None
+                return cached, None, None
 
+        workflow_stopwatch = Stopwatch(self._duration_clock)
         try:
             workflow_result = self._run_workflow(internal_request)
         except (RuntimeError, ValueError) as error:
+            # Expected operational failure (unreachable source, bad data) --
+            # logged at WARNING by the caller, no traceback needed here.
+            workflow_duration = workflow_stopwatch.stop()
+            self._metrics.record_duration("workflow", workflow_duration)
             return _failure(
                 request, "workflow_failure", str(error),
                 detail=type(error).__name__,
-            ), None
+            ), None, workflow_duration
         except Exception as error:  # noqa: BLE001 - boundary must not leak exception types
+            workflow_duration = workflow_stopwatch.stop()
+            self._metrics.record_duration("workflow", workflow_duration)
+            log_exception_event(
+                logger, "verification_exception",
+                correlation_id=correlation_id, phase="workflow",
+            )
             return _failure(
                 request, "internal_error", f"Unexpected failure: {error}",
                 detail=type(error).__name__,
-            ), None
+            ), None, workflow_duration
+        workflow_duration = workflow_stopwatch.stop()
+        self._metrics.record_duration("workflow", workflow_duration)
 
         try:
             result = _to_result(request, workflow_result)
         except Exception as error:  # noqa: BLE001 - a mapping bug must not crash the boundary
+            log_exception_event(
+                logger, "verification_exception",
+                correlation_id=correlation_id, phase="result_mapping",
+            )
             return _failure(
                 request, "internal_error", f"Unexpected failure while building the result: {error}",
                 detail=type(error).__name__,
-            ), None
+            ), None, workflow_duration
 
         if cache_key is not None:
-            self._store_cache(cache_key, result)
-        return result, workflow_result
+            self._store_cache(cache_key, result, correlation_id)
+        return result, workflow_result, workflow_duration
 
     def _cache_key_for(self, request: VerifyProductRequest) -> str | None:
         return _cache_key(request) if self._repository is not None else None
 
     def _lookup_cache(
-        self, key: str, request: VerifyProductRequest,
+        self, key: str, request: VerifyProductRequest, correlation_id: str,
     ) -> VerifyProductResult | None:
         assert self._repository is not None
+        stopwatch = Stopwatch(self._duration_clock)
+
+        def lookup_duration() -> float:
+            duration = stopwatch.stop()
+            self._metrics.record_duration("cache_lookup", duration)
+            return round(duration, 6)
+
+        def miss(reason: str) -> None:
+            self._metrics.increment("cache_misses")
+            log_event(
+                logger, logging.INFO, "cache_miss", correlation_id=correlation_id,
+                reason=reason, duration_seconds=lookup_duration(),
+            )
+
         try:
             entry = self._repository.get(key)
         except Exception:  # noqa: BLE001 - a broken store degrades to a live run
+            self._metrics.increment("cache_misses")
+            log_event(
+                logger, logging.ERROR, "cache_read_failure", correlation_id=correlation_id,
+                duration_seconds=lookup_duration(),
+            )
             return None
-        if entry is None or entry.schema_version != CACHE_SCHEMA_VERSION:
+        if entry is None:
+            miss("not_found")
+            return None
+        if entry.schema_version != CACHE_SCHEMA_VERSION:
+            miss("schema_version_mismatch")
             return None
         if not entry.success and not self._cache_policy.cache_failures:
+            miss("uncached_failure")
             return None
         try:
             cached_result = _result_from_dict(entry.payload)
         except Exception:  # noqa: BLE001 - corrupted payload -> unusable, not a crash
+            self._metrics.increment("cache_misses")
+            log_event(
+                logger, logging.ERROR, "cache_read_failure", correlation_id=correlation_id,
+                reason="corrupted_payload", duration_seconds=lookup_duration(),
+            )
             return None
         now = self._clock()
         age = max(0.0, now - entry.stored_at)
         if age > self._cache_policy.ttl_seconds:
+            self._metrics.increment("cache_misses")
+            log_event(
+                logger, logging.INFO, "cache_stale", correlation_id=correlation_id,
+                age_seconds=round(age, 1), duration_seconds=lookup_duration(),
+            )
             return None
+        self._metrics.increment("cache_hits")
+        log_event(
+            logger, logging.INFO, "cache_hit", correlation_id=correlation_id,
+            age_seconds=round(age, 1), duration_seconds=lookup_duration(),
+        )
         return replace(
             cached_result,
             request=request,
@@ -675,7 +827,7 @@ class ProductVerifierService:
             cache_age_seconds=age,
         )
 
-    def _store_cache(self, key: str, result: VerifyProductResult) -> None:
+    def _store_cache(self, key: str, result: VerifyProductResult, correlation_id: str) -> None:
         assert self._repository is not None
         if not result.success and not self._cache_policy.cache_failures:
             return
@@ -688,7 +840,7 @@ class ProductVerifierService:
                 payload=result.to_dict(),
             ))
         except Exception:  # noqa: BLE001 - caching is best-effort
-            pass
+            log_event(logger, logging.ERROR, "cache_write_failure", correlation_id=correlation_id)
 
 
 def verify_product(

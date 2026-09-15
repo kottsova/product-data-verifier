@@ -45,7 +45,7 @@ export TELEGRAM_BOT_TOKEN="123456:ABC..."   # required for the bot only, see bel
 python -m bot.telegram_bot
 ```
 
-### Configuration (Stage 14)
+### Configuration
 
 All application settings and secrets are read from environment variables in
 exactly one place: [config.py](config.py) (`AppConfig` / `TelegramConfig`).
@@ -58,6 +58,8 @@ No other module reads `os.environ`/`os.getenv` for application settings.
 | `PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS` | No | `2` | Max verifications the bot runs at once; integer >= 1. |
 | `PRODUCT_VERIFIER_JOB_HISTORY_LIMIT` | No | `20` | How many finished jobs per chat the bot keeps for `/status`; integer >= 0. |
 | `PRODUCT_VERIFIER_CACHE_TTL_SECONDS` | No | `3600` | Freshness window for the SQLite result cache; number >= 0. |
+| `PRODUCT_VERIFIER_LOG_LEVEL` | No | `INFO` | Central application log level: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`. |
+| `PRODUCT_VERIFIER_LOG_FORMAT` | No | `text` | Operational log format: `text` or single-line `json`. |
 
 Invalid values (non-numeric, or below the stated minimum) fail fast with a
 `ConfigurationError`, before the bot starts polling. The Telegram token is
@@ -85,6 +87,27 @@ product's result is still fresh in the SQLite cache, the check will be fast
 even though job tracking was reset. (The CLI does not use this cache --
 see the Stage 12 report.)
 
+### Observability and diagnostics (Stage 15)
+
+The Telegram process writes centralized operational logs to standard error.
+Stable events cover bot lifecycle/actions, background jobs, verification, and
+cache outcomes. A job ID is also the verification correlation ID; direct
+service calls receive their own opaque correlation ID. Durations use a
+monotonic clock and in-process metrics aggregate verification/cache/job counts
+and timings.
+
+Known secrets (including `TELEGRAM_BOT_TOKEN`) and authorization-like values
+are redacted from normal messages, structured fields, and server-side exception
+tracebacks. Logs never include complete Telegram updates, user profile fields,
+result payloads, or evidence/provenance bodies. Runtime log files remain ignored
+by `.gitignore` (`*.log`).
+
+Diagnostics are internal only: no public `/health` or `/metrics` Telegram
+commands and no HTTP server are added. The framework-independent snapshot is
+available from `JobManager.diagnostics().to_dict()` for future deployment
+healthcheck integration; it contains uptime, counters/timing aggregates,
+active/queued job counts, repository state, and the cache schema version.
+
 ## Current stage
 
-Stage 14 — Configuration & Secrets.
+Stage 15 — Observability & Operations.

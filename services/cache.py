@@ -12,12 +12,18 @@ from __future__ import annotations
 import contextlib
 from dataclasses import dataclass
 import json
+import logging
 from pathlib import Path
 import sqlite3
 from typing import Mapping, Protocol
 
+from observability import log_event
+
 
 CACHE_SCHEMA_VERSION = 1
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +63,8 @@ class ProductVerificationRepository(Protocol):
 
     def clear(self) -> None: ...
 
+    def is_available(self) -> bool: ...
+
 
 class InMemoryProductVerificationRepository:
     """A process-local fake for tests. Never used for real persistence."""
@@ -75,6 +83,10 @@ class InMemoryProductVerificationRepository:
 
     def clear(self) -> None:
         self._entries.clear()
+
+    def is_available(self) -> bool:
+        """Stage 15 diagnostics probe: an in-process dict is always available."""
+        return True
 
 
 _TABLE_SQL = """
@@ -155,3 +167,20 @@ class SqliteProductVerificationRepository:
     def clear(self) -> None:
         with self._connection() as connection:
             connection.execute("DELETE FROM verification_cache")
+
+    def is_available(self) -> bool:
+        """Stage 15 diagnostics probe: a non-destructive connectivity check.
+
+        Never reads or writes an application row -- just confirms the DB
+        file can be opened and a trivial query executed.
+        """
+        try:
+            with self._connection() as connection:
+                connection.execute("SELECT 1")
+            return True
+        except Exception as error:  # noqa: BLE001 - a probe must never raise, only report
+            log_event(
+                logger, logging.ERROR, "repository_health_failure",
+                repository="sqlite", error_type=type(error).__name__,
+            )
+            return False

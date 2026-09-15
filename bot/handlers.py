@@ -28,10 +28,12 @@ from bot.formatters import (
 )
 from bot.jobs import Job, JobManager, JobManagerShuttingDownError
 from bot.parser import parse_product_query
+from observability import log_event, log_exception_event, scoped_id
 from services.product_verifier import VerifyProductRequest
 
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 Reply = Callable[[str], Awaitable[object]]
 
@@ -84,6 +86,10 @@ async def handle_product_query(
     """
     query = parse_product_query(text)
     if query is None:
+        log_event(
+            logger, logging.INFO, "request_rejected",
+            chat=scoped_id(chat_id), reason="invalid_product_query",
+        )
         await reply(PARSE_ERROR_MESSAGE)
         return
 
@@ -99,12 +105,24 @@ async def handle_product_query(
     try:
         job, is_duplicate = await manager.submit(chat_id, request, on_update=on_update)
     except JobManagerShuttingDownError:
+        log_event(
+            logger, logging.INFO, "request_rejected",
+            chat=scoped_id(chat_id), reason="shutting_down",
+        )
         await reply(SHUTTING_DOWN_MESSAGE)
         return
 
     if is_duplicate:
+        log_event(
+            logger, logging.INFO, "duplicate_request",
+            chat=scoped_id(chat_id), job_id=job.id,
+        )
         await reply(format_duplicate(job))
         return
+    log_event(
+        logger, logging.INFO, "request_accepted",
+        chat=scoped_id(chat_id), job_id=job.id,
+    )
     await reply(format_accepted(job.request))
 
 
@@ -113,7 +131,11 @@ async def _safe_reply(message: object, text: str) -> None:
     try:
         await message.reply_text(text)  # type: ignore[attr-defined]
     except Exception:  # noqa: BLE001 - Telegram/API send failures are logged, not raised
-        logger.exception("Failed to send a Telegram reply")
+        chat_id = getattr(message, "chat_id", None)
+        log_exception_event(
+            logger, "reply_send_failure",
+            chat=scoped_id(chat_id) if chat_id is not None else "unknown",
+        )
 
 
 def _chat_id(update) -> int:  # noqa: ANN001 - telegram.Update, kept duck-typed for testability
@@ -145,7 +167,12 @@ def build_verify_command(manager: JobManager):
 
 def build_status_command(manager: JobManager):
     async def status_command(update, context) -> None:  # noqa: ANN001
-        jobs = manager.active_jobs_for_chat(_chat_id(update))
+        chat_id = _chat_id(update)
+        jobs = manager.active_jobs_for_chat(chat_id)
+        log_event(
+            logger, logging.INFO, "status_action",
+            chat=scoped_id(chat_id), active_jobs=len(jobs),
+        )
         await _safe_reply(update.message, format_status(jobs))
 
     return status_command
@@ -153,7 +180,12 @@ def build_status_command(manager: JobManager):
 
 def build_cancel_command(manager: JobManager):
     async def cancel_command(update, context) -> None:  # noqa: ANN001
-        count = await manager.cancel_chat_jobs(_chat_id(update))
+        chat_id = _chat_id(update)
+        count = await manager.cancel_chat_jobs(chat_id)
+        log_event(
+            logger, logging.INFO, "cancel_action",
+            chat=scoped_id(chat_id), affected_jobs=count,
+        )
         await _safe_reply(update.message, format_cancelled(count))
 
     return cancel_command

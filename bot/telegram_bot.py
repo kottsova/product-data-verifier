@@ -31,12 +31,14 @@ from bot.handlers import (
 from bot.jobs import JobManager
 from bot.service_factory import build_product_verifier_service
 from config import AppConfig, ConfigurationError, TelegramConfig
+from observability import configure_logging, log_event
 from services.product_verifier import ProductVerifierService
 
 
 SHUTDOWN_TIMEOUT_SECONDS = 30.0
 
 logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def build_job_manager(service: ProductVerifierService, config: AppConfig) -> JobManager:
@@ -45,6 +47,7 @@ def build_job_manager(service: ProductVerifierService, config: AppConfig) -> Job
         service,
         max_concurrent_jobs=config.max_concurrent_jobs,
         history_limit=config.job_history_limit,
+        metrics=getattr(service, "metrics", None),
     )
 
 
@@ -56,10 +59,18 @@ def build_application(token: str, manager: JobManager) -> Application:
     layer.
     """
 
-    async def _shutdown(_application: Application) -> None:
-        await manager.shutdown(timeout=SHUTDOWN_TIMEOUT_SECONDS)
+    async def _started(_application: Application) -> None:
+        log_event(logger, logging.INFO, "bot_started")
 
-    application = Application.builder().token(token).post_shutdown(_shutdown).build()
+    async def _shutdown(_application: Application) -> None:
+        try:
+            await manager.shutdown(timeout=SHUTDOWN_TIMEOUT_SECONDS)
+        finally:
+            log_event(logger, logging.INFO, "bot_shutdown")
+
+    application = (
+        Application.builder().token(token).post_init(_started).post_shutdown(_shutdown).build()
+    )
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", build_status_command(manager)))
@@ -71,21 +82,39 @@ def build_application(token: str, manager: JobManager) -> Application:
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO)
     try:
         app_config = AppConfig.from_env()
-        telegram_config = TelegramConfig.from_env()  # fails fast, before any polling/DB I/O
-    except ConfigurationError:
-        logger.exception("Configuration error; refusing to start the bot.")
+    except ConfigurationError as error:
+        configure_logging(AppConfig())
+        log_event(
+            logger, logging.ERROR, "bot_configuration_failure",
+            error_type=type(error).__name__,
+        )
         raise SystemExit(1)
+
+    configure_logging(app_config)
+    log_event(logger, logging.INFO, "bot_starting")
+    try:
+        telegram_config = TelegramConfig.from_env()  # before polling/DB I/O
+    except ConfigurationError as error:
+        log_event(
+            logger, logging.ERROR, "bot_configuration_failure",
+            error_type=type(error).__name__,
+        )
+        raise SystemExit(1)
+
+    # Reconfigure once the secret is known so every normal and exception log
+    # path redacts it. The token itself is never emitted as a field.
+    configure_logging(app_config, secrets=(telegram_config.bot_token,))
 
     service = build_product_verifier_service(app_config)
     manager = build_job_manager(service, app_config)
     application = build_application(telegram_config.bot_token, manager)
-    logger.info(
-        "Starting Telegram bot polling (max_concurrent_jobs=%d, job_history_limit=%d, "
-        "cache_ttl_seconds=%s).",
-        app_config.max_concurrent_jobs, app_config.job_history_limit, app_config.cache_ttl_seconds,
+    log_event(
+        logger, logging.INFO, "bot_polling",
+        max_concurrent_jobs=app_config.max_concurrent_jobs,
+        job_history_limit=app_config.job_history_limit,
+        cache_ttl_seconds=app_config.cache_ttl_seconds,
     )
     application.run_polling()
 
