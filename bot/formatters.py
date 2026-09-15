@@ -1,14 +1,19 @@
 """Deterministic VerifyProductResult -> Telegram message text formatting.
 
 Only depends on services.product_verifier's stable DTOs (VerifyProductResult,
-ServiceAttribute, ...) -- never on core.* or ProductWorkflowResult. Pure
-string-building: every function here is unit-testable without a bot
-framework or network.
+ServiceAttribute, ...) plus bot.jobs.Job (a bot-layer, non-core DTO) --
+never on core.* or ProductWorkflowResult. Pure string-building: every
+function here is unit-testable without a bot framework or network.
+
+Stage 12's format_result()/format_error() are unchanged below; Stage 13
+only adds job-lifecycle formatter helpers (accepted/started/duplicate/
+status/cancelled/outcome) that reuse them for the final result.
 """
 
 from __future__ import annotations
 
-from services.product_verifier import ServiceAttribute, VerifyProductResult
+from bot.jobs import Job
+from services.product_verifier import ServiceAttribute, VerifyProductRequest, VerifyProductResult
 
 
 # Telegram's hard cap is 4096 UTF-16 code units per message. We stay well
@@ -176,3 +181,76 @@ def format_result(
         lines.append(f"… и ещё {remaining} характеристик(-и)")
 
     return chunk_lines(lines, max_message_length)
+
+
+# ---------------------------------------------------------------------------
+# Stage 13: job-lifecycle formatting.
+# ---------------------------------------------------------------------------
+
+JOB_STATE_LABELS = {
+    "queued": "в очереди",
+    "running": "выполняется",
+    "completed": "завершено",
+    "failed": "не удалось",
+    "cancelled": "отменено",
+}
+
+
+def _product_name(request: VerifyProductRequest) -> str:
+    return f"{request.brand} {request.model}".strip()
+
+
+def format_accepted(request: VerifyProductRequest) -> str:
+    """Sent immediately after a new job is created -- the required "принял" ack."""
+    return f"Принял запрос. Проверяю {_product_name(request)}…"
+
+
+def format_started(request: VerifyProductRequest) -> str:
+    """Sent once, when a job actually begins running (leaves "queued")."""
+    return f"\U0001f504 Начинаю проверку {_product_name(request)}…"
+
+
+def format_duplicate(job: Job) -> str:
+    """Sent instead of creating a second job for an already-active request."""
+    state_label = JOB_STATE_LABELS.get(job.state, job.state)
+    return (
+        f"Запрос на {_product_name(job.request)} уже выполняется ({state_label}). "
+        "Дождитесь результата или используйте /status."
+    )
+
+
+def format_status(jobs: list[Job]) -> str:
+    """Rendered for /status: a chat's currently active (queued/running) jobs."""
+    if not jobs:
+        return "Активных задач нет."
+    lines = ["Ваши активные задачи:"]
+    for job in jobs:
+        state_label = JOB_STATE_LABELS.get(job.state, job.state)
+        lines.append(f"• {_product_name(job.request)} — {state_label}")
+    return "\n".join(lines)
+
+
+def format_cancelled(count: int) -> str:
+    """Sent as the immediate reply to /cancel."""
+    if count == 0:
+        return "Нет активных задач для отмены."
+    if count == 1:
+        return "Отменена 1 задача."
+    return f"Отменено задач: {count}."
+
+
+def format_job_outcome(job: Job) -> list[str]:
+    """The final message(s) for a job that reached a terminal state.
+
+    A cancelled job intentionally produces no message: the user already got
+    an immediate /cancel confirmation, and cooperative cancellation means a
+    running computation's result (if it finishes anyway) must be discarded,
+    never delivered.
+    """
+    if job.state == "completed" and job.result is not None:
+        return format_result(job.result)
+    if job.state == "failed":
+        if job.result is not None:
+            return format_result(job.result)
+        return [ERROR_MESSAGES["internal_error"]]
+    return []

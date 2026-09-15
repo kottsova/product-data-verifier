@@ -1,7 +1,15 @@
-"""Deterministic Stage 12 Telegram bot tests. No live network/Telegram API."""
+"""Deterministic Stage 12/13 Telegram bot tests. No live network/Telegram API.
+
+JobManager's own lifecycle/concurrency/cancellation/shutdown behavior has a
+dedicated, more thorough suite in tests/test_bot_jobs.py. This file covers
+the parser, formatters (including the Stage 13 job-lifecycle helpers), the
+Telegram-facing handlers wired to a JobManager, the architecture boundary,
+and configuration/wiring.
+"""
 
 from __future__ import annotations
 
+import asyncio
 from pathlib import Path
 import tempfile
 import unittest
@@ -10,25 +18,41 @@ from bot.formatters import (
     ERROR_MESSAGES,
     QUALITY_LABELS,
     chunk_lines,
+    format_accepted,
+    format_cancelled,
+    format_duplicate,
     format_error,
+    format_job_outcome,
     format_result,
+    format_started,
+    format_status,
 )
 from bot.handlers import (
     HELP_MESSAGE,
     PARSE_ERROR_MESSAGE,
     START_MESSAGE,
+    build_cancel_command,
+    build_status_command,
     build_verify_command,
     handle_product_query,
     help_command,
     start_command,
 )
+from bot.jobs import Job, JobManager
 from bot.parser import ParsedProductQuery, parse_product_query
 from bot.service_factory import (
     DB_PATH_ENV_VAR,
     build_product_verifier_service,
     resolve_db_path,
 )
-from bot.telegram_bot import MissingBotTokenError, resolve_bot_token
+from bot.telegram_bot import (
+    InvalidJobConfigurationError,
+    MissingBotTokenError,
+    build_job_manager,
+    resolve_bot_token,
+    resolve_job_history_limit,
+    resolve_max_concurrent_jobs,
+)
 from services.cache import SqliteProductVerificationRepository
 from services.product_verifier import (
     ProductVerifierService,
@@ -253,6 +277,80 @@ class FormatterLengthLimitTests(unittest.TestCase):
         self.assertLessEqual(len(chunks[0]), 20)
 
 
+def make_job(*, state="queued", request=None, result=None, error=None) -> Job:
+    return Job(
+        id="job-1", chat_id=1, request=request or VerifyProductRequest(brand="Bosch", model="PUE611BB5E"),
+        state=state, result=result, error=error,
+    )
+
+
+class Stage13JobFormatterTests(unittest.TestCase):
+    def test_format_accepted_names_the_product(self):
+        text = format_accepted(VerifyProductRequest(brand="Bosch", model="PUE611BB5E"))
+        self.assertIn("Bosch", text)
+        self.assertIn("PUE611BB5E", text)
+
+    def test_format_started_names_the_product(self):
+        text = format_started(VerifyProductRequest(brand="Bosch", model="PUE611BB5E"))
+        self.assertIn("Bosch", text)
+        self.assertIn("PUE611BB5E", text)
+
+    def test_format_duplicate_mentions_the_product_and_its_state(self):
+        job = make_job(state="running")
+        text = format_duplicate(job)
+        self.assertIn("Bosch", text)
+        self.assertIn("выполняется", text)
+
+    def test_format_status_lists_every_active_job(self):
+        jobs = [
+            make_job(request=VerifyProductRequest(brand="Bosch", model="A"), state="queued"),
+            make_job(request=VerifyProductRequest(brand="HONOR", model="B"), state="running"),
+        ]
+        text = format_status(jobs)
+        self.assertIn("Bosch", text)
+        self.assertIn("HONOR", text)
+        self.assertIn("очеред", text)
+        self.assertIn("выполня", text)
+
+    def test_format_status_handles_no_active_jobs(self):
+        text = format_status([])
+        self.assertTrue(text)
+        self.assertNotIn("None", text)
+
+    def test_format_cancelled_zero_vs_nonzero(self):
+        self.assertNotEqual(format_cancelled(0), format_cancelled(1))
+        self.assertIn("1", format_cancelled(1))
+        self.assertIn("3", format_cancelled(3))
+
+    def test_format_job_outcome_for_completed_job_reuses_format_result(self):
+        result = make_result(status="verified")
+        job = make_job(state="completed", result=result)
+        self.assertEqual(format_job_outcome(job), format_result(result))
+
+    def test_format_job_outcome_for_failed_job_with_result_reuses_format_result(self):
+        error = VerifyProductError(kind="workflow_failure", message="net down")
+        result = make_result(success=False, error=error)
+        job = make_job(state="failed", result=result, error="net down")
+        self.assertEqual(format_job_outcome(job), format_result(result))
+
+    def test_format_job_outcome_for_failed_job_without_result_is_generic_and_safe(self):
+        job = make_job(state="failed", result=None, error="KeyError: boom")
+        messages = format_job_outcome(job)
+        self.assertEqual(len(messages), 1)
+        self.assertNotIn("KeyError", messages[0])
+        self.assertNotIn("boom", messages[0])
+
+    def test_format_job_outcome_for_cancelled_job_is_empty(self):
+        # JobManager._finalize() never attaches a result for a "cancelled" job
+        # (the underlying computation's result, if any, is discarded before
+        # this point) -- format_job_outcome must still produce no message
+        # even if a caller somehow constructs a cancelled Job with a result.
+        job = make_job(state="cancelled", result=None)
+        self.assertEqual(format_job_outcome(job), [])
+        job_with_stray_result = make_job(state="cancelled", result=make_result(status="verified"))
+        self.assertEqual(format_job_outcome(job_with_stray_result), [])
+
+
 # ---------------------------------------------------------------------------
 # Handlers (framework-free core: handle_product_query)
 # ---------------------------------------------------------------------------
@@ -277,57 +375,93 @@ class TrackingFakeService:
         return self._result
 
 
-class HandleProductQueryTests(unittest.TestCase):
-    def _run(self, coro):
-        import asyncio
-        return asyncio.run(coro)
+class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
+    """Stage 13: handle_product_query submits a background job and replies
+    immediately; the final result arrives asynchronously through the same
+    ``reply`` via the job's on_update callback."""
 
-    def test_invalid_input_never_calls_the_service(self):
+    async def test_invalid_input_never_creates_a_job(self):
         service = TrackingFakeService(make_result())
+        manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        self._run(handle_product_query("just-one-token", service, reply=reply))
+        await handle_product_query("just-one-token", 1, manager, reply=reply)
         self.assertEqual(service.calls, [])
         self.assertEqual(reply.messages, [PARSE_ERROR_MESSAGE])
+        self.assertEqual(manager.active_jobs_for_chat(1), [])
 
-    def test_valid_input_builds_a_verify_product_request_and_formats_the_reply(self):
+    async def test_valid_input_replies_immediately_with_an_accepted_message(self):
         service = TrackingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        self._run(handle_product_query("Bosch PUE611BB5E", service, reply=reply))
-        self.assertEqual(len(service.calls), 1)
-        self.assertEqual(service.calls[0].brand, "Bosch")
-        self.assertEqual(service.calls[0].model, "PUE611BB5E")
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply)
         self.assertTrue(reply.messages)
-        self.assertIn("verified", reply.messages[0])
+        self.assertIn("Bosch", reply.messages[0])
+        self.assertIn("PUE611BB5E", reply.messages[0])
 
-    def test_a_raising_fake_service_produces_a_safe_internal_error_reply(self):
+    async def test_final_result_arrives_via_the_same_reply_once_the_job_completes(self):
+        service = TrackingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        reply = RecordingReply()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply)
+        # Give the scheduled background task a chance to run to completion.
+        for _ in range(50):
+            if len(reply.messages) >= 2:
+                break
+            await asyncio.sleep(0.01)
+        self.assertEqual(len(service.calls), 1)
+        self.assertTrue(any("verified" in message for message in reply.messages))
+
+    async def test_a_raising_fake_service_produces_a_safe_reply_not_a_crash(self):
         class BrokenService:
             def verify(self, request):
                 raise KeyError("boom")
 
+        manager = JobManager(BrokenService(), max_concurrent_jobs=1)
         reply = RecordingReply()
-        self._run(handle_product_query("Bosch PUE611BB5E", BrokenService(), reply=reply))
-        self.assertEqual(len(reply.messages), 1)
-        self.assertNotIn("boom", reply.messages[0])
-        self.assertNotIn("KeyError", reply.messages[0])
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply)
+        for _ in range(50):
+            if len(reply.messages) >= 2:
+                break
+            await asyncio.sleep(0.01)
+        joined = "\n".join(reply.messages)
+        self.assertNotIn("boom", joined)
+        self.assertNotIn("KeyError", joined)
 
-    def test_real_product_verifier_service_wiring_with_fake_workflow(self):
+    async def test_real_product_verifier_service_wiring_with_fake_workflow(self):
         """Confirms handle_product_query works against the real service type,
         not just a duck-typed fake -- with a fake workflow runner so no live
         network is touched."""
         profile = final_profile([definition("power")], [candidate("power", "1000", unit="W")])
         service = ProductVerifierService(run_workflow=fake_runner(profile))
+        manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        self._run(handle_product_query("Acme X100", service, reply=reply))
-        self.assertTrue(reply.messages)
+        await handle_product_query("Acme X100", 1, manager, reply=reply)
+        for _ in range(50):
+            if len(reply.messages) >= 2:
+                break
+            await asyncio.sleep(0.01)
         self.assertIn("power", "\n".join(reply.messages).casefold())
 
-    def test_workflow_failure_from_the_real_service_is_formatted_safely(self):
+    async def test_workflow_failure_from_the_real_service_is_formatted_safely(self):
         service = ProductVerifierService(run_workflow=raising_runner(RuntimeError("net down")))
+        manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        self._run(handle_product_query("Acme X100", service, reply=reply))
-        self.assertEqual(len(reply.messages), 1)
-        self.assertIn("net down", reply.messages[0])
-        self.assertNotIn("workflow_failure", reply.messages[0])
+        await handle_product_query("Acme X100", 1, manager, reply=reply)
+        for _ in range(50):
+            if len(reply.messages) >= 2:
+                break
+            await asyncio.sleep(0.01)
+        joined = "\n".join(reply.messages)
+        self.assertIn("net down", joined)
+        self.assertNotIn("workflow_failure", joined)
+
+    async def test_duplicate_active_request_replies_without_a_second_job(self):
+        service = TrackingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        reply1, reply2 = RecordingReply(), RecordingReply()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply1)
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply2)
+        self.assertTrue(any("уже выполняется" in message for message in reply2.messages))
 
 
 # ---------------------------------------------------------------------------
@@ -335,8 +469,9 @@ class HandleProductQueryTests(unittest.TestCase):
 # ---------------------------------------------------------------------------
 
 class FakeMessage:
-    def __init__(self, text: str | None = None, *, fail_send: bool = False):
+    def __init__(self, text: str | None = None, *, chat_id: int = 42, fail_send: bool = False):
         self.text = text
+        self.chat_id = chat_id
         self.sent: list[str] = []
         self._fail_send = fail_send
 
@@ -351,45 +486,103 @@ class FakeUpdate:
         self.message = message
 
 
-class TelegramCommandTests(unittest.TestCase):
-    def _run(self, coro):
-        import asyncio
-        return asyncio.run(coro)
-
-    def test_start_command_sends_the_start_message(self):
+class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
+    async def test_start_command_sends_the_start_message(self):
         message = FakeMessage()
-        self._run(start_command(FakeUpdate(message), None))
+        await start_command(FakeUpdate(message), None)
         self.assertEqual(message.sent, [START_MESSAGE])
 
-    def test_help_command_sends_the_help_message(self):
+    async def test_help_command_sends_the_help_message(self):
         message = FakeMessage()
-        self._run(help_command(FakeUpdate(message), None))
+        await help_command(FakeUpdate(message), None)
         self.assertEqual(message.sent, [HELP_MESSAGE])
+        self.assertIn("/status", HELP_MESSAGE)
+        self.assertIn("/cancel", HELP_MESSAGE)
 
-    def test_verify_command_uses_the_injected_service_and_replies(self):
+    async def test_verify_command_submits_a_job_and_replies(self):
         service = TrackingFakeService(make_result(status="partial"))
-        verify_command = build_verify_command(service)
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
         message = FakeMessage(text="Bosch PUE611BB5E")
-        self._run(verify_command(FakeUpdate(message), None))
-        self.assertEqual(len(service.calls), 1)
+        await verify_command(FakeUpdate(message), None)
         self.assertTrue(message.sent)
-        self.assertIn("partial", message.sent[0])
+        self.assertIn("Bosch", message.sent[0])
 
-    def test_verify_command_on_parse_failure_never_calls_the_service(self):
+    async def test_verify_command_on_parse_failure_never_creates_a_job(self):
         service = TrackingFakeService(make_result())
-        verify_command = build_verify_command(service)
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
         message = FakeMessage(text="onlyonetoken")
-        self._run(verify_command(FakeUpdate(message), None))
+        await verify_command(FakeUpdate(message), None)
         self.assertEqual(service.calls, [])
         self.assertEqual(message.sent, [PARSE_ERROR_MESSAGE])
 
-    def test_send_failure_is_caught_at_the_adapter_and_does_not_raise(self):
+    async def test_send_failure_is_caught_at_the_adapter_and_does_not_raise(self):
         message = FakeMessage(fail_send=True)
         try:
-            self._run(start_command(FakeUpdate(message), None))
+            await start_command(FakeUpdate(message), None)
         except Exception as error:  # pragma: no cover - failure path under test
             self.fail(f"start_command must not propagate a send failure, got {error!r}")
         self.assertEqual(message.sent, [])  # the send failed, but silently
+
+    async def test_status_command_reports_no_active_jobs(self):
+        manager = JobManager(TrackingFakeService(make_result()), max_concurrent_jobs=1)
+        status_command = build_status_command(manager)
+        message = FakeMessage(chat_id=7)
+        await status_command(FakeUpdate(message), None)
+        self.assertEqual(len(message.sent), 1)
+        self.assertNotIn("Bosch", message.sent[0])
+
+    async def test_status_command_lists_an_active_job_for_the_same_chat(self):
+        from tests.test_bot_jobs import GatedService
+
+        service = GatedService()
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
+        status_command = build_status_command(manager)
+        message = FakeMessage(text="Bosch PUE611BB5E", chat_id=7)
+        await verify_command(FakeUpdate(message), None)
+        await service.wait_started("Bosch", "PUE611BB5E")
+
+        status_message = FakeMessage(chat_id=7)
+        await status_command(FakeUpdate(status_message), None)
+        self.assertIn("Bosch", status_message.sent[0])
+
+        service.release_all()
+
+    async def test_cancel_command_reports_zero_with_nothing_active(self):
+        manager = JobManager(TrackingFakeService(make_result()), max_concurrent_jobs=1)
+        cancel_command = build_cancel_command(manager)
+        message = FakeMessage(chat_id=9)
+        await cancel_command(FakeUpdate(message), None)
+        self.assertIn("Нет", message.sent[0])
+
+    async def test_cancel_command_cancels_an_active_job_for_the_same_chat(self):
+        from tests.test_bot_jobs import GatedService
+
+        service = GatedService()
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
+        cancel_command = build_cancel_command(manager)
+        message = FakeMessage(text="Bosch PUE611BB5E", chat_id=9)
+        await verify_command(FakeUpdate(message), None)
+        await service.wait_started("Bosch", "PUE611BB5E")
+
+        cancel_message = FakeMessage(chat_id=9)
+        await cancel_command(FakeUpdate(cancel_message), None)
+        self.assertIn("Отменен", cancel_message.sent[0])
+        # The job is flagged, but a running job's blocking call cannot be
+        # force-killed -- it only leaves the active list once it finalizes.
+        active_before_release = manager.active_jobs_for_chat(9)
+        self.assertEqual(len(active_before_release), 1)
+        self.assertTrue(active_before_release[0].cancel_requested)
+
+        service.release_all()
+        for _ in range(50):
+            if not manager.active_jobs_for_chat(9):
+                break
+            await asyncio.sleep(0.01)
+        self.assertEqual(manager.active_jobs_for_chat(9), [])
 
 
 # ---------------------------------------------------------------------------
@@ -408,7 +601,7 @@ class ArchitectureBoundaryTests(unittest.TestCase):
     }
     BOT_MODULES = (
         "bot/handlers.py", "bot/formatters.py", "bot/parser.py",
-        "bot/telegram_bot.py", "bot/service_factory.py",
+        "bot/telegram_bot.py", "bot/service_factory.py", "bot/jobs.py",
     )
 
     def _code_identifiers_and_imports(self, source: str) -> tuple[set[str], set[str]]:
@@ -474,6 +667,50 @@ class ConfigurationTests(unittest.TestCase):
     def test_db_path_honors_the_environment_variable(self):
         custom = str(Path(tempfile.gettempdir()) / "custom_verifier.sqlite3")
         self.assertEqual(resolve_db_path(env={DB_PATH_ENV_VAR: custom}), custom)
+
+    def test_max_concurrent_jobs_defaults_when_absent(self):
+        self.assertEqual(resolve_max_concurrent_jobs(env={}), 2)
+
+    def test_max_concurrent_jobs_honors_the_environment_variable(self):
+        self.assertEqual(
+            resolve_max_concurrent_jobs(env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "5"}), 5,
+        )
+
+    def test_max_concurrent_jobs_rejects_non_integer(self):
+        with self.assertRaises(InvalidJobConfigurationError):
+            resolve_max_concurrent_jobs(env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "abc"})
+
+    def test_max_concurrent_jobs_rejects_zero_or_negative(self):
+        with self.assertRaises(InvalidJobConfigurationError):
+            resolve_max_concurrent_jobs(env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "0"})
+
+    def test_job_history_limit_defaults_when_absent(self):
+        self.assertEqual(resolve_job_history_limit(env={}), 20)
+
+    def test_job_history_limit_honors_the_environment_variable(self):
+        self.assertEqual(
+            resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "50"}), 50,
+        )
+
+    def test_job_history_limit_accepts_zero(self):
+        self.assertEqual(resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "0"}), 0)
+
+    def test_job_history_limit_rejects_negative(self):
+        with self.assertRaises(InvalidJobConfigurationError):
+            resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "-1"})
+
+    def test_job_history_limit_rejects_non_integer(self):
+        with self.assertRaises(InvalidJobConfigurationError):
+            resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "soon"})
+
+    def test_build_job_manager_wires_configured_limits(self):
+        service = TrackingFakeService(make_result())
+        manager = build_job_manager(
+            service, env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "3", "PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "5"},
+        )
+        self.assertIsInstance(manager, JobManager)
+        self.assertEqual(manager._history_limit, 5)
+        self.assertEqual(manager._semaphore._value, 3)
 
 
 class ServiceFactoryWiringTests(unittest.TestCase):
