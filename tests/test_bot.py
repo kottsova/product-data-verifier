@@ -40,19 +40,9 @@ from bot.handlers import (
 )
 from bot.jobs import Job, JobManager
 from bot.parser import ParsedProductQuery, parse_product_query
-from bot.service_factory import (
-    DB_PATH_ENV_VAR,
-    build_product_verifier_service,
-    resolve_db_path,
-)
-from bot.telegram_bot import (
-    InvalidJobConfigurationError,
-    MissingBotTokenError,
-    build_job_manager,
-    resolve_bot_token,
-    resolve_job_history_limit,
-    resolve_max_concurrent_jobs,
-)
+from bot.service_factory import build_product_verifier_service
+from bot.telegram_bot import build_job_manager
+from config import AppConfig
 from services.cache import SqliteProductVerificationRepository
 from services.product_verifier import (
     ProductVerifierService,
@@ -642,72 +632,15 @@ class ArchitectureBoundaryTests(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# Configuration and production wiring (no real Telegram/network)
+# Production wiring against a typed AppConfig (no real Telegram/network).
+# Config value parsing/validation itself is covered in tests/test_config.py.
 # ---------------------------------------------------------------------------
 
 class ConfigurationTests(unittest.TestCase):
-    def test_missing_token_fails_fast_with_a_clear_message(self):
-        with self.assertRaises(MissingBotTokenError) as context:
-            resolve_bot_token(env={})
-        self.assertIn("TELEGRAM_BOT_TOKEN", str(context.exception))
-
-    def test_blank_token_also_fails_fast(self):
-        with self.assertRaises(MissingBotTokenError):
-            resolve_bot_token(env={"TELEGRAM_BOT_TOKEN": "   "})
-
-    def test_present_token_is_returned(self):
-        self.assertEqual(
-            resolve_bot_token(env={"TELEGRAM_BOT_TOKEN": "123:abc"}), "123:abc",
-        )
-
-    def test_db_path_defaults_when_env_var_absent(self):
-        path = resolve_db_path(env={})
-        self.assertTrue(path.endswith("product_verifier.sqlite3"))
-
-    def test_db_path_honors_the_environment_variable(self):
-        custom = str(Path(tempfile.gettempdir()) / "custom_verifier.sqlite3")
-        self.assertEqual(resolve_db_path(env={DB_PATH_ENV_VAR: custom}), custom)
-
-    def test_max_concurrent_jobs_defaults_when_absent(self):
-        self.assertEqual(resolve_max_concurrent_jobs(env={}), 2)
-
-    def test_max_concurrent_jobs_honors_the_environment_variable(self):
-        self.assertEqual(
-            resolve_max_concurrent_jobs(env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "5"}), 5,
-        )
-
-    def test_max_concurrent_jobs_rejects_non_integer(self):
-        with self.assertRaises(InvalidJobConfigurationError):
-            resolve_max_concurrent_jobs(env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "abc"})
-
-    def test_max_concurrent_jobs_rejects_zero_or_negative(self):
-        with self.assertRaises(InvalidJobConfigurationError):
-            resolve_max_concurrent_jobs(env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "0"})
-
-    def test_job_history_limit_defaults_when_absent(self):
-        self.assertEqual(resolve_job_history_limit(env={}), 20)
-
-    def test_job_history_limit_honors_the_environment_variable(self):
-        self.assertEqual(
-            resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "50"}), 50,
-        )
-
-    def test_job_history_limit_accepts_zero(self):
-        self.assertEqual(resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "0"}), 0)
-
-    def test_job_history_limit_rejects_negative(self):
-        with self.assertRaises(InvalidJobConfigurationError):
-            resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "-1"})
-
-    def test_job_history_limit_rejects_non_integer(self):
-        with self.assertRaises(InvalidJobConfigurationError):
-            resolve_job_history_limit(env={"PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "soon"})
-
     def test_build_job_manager_wires_configured_limits(self):
         service = TrackingFakeService(make_result())
-        manager = build_job_manager(
-            service, env={"PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS": "3", "PRODUCT_VERIFIER_JOB_HISTORY_LIMIT": "5"},
-        )
+        config = AppConfig(max_concurrent_jobs=3, job_history_limit=5)
+        manager = build_job_manager(service, config)
         self.assertIsInstance(manager, JobManager)
         self.assertEqual(manager._history_limit, 5)
         self.assertEqual(manager._semaphore._value, 3)
@@ -717,17 +650,26 @@ class ServiceFactoryWiringTests(unittest.TestCase):
     def test_factory_wires_a_real_sqlite_repository_without_any_network(self):
         with tempfile.TemporaryDirectory() as tmp:
             db_path = str(Path(tmp) / "wiring.sqlite3")
-            service = build_product_verifier_service(db_path=db_path)
+            service = build_product_verifier_service(AppConfig(db_path=db_path))
             self.assertIsInstance(service._repository, SqliteProductVerificationRepository)
             self.assertTrue(Path(db_path).exists())
 
     def test_each_factory_call_builds_an_independent_service_instance(self):
         with tempfile.TemporaryDirectory() as tmp:
             db_path = str(Path(tmp) / "wiring.sqlite3")
-            first = build_product_verifier_service(db_path=db_path)
-            second = build_product_verifier_service(db_path=db_path)
+            config = AppConfig(db_path=db_path)
+            first = build_product_verifier_service(config)
+            second = build_product_verifier_service(config)
             self.assertIsNot(first, second)
             self.assertIsNot(first._repository, second._repository)
+
+    def test_factory_wires_the_cache_ttl_from_config(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = str(Path(tmp) / "wiring.sqlite3")
+            service = build_product_verifier_service(
+                AppConfig(db_path=db_path, cache_ttl_seconds=42.0),
+            )
+            self.assertEqual(service._cache_policy.ttl_seconds, 42.0)
 
 
 if __name__ == "__main__":

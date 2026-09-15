@@ -41,12 +41,28 @@ to bound initial fetches.
 
 ```text
 pip install -r requirements.txt
-export TELEGRAM_BOT_TOKEN="123456:ABC..."                     # required
-export PRODUCT_VERIFIER_DB_PATH="./.cache/product_verifier.sqlite3"  # optional
-export PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS="2"                # optional
-export PRODUCT_VERIFIER_JOB_HISTORY_LIMIT="20"                 # optional
+export TELEGRAM_BOT_TOKEN="123456:ABC..."   # required for the bot only, see below
 python -m bot.telegram_bot
 ```
+
+### Configuration (Stage 14)
+
+All application settings and secrets are read from environment variables in
+exactly one place: [config.py](config.py) (`AppConfig` / `TelegramConfig`).
+No other module reads `os.environ`/`os.getenv` for application settings.
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `TELEGRAM_BOT_TOKEN` | Yes, for `python -m bot.telegram_bot` only | none | Telegram bot secret. Never logged, never in a repr/to_dict. `python app.py` does not need it. |
+| `PRODUCT_VERIFIER_DB_PATH` | No | `./.cache/product_verifier.sqlite3` | Path to the Stage 11 SQLite result cache (relative or absolute). |
+| `PRODUCT_VERIFIER_MAX_CONCURRENT_JOBS` | No | `2` | Max verifications the bot runs at once; integer >= 1. |
+| `PRODUCT_VERIFIER_JOB_HISTORY_LIMIT` | No | `20` | How many finished jobs per chat the bot keeps for `/status`; integer >= 0. |
+| `PRODUCT_VERIFIER_CACHE_TTL_SECONDS` | No | `3600` | Freshness window for the SQLite result cache; number >= 0. |
+
+Invalid values (non-numeric, or below the stated minimum) fail fast with a
+`ConfigurationError`, before the bot starts polling. The Telegram token is
+validated separately from the rest of the settings, so a plain
+`python app.py` run never requires it.
 
 Send the bot a message like `Bosch PUE611BB5E` or `Bosch | PUE611BB5E` (a
 third `| article` part is optional). `/start` and `/help` explain the format.
@@ -71,4 +87,4 @@ see the Stage 12 report.)
 
 ## Current stage
 
-Stage 13 — Telegram UX & Async Job Handling.
+Stage 14 — Configuration & Secrets.
