@@ -1002,6 +1002,96 @@ class SearchFallbackTests(unittest.TestCase):
         self.assertTrue(outcome.attempts[-1].budget_exhausted)
         self.assertEqual(budget.exhausted_stage, "discovery")
 
+    def test_slow_but_successful_provider_cannot_monopolize_workflow_budget(self) -> None:
+        # Stage 18.7: a provider that keeps succeeding, just slowly, must not
+        # be able to consume the whole shared workflow budget by winning the
+        # fallback race on every single query. Once its cumulative elapsed
+        # time reaches its fair share of the total budget, later queries
+        # must skip straight to the next provider even though it is not
+        # blocked, timed out, or circuit-open.
+        class Clock:
+            now = 0.0
+
+            def __call__(self):
+                return self.now
+
+        clock = Clock()
+
+        class SlowProvider(self.Provider):
+            def search_with_timeout(self, query, timeout_seconds):
+                self.calls.append((query, timeout_seconds))
+                clock.now += 20.0
+                return [("https://shop.example/product/X100", "Acme X100")]
+
+        class FastProvider(self.Provider):
+            def search_with_timeout(self, query, timeout_seconds):
+                self.calls.append((query, timeout_seconds))
+                clock.now += 0.1
+                return [("https://shop.example/product/X100", "Acme X100")]
+
+        primary = SlowProvider("primary", [])
+        fallback = FastProvider("fallback", [])
+        budget = WallClockBudget(90.0, clock)
+        session = ResilientSearchSession(
+            providers=(primary, fallback),
+            config=DiscoveryRuntimeConfig(
+                provider_timeouts={"primary": 25.0, "fallback": 8.0},
+                provider_time_share=0.5,
+            ),
+            clock=clock,
+            budget=budget,
+        )
+
+        outcomes = [session.search_with_status(f"query {i}") for i in range(4)]
+
+        # The slow provider is used while its cumulative time is under its
+        # 45s fair share (0.5 * 90s), then yields to the fast provider.
+        self.assertEqual(len(primary.calls), 3)
+        self.assertEqual(len(fallback.calls), 1)
+        last_attempts = outcomes[-1].attempts
+        self.assertEqual(last_attempts[0].status, "capped")
+        self.assertTrue(last_attempts[0].provider_time_capped)
+        self.assertEqual(last_attempts[1].status, "success")
+        self.assertEqual(last_attempts[1].provider, "fallback")
+        # The circuit breaker is a distinct mechanism: the slow provider was
+        # never blocked/timed out/errored, so it must not be circuit-open.
+        self.assertFalse(any(item.circuit_open for item in last_attempts))
+        # Budget still has time remaining; capping freed it for later stages
+        # (fetch) instead of letting one provider spend it all.
+        self.assertGreater(budget.remaining_seconds, 0.0)
+
+    def test_fast_provider_is_never_time_capped(self) -> None:
+        # Regression guard: a provider answering quickly on every query must
+        # never hit the fairness cap, no matter how many queries run.
+        class Clock:
+            now = 0.0
+
+            def __call__(self):
+                return self.now
+
+        clock = Clock()
+
+        class FastProvider(self.Provider):
+            def search_with_timeout(self, query, timeout_seconds):
+                self.calls.append((query, timeout_seconds))
+                clock.now += 0.2
+                return [("https://shop.example/product/X100", "Acme X100")]
+
+        primary = FastProvider("primary", [])
+        budget = WallClockBudget(90.0, clock)
+        session = ResilientSearchSession(
+            providers=(primary,),
+            config=DiscoveryRuntimeConfig(provider_timeouts={"primary": 25.0}),
+            clock=clock,
+            budget=budget,
+        )
+
+        for i in range(20):
+            outcome = session.search_with_status(f"query {i}")
+            self.assertEqual(outcome.attempts[0].status, "success")
+
+        self.assertEqual(len(primary.calls), 20)
+
     def test_generic_browser_items_handle_redirects_layouts_and_duplicates(self) -> None:
         items = [
             {
@@ -1099,7 +1189,15 @@ class SearchFallbackTests(unittest.TestCase):
         self.assertEqual(outcome.candidates[0]["authority_status"], "unknown")
         self.assertEqual(outcome.rejected_candidates[0]["relevance_relation"], "reject")
 
-    def test_explicit_official_claim_from_fallback_does_not_verify_authority(self) -> None:
+    def test_official_claim_from_fallback_provider_seeds_manufacturer_authority(self) -> None:
+        # Stage 18.7: official-domain corroboration no longer depends on one
+        # specific provider (previously: only a non-fallback/primary success
+        # counted). The primary provider is blocked here; a fallback
+        # provider alone returns the "official website" evidence, and it
+        # meets the same evidence bar (domain/brand consistency + explicit
+        # "official" wording + brand name in the title) a primary-provider
+        # claim would have to meet, so it seeds authority just the same.
+        clear_official_domain_cache()
         primary = self.Provider("primary", RuntimeError("provider blocked"))
 
         class QueryFallback:
@@ -1120,9 +1218,65 @@ class SearchFallbackTests(unittest.TestCase):
             if item["url"] == "https://acme.example/product/X100"
         )
 
+        self.assertEqual(product["source_type"], "manufacturer")
+        self.assertEqual(product["authority_status"], "verified")
+        self.assertEqual(product["authority_evidence_url"], "https://acme.example/")
+
+    def test_fallback_official_claim_without_domain_consistency_stays_unverified(self) -> None:
+        # Content evidence, not provider trust, is what must gate
+        # verification: a fallback claim naming the right brand wording but
+        # pointing at an unrelated domain must still be rejected.
+        clear_official_domain_cache()
+        primary = self.Provider("primary", RuntimeError("provider blocked"))
+
+        class QueryFallback:
+            name = "fallback"
+
+            def search(self, query):
+                if query == "Acme official website":
+                    return [("https://unrelated-shop.example/", "Acme official website")]
+                return [("https://acme.example/product/X100", "Acme X100")]
+
+        search = ResilientSearchSession(
+            providers=(primary, QueryFallback()),
+        ).search_with_status
+
+        outcome = discover_with_status("Acme", "X100", searcher=search)
+        product = next(
+            item for item in outcome.candidates
+            if item["url"] == "https://acme.example/product/X100"
+        )
+
         self.assertEqual(product["source_type"], "other")
         self.assertEqual(product["authority_status"], "unknown")
-        self.assertIsNone(product["authority_evidence_url"])
+
+    def test_marketplace_domain_official_claim_from_any_provider_is_never_manufacturer(self) -> None:
+        # A brand whose name coincides with a marketplace's domain label
+        # must never let an "official site" claim - from any provider -
+        # promote the marketplace domain itself to manufacturer authority.
+        clear_official_domain_cache()
+        primary = self.Provider("primary", RuntimeError("provider blocked"))
+
+        class QueryFallback:
+            name = "fallback"
+
+            def search(self, query):
+                if query == "Ozon official website":
+                    return [("https://ozon.ru/", "Ozon official website")]
+                return [("https://ozon.ru/product/X100", "Ozon X100")]
+
+        search = ResilientSearchSession(
+            providers=(primary, QueryFallback()),
+        ).search_with_status
+
+        outcome = discover_with_status("Ozon", "X100", searcher=search)
+        product = next(
+            item for item in outcome.candidates
+            if item["url"] == "https://ozon.ru/product/X100"
+        )
+
+        self.assertEqual(product["source_type"], "marketplace")
+        self.assertNotEqual(product["authority_status"], "verified")
 
 
 if __name__ == "__main__":

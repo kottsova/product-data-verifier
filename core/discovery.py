@@ -71,6 +71,7 @@ SearchResultLike = SearchResult | SearchResultRecord
 SearchStatus = Literal["success", "partial", "empty", "blocked", "timeout", "error"]
 ProviderStatus = Literal[
     "success", "empty", "blocked", "timeout", "parse_error", "error", "circuit_open",
+    "capped",
 ]
 RelevanceRelation = Literal["exact", "likely_variant", "weak", "reject"]
 
@@ -101,6 +102,7 @@ class ProviderAttempt:
     exception_class: str | None = None
     circuit_open: bool = False
     budget_exhausted: bool = False
+    provider_time_capped: bool = False
     raw_result_count: int = 0
     parsed_result_count: int = 0
     deduped_result_count: int = 0
@@ -118,7 +120,9 @@ Searcher = Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome]
 
 @dataclass(frozen=True, slots=True)
 class DiscoveryIssue:
-    status: Literal["empty", "blocked", "timeout", "parse_error", "error", "circuit_open"]
+    status: Literal[
+        "empty", "blocked", "timeout", "parse_error", "error", "circuit_open", "capped",
+    ]
     query: str
     message: str
     provider: str | None = None
@@ -170,6 +174,7 @@ class DiscoveryRuntimeConfig:
         default_factory=lambda: dict(DEFAULT_PROVIDER_TIMEOUTS),
     )
     circuit_breaker_failures: int = 1
+    provider_time_share: float = 0.5
 
     def __post_init__(self) -> None:
         normalized = dict(DEFAULT_PROVIDER_TIMEOUTS)
@@ -178,6 +183,8 @@ class DiscoveryRuntimeConfig:
             raise ValueError("provider timeouts must be positive")
         if self.circuit_breaker_failures < 1:
             raise ValueError("circuit_breaker_failures must be positive")
+        if not (0.0 < self.provider_time_share <= 1.0):
+            raise ValueError("provider_time_share must be within (0, 1]")
         object.__setattr__(self, "provider_timeouts", normalized)
 
     def timeout_for(self, provider: str) -> float:
@@ -460,10 +467,14 @@ def _brand_domain_match(brand: str | None, domain: str) -> bool:
 
 
 def classify_source(domain: str, official_domain: str | None) -> str:
-    if official_domain and (domain == official_domain or domain.endswith(f".{official_domain}")):
-        return "manufacturer"
+    # Marketplace exclusion is checked first and unconditionally: a brand
+    # whose name coincides with a marketplace domain label (e.g. a brand
+    # literally named after a marketplace) must never let an "official site"
+    # SERP match promote that marketplace domain itself to manufacturer.
     if _is_marketplace_domain(domain):
         return "marketplace"
+    if official_domain and (domain == official_domain or domain.endswith(f".{official_domain}")):
+        return "manufacturer"
     if any(word in domain for word in (
         "bestbuy", "citilink", "currys", "digitec", "dns-shop", "galaxus",
         "kaufland", "mediamarkt", "mvideo", "otto", "shop", "store",
@@ -1540,7 +1551,21 @@ class ProviderSearchError(RuntimeError):
 
 
 class ResilientSearchSession:
-    """Try fallback providers only after structured primary failure."""
+    """Try fallback providers only after structured primary failure.
+
+    A provider that keeps *succeeding* slowly is a distinct hazard from one
+    that fails: the per-query fallback chain never advances past it, so a
+    provider answering every query in 10-20s can, by itself, consume the
+    entire shared workflow budget across a multi-query discovery plan before
+    any alternate provider or the downstream fetch stage gets a turn. This
+    session tracks each provider's cumulative elapsed time across the whole
+    request (spanning initial and targeted discovery, which reuse the same
+    session/budget) and stops offering it new queries once that cumulative
+    time reaches its fair share of the total workflow budget
+    (``config.provider_time_share``), regardless of whether its calls are
+    still succeeding. This is generic capacity fairness, not a per-provider
+    rule: it applies to whichever provider is first/slow in a given run.
+    """
 
     def __init__(
         self,
@@ -1574,6 +1599,7 @@ class ResilientSearchSession:
         )
         self._open_providers: dict[int, str] = {}
         self._failure_counts: dict[int, int] = {}
+        self._provider_elapsed: dict[int, float] = {}
 
     def __enter__(self) -> "ResilientSearchSession":
         for provider in self.providers:
@@ -1637,6 +1663,24 @@ class ResilientSearchSession:
                     circuit_open=True,
                 ))
                 continue
+            if self.budget is not None:
+                cap = self.budget.total_seconds * self.config.provider_time_share
+                spent = self._provider_elapsed.get(index, 0.0)
+                if spent >= cap:
+                    attempts.append(ProviderAttempt(
+                        provider=provider.name,
+                        query=query,
+                        status="capped",
+                        message=(
+                            f"{provider.name} has used {spent:.1f}s, its "
+                            f"{cap:.1f}s fair share of the workflow budget; "
+                            "yielding remaining queries to other providers."
+                        ),
+                        is_fallback=index > 0,
+                        timeout_seconds=timeout_seconds,
+                        provider_time_capped=True,
+                    ))
+                    continue
             started = self._clock()
             try:
                 bounded_search = getattr(provider, "search_with_timeout", None)
@@ -1646,6 +1690,7 @@ class ResilientSearchSession:
                     raw_results = tuple(provider.search(query))
             except Exception as error:
                 duration = max(0.0, self._clock() - started)
+                self._provider_elapsed[index] = self._provider_elapsed.get(index, 0.0) + duration
                 status = _provider_status(error)
                 attempts.append(ProviderAttempt(
                     provider=provider.name,
@@ -1670,6 +1715,7 @@ class ResilientSearchSession:
                     )
                 continue
             duration = max(0.0, self._clock() - started)
+            self._provider_elapsed[index] = self._provider_elapsed.get(index, 0.0) + duration
             results = _normalized_search_results(raw_results, provider.name, query)
             raw_result_count = int(
                 getattr(provider, "last_raw_result_count", len(raw_results))
@@ -1813,21 +1859,30 @@ def _search_status_from_issues(issues: Iterable[DiscoveryIssue]) -> SearchStatus
     statuses = [item.status for item in issues]
     if not statuses:
         return "success"
-    for status in ("timeout", "blocked", "error", "parse_error", "empty", "circuit_open"):
+    for status in ("timeout", "blocked", "error", "parse_error", "empty", "circuit_open", "capped"):
         if status not in statuses:
             continue
-        if status in {"parse_error", "circuit_open"}:
+        if status in {"parse_error", "circuit_open", "capped"}:
             return "error"
         return status  # type: ignore[return-value]
     return "error"
 
 
-def _primary_provider_succeeded(attempts: Iterable[ProviderAttempt]) -> bool:
-    """Fallback discovery can find sources but cannot establish authority."""
-    return any(
-        item.status == "success" and not item.is_fallback
-        for item in attempts
-    )
+def _official_query_returned_results(attempts: Iterable[ProviderAttempt]) -> bool:
+    """Any provider - not only the first/primary one - may seed official-domain
+    evidence for an "official website" query.
+
+    Stage 18.7: requiring specifically the *non-fallback* provider to be the
+    one that succeeded made the entire request's authority corroboration
+    depend on one search provider (previously Google) being available for
+    this one query, even though ``discover_global_official_domains`` already
+    applies an evidence-based filter (domain/brand consistency, an explicit
+    "official" claim, and the brand name in the result title) regardless of
+    which provider returned the result. That filter - not provider identity -
+    is what makes a claim trustworthy, so any provider's success is eligible
+    on equal terms.
+    """
+    return any(item.status == "success" for item in attempts)
 
 
 def discover_with_status(
@@ -1872,7 +1927,7 @@ def discover_with_status(
             provider_attempts.extend(attempts)
             issues.extend(query_issues)
             raw_results.extend(found)
-            if "official" in query and _primary_provider_succeeded(attempts):
+            if "official" in query and _official_query_returned_results(attempts):
                 official_results.extend(found)
             if any(item.budget_exhausted for item in attempts):
                 budget_stopped = True
@@ -2060,7 +2115,7 @@ def discover_identity_query_with_status(
             provider_attempts.extend(attempts)
             issues.extend(query_issues)
             authority_results = (
-                official_results if _primary_provider_succeeded(attempts) else ()
+                official_results if _official_query_returned_results(attempts) else ()
             )
             official_domains = dict(
                 discover_global_official_domains(identity.brand, authority_results)
