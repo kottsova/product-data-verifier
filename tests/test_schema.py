@@ -127,12 +127,26 @@ class SchemaTests(unittest.TestCase):
             ("air_fryer", "Габариты (Ш×В×Г)", "dimensions"),
             ("wet_dry_vacuum", "შესრუტვის მაქსიმალური სიმძლავრე, კპა", "suction_power"),
             ("wet_dry_vacuum", "ჭუჭყიანი წყლის კონტეინერის მოცულობა, ლ", "dirty_water_tank"),
+            ("wet_dry_vacuum", "Мощность", "rated_power"),
+            ("wet_dry_vacuum", "Ёмкость батареи", "battery_capacity"),
+            ("wet_dry_vacuum", "Уровень шума", "noise_level"),
+            ("wet_dry_vacuum", "Источник питания", "battery_type"),
+            ("wet_dry_vacuum", "Размеры (ШxВxТ) мм", "dimensions"),
         )
         for category, alias, expected in cases:
             with self.subTest(category=category, alias=alias):
                 definition = resolve_attribute_definition(alias, category)
                 self.assertIsNotNone(definition)
                 self.assertEqual(definition.canonical_name, expected)
+
+    def test_wet_dry_vacuum_new_multilingual_fields_are_scoped_correctly(self) -> None:
+        schema = {item.canonical_name: item for item in get_attribute_schema("wet_dry_vacuum")}
+        self.assertIn("noise_level", schema)
+        self.assertIn("battery_type", schema)
+        self.assertIn("hepa_filter", schema)
+        # A marketing yes/no bullet is optional, unlike the other two which
+        # are routinely published spec-table values.
+        self.assertFalse(schema["hepa_filter"].expected)
 
     def test_aliases_do_not_resolve_to_conflicting_canonical_fields(self) -> None:
         for category in EXPECTED_BY_CATEGORY:

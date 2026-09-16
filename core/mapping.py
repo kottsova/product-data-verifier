@@ -63,7 +63,7 @@ class MappingResult:
 
 AMBIGUOUS_LABELS = {
     "weight", "dimensions", "dimension", "capacity", "size", "color", "colour",
-    "объем",
+    "объем", "емкость",
 }
 BATTERY_CONTEXT = re.compile(r"\bbattery\b|\baccumulator\b|аккумулятор|батаре|ელემენტ|აკუმულატორ", re.I)
 DISPLAY_CONTEXT = re.compile(r"\bdisplay\b|\bscreen\b|экран|диспле|ეკრან", re.I)
@@ -90,6 +90,7 @@ UNIT_ALIASES = {
     "па": "Pa", "кпа": "kPa",
     "мач": "mAh", "ма год": "mAh", "ач": "Ah", "а год": "Ah",
     "мин": "min", "хв": "min", "ч": "h", "год": "h",
+    "дб": "dB", "db": "dB",
 }
 
 
@@ -176,6 +177,7 @@ def _ambiguity_candidates(label: str, definitions: dict[str, AttributeDefinition
         "dimension": ("product_dimensions", "package_dimensions", "dimensions"),
         "capacity": ("battery_capacity", "capacity", "clean_water_tank", "dirty_water_tank"),
         "объем": ("battery_capacity", "capacity", "clean_water_tank", "dirty_water_tank"),
+        "емкость": ("battery_capacity", "capacity", "clean_water_tank", "dirty_water_tank"),
         "size": ("display_size", "product_dimensions"),
         "color": ("color",),
         "colour": ("color",),

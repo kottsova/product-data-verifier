@@ -209,8 +209,9 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
     ),
     "wet_dry_vacuum": (
         _definition("suction_power", ("suction power", "suction pressure", "мощность всасывания", "сила всмоктування", "потужність всмоктування", "тиск всмоктування", "შესრუტვის მაქსიმალური სიმძლავრე კპა"), value_type="power", unit_family="pressure_or_power", priority="critical"),
-        _definition("rated_power", ("rated power", "power", "номинальная мощность", "потужність споживання", "споживана потужність", "სიმძლავრე"), value_type="power", unit_family="power", priority="high"),
-        _definition("battery_capacity", ("battery capacity", "ємність акумулятора", "ємність акумулятору", "ємність аккумулятора", "ємність аккумулятору", "акумуляторна ємність", "აკუმულატორის ტევადობა"), value_type="capacity", unit_family="electric_charge", attribute_scope="variant_level", priority="critical"),
+        _definition("rated_power", ("rated power", "power", "мощность", "номинальная мощность", "потужність споживання", "споживана потужність", "სიმძლავრე"), value_type="power", unit_family="power", priority="high"),
+        _definition("battery_capacity", ("battery capacity", "емкость батареи", "емкость аккумулятора", "ємність акумулятора", "ємність акумулятору", "ємність аккумулятора", "ємність аккумулятору", "акумуляторна ємність", "აკუმულატორის ტევადობა"), value_type="capacity", unit_family="electric_charge", attribute_scope="variant_level", priority="critical"),
+        _definition("battery_type", ("battery type", "battery chemistry", "источник питания", "тип аккумулятора", "тип батареи"), value_type="text", attribute_scope="variant_level", priority="medium"),
         _definition("runtime", ("runtime", "run time", "operating time", "время работы", "час роботи на одному заряді", "час автономної роботи", "тривалість роботи", "ავტონომიური მუშაობის დრო"), value_type="duration", unit_family="time", priority="critical"),
         _definition("charging_time", ("charging time", "charge time", "время зарядки", "час повної зарядки", "час заряджання", "час зарядки", "დატენვის დრო"), value_type="duration", unit_family="time", priority="critical"),
         _definition("clean_water_tank", ("clean water tank", "clean water tank capacity", "бак для чистой воды", "об'єм резервуару для чистої води", "об'єм бака для чистої води", "сუფთა წყლის კონტეინერის მოცულობა ლ"), value_type="capacity", unit_family="volume", priority="critical"),
@@ -218,8 +219,10 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
         _definition("modes", ("modes", "cleaning modes", "режимы", "режими прибирання", "режими роботи", "წმენდის რეჟიმების რაოდენობა"), value_type="list", priority="high"),
         _definition("self_cleaning", ("self cleaning", "self-cleaning", "self-cleaning mode", "самоочистка", "თვითწმენდის რეჟიმი"), value_type="boolean", priority="high"),
         _definition("drying_temperature", ("drying temperature", "drying", "температура сушки", "сушка", "გაშრობა"), value_type="number", unit_family="temperature", priority="medium"),
+        _definition("noise_level", ("noise", "noise level", "sound level", "уровень шума", "шум"), value_type="number", unit_family="sound_pressure", priority="medium"),
+        _definition("hepa_filter", ("hepa filter", "air filter", "воздушный фильтр hepa", "фильтр hepa", "воздушный фильтр"), value_type="boolean", priority="low", expected=False),
         _definition("weight", ("weight", "вес", "წონა"), value_type="weight", unit_family="mass", priority="high", notes="Generic product weight; never infer gross weight from this label."),
-        _definition("dimensions", ("dimensions", "габариты"), value_type="dimension", unit_family="length", priority="high", notes="Generic product dimensions; never infer package dimensions from this label."),
+        _definition("dimensions", ("dimensions", "габариты", "размеры"), value_type="dimension", unit_family="length", priority="high", notes="Generic product dimensions; never infer package dimensions from this label."),
     ),
 }
 

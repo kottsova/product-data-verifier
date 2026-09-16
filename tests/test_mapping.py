@@ -173,6 +173,64 @@ class DirectMappingTests(unittest.TestCase):
         self.assertEqual(result.mapped, [])
         self.assertEqual(result.unmapped, [item])
 
+    def test_russian_wet_dry_aliases_map_to_canonical_fields(self) -> None:
+        # Real sanitized labels recovered from a Dreame manufacturer page
+        # (Stage 18.8) that previously fell through to "discovered" fields
+        # because only fuller Ukrainian/Georgian phrasings were registered.
+        cases = (
+            ("Мощность Вт", "315", None, "rated_power", None),
+            ("Ёмкость батареи", "2500", "мАч", "battery_capacity", "mAh"),
+            ("Уровень шума", "76", "дБ", "noise_level", "dB"),
+            (
+                "Источник питания",
+                "съемный литий-ионный (Li-Ion) аккумулятор",
+                None,
+                "battery_type",
+                None,
+            ),
+            ("Воздушный фильтр HEPA", "Да", None, "hepa_filter", None),
+        )
+        for label, value, unit, expected_name, expected_unit in cases:
+            with self.subTest(label=label):
+                result = map_attributes(
+                    [raw(label, f"{value} {unit}" if unit else value, value=value, unit=unit)],
+                    category="wet_dry_vacuum",
+                )
+                self.assertEqual(len(result.mapped), 1)
+                self.assertEqual(result.mapped[0].canonical_name, expected_name)
+                self.assertEqual(result.mapped[0].unit, expected_unit)
+
+    def test_bracket_dimension_legend_generalizes_to_new_letter_orders(self) -> None:
+        # "(ШxВxТ)" (width x height x thickness/depth) is the same kind of
+        # bracketed dimension legend as the already-handled "(Ш×В×Г)"; only
+        # the depth abbreviation letter differs, so the generic unit-suffix
+        # pattern must accept any letter from the known dimension-abbreviation
+        # class, not just the one literal combination seen before.
+        result = map_attributes(
+            [raw("Размеры (ШxВxТ) мм", "278х703х316")],
+            category="wet_dry_vacuum",
+        )
+        self.assertEqual(len(result.mapped), 1)
+        self.assertEqual(result.mapped[0].canonical_name, "dimensions")
+
+    def test_bare_russian_power_is_not_confused_with_suction_power(self) -> None:
+        result = map_attributes(
+            [raw("Мощность", "315 Вт"), raw("Мощность всасывания", "23000 Па")],
+            category="wet_dry_vacuum",
+        )
+        self.assertEqual(
+            [item.canonical_name for item in result.mapped],
+            ["rated_power", "suction_power"],
+        )
+
+    def test_bare_russian_capacity_synonym_remains_ambiguous_for_wet_dry_vacuum(self) -> None:
+        result = map_attributes([raw("Ёмкость", "2 л")], category="wet_dry_vacuum")
+        self.assertEqual(result.mapped, [])
+        self.assertEqual(len(result.ambiguous), 1)
+        candidates = set(result.ambiguous[0].candidates)
+        self.assertTrue(candidates <= {"battery_capacity", "clean_water_tank", "dirty_water_tank"})
+        self.assertTrue(candidates)
+
     def test_strong_weight_aliases(self) -> None:
         cases = (
             ("Net weight", "net_weight"),

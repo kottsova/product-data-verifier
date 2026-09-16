@@ -8,8 +8,8 @@ import unicodedata
 
 _UNIT_SUFFIX = (
     r"(?:°\s*[cf]|[кk]?[вw]т|[вv]|гц|hz|mah|ач|ah|мл|ml|л|l|"
-    r"кг|kg|гр?|g|мм|mm|см|cm|м|m|мин|сек|ч|шт|pcs?|"
-    r"ш\s*[xх×]\s*в\s*[xх×]\s*г|h\s*[xх×]\s*w\s*[xх×]\s*d)"
+    r"кг|kg|гр?|g|мм|mm|см|cm|м|m|мин|сек|ч|шт|pcs?|дб|db|"
+    r"(?:[швгдт]\s*[xх×]\s*){2}[швгдт]|(?:[hwdlt]\s*[xх×]\s*){2}[hwdlt])"
 )
 _BRACKETED_UNIT_SUFFIX_RE = re.compile(
     rf"\s*[\(\[]\s*{_UNIT_SUFFIX}\s*[\)\]]\s*$",
@@ -32,9 +32,16 @@ def normalize_attribute_label(value: str | None) -> str:
     """
 
     text = unicodedata.normalize("NFKC", value or "").casefold().replace("ё", "е")
-    text = _BRACKETED_UNIT_SUFFIX_RE.sub("", text)
-    text = _DELIMITED_UNIT_SUFFIX_RE.sub("", text)
-    text = _BARE_UNIT_SUFFIX_RE.sub("", text)
+    # A label may stack a bracketed dimension legend and a trailing bare unit
+    # ("Размеры (ШxВxТ) мм"), so strip trailing unit/legend noise repeatedly
+    # until nothing more comes off, not just once.
+    for _ in range(4):
+        stripped = _BRACKETED_UNIT_SUFFIX_RE.sub("", text)
+        stripped = _DELIMITED_UNIT_SUFFIX_RE.sub("", stripped)
+        stripped = _BARE_UNIT_SUFFIX_RE.sub("", stripped)
+        if stripped == text:
+            break
+        text = stripped
     return " ".join(re.findall(r"[\w]+", text))
 
 
