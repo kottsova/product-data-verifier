@@ -108,6 +108,36 @@ class FetchSourceTests(unittest.TestCase):
         self.assertEqual(result["fetch_method"], "requests")
         browser.assert_not_called()
 
+    def test_tailwind_utility_classes_do_not_trigger_false_incompleteness(self):
+        # Stage 18.8: reproduces a real manufacturer product page
+        # (sanitized/minimized) that was wrongly sent to Playwright despite
+        # having its full specification grid in static HTML. Two Tailwind
+        # utility-class collisions caused it: an image-gallery thumbnail
+        # class "aspect-square" contains "spec" as a substring (falsely
+        # treated as a specification container), and an unrelated form's
+        # Tailwind variant classes "peer-disabled:placeholder:..." /
+        # "peer-placeholder-shown:..." contain the whole word "placeholder"
+        # (falsely treated as two loading-skeleton signals, tripping the
+        # "skeletons >= 2" incompleteness rule).
+        body = """<html><body>
+          <div class="flex aspect-square h-20 w-20"><img src="thumb1.jpg"></div>
+          <div class="flex aspect-square h-20 w-20"><img src="thumb2.jpg"></div>
+          <div class="grid grid-cols-2">
+            <div class="flex justify-between"><div class="text-inactive"><p>Power</p></div><div class="text-label"><p>315 W</p></div></div>
+            <div class="flex justify-between"><div class="text-inactive"><p>Battery capacity</p></div><div class="text-label"><p>2500 mAh</p></div></div>
+            <div class="flex justify-between"><div class="text-inactive"><p>Noise level</p></div><div class="text-label"><p>76 dB</p></div></div>
+          </div>
+          <form>
+            <input class="peer-disabled:placeholder:text-inactive" placeholder="E-mail">
+            <label class="peer-placeholder-shown:translate-y-0">E-mail</label>
+          </form>
+          <p>""" + "Useful complete product information is available in this section. " * 5 + """</p>
+        </body></html>"""
+        with patch("core.fetch._fetch_with_playwright") as browser:
+            result = fetch_source("https://example.com/p", session=FakeSession(html_response(body)))
+        self.assertEqual(result["fetch_method"], "requests")
+        browser.assert_not_called()
+
     def test_broad_product_detail_container_with_incidental_empty_ui_is_complete(self):
         body = """<html><body><main class='product-detail'>
           <div><h2>Technical data</h2><p>Power: 4600 W</p><p>Width: 592 mm</p>

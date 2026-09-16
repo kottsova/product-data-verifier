@@ -304,6 +304,47 @@ class ExtractTests(unittest.TestCase):
             for item in attrs
         ))
 
+    def test_review_widget_names_and_ratings_are_not_spec_pairs(self):
+        # Stage 18.8: reproduces a real manufacturer page's review widget
+        # (sanitized/minimized), where the fallback line-pairing heuristic
+        # misread "reviewer name" (no digit) followed by a bare "5" (star
+        # rating) as a spec label/value pair. The widget has no distinct
+        # semantic class name to filter on (pure utility-CSS markup), so
+        # the pattern itself - a bare 1-5 rating immediately followed by a
+        # date line - is what identifies a review entry.
+        html = """<div>
+          <h2>Specifications</h2>
+          <div class='grid'>
+            <div><p>Power</p><p>315 W</p></div>
+            <div><p>Noise level</p><p>76 dB</p></div>
+          </div>
+          <div class='flex'>
+            <p>Reviews</p>
+            <p>Leave a review</p>
+            <p>5.0</p>
+          </div>
+          <div class='flex'>
+            <p>Jane Doe</p>
+            <p>5</p>
+            <p>22.08.26</p>
+            <p>Great product, works well.</p>
+          </div>
+          <div class='flex'>
+            <p>John Smith</p>
+            <p>4</p>
+            <p>18.08.26</p>
+            <p>Happy with the purchase.</p>
+          </div>
+        </div>"""
+
+        attrs = extract_attributes(fetched(html=html))
+        names = {item.name for item in attrs}
+
+        self.assertIn("Power", names)
+        self.assertIn("Noise level", names)
+        self.assertNotIn("Jane Doe", names)
+        self.assertNotIn("John Smith", names)
+
     def test_repeated_pairs_preserve_semantic_section_context(self):
         html = """<section class='products-spec-component-level-1'>
           <div class='products-spec-component-title'>Dimensions and Weight</div>

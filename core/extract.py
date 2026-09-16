@@ -58,6 +58,13 @@ PAIR_PATTERN = re.compile(r"^(.{1,120}?)(?:\s*:\s*|\s+\.{2,}\s*)(.{1,500})$")
 NUMERIC_PAIR_PATTERN = re.compile(
     r"^([^:]{1,100}?[A-Za-zА-Яа-я])\s+([-+]?\d+(?:[.,]\d+)?(?:\s*[x×]\s*\d+(?:[.,]\d+)?){0,3}(?:\s*[A-Za-z°%]+)?)$"
 )
+# A bare 1-5 star rating immediately followed by a date line is a review
+# widget's "reviewer name / rating / date" triple, not a spec label/value
+# pair - observed live on a manufacturer page (a reviewer's name paired
+# with their star rating). Generic across any review widget, not tied to
+# a specific site's markup.
+REVIEW_RATING_LINE_PATTERN = re.compile(r"^[1-5](?:[.,]0)?$")
+REVIEW_DATE_LINE_PATTERN = re.compile(r"^\d{1,2}[./]\d{1,2}[./]\d{2,4}$")
 FACTUAL_JSON_FIELDS = ("sku", "mpn", "gtin", "gtin8", "gtin12", "gtin13", "gtin14",
                        "productID", "model", "brand", "color", "material", "weight",
                        "width", "height", "depth", "size", "category")
@@ -1120,6 +1127,12 @@ def _pairs_from_lines(text: str, method: str, confidence: str, source_url: str,
                 found.append(item)
         elif index + 1 < len(lines) and len(line) <= 100 and not re.search(r"\d", line):
             next_line = lines[index + 1]
+            if (
+                REVIEW_RATING_LINE_PATTERN.match(next_line)
+                and index + 2 < len(lines)
+                and REVIEW_DATE_LINE_PATTERN.match(lines[index + 2])
+            ):
+                continue
             if re.match(r"^[-+]?\d", next_line) and len(next_line) <= 100:
                 item = _attribute(line.rstrip(":"), next_line, source_url, source_type,
                                   method, confidence, f"{line} {next_line}", generic=True)

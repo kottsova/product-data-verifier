@@ -162,7 +162,15 @@ def _tag_signals(node: object) -> str:
     classes = node.get("class") or []  # type: ignore[attr-defined]
     if isinstance(classes, str):
         classes = [classes]
-    return " ".join([node_id, *(str(value) for value in classes)]).casefold()
+    # Utility-CSS frameworks (Tailwind and equivalents) encode conditional
+    # styling as "<modifier[-modifier...]>:<utility>" class tokens, e.g.
+    # "peer-placeholder-shown:translate-y-0" or "hover:opacity-100". A
+    # marker word appearing only inside such a token (observed live:
+    # "placeholder" inside a completely unrelated input's variant classes)
+    # describes a CSS state, not page-content completeness, so these tokens
+    # are excluded before signal matching.
+    semantic_classes = [str(value) for value in classes if ":" not in str(value)]
+    return " ".join([node_id, *semantic_classes]).casefold()
 
 
 def _meaningful_product_json_ld(soup: BeautifulSoup) -> bool:
@@ -207,10 +215,13 @@ def _html_content_complete(html: str, text: str) -> bool:
     ):
         return False
 
-    spec_marker = re.compile(r"spec|attribute|characteristic|parameter|product[-_ ]?detail", re.I)
+    # \b before each alternative avoids matching "spec" inside an unrelated
+    # word like "aspect" (observed live: image-gallery thumbnails classed
+    # "aspect-square" were misread as specification containers).
+    spec_marker = re.compile(r"\b(?:spec|attribute|characteristic|parameter|product[-_ ]?detail)", re.I)
     label_marker = re.compile(r"label|name|key|title|heading", re.I)
     value_marker = re.compile(r"value|description|desc|content|data", re.I)
-    skeleton_marker = re.compile(r"skeleton|placeholder|loading|shimmer", re.I)
+    skeleton_marker = re.compile(r"\b(?:skeleton|placeholder|loading|shimmer)\b", re.I)
 
     spec_nodes = [node for node in soup.find_all(True) if spec_marker.search(_tag_signals(node))]
     if not spec_nodes:
