@@ -9,10 +9,11 @@ from pathlib import Path
 import re
 import tempfile
 import time
-from typing import Callable, Iterable, Literal, Protocol, TypedDict
+from typing import Callable, Iterable, Literal, Mapping, Protocol, TypedDict
 from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
+from core.budget import WallClockBudget
 from core.match import article_matches, candidate_model_match, model_match, normalize_model, normalize_text
 from core.identity import ProductIdentity, base_model_in_text, identity_verification_signals
 
@@ -36,11 +37,39 @@ class Candidate(TypedDict):
     identity_verification_evidence: list[str]
     relevance_relation: str
     relevance_reasons: list[str]
+    snippet: str
+    discovery_provider: str
+    discovery_query: str
+    discovery_rank: int
+    raw_url: str
+    redirect_url: str | None
+    parse_status: str
+    parse_confidence: str
+    discovery_provenance: list[dict[str, object]]
 
 
 SearchResult = tuple[str, str]
-SearchStatus = Literal["success", "partial", "blocked", "error"]
-ProviderStatus = Literal["success", "blocked", "error"]
+@dataclass(frozen=True, slots=True)
+class SearchResultRecord:
+    """Provider-neutral result link before product relevance/ranking."""
+
+    url: str
+    title: str
+    snippet: str = ""
+    provider: str = "unknown"
+    query: str = ""
+    rank: int = 0
+    raw_url: str = ""
+    redirect_url: str | None = None
+    parse_status: str = "parsed"
+    parse_confidence: str = "medium"
+
+
+SearchResultLike = SearchResult | SearchResultRecord
+SearchStatus = Literal["success", "partial", "empty", "blocked", "timeout", "error"]
+ProviderStatus = Literal[
+    "success", "empty", "blocked", "timeout", "parse_error", "error", "circuit_open",
+]
 RelevanceRelation = Literal["exact", "likely_variant", "weak", "reject"]
 
 
@@ -49,7 +78,7 @@ class SearchProvider(Protocol):
 
     name: str
 
-    def search(self, query: str) -> Iterable[SearchResult]: ...
+    def search(self, query: str) -> Iterable[SearchResultLike]: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,20 +91,28 @@ class ProviderAttempt:
     result_count: int = 0
     message: str | None = None
     is_fallback: bool = False
+    duration_seconds: float = 0.0
+    timeout_seconds: float | None = None
+    timed_out: bool = False
+    blocked: bool = False
+    parse_failure: bool = False
+    exception_class: str | None = None
+    circuit_open: bool = False
+    budget_exhausted: bool = False
 
 
 @dataclass(frozen=True, slots=True)
 class ProviderQueryOutcome:
-    results: tuple[SearchResult, ...] = ()
+    results: tuple[SearchResultLike, ...] = ()
     attempts: tuple[ProviderAttempt, ...] = ()
 
 
-Searcher = Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome]
+Searcher = Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome]
 
 
 @dataclass(frozen=True, slots=True)
 class DiscoveryIssue:
-    status: Literal["blocked", "error"]
+    status: Literal["empty", "blocked", "timeout", "parse_error", "error", "circuit_open"]
     query: str
     message: str
     provider: str | None = None
@@ -101,6 +138,43 @@ class DiscoverySearchError(RuntimeError):
         self.outcome = outcome
         detail = outcome.issues[-1].message if outcome.issues else "Search failed."
         super().__init__(f"Discovery {outcome.search_status}: {detail}")
+
+
+class ProviderTimeoutError(RuntimeError):
+    """A provider exhausted its own configured deadline."""
+
+
+class ProviderParseError(RuntimeError):
+    """A provider returned a result page that could not be parsed safely."""
+
+
+DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
+    "google": 25.0,
+    "duckduckgo_lite": 8.0,
+    "naver": 8.0,
+}
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveryRuntimeConfig:
+    """Per-provider execution limits and request-local circuit policy."""
+
+    provider_timeouts: Mapping[str, float] = field(
+        default_factory=lambda: dict(DEFAULT_PROVIDER_TIMEOUTS),
+    )
+    circuit_breaker_failures: int = 1
+
+    def __post_init__(self) -> None:
+        normalized = dict(DEFAULT_PROVIDER_TIMEOUTS)
+        normalized.update({str(name): float(value) for name, value in self.provider_timeouts.items()})
+        if any(value <= 0 for value in normalized.values()):
+            raise ValueError("provider timeouts must be positive")
+        if self.circuit_breaker_failures < 1:
+            raise ValueError("circuit_breaker_failures must be positive")
+        object.__setattr__(self, "provider_timeouts", normalized)
+
+    def timeout_for(self, provider: str) -> float:
+        return float(self.provider_timeouts.get(provider, 10.0))
 
 MARKETPLACE_DOMAINS = {
     "amazon", "aliexpress", "ebay", "ozon", "temu", "wildberries",
@@ -239,6 +313,48 @@ def canonicalize_url(url: str) -> str:
     return urlunparse((parsed.scheme.lower(), host, path, "", query, ""))
 
 
+def _search_result_record(
+    item: SearchResultLike,
+    *,
+    provider: str = "unknown",
+    query: str = "",
+    rank: int = 0,
+) -> SearchResultRecord:
+    if isinstance(item, SearchResultRecord):
+        return SearchResultRecord(
+            url=item.url,
+            title=item.title,
+            snippet=item.snippet,
+            provider=item.provider if item.provider != "unknown" else provider,
+            query=item.query or query,
+            rank=item.rank or rank,
+            raw_url=item.raw_url or item.url,
+            redirect_url=item.redirect_url,
+            parse_status=item.parse_status,
+            parse_confidence=item.parse_confidence,
+        )
+    raw_url, title = item
+    return SearchResultRecord(
+        url=raw_url,
+        title=title,
+        provider=provider,
+        query=query,
+        rank=rank,
+        raw_url=raw_url,
+    )
+
+
+def _normalized_search_results(
+    results: Iterable[SearchResultLike],
+    provider: str,
+    query: str,
+) -> tuple[SearchResultRecord, ...]:
+    return tuple(
+        _search_result_record(item, provider=provider, query=query, rank=index)
+        for index, item in enumerate(results, start=1)
+    )
+
+
 def is_obvious_non_product_url(url: str) -> bool:
     if not url or not _host(url):
         return True
@@ -273,11 +389,16 @@ def _page_kind(url: str) -> str:
     return "other"
 
 
-def discover_global_official_domains(brand: str, results: Iterable[SearchResult]) -> list[tuple[str, str]]:
+def discover_global_official_domains(
+    brand: str,
+    results: Iterable[SearchResultLike],
+) -> list[tuple[str, str]]:
     """Return conservatively proven official domains and their evidence URLs."""
     brand_key = normalize_model(brand).lower()
     ranked: list[tuple[int, str, str]] = []
-    for position, (url, title) in enumerate(results):
+    for position, item in enumerate(results):
+        record = _search_result_record(item, rank=position + 1)
+        url, title = record.url, f"{record.title} {record.snippet}".strip()
         domain = _host(url)
         label = re.sub(r"[^a-z0-9]", "", domain.split(".")[0])
         title_norm = normalize_text(title)
@@ -301,7 +422,7 @@ def discover_global_official_domains(brand: str, results: Iterable[SearchResult]
     return found
 
 
-def discover_global_official_domain(brand: str, results: Iterable[SearchResult]) -> str | None:
+def discover_global_official_domain(brand: str, results: Iterable[SearchResultLike]) -> str | None:
     """Backward-compatible single-domain view of official-domain discovery."""
     domains = discover_global_official_domains(brand, results)
     return domains[0][0] if domains else None
@@ -465,7 +586,10 @@ def assess_candidate_relevance(
     expose the requested model/article in its title/snippet or URL; a brand-only
     result cannot become relevant through source type or provider reputation.
     """
-    title = str(candidate.get("title") or "")
+    title = " ".join(filter(None, (
+        str(candidate.get("title") or ""),
+        str(candidate.get("snippet") or ""),
+    )))
     url = str(candidate.get("url") or "")
     haystack = f"{title} {url}"
     match = str(candidate.get("model_match") or "unknown")
@@ -524,13 +648,17 @@ def _partition_relevance_candidates(
     return accepted, rejected
 
 
-def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
+def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
                     article: str | None = None, official_domain: str | None = None,
                     authority_evidence_url: str | None = None,
                     market: str = "global",
                     official_domains: dict[str, str] | None = None) -> list[Candidate]:
     candidates: dict[str, Candidate] = {}
-    for raw_url, title in results:
+    for item in results:
+        record = _search_result_record(item)
+        raw_url = record.url
+        title = record.title
+        search_text = " ".join(part for part in (record.title, record.snippet) if part)
         url = canonicalize_url(raw_url)
         if not url or is_obvious_non_product_url(url):
             continue
@@ -551,7 +679,7 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
             authority_reason = "Domain verified from an explicit brand official-site result."
             if _is_official_document(url):
                 source_type = "official_document"
-        match = candidate_model_match(model, title, urlparse(url).path)
+        match = candidate_model_match(model, search_text, urlparse(url).path)
         product_match_evidence = None
         if match == "exact":
             product_match_evidence = "Exact normalized model token found in title/snippet or URL."
@@ -559,7 +687,7 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
             product_match_evidence = "Base model found with an explicit variant suffix."
         elif match == "likely":
             product_match_evidence = "Model-like identifier extends the requested base model."
-        elif article_matches(article, f"{title} {url}"):
+        elif article_matches(article, f"{search_text} {url}"):
             product_match_evidence = "Exact article/MPN token found in title/snippet or URL."
         candidate: Candidate = {
             "url": url, "domain": domain, "title": " ".join((title or "").split()),
@@ -570,16 +698,41 @@ def rank_candidates(results: Iterable[SearchResult], brand: str, model: str,
             "model_match": match,
             "model_relevance": _model_relevance(match),
             "score": score_candidate(
-                url, title, source_type, authority_status, match, model, article, brand,
+                url, search_text, source_type, authority_status, match, model, article, brand,
             ),
             "identity_relation": "unknown",
             "identity_verification_evidence": [],
             "relevance_relation": "reject",
             "relevance_reasons": [],
+            "snippet": " ".join((record.snippet or "").split()),
+            "discovery_provider": record.provider,
+            "discovery_query": record.query,
+            "discovery_rank": record.rank,
+            "raw_url": record.raw_url or raw_url,
+            "redirect_url": record.redirect_url,
+            "parse_status": record.parse_status,
+            "parse_confidence": record.parse_confidence,
+            "discovery_provenance": [{
+                "provider": record.provider,
+                "query": record.query,
+                "rank": record.rank,
+                "raw_url": record.raw_url or raw_url,
+                "redirect_url": record.redirect_url,
+                "parse_status": record.parse_status,
+                "parse_confidence": record.parse_confidence,
+            }],
         }
         previous = candidates.get(url)
-        if previous is None or candidate["score"] > previous["score"]:
+        if previous is None:
             candidates[url] = candidate
+            continue
+        merged_provenance = list(previous.get("discovery_provenance") or ())
+        for provenance in candidate["discovery_provenance"]:
+            if provenance not in merged_provenance:
+                merged_provenance.append(provenance)
+        winner = candidate if candidate["score"] > previous["score"] else previous
+        winner["discovery_provenance"] = merged_provenance
+        candidates[url] = winner
     return sorted(candidates.values(), key=lambda item: (-item["score"], item["url"]))
 
 
@@ -626,20 +779,84 @@ def _is_external_result(url: str) -> bool:
 
 def _clean_google_result_url(raw_url: str) -> str:
     url = unquote((raw_url or "").strip())
-    parsed = urlparse(url)
-    host = (parsed.hostname or "").lower()
-    if parsed.path == "/url" and (host == "google.com" or host.endswith(".google.com")):
+    for _ in range(3):
+        parsed = urlparse(url)
+        host = (parsed.hostname or "").lower()
+        google_redirect = (
+            parsed.path in {"/url", "/goto"}
+            and (
+                not host
+                or host == "google.com"
+                or host.endswith(".google.com")
+            )
+        )
+        if not google_redirect:
+            break
         query = parse_qs(parsed.query)
-        url = (query.get("q") or query.get("url") or [""])[0]
-    elif url.startswith("/url?"):
-        url = (parse_qs(urlparse(url).query).get("q") or [""])[0]
+        target = next((
+            values[0]
+            for key in ("q", "url", "u", "target")
+            if (values := query.get(key)) and values[0]
+        ), "")
+        if not target or target == url:
+            return ""
+        url = unquote(target)
     return canonicalize_url(unquote(url))
 
 
-def needs_playwright_fallback(results: Iterable[SearchResult], html: str) -> bool:
+def _parse_google_browser_items(
+    items: Iterable[Mapping[str, object]],
+) -> list[SearchResultRecord]:
+    """Normalize several generic Google result-link layouts into one contract."""
+    found: list[SearchResultRecord] = []
+    seen: set[str] = set()
+    for position, item in enumerate(items, start=1):
+        raw_urls = [
+            str(item.get(name) or "").strip()
+            for name in ("href", "dataHref", "dataUrl", "pingTarget")
+        ]
+        raw_url = next((value for value in raw_urls if value), "")
+        url = next((
+            cleaned for value in raw_urls
+            if (cleaned := _clean_google_result_url(value)) and _is_external_result(cleaned)
+        ), "")
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        title = " ".join(str(item.get("title") or "").split())
+        block_text = " ".join(str(item.get("text") or "").split())
+        if not title:
+            title = block_text.split("\n", 1)[0].strip()
+        snippet = block_text
+        if title and snippet.casefold().startswith(title.casefold()):
+            snippet = snippet[len(title):].strip(" -—|\n")
+        found.append(SearchResultRecord(
+            url=url,
+            title=title or block_text,
+            snippet=snippet,
+            rank=position,
+            raw_url=raw_url,
+            redirect_url=raw_url if raw_url and raw_url != url else None,
+            parse_status="parsed",
+            parse_confidence="high" if title else "medium",
+        ))
+    return found
+
+
+def _google_result_layout_ready(page: object) -> bool:
+    """Recognize result headings even when the anchor wraps a parent/sibling."""
+    locator = getattr(page, "locator")
+    return bool(locator("h3").count() or locator("a:has(h3)").count())
+
+
+def needs_playwright_fallback(results: Iterable[SearchResultLike], html: str) -> bool:
     """Decide whether the HTTP response contains usable organic results."""
     text = (html or "").lower()
-    external = [url for url, _ in results if _is_external_result(url)]
+    external = [
+        record.url
+        for item in results
+        if _is_external_result((record := _search_result_record(item)).url)
+    ]
     return not external or any(marker in text for marker in INTERSTITIAL_MARKERS)
 
 
@@ -654,13 +871,18 @@ def _google_search_url(query: str, market: str) -> str:
     return f"https://www.google.com/search?{urlencode(params)}"
 
 
-def _http_google_search_for_market(query: str, market: str) -> tuple[list[SearchResult], str]:
+def _http_google_search_for_market(
+    query: str,
+    market: str,
+    *,
+    timeout: float = 15.0,
+) -> tuple[list[SearchResult], str]:
     request = Request(
         _google_search_url(query, market),
         headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "en-US,en;q=0.8"},
     )
     try:
-        with urlopen(request, timeout=15) as response:
+        with urlopen(request, timeout=max(0.1, timeout)) as response:
             html = response.read().decode("utf-8", errors="replace")
     except Exception:
         return [], ""
@@ -674,10 +896,13 @@ class GoogleSearchSession:
 
     name = "google"
 
-    def __init__(self, market: str = "global") -> None:
+    def __init__(self, market: str = "global", *, timeout_seconds: float = 25.0) -> None:
         if market not in SUPPORTED_MARKETS:
             raise ValueError(f"Unsupported market: {market}")
         self.market = market
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        self.timeout_seconds = float(timeout_seconds)
         self._playwright = None
         self._browser = None
         self._context = None
@@ -709,13 +934,23 @@ class GoogleSearchSession:
                 if playwright is not None:
                     playwright.stop()
 
-    def search(self, query: str) -> list[SearchResult]:
-        results, html = _http_google_search_for_market(query, self.market)
+    def search(self, query: str) -> list[SearchResultLike]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(self, query: str, timeout_seconds: float) -> list[SearchResultLike]:
+        deadline = time.monotonic() + max(0.1, timeout_seconds)
+        results, html = _http_google_search_for_market(
+            query,
+            self.market,
+            timeout=min(15.0, max(0.1, deadline - time.monotonic())),
+        )
         if not needs_playwright_fallback(results, html):
             return results
-        return self._playwright_search(query)
+        if time.monotonic() >= deadline:
+            raise ProviderTimeoutError("Google provider deadline exhausted after HTTP search.")
+        return self._playwright_search(query, deadline=deadline)
 
-    def _ensure_page(self):
+    def _ensure_page(self, *, deadline: float | None = None):
         if self._page is not None:
             return self._page
         try:
@@ -728,6 +963,14 @@ class GoogleSearchSession:
         self._playwright = sync_playwright().start()
         try:
             profile_dir = Path(tempfile.gettempdir()) / "product-data-verifier-google-profile"
+            launch_timeout = (
+                max(1, int((deadline - time.monotonic()) * 1000))
+                if deadline is not None else 30000
+            )
+            if launch_timeout <= 1 and deadline is not None:
+                raise ProviderTimeoutError(
+                    "Google provider deadline exhausted before browser launch."
+                )
             self._context = self._playwright.chromium.launch_persistent_context(
                 str(profile_dir),
                 headless=browser_headless(),
@@ -738,7 +981,12 @@ class GoogleSearchSession:
                     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
                 ),
                 viewport={"width": 1440, "height": 1000},
+                timeout=launch_timeout,
             )
+        except ProviderTimeoutError:
+            self._playwright.stop()
+            self._playwright = None
+            raise
         except Exception as error:
             self._playwright.stop()
             self._playwright = None
@@ -749,40 +997,71 @@ class GoogleSearchSession:
         return self._page
 
     @staticmethod
-    def _accept_consent(page) -> bool:
+    def _accept_consent(page, *, deadline: float | None = None) -> bool:
         for label in ("Accept all", "I agree", "Accept", "Принять все", "Согласен"):
             try:
                 button = page.get_by_text(label, exact=True)
                 if button.count():
-                    button.first.click(timeout=3000)
-                    page.wait_for_timeout(800)
+                    timeout = 3000
+                    if deadline is not None:
+                        timeout = max(1, min(timeout, int(
+                            max(0.0, deadline - time.monotonic()) * 1000
+                        )))
+                    button.first.click(timeout=timeout)
+                    remaining = (
+                        800 if deadline is None else max(
+                            0, min(800, int((deadline - time.monotonic()) * 1000)),
+                        )
+                    )
+                    if remaining:
+                        page.wait_for_timeout(remaining)
                     return True
             except Exception:
                 continue
         return False
 
-    def _playwright_search(self, query: str) -> list[SearchResult]:
-        page = self._ensure_page()
+    def _playwright_search(
+        self,
+        query: str,
+        *,
+        deadline: float | None = None,
+    ) -> list[SearchResultLike]:
+        deadline = deadline or (time.monotonic() + self.timeout_seconds)
+        page = self._ensure_page(deadline=deadline)
         search_url = _google_search_url(query, self.market)
+
+        def remaining_ms(maximum: int) -> int:
+            remaining = int(max(0.0, deadline - time.monotonic()) * 1000)
+            if remaining <= 0:
+                raise ProviderTimeoutError("Google provider deadline exhausted.")
+            return max(1, min(maximum, remaining))
+
         try:
-            page.goto(search_url, wait_until="domcontentloaded", timeout=60000)
-            self._accept_consent(page)
-            page.wait_for_load_state("domcontentloaded", timeout=10000)
+            page.goto(search_url, wait_until="domcontentloaded", timeout=remaining_ms(60000))
+            self._accept_consent(page, deadline=deadline)
+            page.wait_for_load_state("domcontentloaded", timeout=remaining_ms(10000))
+        except ProviderTimeoutError:
+            raise
         except Exception as error:
+            if time.monotonic() >= deadline:
+                raise ProviderTimeoutError("Google provider deadline exhausted while loading.") from error
             raise RuntimeError(f"Playwright could not load Google search: {error}") from error
 
-        deadline = time.monotonic() + 15
         body_text = ""
         while time.monotonic() < deadline:
             try:
-                body_text = page.locator("body").inner_text(timeout=3000).lower()
-                if page.locator("a:has(h3)").count():
+                body_text = page.locator("body").inner_text(timeout=remaining_ms(3000)).lower()
+                if _google_result_layout_ready(page):
                     break
                 if any(marker in body_text for marker in INTERSTITIAL_MARKERS):
-                    self._accept_consent(page)
+                    self._accept_consent(page, deadline=deadline)
             except Exception:
                 pass
-            page.wait_for_timeout(500)
+            if time.monotonic() < deadline:
+                page.wait_for_timeout(min(500, remaining_ms(500)))
+
+        if time.monotonic() >= deadline and not _google_result_layout_ready(page):
+            raise ProviderTimeoutError("Google provider deadline exhausted waiting for results.")
 
         if any(marker in body_text for marker in (
             "unusual traffic", "not a robot", "recaptcha", "необычный трафик", "не робот",
@@ -790,44 +1069,73 @@ class GoogleSearchSession:
             raise RuntimeError("Google bot-check blocked the Playwright search.")
 
         try:
-            items = page.locator("a:has(h3)").evaluate_all(
-                """anchors => anchors.map(a => {
-                    let block = a.closest('.MjjYud, .g, [data-snhf]');
-                    if (!block) {
-                        let node = a;
-                        for (let i = 0; i < 6 && node; i++, node = node.parentElement) {
-                            if (node.querySelector && node.querySelector('h3') &&
-                                (node.innerText || '').length > (a.innerText || '').length + 20) {
-                                block = node; break;
+            items = page.locator("body").evaluate(
+                """body => {
+                    const found = [];
+                    const seen = new Set();
+                    const add = (anchor, heading, block) => {
+                        if (!anchor) return;
+                        const href = anchor.getAttribute('href') || anchor.href || '';
+                        const dataHref = anchor.getAttribute('data-href') || '';
+                        const dataUrl = anchor.getAttribute('data-url') || '';
+                        const key = [href, dataHref, dataUrl, (heading && heading.innerText) || ''].join('|');
+                        if (seen.has(key)) return;
+                        seen.add(key);
+                        found.push({
+                            href,
+                            dataHref,
+                            dataUrl,
+                            pingTarget: anchor.getAttribute('ping') || '',
+                            title: ((heading && heading.innerText) || anchor.innerText || '').trim(),
+                            text: ((block && block.innerText) || anchor.innerText || '').trim()
+                        });
+                    };
+                    for (const heading of body.querySelectorAll('h3')) {
+                        let block = heading.closest('.MjjYud, .g, [data-snhf], [data-ved]');
+                        let anchor = heading.closest('a[href], a[data-href], a[data-url]');
+                        if (!anchor && block) {
+                            anchor = block.querySelector('a[href], a[data-href], a[data-url]');
+                        }
+                        if (!block) {
+                            let node = heading.parentElement;
+                            for (let i = 0; i < 7 && node; i++, node = node.parentElement) {
+                                const candidate = node.querySelector &&
+                                    node.querySelector('a[href], a[data-href], a[data-url]');
+                                if (candidate) { anchor = anchor || candidate; block = node; break; }
                             }
                         }
+                        add(anchor, heading, block);
                     }
-                    return {
-                        href: a.getAttribute('href') || a.href || '',
-                        text: ((block && block.innerText) || a.innerText || '').trim()
-                    };
-                })"""
+                    for (const anchor of body.querySelectorAll('a[href], a[data-href], a[data-url]')) {
+                        const heading = anchor.querySelector('h3');
+                        if (!heading) continue;
+                        add(anchor, heading, anchor.closest('.MjjYud, .g, [data-snhf], [data-ved]'));
+                    }
+                    return found;
+                }"""
             )
         except Exception as error:
-            raise RuntimeError(f"Could not extract Google organic results: {error}") from error
+            raise ProviderParseError(f"Could not extract Google organic results: {error}") from error
 
-        found: list[SearchResult] = []
-        seen: set[str] = set()
         for item in items:
-            raw_url = item.get("href", "")
+            raw_url = str(item.get("href") or "")
             if raw_url.startswith("/goto?"):
                 try:
                     response = self._context.request.get(
-                        f"https://www.google.com{raw_url}", timeout=15000
+                        f"https://www.google.com{raw_url}", timeout=remaining_ms(15000)
                     )
-                    raw_url = response.url
+                    item["href"] = response.url
                 except Exception:
                     continue
-            url = _clean_google_result_url(raw_url)
-            if not url or not _is_external_result(url) or url in seen:
-                continue
-            seen.add(url)
-            found.append((url, " ".join((item.get("text") or "").split())))
+        found = _parse_google_browser_items(items)
+        if not found and (
+            page.locator("h3").count()
+            or "search results" in body_text
+            or "web results" in body_text
+        ):
+            raise ProviderParseError(
+                "Google returned a normal result page but no external result link could be parsed."
+            )
         return found
 
 
@@ -892,17 +1200,26 @@ class DuckDuckGoLiteSearchProvider:
 
     name = "duckduckgo_lite"
 
-    def __init__(self, market: str = "global") -> None:
+    def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
         if market not in SUPPORTED_MARKETS:
             raise ValueError(f"Unsupported market: {market}")
         self.market = market
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        self.timeout_seconds = float(timeout_seconds)
 
     def search(self, query: str) -> list[SearchResult]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(self, query: str, timeout_seconds: float) -> list[SearchResult]:
+        deadline = time.monotonic() + max(0.1, timeout_seconds)
         global _DUCKDUCKGO_LAST_REQUEST_AT
         remaining = DUCKDUCKGO_MIN_INTERVAL_SECONDS - (
             time.monotonic() - _DUCKDUCKGO_LAST_REQUEST_AT
         )
         if remaining > 0:
+            if remaining >= timeout_seconds:
+                raise ProviderTimeoutError("DuckDuckGo provider deadline exhausted during rate limit.")
             time.sleep(remaining)
         params = {"q": query}
         region = DUCKDUCKGO_MARKETS.get(self.market)
@@ -917,9 +1234,16 @@ class DuckDuckGoLiteSearchProvider:
         )
         try:
             _DUCKDUCKGO_LAST_REQUEST_AT = time.monotonic()
-            with urlopen(request, timeout=20) as response:
+            remaining_timeout = deadline - time.monotonic()
+            if remaining_timeout <= 0:
+                raise ProviderTimeoutError("DuckDuckGo provider deadline exhausted before request.")
+            with urlopen(request, timeout=max(0.1, min(20.0, remaining_timeout))) as response:
                 html = response.read().decode("utf-8", errors="replace")
+        except ProviderTimeoutError:
+            raise
         except Exception as error:
+            if time.monotonic() >= deadline:
+                raise ProviderTimeoutError("DuckDuckGo provider deadline exhausted.") from error
             raise RuntimeError(f"DuckDuckGo Lite search failed: {error}") from error
         lowered = html.lower()
         if any(marker in lowered for marker in DUCKDUCKGO_BLOCK_MARKERS):
@@ -969,12 +1293,19 @@ class NaverSearchProvider:
 
     name = "naver"
 
-    def __init__(self, market: str = "global") -> None:
+    def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
         if market not in SUPPORTED_MARKETS:
             raise ValueError(f"Unsupported market: {market}")
         self.market = market
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        self.timeout_seconds = float(timeout_seconds)
 
     def search(self, query: str) -> list[SearchResult]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(self, query: str, timeout_seconds: float) -> list[SearchResult]:
+        deadline = time.monotonic() + max(0.1, timeout_seconds)
         request = Request(
             f"https://search.naver.com/search.naver?{urlencode({'where': 'web', 'query': query})}",
             headers={
@@ -983,9 +1314,16 @@ class NaverSearchProvider:
             },
         )
         try:
-            with urlopen(request, timeout=20) as response:
+            remaining_timeout = deadline - time.monotonic()
+            if remaining_timeout <= 0:
+                raise ProviderTimeoutError("Naver provider deadline exhausted before request.")
+            with urlopen(request, timeout=max(0.1, min(20.0, remaining_timeout))) as response:
                 html = response.read().decode("utf-8", errors="replace")
+        except ProviderTimeoutError:
+            raise
         except Exception as error:
+            if time.monotonic() >= deadline:
+                raise ProviderTimeoutError("Naver provider deadline exhausted.") from error
             raise RuntimeError(f"Naver search failed: {error}") from error
         parser = _NaverParser()
         parser.feed(html)
@@ -997,8 +1335,14 @@ class NaverSearchProvider:
         return parser.results
 
 
-def _provider_status(error: RuntimeError) -> Literal["blocked", "error"]:
+def _provider_status(error: Exception) -> Literal["blocked", "timeout", "parse_error", "error"]:
+    if isinstance(error, (ProviderTimeoutError, TimeoutError)):
+        return "timeout"
+    if isinstance(error, ProviderParseError):
+        return "parse_error"
     lowered = (str(error) or error.__class__.__name__).lower()
+    if any(marker in lowered for marker in ("timed out", "timeout", "deadline")):
+        return "timeout"
     return "blocked" if any(marker in lowered for marker in (
         "bot-check", "blocked", "captcha", "recaptcha", "unusual traffic",
     )) else "error"
@@ -1021,16 +1365,31 @@ class ResilientSearchSession:
         self,
         market: str = "global",
         providers: Iterable[SearchProvider] | None = None,
+        *,
+        config: DiscoveryRuntimeConfig | None = None,
+        clock: Callable[[], float] = time.monotonic,
+        budget: WallClockBudget | None = None,
     ) -> None:
         if market not in SUPPORTED_MARKETS:
             raise ValueError(f"Unsupported market: {market}")
         self.market = market
+        self.config = config or DiscoveryRuntimeConfig()
+        self._clock = clock
+        self.budget = budget
+        self.budget_stage = "discovery"
         self.providers = tuple(providers) if providers is not None else (
-            GoogleSearchSession(market),
-            DuckDuckGoLiteSearchProvider(market),
-            NaverSearchProvider(market),
+            GoogleSearchSession(
+                market, timeout_seconds=self.config.timeout_for("google"),
+            ),
+            DuckDuckGoLiteSearchProvider(
+                market, timeout_seconds=self.config.timeout_for("duckduckgo_lite"),
+            ),
+            NaverSearchProvider(
+                market, timeout_seconds=self.config.timeout_for("naver"),
+            ),
         )
-        self._blocked_providers: set[int] = set()
+        self._open_providers: dict[int, str] = {}
+        self._failure_counts: dict[int, int] = {}
 
     def __enter__(self) -> "ResilientSearchSession":
         for provider in self.providers:
@@ -1064,11 +1423,45 @@ class ResilientSearchSession:
     def search_with_status(self, query: str) -> ProviderQueryOutcome:
         attempts: list[ProviderAttempt] = []
         for index, provider in enumerate(self.providers):
-            if index in self._blocked_providers and index < len(self.providers) - 1:
+            timeout_seconds = self.config.timeout_for(provider.name)
+            if self.budget is not None:
+                bounded_timeout = self.budget.timeout_for(
+                    timeout_seconds,
+                    self.budget_stage,
+                )
+                if bounded_timeout is None:
+                    attempts.append(ProviderAttempt(
+                        provider=provider.name,
+                        query=query,
+                        status="timeout",
+                        message=self.budget.exhaustion_reason,
+                        is_fallback=index > 0,
+                        timeout_seconds=0.0,
+                        timed_out=True,
+                        budget_exhausted=True,
+                    ))
+                    break
+                timeout_seconds = bounded_timeout
+            if index in self._open_providers:
+                attempts.append(ProviderAttempt(
+                    provider=provider.name,
+                    query=query,
+                    status="circuit_open",
+                    message=self._open_providers[index],
+                    is_fallback=index > 0,
+                    timeout_seconds=timeout_seconds,
+                    circuit_open=True,
+                ))
                 continue
+            started = self._clock()
             try:
-                results = tuple(provider.search(query))
-            except RuntimeError as error:
+                bounded_search = getattr(provider, "search_with_timeout", None)
+                if bounded_search is not None:
+                    raw_results = tuple(bounded_search(query, timeout_seconds))
+                else:
+                    raw_results = tuple(provider.search(query))
+            except Exception as error:
+                duration = max(0.0, self._clock() - started)
                 status = _provider_status(error)
                 attempts.append(ProviderAttempt(
                     provider=provider.name,
@@ -1076,36 +1469,79 @@ class ResilientSearchSession:
                     status=status,
                     message=str(error) or error.__class__.__name__,
                     is_fallback=index > 0,
+                    duration_seconds=round(duration, 6),
+                    timeout_seconds=timeout_seconds,
+                    timed_out=status == "timeout",
+                    blocked=status == "blocked",
+                    parse_failure=status == "parse_error",
+                    exception_class=type(error).__name__,
                 ))
-                if status == "blocked":
-                    self._blocked_providers.add(index)
+                self._failure_counts[index] = self._failure_counts.get(index, 0) + 1
+                if status in {"blocked", "timeout", "parse_error"} or (
+                    self._failure_counts[index] >= self.config.circuit_breaker_failures
+                ):
+                    self._open_providers[index] = (
+                        f"Circuit open after {status}: {str(error) or type(error).__name__}"
+                    )
                 continue
+            duration = max(0.0, self._clock() - started)
+            results = _normalized_search_results(raw_results, provider.name, query)
+            if duration > timeout_seconds:
+                error = ProviderTimeoutError(
+                    f"{provider.name} exceeded its {timeout_seconds:g}s deadline."
+                )
+                attempts.append(ProviderAttempt(
+                    provider=provider.name,
+                    query=query,
+                    status="timeout",
+                    message=str(error),
+                    is_fallback=index > 0,
+                    duration_seconds=round(duration, 6),
+                    timeout_seconds=timeout_seconds,
+                    timed_out=True,
+                    exception_class=type(error).__name__,
+                ))
+                self._open_providers[index] = f"Circuit open after timeout: {error}"
+                continue
+            if not results:
+                attempts.append(ProviderAttempt(
+                    provider=provider.name,
+                    query=query,
+                    status="empty",
+                    result_count=0,
+                    message="Provider returned no candidates.",
+                    is_fallback=index > 0,
+                    duration_seconds=round(duration, 6),
+                    timeout_seconds=timeout_seconds,
+                ))
+                continue
+            self._failure_counts[index] = 0
             attempts.append(ProviderAttempt(
                 provider=provider.name,
                 query=query,
                 status="success",
                 result_count=len(results),
                 is_fallback=index > 0,
+                duration_seconds=round(duration, 6),
+                timeout_seconds=timeout_seconds,
             ))
-            # A successful empty response is a real zero-result outcome. It is
-            # deliberately not treated as provider failure.
             return ProviderQueryOutcome(results, tuple(attempts))
         return ProviderQueryOutcome((), tuple(attempts))
 
-    def search(self, query: str) -> list[SearchResult]:
+    def search(self, query: str) -> list[SearchResultLike]:
         outcome = self.search_with_status(query)
         if outcome.attempts and all(item.status != "success" for item in outcome.attempts):
             raise ProviderSearchError(query, outcome.attempts)
         return list(outcome.results)
 
 
-def google_search(query: str, market: str = "global") -> list[SearchResult]:
+def google_search(query: str, market: str = "global") -> list[SearchResultLike]:
     """Search once, closing a fallback browser afterwards if one was needed."""
     with GoogleSearchSession(market) as session:
         return session.search(query)
 
 
-def _discovery_issue(query: str, error: RuntimeError) -> DiscoveryIssue:
+def _discovery_issue(query: str, error: Exception) -> DiscoveryIssue:
     message = str(error) or error.__class__.__name__
     return DiscoveryIssue(_provider_status(error), query, message)
 
@@ -1121,9 +1557,9 @@ def _searcher_name(searcher: object) -> str:
 
 
 def _search_query(
-    searcher: Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome],
+    searcher: Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome],
     query: str,
-) -> tuple[list[SearchResult], list[ProviderAttempt], list[DiscoveryIssue]]:
+) -> tuple[list[SearchResultLike], list[ProviderAttempt], list[DiscoveryIssue]]:
     try:
         response = searcher(query)
     except ProviderSearchError as error:
@@ -1134,7 +1570,7 @@ def _search_query(
             if item.status != "success"
         ]
         return [], attempts, issues
-    except RuntimeError as error:
+    except Exception as error:
         issue = _discovery_issue(query, error)
         provider = _searcher_name(searcher)
         issue = DiscoveryIssue(issue.status, issue.query, issue.message, provider)
@@ -1148,11 +1584,36 @@ def _search_query(
             for item in attempts
             if item.status != "success"
         ]
-        return list(response.results), attempts, issues
+        provider = next(
+            (item.provider for item in reversed(attempts) if item.status == "success"),
+            _searcher_name(searcher),
+        )
+        return list(_normalized_search_results(response.results, provider, query)), attempts, issues
 
-    results = list(response)
+    raw_results = list(response)
     provider = _searcher_name(searcher)
+    if not raw_results:
+        attempt = ProviderAttempt(
+            provider, query, "empty", message="Provider returned no candidates.",
+        )
+        return [], [attempt], [
+            DiscoveryIssue("empty", query, attempt.message or "Empty result.", provider),
+        ]
+    results = list(_normalized_search_results(raw_results, provider, query))
     return results, [ProviderAttempt(provider, query, "success", len(results))], []
+
+
+def _search_status_from_issues(issues: Iterable[DiscoveryIssue]) -> SearchStatus:
+    statuses = [item.status for item in issues]
+    if not statuses:
+        return "success"
+    for status in ("timeout", "blocked", "error", "parse_error", "empty", "circuit_open"):
+        if status not in statuses:
+            continue
+        if status in {"parse_error", "circuit_open"}:
+            return "error"
+        return status  # type: ignore[return-value]
+    return "error"
 
 
 def _primary_provider_succeeded(attempts: Iterable[ProviderAttempt]) -> bool:
@@ -1180,13 +1641,13 @@ def discover_with_status(
         raise ValueError(f"Unsupported market: {market}")
 
     def run(
-        active_searcher: Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome],
+        active_searcher: Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome],
     ) -> DiscoveryOutcome:
         cache_key = (normalize_model(brand), market)
         cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
         official_domains = dict(cached or ())
-        raw_results: list[SearchResult] = []
-        official_results: list[SearchResult] = []
+        raw_results: list[SearchResultLike] = []
+        official_results: list[SearchResultLike] = []
         issues: list[DiscoveryIssue] = []
         provider_attempts: list[ProviderAttempt] = []
         attempted_queries: list[str] = []
@@ -1195,6 +1656,7 @@ def discover_with_status(
         if cached is None:
             queries.extend((f"{brand} official website", f"{brand} official {model}"))
         queries.extend(base_queries)
+        budget_stopped = False
         for query in queries:
             attempted_queries.append(query)
             found, attempts, query_issues = _search_query(active_searcher, query)
@@ -1203,16 +1665,25 @@ def discover_with_status(
             raw_results.extend(found)
             if "official" in query and _primary_provider_succeeded(attempts):
                 official_results.extend(found)
+            if any(item.budget_exhausted for item in attempts):
+                budget_stopped = True
+                break
         if cached is None:
             official_domains = dict(discover_global_official_domains(brand, official_results))
             _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
         relevant_domains = [
             domain for domain in official_domains
-            if any(url_belongs_to_domain(url, domain) and model_match(model, f"{title} {url}") == "exact"
-                   for url, title in raw_results)
+            if any(
+                url_belongs_to_domain((record := _search_result_record(item)).url, domain)
+                and model_match(
+                    model,
+                    f"{record.title} {record.snippet} {record.url}",
+                ) == "exact"
+                for item in raw_results
+            )
         ]
         site_domains = relevant_domains or list(official_domains)[:1]
-        for domain in site_domains[:3]:
+        for domain in (() if budget_stopped else site_domains[:3]):
             query = f'"{model}" site:{domain}'
             queries.append(query)
             attempted_queries.append(query)
@@ -1220,6 +1691,8 @@ def discover_with_status(
             provider_attempts.extend(attempts)
             issues.extend(query_issues)
             raw_results.extend(found)
+            if any(item.budget_exhausted for item in attempts):
+                break
         ranked_candidates = rank_candidates(
             raw_results, brand, model, article, market=market,
             official_domains=official_domains,
@@ -1230,7 +1703,7 @@ def discover_with_status(
         if issues and raw_results:
             status: SearchStatus = "partial"
         elif issues:
-            status = issues[-1].status
+            status = _search_status_from_issues(issues)
         else:
             status = "success"
         return DiscoveryOutcome(
@@ -1359,7 +1832,7 @@ def discover_identity_query_with_status(
         article = identity.candidate_identifiers[0]
 
     def run(
-        active_searcher: Callable[[str], Iterable[SearchResult] | ProviderQueryOutcome],
+        active_searcher: Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome],
     ) -> DiscoveryOutcome:
         cache_key = (normalize_model(identity.brand), market)
         cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
@@ -1367,7 +1840,7 @@ def discover_identity_query_with_status(
         issues: list[DiscoveryIssue] = []
         provider_attempts: list[ProviderAttempt] = []
         attempted: list[str] = []
-        raw_results: list[SearchResult] = []
+        raw_results: list[SearchResultLike] = []
 
         if cached is None:
             authority_query = f"{identity.brand} official website"
@@ -1384,6 +1857,32 @@ def discover_identity_query_with_status(
                 discover_global_official_domains(identity.brand, authority_results)
             )
             _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
+            if any(item.budget_exhausted for item in attempts):
+                ranked_candidates = rank_candidates(
+                    raw_results,
+                    identity.brand,
+                    model,
+                    article,
+                    market=market,
+                    official_domains=official_domains,
+                )
+                candidates, rejected_candidates = _partition_relevance_candidates(
+                    ranked_candidates, identity.brand, model, article,
+                )
+                return _annotate_identity_candidates(
+                    DiscoveryOutcome(
+                        candidates,
+                        _search_status_from_issues(issues),
+                        [query],
+                        attempted,
+                        issues,
+                        provider_attempts,
+                        rejected_candidates,
+                    ),
+                    identity,
+                    model,
+                    article,
+                )
 
         attempted.append(query)
         found, attempts, query_issues = _search_query(active_searcher, query)
@@ -1405,7 +1904,7 @@ def discover_identity_query_with_status(
         if issues and raw_results:
             status: SearchStatus = "partial"
         elif issues:
-            status = issues[-1].status
+            status = _search_status_from_issues(issues)
         else:
             status = "success"
         return _annotate_identity_candidates(

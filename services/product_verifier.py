@@ -25,6 +25,7 @@ from typing import Callable, Literal, Mapping
 import unicodedata
 
 from core.identity import ProductIdentity
+from core.discovery import DEFAULT_PROVIDER_TIMEOUTS
 from core.mapping import DimensionValue
 from core.profile import EvidenceRecord, FinalProductProfile, ProfileAttribute, ProfileCategory
 from core.quality import QualityAssessment, assess_product_quality
@@ -67,6 +68,10 @@ class VerifyProductRequest:
     market: str = "global"
     max_sources: int = 5
     targeted_search_enabled: bool = True
+    wall_clock_budget_seconds: float = 90.0
+    provider_timeouts: Mapping[str, float] = field(
+        default_factory=lambda: dict(DEFAULT_PROVIDER_TIMEOUTS),
+    )
     # Stage 11: bypass a cache hit and force a live re-run. Never part of the
     # cache key -- the refreshed result is still saved for later requests.
     force_refresh: bool = False
@@ -79,6 +84,8 @@ class VerifyProductRequest:
             "market": self.market,
             "max_sources": self.max_sources,
             "targeted_search_enabled": self.targeted_search_enabled,
+            "wall_clock_budget_seconds": self.wall_clock_budget_seconds,
+            "provider_timeouts": dict(self.provider_timeouts),
             "force_refresh": self.force_refresh,
         }
 
@@ -392,6 +399,8 @@ def _verify_request_from_dict(data: Mapping[str, object]) -> VerifyProductReques
         market=data["market"],
         max_sources=data["max_sources"],
         targeted_search_enabled=data["targeted_search_enabled"],
+        wall_clock_budget_seconds=float(data.get("wall_clock_budget_seconds", 90.0)),
+        provider_timeouts=dict(data.get("provider_timeouts", DEFAULT_PROVIDER_TIMEOUTS)),
         force_refresh=bool(data.get("force_refresh", False)),
     )
 
@@ -433,6 +442,8 @@ def _cache_key(request: VerifyProductRequest) -> str:
         "market": _normalize_key_part(request.market),
         "max_sources": request.max_sources,
         "targeted_search_enabled": request.targeted_search_enabled,
+        "wall_clock_budget_seconds": request.wall_clock_budget_seconds,
+        "provider_timeouts": dict(sorted(request.provider_timeouts.items())),
     }
     canonical = json.dumps(parts, sort_keys=True, ensure_ascii=True)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -532,6 +543,8 @@ def _build_internal_request(request: VerifyProductRequest) -> ProductWorkflowReq
         market=request.market,
         max_initial_sources=request.max_sources,
         targeted_search_enabled=request.targeted_search_enabled,
+        wall_clock_budget_seconds=request.wall_clock_budget_seconds,
+        provider_timeouts=request.provider_timeouts,
     )
 
 

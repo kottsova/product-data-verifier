@@ -1,4 +1,4 @@
-"""Stage 18.1 read-only, stage-by-stage live quality diagnosis.
+"""Stage 18 read-only, stage-by-stage live quality diagnosis.
 
 This module does not change pipeline behavior.  It invokes the stable service
 with no cache repository, retains the internal result through the documented
@@ -55,6 +55,7 @@ PRODUCTS: dict[str, dict[str, Any]] = {
 def _candidate(candidate: Mapping[str, object]) -> dict[str, Any]:
     return {
         "url": candidate.get("url"), "title": candidate.get("title"),
+        "snippet": candidate.get("snippet"),
         "score": candidate.get("score"),
         "source_type": candidate.get("source_type"),
         "authority_status": candidate.get("authority_status"),
@@ -63,6 +64,30 @@ def _candidate(candidate: Mapping[str, object]) -> dict[str, Any]:
         "identity_relation": candidate.get("identity_relation"),
         "relevance_relation": candidate.get("relevance_relation"),
         "relevance_reasons": list(candidate.get("relevance_reasons") or ()),
+        "discovery_provider": candidate.get("discovery_provider"),
+        "discovery_query": candidate.get("discovery_query"),
+        "discovery_rank": candidate.get("discovery_rank"),
+        "raw_url": candidate.get("raw_url"),
+        "redirect_url": candidate.get("redirect_url"),
+        "parse_status": candidate.get("parse_status"),
+        "parse_confidence": candidate.get("parse_confidence"),
+        "discovery_provenance": list(candidate.get("discovery_provenance") or ()),
+    }
+
+
+def _provider_attempt(item: Any) -> dict[str, Any]:
+    return {
+        "provider": item.provider, "query": item.query, "status": item.status,
+        "result_count": item.result_count, "message": item.message,
+        "is_fallback": item.is_fallback,
+        "duration_seconds": item.duration_seconds,
+        "timeout_seconds": item.timeout_seconds,
+        "timed_out": item.timed_out,
+        "blocked": item.blocked,
+        "parse_failure": item.parse_failure,
+        "exception_class": item.exception_class,
+        "circuit_open": item.circuit_open,
+        "budget_exhausted": item.budget_exhausted,
     }
 
 
@@ -118,11 +143,9 @@ def _targeted_trace(result: Any) -> dict[str, Any]:
                 query_results.append({
                     "query": query.query, "intent": query.query_intent,
                     "discovery_status": query.discovery_status,
-                    "provider_attempts": [{
-                        "provider": item.provider, "query": item.query, "status": item.status,
-                        "result_count": item.result_count, "message": item.message,
-                        "is_fallback": item.is_fallback,
-                    } for item in query.provider_attempts],
+                    "provider_attempts": [
+                        _provider_attempt(item) for item in query.provider_attempts
+                    ],
                     "issues": [{
                         "provider": item.provider, "status": item.status,
                         "query": item.query, "message": item.message,
@@ -136,6 +159,11 @@ def _targeted_trace(result: Any) -> dict[str, Any]:
                     "mapped_attributes": [_mapped(item) for item in query.mapped_candidate_facts],
                     "related_attributes": [_mapped(item) for item in query.related_candidate_facts],
                     "useful_evidence_found": query.useful_evidence_found,
+                    "accepted_candidate_count": query.accepted_candidate_count,
+                    "useful_fact_count": query.useful_fact_count,
+                    "new_domain_count": query.new_domain_count,
+                    "coverage_gain_count": query.coverage_gain_count,
+                    "confirmable_fact_gain_count": query.confirmable_fact_gain_count,
                 })
             fields.append({
                 "canonical_name": field.gap.canonical_name,
@@ -148,6 +176,26 @@ def _targeted_trace(result: Any) -> dict[str, Any]:
         "enabled": result.request.targeted_search_enabled, "plan": plan,
         "deferred_gaps": [item.canonical_name for item in result.targeted_plan.deferred_gaps],
         "fetch_count": result.targeted_search.fetch_count if result.targeted_search else 0,
+        "stop_reason": result.targeted_search.stop_reason if result.targeted_search else None,
+        "executed_query_count": (
+            result.targeted_search.executed_query_count if result.targeted_search else 0
+        ),
+        "accepted_candidate_count": (
+            result.targeted_search.accepted_candidate_count if result.targeted_search else 0
+        ),
+        "useful_fact_count": (
+            result.targeted_search.useful_fact_count if result.targeted_search else 0
+        ),
+        "discovered_domain_count": (
+            result.targeted_search.discovered_domain_count if result.targeted_search else 0
+        ),
+        "coverage_gain_count": (
+            result.targeted_search.coverage_gain_count if result.targeted_search else 0
+        ),
+        "confirmable_fact_gain_count": (
+            result.targeted_search.confirmable_fact_gain_count
+            if result.targeted_search else 0
+        ),
         "fields": fields,
     }
 
@@ -168,6 +216,7 @@ def build_stage_trace(product: Mapping[str, Any], result: Any) -> dict[str, Any]
             "article": product.get("article"), "market": product.get("market", "global"),
             "max_sources": result.request.max_initial_sources,
             "targeted_search_enabled": result.request.targeted_search_enabled,
+            "wall_clock_budget_seconds": result.request.wall_clock_budget_seconds,
         },
         "identity": {
             "brand": identity.brand, "raw_name": identity.raw_name,
@@ -186,11 +235,9 @@ def build_stage_trace(product: Mapping[str, Any], result: Any) -> dict[str, Any]
             "provider_counts": {
                 provider: dict(counts) for provider, counts in sorted(providers.items())
             },
-            "provider_attempts": [{
-                "provider": item.provider, "query": item.query, "status": item.status,
-                "result_count": item.result_count, "message": item.message,
-                "is_fallback": item.is_fallback,
-            } for item in result.discovery.provider_attempts],
+            "provider_attempts": [
+                _provider_attempt(item) for item in result.discovery.provider_attempts
+            ],
             "issues": [{
                 "provider": item.provider, "status": item.status,
                 "query": item.query, "message": item.message,
@@ -264,6 +311,7 @@ def build_stage_trace(product: Mapping[str, Any], result: Any) -> dict[str, Any]
             } for item in result.validated_profile.diagnostics],
         },
         "quality": result.quality.to_dict(),
+        "budget": dict(result.final_profile.metadata.get("wall_clock_budget") or {}),
     }
     trace["coverage_audit"] = audit_result(
         AuditProduct(
@@ -307,11 +355,9 @@ def _worker(product: dict[str, Any], config: dict[str, Any], output_queue: Any) 
                     "status": outcome.search_status,
                     "queries": list(outcome.queries),
                     "attempted_queries": list(outcome.attempted_queries),
-                    "provider_attempts": [{
-                        "provider": item.provider, "query": item.query, "status": item.status,
-                        "result_count": item.result_count, "message": item.message,
-                        "is_fallback": item.is_fallback,
-                    } for item in outcome.provider_attempts],
+                    "provider_attempts": [
+                        _provider_attempt(item) for item in outcome.provider_attempts
+                    ],
                     "issues": [{
                         "provider": item.provider, "status": item.status,
                         "query": item.query, "message": item.message,
@@ -326,6 +372,7 @@ def _worker(product: dict[str, Any], config: dict[str, Any], output_queue: Any) 
         brand=product["brand"], model=product["model"], article=product.get("article"),
         market=product.get("market", "global"), max_sources=config["max_sources"],
         targeted_search_enabled=config["targeted_search_enabled"], force_refresh=True,
+        wall_clock_budget_seconds=config["wall_clock_budget_seconds"],
     )
     service = ProductVerifierService(repository=None)
     service_result, workflow_result = service.verify_with_workflow_result(
@@ -383,6 +430,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "concurrency": args.concurrency, "timeout_seconds": args.timeout,
         "max_sources": args.max_sources,
         "targeted_search_enabled": not args.no_targeted_search,
+        "wall_clock_budget_seconds": args.wall_clock_budget,
         "phase": args.phase,
     }
     output = Path(args.output)
@@ -429,6 +477,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-targeted-search", action="store_true")
     parser.add_argument("--phase", choices=("full", "discovery"), default="full")
     parser.add_argument("--timeout", type=float, default=240.0)
+    parser.add_argument("--wall-clock-budget", type=float, default=90.0)
     parser.add_argument("--concurrency", type=int, default=1)
     parser.add_argument(
         "--output", default="diagnostics/results/stage18-live-quality.json",

@@ -8,12 +8,16 @@ network access.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import time
 from typing import Callable, Mapping, cast
 
+from core.budget import WallClockBudget
 from core.category import CategoryResult, detect_category
 from core.discovery import (
     SUPPORTED_MARKETS,
     Candidate,
+    DEFAULT_PROVIDER_TIMEOUTS,
+    DiscoveryRuntimeConfig,
     DiscoveryOutcome,
     ProviderAttempt,
     ResilientSearchSession,
@@ -61,6 +65,14 @@ def _provider_attempt_data(attempt: ProviderAttempt) -> dict[str, object]:
         "result_count": attempt.result_count,
         "message": attempt.message,
         "is_fallback": attempt.is_fallback,
+        "duration_seconds": attempt.duration_seconds,
+        "timeout_seconds": attempt.timeout_seconds,
+        "timed_out": attempt.timed_out,
+        "blocked": attempt.blocked,
+        "parse_failure": attempt.parse_failure,
+        "exception_class": attempt.exception_class,
+        "circuit_open": attempt.circuit_open,
+        "budget_exhausted": attempt.budget_exhausted,
     }
 
 
@@ -84,6 +96,7 @@ class WorkflowServices:
     discover_targeted: TargetedDiscovery = _targeted_discovery
     fetch: Fetcher = fetch_candidate
     extract: Extractor = extract_attributes
+    clock: Callable[[], float] = time.monotonic
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +109,10 @@ class ProductWorkflowRequest:
     minimum_search_priority: Priority = "medium"
     targeted_search_enabled: bool = True
     targeted_config: TargetedSearchConfig = field(default_factory=TargetedSearchConfig)
+    wall_clock_budget_seconds: float = 90.0
+    provider_timeouts: Mapping[str, float] = field(
+        default_factory=lambda: dict(DEFAULT_PROVIDER_TIMEOUTS),
+    )
 
     def __post_init__(self) -> None:
         raw_name = " ".join((self.raw_name or "").split())
@@ -110,9 +127,14 @@ class ProductWorkflowRequest:
             raise ValueError(
                 f"unsupported minimum_search_priority: {self.minimum_search_priority}"
             )
+        if self.wall_clock_budget_seconds <= 0:
+            raise ValueError("wall_clock_budget_seconds must be positive")
+        runtime_config = DiscoveryRuntimeConfig(self.provider_timeouts)
         object.__setattr__(self, "raw_name", raw_name)
         object.__setattr__(self, "brand", brand)
         object.__setattr__(self, "identity_evidence", tuple(self.identity_evidence))
+        object.__setattr__(self, "wall_clock_budget_seconds", float(self.wall_clock_budget_seconds))
+        object.__setattr__(self, "provider_timeouts", dict(runtime_config.provider_timeouts))
 
     @classmethod
     def from_parts(
@@ -264,8 +286,11 @@ def _candidate_fetch_view(
 def _run_product_workflow_with_services(
     request: ProductWorkflowRequest,
     active: WorkflowServices,
+    *,
+    budget: WallClockBudget | None = None,
 ) -> ProductWorkflowResult:
     """Run Stages 1-7 once and retain every stage result for inspection."""
+    budget = budget or WallClockBudget(request.wall_clock_budget_seconds, active.clock)
     identity = resolve_product_identity(
         request.raw_name,
         brand=request.brand,
@@ -286,16 +311,20 @@ def _run_product_workflow_with_services(
             fetch_cache[key] = active.fetch(candidate)
         return _candidate_fetch_view(fetch_cache[key], candidate)
 
-    fetched_sources = tuple(
-        fetch_once(candidate)
-        for candidate in selected_candidates
-    )
-    raw_attributes = tuple(
-        attribute
-        for source in fetched_sources
-        if source.get("status") == "success"
-        for attribute in active.extract(source)
-    )
+    fetched: list[FetchResult] = []
+    for candidate in selected_candidates:
+        if not budget.can_start("initial_fetch", minimum_seconds=0.25):
+            break
+        fetched.append(fetch_once(candidate))
+    fetched_sources = tuple(fetched)
+    extracted: list[RawAttribute] = []
+    for source in fetched_sources:
+        if source.get("status") != "success":
+            continue
+        if not budget.can_start("initial_extraction", minimum_seconds=0.05):
+            break
+        extracted.extend(active.extract(source))
+    raw_attributes = tuple(extracted)
     category = detect_category(
         identity,
         raw_attributes,
@@ -318,7 +347,9 @@ def _run_product_workflow_with_services(
         config=request.targeted_config,
     )
     targeted_search: TargetedSearchResult | None = None
-    if request.targeted_search_enabled:
+    if request.targeted_search_enabled and budget.can_start(
+        "targeted_search", minimum_seconds=0.25,
+    ):
         targeted_search = run_targeted_search(
             targeted_plan,
             gaps,
@@ -329,6 +360,7 @@ def _run_product_workflow_with_services(
             ),
             fetcher=fetch_once,
             extractor=active.extract,
+            budget=budget,
         )
 
     validated = validate_product_profile(
@@ -360,6 +392,17 @@ def _run_product_workflow_with_services(
             "targeted_search_enabled": request.targeted_search_enabled,
             "targeted_query_count": len(targeted_plan.queries),
             "targeted_fetch_count": targeted_search.fetch_count if targeted_search else 0,
+            "targeted_stop_reason": targeted_search.stop_reason if targeted_search else None,
+            "targeted_executed_query_count": (
+                targeted_search.executed_query_count if targeted_search else 0
+            ),
+            "targeted_accepted_candidate_count": (
+                targeted_search.accepted_candidate_count if targeted_search else 0
+            ),
+            "targeted_useful_fact_count": (
+                targeted_search.useful_fact_count if targeted_search else 0
+            ),
+            "wall_clock_budget": budget.snapshot(),
         },
     )
     return ProductWorkflowResult(
@@ -388,6 +431,8 @@ def _discover_initial_with_released_browser(
     market: str,
 ) -> DiscoveryOutcome:
     """Finish the discovery browser lifecycle before document fetch begins."""
+    previous_stage = search.budget_stage
+    search.budget_stage = "initial_discovery"
     try:
         return discover_identity_with_status(
             identity,
@@ -395,6 +440,7 @@ def _discover_initial_with_released_browser(
             searcher=search.search_with_status,
         )
     finally:
+        search.budget_stage = previous_stage
         search.release_transient_resources()
 
 
@@ -405,6 +451,8 @@ def _discover_targeted_with_released_browser(
     market: str,
 ) -> DiscoveryOutcome:
     """Release a targeted discovery browser before its candidate is fetched."""
+    previous_stage = search.budget_stage
+    search.budget_stage = "targeted_discovery"
     try:
         return discover_identity_query_with_status(
             identity,
@@ -413,6 +461,7 @@ def _discover_targeted_with_released_browser(
             searcher=search.search_with_status,
         )
     finally:
+        search.budget_stage = previous_stage
         search.release_transient_resources()
 
 
@@ -425,7 +474,19 @@ def run_product_workflow(
     if services is not None:
         return _run_product_workflow_with_services(request, services)
 
-    with ResilientSearchSession(request.market) as search:
+    budget = WallClockBudget(request.wall_clock_budget_seconds)
+    runtime_config = DiscoveryRuntimeConfig(request.provider_timeouts)
+    with ResilientSearchSession(
+        request.market,
+        config=runtime_config,
+        budget=budget,
+    ) as search:
+        def live_fetch(candidate: Mapping[str, object]) -> FetchResult:
+            timeout = budget.timeout_for(30.0, "fetch", minimum_seconds=0.25)
+            if timeout is None:
+                raise RuntimeError(budget.exhaustion_reason or "Workflow budget exhausted.")
+            return fetch_candidate(candidate, timeout=timeout)
+
         live_services = WorkflowServices(
             discover_initial=lambda identity, market: _discover_initial_with_released_browser(
                 search, identity, market,
@@ -435,8 +496,9 @@ def run_product_workflow(
                     search, identity, query, market,
                 )
             ),
+            fetch=live_fetch,
         )
-        return _run_product_workflow_with_services(request, live_services)
+        return _run_product_workflow_with_services(request, live_services, budget=budget)
 
 
 # Short application-facing alias.

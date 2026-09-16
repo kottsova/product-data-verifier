@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import re
 from typing import Callable, Iterable, Literal, Mapping
+from urllib.parse import urlparse
 
+from core.budget import WallClockBudget
 from core.discovery import (
     Candidate,
     DiscoveryIssue,
@@ -31,6 +33,14 @@ StopReason = Literal[
     "discovery_blocked",
     "discovery_error",
     "no_queries",
+    "budget_exhausted",
+    "global_query_limit",
+    "zero_accepted_candidates",
+    "zero_useful_facts",
+    "duplicate_domain_saturation",
+    "no_coverage_gain",
+    "no_confirmed_gain",
+    "completed_plan",
 ]
 DiscoveryRunner = Callable[[ProductIdentity, str], DiscoveryOutcome]
 Fetcher = Callable[[Mapping[str, object]], FetchResult]
@@ -43,10 +53,21 @@ class TargetedSearchConfig:
     max_candidates_per_query: int = 5
     max_candidates_per_field: int = 8
     stop_on_strong_official_evidence: bool = True
+    max_total_queries: int = 16
+    max_consecutive_zero_candidates: int = 10
+    max_consecutive_zero_useful_facts: int = 10
+    max_consecutive_duplicate_domains: int = 5
+    max_consecutive_no_coverage_gain: int = 10
+    max_consecutive_no_confirmed_gain: int = 12
 
     def __post_init__(self) -> None:
         for name in (
             "max_queries_per_field", "max_candidates_per_query", "max_candidates_per_field",
+            "max_total_queries", "max_consecutive_zero_candidates",
+            "max_consecutive_zero_useful_facts",
+            "max_consecutive_duplicate_domains",
+            "max_consecutive_no_coverage_gain",
+            "max_consecutive_no_confirmed_gain",
         ):
             if getattr(self, name) < 1:
                 raise ValueError(f"{name} must be positive")
@@ -96,6 +117,11 @@ class TargetedQueryResult:
     issues: tuple[DiscoveryIssue, ...] = ()
     provider_attempts: tuple[ProviderAttempt, ...] = ()
     useful_evidence_found: bool = False
+    accepted_candidate_count: int = 0
+    useful_fact_count: int = 0
+    new_domain_count: int = 0
+    coverage_gain_count: int = 0
+    confirmable_fact_gain_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -119,6 +145,13 @@ class TargetedSearchResult:
     fields: list[TargetedFieldResult] = field(default_factory=list)
     fetched_urls: tuple[str, ...] = ()
     fetch_count: int = 0
+    stop_reason: StopReason | None = None
+    executed_query_count: int = 0
+    accepted_candidate_count: int = 0
+    useful_fact_count: int = 0
+    discovered_domain_count: int = 0
+    coverage_gain_count: int = 0
+    confirmable_fact_gain_count: int = 0
 
     @property
     def blocked(self) -> bool:
@@ -308,13 +341,28 @@ def _run_targeted_search(
     discovery: DiscoveryRunner,
     fetcher: Fetcher,
     extractor: Extractor,
+    budget: WallClockBudget | None = None,
 ) -> TargetedSearchResult:
     gap_index = analysis.by_name
     fetch_cache: dict[str, FetchResult] = {}
     extraction_cache: dict[str, tuple[list[RawAttribute], object]] = {}
     field_results: list[TargetedFieldResult] = []
+    executed_queries = 0
+    accepted_candidates = 0
+    useful_facts = 0
+    seen_domains: set[str] = set()
+    coverage_fields: set[str] = set()
+    confirmable_fields: set[str] = set()
+    consecutive_zero_candidates = 0
+    consecutive_zero_useful = 0
+    consecutive_duplicate_domains = 0
+    consecutive_no_coverage_gain = 0
+    consecutive_no_confirmed_gain = 0
+    global_stop_reason: StopReason | None = None
 
     for canonical_name, queries in plan.by_field.items():
+        if global_stop_reason is not None:
+            break
         gap = gap_index[canonical_name]
         query_results: list[TargetedQueryResult] = []
         inspected = 0
@@ -322,15 +370,35 @@ def _run_targeted_search(
         stop_field = False
 
         for targeted_query in queries[:plan.config.max_queries_per_field]:
+            if executed_queries >= plan.config.max_total_queries:
+                stop_reason = "global_query_limit"
+                global_stop_reason = stop_reason
+                break
+            if budget is not None and not budget.can_start(
+                "targeted_discovery", minimum_seconds=0.25,
+            ):
+                stop_reason = "budget_exhausted"
+                global_stop_reason = stop_reason
+                break
             outcome = discovery(identity, targeted_query.query)
+            executed_queries += 1
             fetched: list[FetchResult] = []
             exact_facts: list[CanonicalAttribute] = []
             related_facts: list[CanonicalAttribute] = []
             relevant_raw: list[RawAttribute] = []
             rejected: list[CandidateRejection] = []
             strong_official = False
+            accepted_this_query = 0
+            domains_this_query: set[str] = set()
 
             for candidate in outcome.candidates[:plan.config.max_candidates_per_query]:
+                if budget is not None and not budget.can_start(
+                    "targeted_fetch", minimum_seconds=0.25,
+                ):
+                    stop_reason = "budget_exhausted"
+                    global_stop_reason = stop_reason
+                    stop_field = True
+                    break
                 if inspected >= plan.config.max_candidates_per_field:
                     stop_reason = "candidate_limit"
                     stop_field = True
@@ -344,6 +412,12 @@ def _run_targeted_search(
                 if not url:
                     rejected.append(CandidateRejection(candidate, "Candidate URL is invalid."))
                     continue
+                accepted_this_query += 1
+                domain = str(
+                    candidate.get("domain") or urlparse(url).hostname or ""
+                ).casefold()
+                if domain:
+                    domains_this_query.add(domain)
                 if url not in fetch_cache:
                     fetch_cache[url] = fetcher(candidate)
                 source = dict(fetch_cache[url])
@@ -356,6 +430,13 @@ def _run_targeted_search(
                 fetched.append(source)  # type: ignore[arg-type]
                 if source["status"] != "success":
                     continue
+                if budget is not None and not budget.can_start(
+                    "targeted_extraction", minimum_seconds=0.05,
+                ):
+                    stop_reason = "budget_exhausted"
+                    global_stop_reason = stop_reason
+                    stop_field = True
+                    break
                 if url not in extraction_cache:
                     raw = extractor(source)
                     extraction_cache[url] = (
@@ -379,6 +460,17 @@ def _run_targeted_search(
                     strong_official = True
 
             useful = bool(exact_facts)
+            new_domains = domains_this_query - seen_domains
+            seen_domains.update(domains_this_query)
+            coverage_gain = int(bool(exact_facts) and canonical_name not in coverage_fields)
+            if coverage_gain:
+                coverage_fields.add(canonical_name)
+            confirmable = bool(exact_facts) and strong_official
+            confirmable_gain = int(confirmable and canonical_name not in confirmable_fields)
+            if confirmable_gain:
+                confirmable_fields.add(canonical_name)
+            accepted_candidates += accepted_this_query
+            useful_facts += len(exact_facts)
             query_results.append(TargetedQueryResult(
                 requested_canonical_field=canonical_name,
                 query=targeted_query.query,
@@ -393,6 +485,11 @@ def _run_targeted_search(
                 issues=tuple(outcome.issues),
                 provider_attempts=tuple(outcome.provider_attempts),
                 useful_evidence_found=useful,
+                accepted_candidate_count=accepted_this_query,
+                useful_fact_count=len(exact_facts),
+                new_domain_count=len(new_domains),
+                coverage_gain_count=coverage_gain,
+                confirmable_fact_gain_count=confirmable_gain,
             ))
             if outcome.search_status == "blocked":
                 stop_reason = "discovery_blocked"
@@ -406,6 +503,59 @@ def _run_targeted_search(
             if stop_field:
                 break
 
+            consecutive_zero_candidates = (
+                consecutive_zero_candidates + 1 if accepted_this_query == 0 else 0
+            )
+            consecutive_zero_useful = (
+                consecutive_zero_useful + 1 if not exact_facts else 0
+            )
+            consecutive_duplicate_domains = (
+                consecutive_duplicate_domains + 1
+                if accepted_this_query > 0 and not new_domains and not exact_facts
+                else 0
+            )
+            consecutive_no_coverage_gain = (
+                consecutive_no_coverage_gain + 1 if coverage_gain == 0 else 0
+            )
+            consecutive_no_confirmed_gain = (
+                consecutive_no_confirmed_gain + 1 if confirmable_gain == 0 else 0
+            )
+            early_stop_checks: tuple[tuple[bool, StopReason], ...] = (
+                (
+                    consecutive_zero_candidates
+                    >= plan.config.max_consecutive_zero_candidates,
+                    "zero_accepted_candidates",
+                ),
+                (
+                    consecutive_zero_useful
+                    >= plan.config.max_consecutive_zero_useful_facts,
+                    "zero_useful_facts",
+                ),
+                (
+                    consecutive_duplicate_domains
+                    >= plan.config.max_consecutive_duplicate_domains,
+                    "duplicate_domain_saturation",
+                ),
+                (
+                    consecutive_no_coverage_gain
+                    >= plan.config.max_consecutive_no_coverage_gain,
+                    "no_coverage_gain",
+                ),
+                (
+                    consecutive_no_confirmed_gain
+                    >= plan.config.max_consecutive_no_confirmed_gain,
+                    "no_confirmed_gain",
+                ),
+            )
+            for should_stop, reason in early_stop_checks:
+                if should_stop:
+                    stop_reason = reason
+                    global_stop_reason = reason
+                    stop_field = True
+                    break
+            if stop_field:
+                break
+
         if not queries:
             stop_reason = "no_queries"
         status = _field_status(query_results)
@@ -416,12 +566,21 @@ def _run_targeted_search(
             useful_evidence_found=status == "success",
             stop_reason=stop_reason,
         ))
+        if global_stop_reason is not None:
+            break
 
     return TargetedSearchResult(
         plan=plan,
         fields=field_results,
         fetched_urls=tuple(fetch_cache),
         fetch_count=len(fetch_cache),
+        stop_reason=global_stop_reason or "completed_plan",
+        executed_query_count=executed_queries,
+        accepted_candidate_count=accepted_candidates,
+        useful_fact_count=useful_facts,
+        discovered_domain_count=len(seen_domains),
+        coverage_gain_count=len(coverage_fields),
+        confirmable_fact_gain_count=len(confirmable_fields),
     )
 
 
@@ -435,19 +594,26 @@ def run_targeted_search(
     discovery: DiscoveryRunner | None = None,
     fetcher: Fetcher = fetch_candidate,
     extractor: Extractor = extract_attributes,
+    budget: WallClockBudget | None = None,
 ) -> TargetedSearchResult:
     """Execute a plan with per-run URL caching; returned facts stay provisional."""
     if plan.category != analysis.category:
         raise ValueError("plan and gap analysis categories differ")
     if discovery is not None:
-        return _run_targeted_search(plan, analysis, identity, discovery, fetcher, extractor)
+        return _run_targeted_search(
+            plan, analysis, identity, discovery, fetcher, extractor, budget,
+        )
     if searcher is not None:
         runner = lambda item, query: discover_identity_query_with_status(
             item, query, market, searcher,
         )
-        return _run_targeted_search(plan, analysis, identity, runner, fetcher, extractor)
+        return _run_targeted_search(
+            plan, analysis, identity, runner, fetcher, extractor, budget,
+        )
     with ResilientSearchSession(market) as session:
         runner = lambda item, query: discover_identity_query_with_status(
             item, query, market, session.search_with_status,
         )
-        return _run_targeted_search(plan, analysis, identity, runner, fetcher, extractor)
+        return _run_targeted_search(
+            plan, analysis, identity, runner, fetcher, extractor, budget,
+        )

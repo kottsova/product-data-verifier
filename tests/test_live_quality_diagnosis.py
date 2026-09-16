@@ -53,6 +53,7 @@ class LiveQualityDiagnosticTests(unittest.TestCase):
             "input", "identity", "discovery", "relevance_and_ranking", "fetch",
             "extraction", "category_and_schema", "mapping", "gap_detection",
             "targeted_search", "validation", "quality", "coverage_audit",
+            "budget",
         })
         self.assertEqual(trace["fetch"]["attempted"], 1)
         self.assertEqual(trace["extraction"]["total"], 3)

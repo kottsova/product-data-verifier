@@ -129,6 +129,45 @@ class FixtureServices:
 
 
 class ProductWorkflowTests(unittest.TestCase):
+    def test_budget_exhaustion_returns_best_partial_result_without_new_fetch(self):
+        class Clock:
+            now = 0.0
+
+            def __call__(self):
+                return self.now
+
+        clock = Clock()
+        url = "https://acme.example/product/X100"
+        item = candidate(url)
+        fetch_calls = []
+
+        def discover(_identity, _market):
+            clock.now = 1.0
+            return DiscoveryOutcome([item], "success", ["initial"], ["initial"], [])
+
+        services = WorkflowServices(
+            discover_initial=discover,
+            fetch=lambda value: fetch_calls.append(value) or fetch_result(value),
+            clock=clock,
+        )
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+                wall_clock_budget_seconds=0.5,
+            ),
+            services=services,
+        )
+
+        self.assertEqual(fetch_calls, [])
+        self.assertEqual(len(result.selected_candidates), 1)
+        self.assertEqual(result.fetched_sources, ())
+        budget = result.final_profile.metadata["wall_clock_budget"]
+        self.assertTrue(budget["exhausted"])
+        self.assertEqual(budget["exhausted_stage"], "initial_fetch")
+        self.assertIn("Insufficient workflow budget", budget["exhaustion_reason"])
+
     def test_relevance_gate_may_select_fewer_sources_and_never_fetches_rejected(self):
         accepted_url = "https://shop.example/product/X100"
         rejected_urls = [
@@ -267,6 +306,12 @@ class ProductWorkflowTests(unittest.TestCase):
                     max_queries_per_field=1,
                     max_candidates_per_query=1,
                     max_candidates_per_field=1,
+                    max_total_queries=20,
+                    max_consecutive_zero_candidates=20,
+                    max_consecutive_zero_useful_facts=20,
+                    max_consecutive_duplicate_domains=20,
+                    max_consecutive_no_coverage_gain=20,
+                    max_consecutive_no_confirmed_gain=20,
                 ),
             ),
             services=fixtures.services(),
@@ -299,6 +344,12 @@ class ProductWorkflowTests(unittest.TestCase):
                     max_queries_per_field=1,
                     max_candidates_per_query=1,
                     max_candidates_per_field=1,
+                    max_total_queries=20,
+                    max_consecutive_zero_candidates=20,
+                    max_consecutive_zero_useful_facts=20,
+                    max_consecutive_duplicate_domains=20,
+                    max_consecutive_no_coverage_gain=20,
+                    max_consecutive_no_confirmed_gain=20,
                 ),
             ),
             services=fixtures.services(),
@@ -462,6 +513,7 @@ class WorkflowPlaywrightLifecycleTests(unittest.TestCase):
 
         class SearchSession:
             active = False
+            budget_stage = "discovery"
 
             def __enter__(self):
                 return self
@@ -489,7 +541,7 @@ class WorkflowPlaywrightLifecycleTests(unittest.TestCase):
             searcher(query)
             return DiscoveryOutcome()
 
-        def workflow_runner(request, services):
+        def workflow_runner(request, services, **_kwargs):
             services.discover_initial(object(), request.market)
             events.append("initial_fetch")
             self.assertFalse(search.active)

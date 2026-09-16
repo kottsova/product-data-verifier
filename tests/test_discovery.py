@@ -2,8 +2,14 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from core.discovery import (
+    DiscoveryRuntimeConfig,
+    ProviderParseError,
     ProviderQueryOutcome,
+    ProviderTimeoutError,
     ResilientSearchSession,
+    SearchResultRecord,
+    _parse_google_browser_items,
+    _google_result_layout_ready,
     DiscoverySearchError,
     GoogleSearchSession,
     browser_headless,
@@ -17,6 +23,7 @@ from core.discovery import (
     is_obvious_non_product_url,
     rank_candidates,
 )
+from core.budget import WallClockBudget
 from core.identity import resolve_product_identity
 from core.match import candidate_model_match, model_match, normalize_model
 
@@ -570,7 +577,9 @@ class SearchFallbackTests(unittest.TestCase):
         with patch("core.discovery._http_google_search_for_market", return_value=([], "empty")), \
                 patch.object(session, "_playwright_search", return_value=fallback_results) as fallback:
             self.assertEqual(session.search("model"), fallback_results)
-            fallback.assert_called_once_with("model")
+            fallback.assert_called_once()
+            self.assertEqual(fallback.call_args.args, ("model",))
+            self.assertIn("deadline", fallback.call_args.kwargs)
 
     def test_consent_page_uses_playwright(self) -> None:
         session = GoogleSearchSession()
@@ -580,7 +589,9 @@ class SearchFallbackTests(unittest.TestCase):
             return_value=(misleading, "Before you continue to Google"),
         ), patch.object(session, "_playwright_search", return_value=[]) as fallback:
             session.search("model")
-            fallback.assert_called_once_with("model")
+            fallback.assert_called_once()
+            self.assertEqual(fallback.call_args.args, ("model",))
+            self.assertIn("deadline", fallback.call_args.kwargs)
 
     def test_google_transient_resources_are_closed_and_reset(self) -> None:
         session = GoogleSearchSession()
@@ -742,8 +753,10 @@ class SearchFallbackTests(unittest.TestCase):
         second = session.search_with_status("Acme X100 specifications")
 
         self.assertEqual(primary.calls, ["Acme X100"])
-        self.assertEqual([item.provider for item in second.attempts], ["fallback"])
-        self.assertTrue(second.attempts[0].is_fallback)
+        self.assertEqual([item.provider for item in second.attempts], ["primary", "fallback"])
+        self.assertEqual(second.attempts[0].status, "circuit_open")
+        self.assertTrue(second.attempts[0].circuit_open)
+        self.assertTrue(second.attempts[1].is_fallback)
 
     def test_primary_success_does_not_call_fallback(self) -> None:
         primary = self.Provider(
@@ -759,7 +772,7 @@ class SearchFallbackTests(unittest.TestCase):
         self.assertEqual(outcome.attempts[0].status, "success")
         self.assertEqual(fallback.calls, [])
 
-    def test_primary_successful_zero_result_does_not_call_fallback(self) -> None:
+    def test_primary_empty_result_is_classified_and_falls_through(self) -> None:
         primary = self.Provider("primary", [])
         fallback = self.Provider(
             "fallback",
@@ -769,9 +782,165 @@ class SearchFallbackTests(unittest.TestCase):
             providers=(primary, fallback),
         ).search_with_status("Acme X100")
 
-        self.assertEqual(outcome.results, ())
-        self.assertEqual(outcome.attempts[0].status, "success")
+        self.assertEqual(len(outcome.results), 1)
+        self.assertEqual(
+            [item.status for item in outcome.attempts],
+            ["empty", "success"],
+        )
+        self.assertEqual(fallback.calls, ["Acme X100"])
+
+    def test_provider_timeout_opens_request_local_circuit_and_fallback_runs(self) -> None:
+        class TimedOutProvider(self.Provider):
+            def search_with_timeout(self, query, timeout_seconds):
+                self.calls.append((query, timeout_seconds))
+                raise ProviderTimeoutError("provider deadline exhausted")
+
+        primary = TimedOutProvider("primary", [])
+        fallback = self.Provider(
+            "fallback", [("https://shop.example/product/X100", "Acme X100")],
+        )
+        session = ResilientSearchSession(
+            providers=(primary, fallback),
+            config=DiscoveryRuntimeConfig(
+                provider_timeouts={"primary": 0.25, "fallback": 1.0},
+            ),
+        )
+
+        first = session.search_with_status("Acme X100")
+        second = session.search_with_status("Acme X100 specifications")
+
+        timeout = first.attempts[0]
+        self.assertEqual(timeout.status, "timeout")
+        self.assertTrue(timeout.timed_out)
+        self.assertEqual(timeout.timeout_seconds, 0.25)
+        self.assertEqual(timeout.exception_class, "ProviderTimeoutError")
+        self.assertEqual(second.attempts[0].status, "circuit_open")
+        self.assertEqual(len(primary.calls), 1)
+
+    def test_attempt_telemetry_records_duration_and_block_flags(self) -> None:
+        clock_values = iter((10.0, 10.75, 10.75, 11.0))
+        primary = self.Provider("primary", RuntimeError("captcha blocked"))
+        fallback = self.Provider(
+            "fallback", [("https://shop.example/product/X100", "Acme X100")],
+        )
+        outcome = ResilientSearchSession(
+            providers=(primary, fallback),
+            clock=lambda: next(clock_values),
+        ).search_with_status("Acme X100")
+
+        blocked, success = outcome.attempts
+        self.assertEqual(blocked.duration_seconds, 0.75)
+        self.assertTrue(blocked.blocked)
+        self.assertFalse(blocked.timed_out)
+        self.assertEqual(blocked.exception_class, "RuntimeError")
+        self.assertEqual(success.duration_seconds, 0.25)
+
+    def test_parse_failure_is_explicit_and_falls_through(self) -> None:
+        primary = self.Provider("primary", ProviderParseError("SERP layout changed"))
+        fallback = self.Provider(
+            "fallback", [("https://shop.example/product/X100", "Acme X100")],
+        )
+
+        outcome = ResilientSearchSession(
+            providers=(primary, fallback),
+        ).search_with_status("Acme X100")
+
+        failed = outcome.attempts[0]
+        self.assertEqual(failed.status, "parse_error")
+        self.assertTrue(failed.parse_failure)
+        self.assertEqual(failed.exception_class, "ProviderParseError")
+        self.assertEqual(outcome.attempts[1].status, "success")
+
+    def test_global_budget_caps_provider_deadline_and_prevents_new_fallback(self) -> None:
+        class Clock:
+            now = 0.0
+
+            def __call__(self):
+                return self.now
+
+        clock = Clock()
+
+        class SlowProvider(self.Provider):
+            def search_with_timeout(self, query, timeout_seconds):
+                self.calls.append((query, timeout_seconds))
+                clock.now += 0.6
+                return [("https://shop.example/product/X100", "Acme X100")]
+
+        primary = SlowProvider("primary", [])
+        fallback = self.Provider("fallback", RuntimeError("must not run"))
+        budget = WallClockBudget(0.5, clock)
+        outcome = ResilientSearchSession(
+            providers=(primary, fallback),
+            config=DiscoveryRuntimeConfig(
+                provider_timeouts={"primary": 5.0, "fallback": 5.0},
+            ),
+            clock=clock,
+            budget=budget,
+        ).search_with_status("Acme X100")
+
+        self.assertEqual(primary.calls[0][1], 0.5)
         self.assertEqual(fallback.calls, [])
+        self.assertEqual([item.status for item in outcome.attempts], ["timeout", "timeout"])
+        self.assertTrue(outcome.attempts[-1].budget_exhausted)
+        self.assertEqual(budget.exhausted_stage, "discovery")
+
+    def test_generic_browser_items_handle_redirects_layouts_and_duplicates(self) -> None:
+        items = [
+            {
+                "href": (
+                    "https://www.google.com/url?sa=t&url="
+                    "https%3A%2F%2Facme.example%2Fproduct%2FX100%3Futm_source%3Dgoogle"
+                ),
+                "title": "Acme X100",
+                "text": "Acme X100 Official specifications and dimensions",
+            },
+            {
+                "href": "",
+                "dataHref": "https://acme.example/product/X100",
+                "title": "Acme X100 duplicate",
+                "text": "Duplicate layout",
+            },
+            {"href": "://malformed", "title": "Broken", "text": "Broken"},
+        ]
+
+        results = _parse_google_browser_items(items)
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].url, "https://acme.example/product/X100")
+        self.assertEqual(results[0].title, "Acme X100")
+        self.assertIn("Official specifications", results[0].snippet)
+        self.assertEqual(results[0].parse_confidence, "high")
+
+    def test_browser_result_readiness_accepts_heading_outside_anchor(self) -> None:
+        page = MagicMock()
+        page.locator.side_effect = lambda selector: MagicMock(
+            count=lambda: 1 if selector == "h3" else 0,
+        )
+
+        self.assertTrue(_google_result_layout_ready(page))
+
+    def test_candidate_contract_merges_cross_provider_provenance(self) -> None:
+        url = "https://shop.example/product/X100"
+        candidates = rank_candidates([
+            SearchResultRecord(
+                url, "Acme X100", "First snippet", "google", "Acme X100", 2,
+                raw_url=f"{url}?utm_source=google",
+            ),
+            SearchResultRecord(
+                url, "Acme X100", "Second snippet", "naver", '"X100" Acme', 1,
+                raw_url=url,
+            ),
+        ], "Acme", "X100")
+
+        self.assertEqual(len(candidates), 1)
+        item = candidates[0]
+        self.assertEqual(item["url"], url)
+        self.assertEqual(
+            {entry["provider"] for entry in item["discovery_provenance"]},
+            {"google", "naver"},
+        )
+        self.assertIn(item["parse_confidence"], {"medium", "high"})
+        self.assertEqual(item["authority_status"], "unknown")
 
     def test_fallback_results_use_normal_dedupe_scoring_without_authority_upgrade(self) -> None:
         primary = self.Provider("primary", RuntimeError("provider blocked"))

@@ -104,6 +104,109 @@ def one_field_plan(name, *, scope="unknown", product_identity=None, queries=1):
 
 
 class TargetedSearchTests(unittest.TestCase):
+    def test_zero_candidate_early_stop_is_global_and_telemetried(self):
+        definitions = [
+            AttributeDefinition("net_weight", priority="high"),
+            AttributeDefinition("gross_weight", priority="high"),
+        ]
+        product = identity()
+        analysis = analyze_gaps(
+            "cooktop", map_attributes([], category="cooktop"),
+            identity=product, schema=definitions,
+        )
+        plan = build_targeted_search_plan(
+            analysis,
+            product,
+            config=TargetedSearchConfig(
+                max_queries_per_field=3,
+                max_consecutive_zero_candidates=2,
+                max_consecutive_zero_useful_facts=10,
+                max_consecutive_no_coverage_gain=10,
+                max_consecutive_no_confirmed_gain=10,
+            ),
+        )
+        calls = []
+        result = run_targeted_search(
+            plan,
+            analysis,
+            product,
+            discovery=lambda _identity, query: calls.append(query) or DiscoveryOutcome(),
+        )
+
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(result.executed_query_count, 2)
+        self.assertEqual(result.stop_reason, "zero_accepted_candidates")
+        self.assertEqual(result.fields[-1].stop_reason, "zero_accepted_candidates")
+        self.assertEqual(result.accepted_candidate_count, 0)
+
+    def test_duplicate_domain_saturation_stops_unproductive_fan_out(self):
+        analysis, plan = one_field_plan("net_weight", queries=3)
+        plan = type(plan)(
+            category=plan.category,
+            queries=plan.queries * 3,
+            deferred_gaps=plan.deferred_gaps,
+            config=TargetedSearchConfig(
+                max_queries_per_field=3,
+                max_consecutive_zero_candidates=10,
+                max_consecutive_zero_useful_facts=10,
+                max_consecutive_duplicate_domains=2,
+                max_consecutive_no_coverage_gain=10,
+                max_consecutive_no_confirmed_gain=10,
+            ),
+        )
+        result = run_targeted_search(
+            plan,
+            analysis,
+            identity(),
+            discovery=lambda _identity, _query: DiscoveryOutcome([candidate()]),
+            fetcher=lambda _candidate: fetched(),
+            extractor=lambda _source: [raw("Voltage", "220 V")],
+        )
+
+        self.assertEqual(result.executed_query_count, 3)
+        self.assertEqual(result.stop_reason, "duplicate_domain_saturation")
+        self.assertEqual(result.discovered_domain_count, 1)
+        self.assertEqual(result.useful_fact_count, 0)
+
+    def test_total_query_cap_bounds_product_agnostic_fan_out(self):
+        definitions = [
+            AttributeDefinition("net_weight", priority="high"),
+            AttributeDefinition("gross_weight", priority="high"),
+        ]
+        product = identity()
+        analysis = analyze_gaps(
+            "cooktop", map_attributes([], category="cooktop"),
+            identity=product, schema=definitions,
+        )
+        plan = build_targeted_search_plan(
+            analysis,
+            product,
+            config=TargetedSearchConfig(
+                max_queries_per_field=3,
+                max_total_queries=2,
+                max_consecutive_zero_candidates=10,
+                max_consecutive_zero_useful_facts=10,
+                max_consecutive_no_coverage_gain=10,
+                max_consecutive_no_confirmed_gain=10,
+            ),
+        )
+        plan = type(plan)(
+            category=plan.category,
+            queries=plan.queries * 3,
+            deferred_gaps=plan.deferred_gaps,
+            config=plan.config,
+        )
+        result = run_targeted_search(
+            plan,
+            analysis,
+            product,
+            discovery=lambda _identity, _query: DiscoveryOutcome([candidate()]),
+            fetcher=lambda _candidate: fetched(),
+            extractor=lambda _source: [raw("Voltage", "220 V")],
+        )
+
+        self.assertEqual(result.executed_query_count, 2)
+        self.assertEqual(result.stop_reason, "global_query_limit")
     def test_wrong_model_candidate_is_rejected_without_fetch(self):
         analysis, plan = one_field_plan("net_weight")
         calls = []
