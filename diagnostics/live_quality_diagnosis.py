@@ -88,6 +88,32 @@ def _provider_attempt(item: Any) -> dict[str, Any]:
         "exception_class": item.exception_class,
         "circuit_open": item.circuit_open,
         "budget_exhausted": item.budget_exhausted,
+        "raw_result_count": item.raw_result_count,
+        "parsed_result_count": item.parsed_result_count,
+        "deduped_result_count": item.deduped_result_count,
+        "transport": item.transport,
+    }
+
+
+def _discovery_result_counts(outcome: Any) -> dict[str, int]:
+    attempts = [item for item in outcome.provider_attempts if item.status == "success"]
+    global_deduped = len(outcome.candidates) + len(outcome.rejected_candidates)
+    if not attempts:
+        return {
+            "raw": global_deduped,
+            "parsed": global_deduped,
+            "provider_deduped": global_deduped,
+            "global_deduped": global_deduped,
+            "accepted": len(outcome.candidates),
+            "rejected": len(outcome.rejected_candidates),
+        }
+    return {
+        "raw": sum(item.raw_result_count for item in attempts),
+        "parsed": sum(item.parsed_result_count for item in attempts),
+        "provider_deduped": sum(item.deduped_result_count for item in attempts),
+        "global_deduped": global_deduped,
+        "accepted": len(outcome.candidates),
+        "rejected": len(outcome.rejected_candidates),
     }
 
 
@@ -244,6 +270,7 @@ def build_stage_trace(product: Mapping[str, Any], result: Any) -> dict[str, Any]
             } for item in result.discovery.issues],
             "accepted_candidates": [_candidate(item) for item in result.discovery.candidates],
             "rejected_candidates": [_candidate(item) for item in result.discovery.rejected_candidates],
+            "result_counts": _discovery_result_counts(result.discovery),
         },
         "relevance_and_ranking": {
             "before_filter": len(result.discovery.candidates) + len(result.discovery.rejected_candidates),
@@ -364,6 +391,7 @@ def _worker(product: dict[str, Any], config: dict[str, Any], output_queue: Any) 
                     } for item in outcome.issues],
                     "accepted_candidates": [_candidate(item) for item in outcome.candidates],
                     "rejected_candidates": [_candidate(item) for item in outcome.rejected_candidates],
+                    "result_counts": _discovery_result_counts(outcome),
                 },
             },
         }))

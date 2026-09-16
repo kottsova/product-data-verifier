@@ -2,12 +2,14 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from core.discovery import (
+    DuckDuckGoHtmlSearchProvider,
     DiscoveryRuntimeConfig,
     ProviderParseError,
     ProviderQueryOutcome,
     ProviderTimeoutError,
     ResilientSearchSession,
     SearchResultRecord,
+    _DuckDuckGoHtmlParser,
     _parse_google_browser_items,
     _google_result_layout_ready,
     DiscoverySearchError,
@@ -79,6 +81,84 @@ class MatchTests(unittest.TestCase):
 
 
 class DiscoveryTests(unittest.TestCase):
+    def test_duckduckgo_html_parser_normalizes_layouts_and_snippets(self) -> None:
+        html = """
+        <div class="result results_links">
+          <h2 class="result__title">
+            <a class="result__a" href="//duckduckgo.com/l/?uddg=https%3A%2F%2Facme.example%2Fproduct%2FX100&amp;rut=abc">
+              Acme <b>X100</b> product
+            </a>
+          </h2>
+          <a class="result__snippet">Official specifications for Acme X100.</a>
+        </div>
+        <div>
+          <a class="result-link" href="https://manuals.example/acme-x100.pdf">
+            Acme X100 manual
+          </a>
+          <div class="result-snippet">Installation and operating data.</div>
+        </div>
+        """
+        parser = _DuckDuckGoHtmlParser()
+        parser.feed(html)
+
+        self.assertEqual(parser.raw_result_count, 2)
+        self.assertEqual(len(parser.results), 2)
+        self.assertEqual(parser.results[0].url, "https://acme.example/product/X100")
+        self.assertEqual(parser.results[0].title, "Acme X100 product")
+        self.assertEqual(
+            parser.results[0].snippet,
+            "Official specifications for Acme X100.",
+        )
+        self.assertIn("duckduckgo.com/l/", parser.results[0].raw_url)
+        self.assertEqual(
+            parser.results[0].redirect_url,
+            parser.results[0].raw_url,
+        )
+        self.assertEqual(parser.results[1].parse_confidence, "high")
+
+    def test_duckduckgo_html_parser_counts_unparseable_organic_links(self) -> None:
+        parser = _DuckDuckGoHtmlParser()
+        parser.feed("""
+            <a class="result__a" href="://malformed">Broken result</a>
+            <a class="result__a" href="https://shop.example/X100">Acme X100</a>
+        """)
+
+        self.assertEqual(parser.raw_result_count, 2)
+        self.assertEqual(len(parser.results), 1)
+
+    def test_default_session_includes_independent_duckduckgo_html_route(self) -> None:
+        session = ResilientSearchSession()
+
+        self.assertEqual(
+            [provider.name for provider in session.providers],
+            ["google", "duckduckgo_html", "duckduckgo_lite", "naver"],
+        )
+        html_provider = session.providers[1]
+        self.assertIsInstance(html_provider, DuckDuckGoHtmlSearchProvider)
+
+    def test_duckduckgo_html_provider_uses_requests_transport(self) -> None:
+        response = MagicMock()
+        response.text = """
+            <a class="result__a" href="https://shop.example/product/X100">
+                Acme X100
+            </a>
+            <div class="result__snippet">Product specifications.</div>
+        """
+        response.raise_for_status.return_value = None
+        provider = DuckDuckGoHtmlSearchProvider()
+
+        with patch("core.discovery._DUCKDUCKGO_LAST_REQUEST_AT", 0.0), patch(
+            "core.discovery.requests.get", return_value=response,
+        ) as request, patch(
+            "core.discovery.urlopen", side_effect=AssertionError("urllib route used"),
+        ):
+            results = provider.search("Acme X100")
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].url, "https://shop.example/product/X100")
+        self.assertEqual(provider.last_raw_result_count, 1)
+        request.assert_called_once()
+
     def test_url_deduplication(self) -> None:
         results = [
             ("https://example.com/product/PUE611BB5E?utm_source=x", "PUE611BB5E"),
@@ -653,7 +733,7 @@ class SearchFallbackTests(unittest.TestCase):
         self.assertEqual(outcome.search_status, "blocked")
         self.assertEqual(outcome.candidates, [])
         self.assertEqual(outcome.issues[0].status, "blocked")
-        self.assertEqual(outcome.issues[0].query, "Acme official website")
+        self.assertEqual(outcome.issues[0].query, "Acme X100")
         with self.assertRaises(DiscoverySearchError) as raised:
             discover("Acme", "X100", searcher=blocked_searcher)
         self.assertEqual(raised.exception.outcome.search_status, "blocked")
@@ -691,6 +771,22 @@ class SearchFallbackTests(unittest.TestCase):
         self.assertEqual(outcome.search_status, "partial")
         self.assertEqual(outcome.issues[0].query, "Acme official website")
 
+    def test_exact_identity_query_precedes_authority_bootstrap(self) -> None:
+        clear_official_domain_cache()
+        calls = []
+
+        def searcher(query):
+            calls.append(query)
+            if query == "Acme official website":
+                raise RuntimeError("provider bot-check blocked")
+            return [("https://shop.example/product/X100", "Acme X100")]
+
+        outcome = discover_with_status("Acme", "X100", searcher=searcher)
+
+        self.assertLess(calls.index("Acme X100"), calls.index("Acme official website"))
+        self.assertTrue(outcome.candidates)
+        self.assertEqual(outcome.search_status, "partial")
+
     def test_primary_blocked_uses_fallback_and_preserves_attempts(self) -> None:
         primary = self.Provider("primary", RuntimeError("provider bot-check blocked"))
         fallback = self.Provider(
@@ -707,6 +803,28 @@ class SearchFallbackTests(unittest.TestCase):
         self.assertFalse(outcome.attempts[0].is_fallback)
         self.assertTrue(outcome.attempts[1].is_fallback)
         self.assertEqual(outcome.attempts[1].result_count, 1)
+
+    def test_provider_attempt_reports_raw_parsed_deduped_and_transport_counts(self) -> None:
+        class InstrumentedProvider:
+            name = "instrumented"
+            last_raw_result_count = 3
+            last_transport = "http"
+
+            def search(self, query):
+                return [
+                    ("https://shop.example/product/X100", "Acme X100"),
+                    ("https://shop.example/product/X100?utm_source=duplicate", "Duplicate"),
+                ]
+
+        outcome = ResilientSearchSession(
+            providers=(InstrumentedProvider(),),
+        ).search_with_status("Acme X100")
+
+        attempt = outcome.attempts[0]
+        self.assertEqual(attempt.raw_result_count, 3)
+        self.assertEqual(attempt.parsed_result_count, 2)
+        self.assertEqual(attempt.deduped_result_count, 1)
+        self.assertEqual(attempt.transport, "http")
 
     def test_primary_error_uses_fallback(self) -> None:
         primary = self.Provider("primary", RuntimeError("transport unavailable"))

@@ -73,6 +73,10 @@ def _provider_attempt_data(attempt: ProviderAttempt) -> dict[str, object]:
         "exception_class": attempt.exception_class,
         "circuit_open": attempt.circuit_open,
         "budget_exhausted": attempt.budget_exhausted,
+        "raw_result_count": attempt.raw_result_count,
+        "parsed_result_count": attempt.parsed_result_count,
+        "deduped_result_count": attempt.deduped_result_count,
+        "transport": attempt.transport,
     }
 
 

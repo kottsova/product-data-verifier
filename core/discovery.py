@@ -13,6 +13,8 @@ from typing import Callable, Iterable, Literal, Mapping, Protocol, TypedDict
 from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
+import requests
+
 from core.budget import WallClockBudget
 from core.match import article_matches, candidate_model_match, model_match, normalize_model, normalize_text
 from core.identity import ProductIdentity, base_model_in_text, identity_verification_signals
@@ -99,6 +101,10 @@ class ProviderAttempt:
     exception_class: str | None = None
     circuit_open: bool = False
     budget_exhausted: bool = False
+    raw_result_count: int = 0
+    parsed_result_count: int = 0
+    deduped_result_count: int = 0
+    transport: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -150,6 +156,7 @@ class ProviderParseError(RuntimeError):
 
 DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
     "google": 25.0,
+    "duckduckgo_html": 8.0,
     "duckduckgo_lite": 8.0,
     "naver": 8.0,
 }
@@ -907,6 +914,7 @@ class GoogleSearchSession:
         self._browser = None
         self._context = None
         self._page = None
+        self.last_transport: str | None = None
 
     def __enter__(self) -> "GoogleSearchSession":
         return self
@@ -939,6 +947,7 @@ class GoogleSearchSession:
 
     def search_with_timeout(self, query: str, timeout_seconds: float) -> list[SearchResultLike]:
         deadline = time.monotonic() + max(0.1, timeout_seconds)
+        self.last_transport = "http"
         results, html = _http_google_search_for_market(
             query,
             self.market,
@@ -948,6 +957,7 @@ class GoogleSearchSession:
             return results
         if time.monotonic() >= deadline:
             raise ProviderTimeoutError("Google provider deadline exhausted after HTTP search.")
+        self.last_transport = "browser"
         return self._playwright_search(query, deadline=deadline)
 
     def _ensure_page(self, *, deadline: float | None = None):
@@ -1195,6 +1205,171 @@ def _clean_duckduckgo_result_url(raw_url: str) -> str:
     return canonicalize_url(url)
 
 
+class _DuckDuckGoHtmlParser(HTMLParser):
+    """Parse organic results from both current DDG HTML result layouts."""
+
+    _TITLE_CLASSES = {"result__a", "result-link", "result-title-a"}
+    _SNIPPET_CLASSES = {"result__snippet", "result-snippet"}
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.raw_result_count = 0
+        self._entries: list[dict[str, str]] = []
+        self._capture: str | None = None
+        self._capture_depth = 0
+        self._capture_text: list[str] = []
+        self._capture_href = ""
+        self._snippet_target = -1
+
+    @property
+    def results(self) -> list[SearchResultRecord]:
+        return [
+            SearchResultRecord(
+                url=item["url"],
+                title=item["title"],
+                snippet=item.get("snippet", ""),
+                raw_url=item["raw_url"],
+                redirect_url=(
+                    item["raw_url"] if item["raw_url"] != item["url"] else None
+                ),
+                parse_status="parsed",
+                parse_confidence="high" if item["title"] else "medium",
+            )
+            for item in self._entries
+        ]
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if self._capture is not None:
+            self._capture_depth += 1
+            return
+        values = dict(attrs)
+        classes = set((values.get("class") or "").split())
+        if tag == "a" and classes & self._TITLE_CLASSES:
+            self.raw_result_count += 1
+            self._capture = "title"
+            self._capture_depth = 1
+            self._capture_text = []
+            self._capture_href = values.get("href") or ""
+            return
+        if classes & self._SNIPPET_CLASSES and self._entries:
+            self._capture = "snippet"
+            self._capture_depth = 1
+            self._capture_text = []
+            self._snippet_target = len(self._entries) - 1
+
+    def handle_data(self, data: str) -> None:
+        if self._capture is not None:
+            self._capture_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if self._capture is None:
+            return
+        self._capture_depth -= 1
+        if self._capture_depth > 0:
+            return
+        text = " ".join(" ".join(self._capture_text).split())
+        if self._capture == "title":
+            url = _clean_duckduckgo_result_url(self._capture_href)
+            if url:
+                self._entries.append({
+                    "url": url,
+                    "title": text,
+                    "snippet": "",
+                    "raw_url": self._capture_href,
+                })
+        elif 0 <= self._snippet_target < len(self._entries):
+            self._entries[self._snippet_target]["snippet"] = text
+        self._capture = None
+        self._capture_depth = 0
+        self._capture_text = []
+        self._capture_href = ""
+        self._snippet_target = -1
+
+
+class DuckDuckGoHtmlSearchProvider:
+    """Keyless DDG HTML route, independent from the frequently blocked Lite UI."""
+
+    name = "duckduckgo_html"
+
+    def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        self.market = market
+        self.timeout_seconds = float(timeout_seconds)
+        self.last_raw_result_count = 0
+        self.last_transport = "http"
+
+    def search(self, query: str) -> list[SearchResultRecord]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(
+        self,
+        query: str,
+        timeout_seconds: float,
+    ) -> list[SearchResultRecord]:
+        deadline = time.monotonic() + max(0.1, timeout_seconds)
+        global _DUCKDUCKGO_LAST_REQUEST_AT
+        remaining = DUCKDUCKGO_MIN_INTERVAL_SECONDS - (
+            time.monotonic() - _DUCKDUCKGO_LAST_REQUEST_AT
+        )
+        if remaining > 0:
+            if remaining >= timeout_seconds:
+                raise ProviderTimeoutError(
+                    "DuckDuckGo HTML provider deadline exhausted during rate limit."
+                )
+            time.sleep(remaining)
+        params = {"q": query}
+        region = DUCKDUCKGO_MARKETS.get(self.market)
+        if region:
+            params["kl"] = region
+        url = f"https://html.duckduckgo.com/html/?{urlencode(params)}"
+        headers = {
+            "User-Agent": "Mozilla/5.0",
+            "Accept-Language": "en-US,en;q=0.8",
+        }
+        try:
+            _DUCKDUCKGO_LAST_REQUEST_AT = time.monotonic()
+            remaining_timeout = deadline - time.monotonic()
+            if remaining_timeout <= 0:
+                raise ProviderTimeoutError(
+                    "DuckDuckGo HTML provider deadline exhausted before request."
+                )
+            response = requests.get(
+                url,
+                headers=headers,
+                timeout=max(0.1, min(20.0, remaining_timeout)),
+            )
+            response.raise_for_status()
+            html = response.text
+        except ProviderTimeoutError:
+            raise
+        except requests.Timeout as error:
+            raise ProviderTimeoutError(
+                "DuckDuckGo HTML provider deadline exhausted."
+            ) from error
+        except requests.RequestException as error:
+            raise RuntimeError(f"DuckDuckGo HTML search failed: {error}") from error
+        except Exception as error:
+            if time.monotonic() >= deadline:
+                raise ProviderTimeoutError(
+                    "DuckDuckGo HTML provider deadline exhausted."
+                ) from error
+            raise RuntimeError(f"DuckDuckGo HTML search failed: {error}") from error
+        lowered = html.lower()
+        if any(marker in lowered for marker in DUCKDUCKGO_BLOCK_MARKERS):
+            raise RuntimeError("DuckDuckGo bot-check blocked the HTML search.")
+        parser = _DuckDuckGoHtmlParser()
+        parser.feed(html)
+        self.last_raw_result_count = parser.raw_result_count
+        if parser.raw_result_count and not parser.results:
+            raise ProviderParseError(
+                "DuckDuckGo HTML returned organic results but none could be parsed."
+            )
+        return parser.results
+
+
 class DuckDuckGoLiteSearchProvider:
     """Keyless HTML fallback with the same URL/title result contract."""
 
@@ -1207,6 +1382,8 @@ class DuckDuckGoLiteSearchProvider:
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
         self.timeout_seconds = float(timeout_seconds)
+        self.last_transport = "http"
+        self.last_raw_result_count = 0
 
     def search(self, query: str) -> list[SearchResult]:
         return self.search_with_timeout(query, self.timeout_seconds)
@@ -1250,6 +1427,7 @@ class DuckDuckGoLiteSearchProvider:
             raise RuntimeError("DuckDuckGo bot-check blocked the Lite search.")
         parser = _DuckDuckGoLiteParser()
         parser.feed(html)
+        self.last_raw_result_count = len(parser.results)
         return parser.results
 
 
@@ -1300,6 +1478,8 @@ class NaverSearchProvider:
         if timeout_seconds <= 0:
             raise ValueError("timeout_seconds must be positive")
         self.timeout_seconds = float(timeout_seconds)
+        self.last_transport = "http"
+        self.last_raw_result_count = 0
 
     def search(self, query: str) -> list[SearchResult]:
         return self.search_with_timeout(query, self.timeout_seconds)
@@ -1327,6 +1507,7 @@ class NaverSearchProvider:
             raise RuntimeError(f"Naver search failed: {error}") from error
         parser = _NaverParser()
         parser.feed(html)
+        self.last_raw_result_count = len(parser.results)
         lowered = html.lower()
         if not parser.results and any(marker in lowered for marker in (
             "captcha", "verify you are a human", "비정상적인 접근",
@@ -1380,6 +1561,9 @@ class ResilientSearchSession:
         self.providers = tuple(providers) if providers is not None else (
             GoogleSearchSession(
                 market, timeout_seconds=self.config.timeout_for("google"),
+            ),
+            DuckDuckGoHtmlSearchProvider(
+                market, timeout_seconds=self.config.timeout_for("duckduckgo_html"),
             ),
             DuckDuckGoLiteSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("duckduckgo_lite"),
@@ -1475,6 +1659,7 @@ class ResilientSearchSession:
                     blocked=status == "blocked",
                     parse_failure=status == "parse_error",
                     exception_class=type(error).__name__,
+                    transport=getattr(provider, "last_transport", None),
                 ))
                 self._failure_counts[index] = self._failure_counts.get(index, 0) + 1
                 if status in {"blocked", "timeout", "parse_error"} or (
@@ -1486,6 +1671,15 @@ class ResilientSearchSession:
                 continue
             duration = max(0.0, self._clock() - started)
             results = _normalized_search_results(raw_results, provider.name, query)
+            raw_result_count = int(
+                getattr(provider, "last_raw_result_count", len(raw_results))
+            )
+            parsed_result_count = len(results)
+            deduped_result_count = len({
+                url
+                for item in results
+                if (url := canonicalize_url(item.url))
+            })
             if duration > timeout_seconds:
                 error = ProviderTimeoutError(
                     f"{provider.name} exceeded its {timeout_seconds:g}s deadline."
@@ -1500,6 +1694,10 @@ class ResilientSearchSession:
                     timeout_seconds=timeout_seconds,
                     timed_out=True,
                     exception_class=type(error).__name__,
+                    raw_result_count=raw_result_count,
+                    parsed_result_count=parsed_result_count,
+                    deduped_result_count=deduped_result_count,
+                    transport=getattr(provider, "last_transport", None),
                 ))
                 self._open_providers[index] = f"Circuit open after timeout: {error}"
                 continue
@@ -1513,6 +1711,10 @@ class ResilientSearchSession:
                     is_fallback=index > 0,
                     duration_seconds=round(duration, 6),
                     timeout_seconds=timeout_seconds,
+                    raw_result_count=raw_result_count,
+                    parsed_result_count=parsed_result_count,
+                    deduped_result_count=deduped_result_count,
+                    transport=getattr(provider, "last_transport", None),
                 ))
                 continue
             self._failure_counts[index] = 0
@@ -1524,6 +1726,10 @@ class ResilientSearchSession:
                 is_fallback=index > 0,
                 duration_seconds=round(duration, 6),
                 timeout_seconds=timeout_seconds,
+                raw_result_count=raw_result_count,
+                parsed_result_count=parsed_result_count,
+                deduped_result_count=deduped_result_count,
+                transport=getattr(provider, "last_transport", None),
             ))
             return ProviderQueryOutcome(results, tuple(attempts))
         return ProviderQueryOutcome((), tuple(attempts))
@@ -1652,10 +1858,13 @@ def discover_with_status(
         provider_attempts: list[ProviderAttempt] = []
         attempted_queries: list[str] = []
         base_queries = build_search_queries(brand, model, article)
-        queries: list[str] = []
+        # Identity-bearing queries run before the broad authority bootstrap.
+        # A bot-check on a low-specificity "official website" SERP must not
+        # open a provider circuit before it has a chance to return product
+        # pages for the exact model.
+        queries: list[str] = list(base_queries)
         if cached is None:
             queries.extend((f"{brand} official website", f"{brand} official {model}"))
-        queries.extend(base_queries)
         budget_stopped = False
         for query in queries:
             attempted_queries.append(query)

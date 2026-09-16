@@ -59,6 +59,14 @@ class LiveQualityDiagnosticTests(unittest.TestCase):
         self.assertEqual(trace["extraction"]["total"], 3)
         self.assertEqual(trace["mapping"]["mapped_count"], 3)
         self.assertEqual(trace["category_and_schema"]["category"], "smartphone")
+        self.assertEqual(trace["discovery"]["result_counts"], {
+            "raw": 1,
+            "parsed": 1,
+            "provider_deduped": 1,
+            "global_deduped": 1,
+            "accepted": 1,
+            "rejected": 0,
+        })
         self.assertFalse(trace["targeted_search"]["enabled"])
 
 
