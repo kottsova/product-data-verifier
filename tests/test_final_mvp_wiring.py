@@ -37,6 +37,18 @@ async def wait_until_idle(manager: JobManager, chat_id: int, timeout: float = 2.
 
 
 class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
+    async def _run_profile(self, profile, *, chat_id: int) -> str:
+        service = ProductVerifierService(
+            run_workflow=lambda _request: type(
+                "WorkflowResult", (), {"final_profile": profile},
+            )(),
+        )
+        manager = JobManager(service, max_concurrent_jobs=1)
+        reply = ReplyRecorder()
+        await handle_product_query("Acme X100", chat_id, manager, reply=reply)
+        await wait_until_idle(manager, chat_id)
+        return "\n".join(reply.messages)
+
     async def test_accepted_running_final_and_cache_hit_cross_the_complete_path(self):
         profile = final_profile(
             [definition("power")], [candidate("power", "1000", unit="W")],
@@ -95,6 +107,44 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         joined = "\n".join(reply.messages)
         self.assertIn("stage17 network down", joined)
         self.assertNotIn("workflow_failure", joined)
+
+    async def test_insufficient_result_names_unresolved_fields_and_explains_itself(self):
+        profile = final_profile([
+            definition("power"),
+            definition("timer"),
+        ])
+        joined = await self._run_profile(profile, chat_id=20)
+        self.assertIn("insufficient", joined)
+        self.assertIn("Не определено (2)", joined)
+        self.assertIn("power", joined.casefold())
+        self.assertIn("timer", joined.casefold())
+        self.assertIn("Почему данных недостаточно", joined)
+
+    async def test_conflicted_result_keeps_confirmed_conflict_and_unresolved_distinct(self):
+        profile = final_profile(
+            [
+                definition("brand", priority="critical"),
+                definition("model", priority="critical"),
+                definition("power"),
+                definition("voltage", priority="critical"),
+                definition("timer"),
+            ],
+            [
+                candidate("brand", "Acme"),
+                candidate("model", "X100"),
+                candidate("power", "1000", unit="W"),
+                candidate("voltage", "220", unit="V", source="https://one.example/X100"),
+                candidate("voltage", "110", unit="V", source="https://two.example/X100"),
+            ],
+        )
+        joined = await self._run_profile(profile, chat_id=21)
+        self.assertIn("conflicted", joined)
+        self.assertIn("Подтверждено (3)", joined)
+        self.assertIn("Конфликты (1)", joined)
+        self.assertIn("Не определено (1)", joined)
+        self.assertIn("power: 1000 w", joined.casefold())
+        self.assertIn("voltage: конфликт данных", joined.casefold())
+        self.assertIn("timer", joined.casefold())
 
 
 if __name__ == "__main__":

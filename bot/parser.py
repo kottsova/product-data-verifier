@@ -20,9 +20,10 @@ def parse_product_query(text: str) -> ParsedProductQuery | None:
     """Parse "Brand Model" or "Brand | Model[ | Article]". None if ambiguous.
 
     Two deterministic formats are supported:
-      - Pipe-delimited: "Bosch | PUE611BB5E" or "Bosch | PUE611BB5E | ABC123".
+      - Pipe-delimited: "ExampleCo | Model 200" or
+        "ExampleCo | Model 200 | ART-7".
         Exactly 2 or 3 non-empty, trimmed parts are required.
-      - Plain whitespace: "Bosch PUE611BB5E" -- the first token is the brand,
+      - Plain whitespace: "ExampleCo Model 200" -- the first token is the brand,
         everything after it (whitespace-collapsed) is the model. This mirrors
         how core.identity.resolve_product_identity separates brand from a
         raw product name, so a Telegram query and a CLI ``brand model`` call

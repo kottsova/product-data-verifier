@@ -2,6 +2,13 @@
 
 Сервис для поиска, извлечения и проверки товарных характеристик по модели товара.
 
+## Current status
+
+Stage 19: **PASS**. Deterministic core decision: `READY FOR TELEGRAM MVP`.
+Stage 20: **PASS**. The Telegram MVP integrates that stable service boundary
+with the existing polling application; it does not duplicate or bypass the
+verifier pipeline.
+
 ## Основной сценарий
 
 Brand + Model + Article
@@ -39,6 +46,25 @@ to bound initial fetches.
 
 ## Telegram Bot
 
+Architecture:
+
+```text
+Telegram message
+→ bot.parser.parse_product_query
+→ services.product_verifier.VerifyProductRequest
+→ bot.jobs.JobManager
+→ services.product_verifier.ProductVerifierService.verify
+→ existing core workflow
+→ services.product_verifier.VerifyProductResult
+→ bot.formatters.format_result
+→ Telegram reply
+```
+
+The bot layer depends on the stable service DTOs and never imports the core
+workflow, validation, authority, or profile internals directly.
+
+Start the polling process:
+
 ```text
 pip install -r requirements.txt
 python -m playwright install chromium
@@ -67,8 +93,24 @@ Invalid values (non-numeric, or below the stated minimum) fail fast with a
 validated separately from the rest of the settings, so a plain
 `python app.py` run never requires it.
 
-Send the bot a message like `Bosch PUE611BB5E` or `Bosch | PUE611BB5E` (a
-third `| article` part is optional). `/start` and `/help` explain the format.
+Supported product-query formats are:
+
+```text
+ExampleCo Model 200
+ExampleCo | Model 200
+ExampleCo | Model 200 | ART-7
+```
+
+The first token in the plain form is the brand; use the pipe-delimited form
+when the model or optional manufacturer article needs an explicit boundary.
+Ambiguous or incomplete input is rejected without starting the verifier.
+
+Commands:
+
+- `/start` — onboarding and a short request example;
+- `/help` — formats and command summary;
+- `/status` — current queued/running jobs for the chat;
+- `/cancel` — cancel queued jobs and discard results of running jobs.
 
 Verification runs as a **background job**, not inline in the handler: you
 get an immediate "Принял..." reply, then a "started" update once processing
@@ -87,6 +129,23 @@ and is lost on restart -- after a restart, resend your message; if that
 product's result is still fresh in the SQLite cache, the check will be fast
 even though job tracking was reset. (The CLI does not use this cache --
 see the Stage 12 report.)
+
+The final response shows identity, category, quality, coverage, and bounded
+lists of Confirmed, Conflict, and Unresolved fields. An `insufficient` result
+includes up to two reasons/warnings already produced by the verifier. Values
+that are conflicted or unresolved remain explicitly labelled and are never
+presented as verified. Output is chunked below Telegram's 4096 UTF-16-unit
+message limit.
+
+### Current Telegram MVP limitations
+
+- Requests currently use the verifier's `global` market default.
+- Delivery uses polling, not webhooks.
+- Active job tracking is in-memory and is lost on process restart.
+- Displayed fields are bounded per status section; the full structured result
+  remains available through the service DTO/cache.
+- Full evidence/provenance records are preserved by the service but are not
+  rendered in Telegram messages.
 
 ### Observability and diagnostics (Stage 15)
 
@@ -213,4 +272,4 @@ assessment and current live findings.
 
 ## Current stage
 
-Stage 17 — Final MVP Regression.
+Stage 20 — Telegram MVP Integration: **PASS**.

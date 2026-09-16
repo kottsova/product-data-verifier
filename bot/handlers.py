@@ -19,6 +19,8 @@ import logging
 from typing import Awaitable, Callable
 
 from bot.formatters import (
+    DEFAULT_MAX_MESSAGE_LENGTH,
+    chunk_lines,
     format_accepted,
     format_cancelled,
     format_duplicate,
@@ -40,9 +42,9 @@ Reply = Callable[[str], Awaitable[object]]
 START_MESSAGE = (
     "Привет! Я проверяю характеристики товара по бренду и модели.\n\n"
     "Отправьте сообщение в формате:\n"
-    "Bosch PUE611BB5E\n"
+    "ExampleCo Model 200\n"
     "или\n"
-    "Bosch | PUE611BB5E\n\n"
+    "ExampleCo | Model 200\n\n"
     "Проверка выполняется в фоне; я пришлю результат, когда он будет готов.\n"
     "Команда /help покажет подробности."
 )
@@ -53,9 +55,9 @@ HELP_MESSAGE = (
     "или\n"
     "<бренд> | <модель> | <артикул (необязательно)>\n\n"
     "Примеры:\n"
-    "Bosch PUE611BB5E\n"
-    "HONOR | X8d\n"
-    "Dreame | G12 Pro | HHR32A\n\n"
+    "ExampleCo Model 200\n"
+    "ExampleCo | Model 200\n"
+    "ExampleCo | Model 200 | ART-7\n\n"
     "Проверка товара выполняется в фоне и может занять несколько минут; "
     "я пришлю сообщение, когда результат будет готов.\n\n"
     "Команды:\n"
@@ -65,8 +67,8 @@ HELP_MESSAGE = (
 
 PARSE_ERROR_MESSAGE = (
     "Не удалось понять запрос. Отправьте бренд и модель, например:\n"
-    "Bosch PUE611BB5E\n"
-    "или Bosch | PUE611BB5E"
+    "ExampleCo Model 200\n"
+    "или ExampleCo | Model 200"
 )
 
 SHUTTING_DOWN_MESSAGE = "Бот перезапускается, попробуйте отправить запрос через минуту."
@@ -129,7 +131,9 @@ async def handle_product_query(
 async def _safe_reply(message: object, text: str) -> None:
     """Adapter-level guard: a failed Telegram send must not crash the bot."""
     try:
-        await message.reply_text(text)  # type: ignore[attr-defined]
+        lines = text.splitlines() or [""]
+        for chunk in chunk_lines(lines, DEFAULT_MAX_MESSAGE_LENGTH):
+            await message.reply_text(chunk)  # type: ignore[attr-defined]
     except Exception:  # noqa: BLE001 - Telegram/API send failures are logged, not raised
         chat_id = getattr(message, "chat_id", None)
         log_exception_event(

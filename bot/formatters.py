@@ -16,12 +16,13 @@ from bot.jobs import Job
 from services.product_verifier import ServiceAttribute, VerifyProductRequest, VerifyProductResult
 
 
-# Telegram's hard cap is 4096 UTF-16 code units per message. We stay well
-# under it (and use plain character length, a superset bound for BMP text)
-# so a slightly different counting rule can never push us over.
+# Telegram's hard cap is 4096 UTF-16 code units per message.  The default
+# keeps a generous margin, and chunk_lines also caps caller-provided limits at
+# 4095 code units so every returned chunk is strictly below Telegram's cap.
 TELEGRAM_MESSAGE_LIMIT = 4096
 DEFAULT_MAX_MESSAGE_LENGTH = 3500
 DEFAULT_MAX_ATTRIBUTES = 12
+DEFAULT_MAX_REASONS = 2
 
 QUALITY_LABELS = {
     "verified": "✅ Подтверждено (verified)",
@@ -76,20 +77,19 @@ def format_error(result: VerifyProductResult) -> list[str]:
     """
     error = result.error
     if error is None:
-        return [ERROR_MESSAGES["internal_error"]]
+        message = ERROR_MESSAGES["internal_error"]
+        return chunk_lines([message], DEFAULT_MAX_MESSAGE_LENGTH)
     template = ERROR_MESSAGES.get(error.kind, ERROR_MESSAGES["internal_error"])
     if error.kind == "internal_error":
-        return [template]
-    return [template.format(message=error.message)]
+        message = template
+    else:
+        message = template.format(message=error.message)
+    return chunk_lines([message], DEFAULT_MAX_MESSAGE_LENGTH)
 
 
-def _eligible_attributes(attributes: tuple[ServiceAttribute, ...]) -> list[ServiceAttribute]:
-    found = [
-        item for item in attributes
-        if item.status in ("Confirmed", "Conflict") or item.value is not None
-    ]
+def _sorted_attributes(attributes: list[ServiceAttribute]) -> list[ServiceAttribute]:
     return sorted(
-        found,
+        attributes,
         key=lambda item: (PRIORITY_RANK.get(item.priority, 3), item.canonical_name),
     )
 
@@ -104,6 +104,89 @@ def _attribute_line(attribute: ServiceAttribute) -> str:
         return f"{icon} {attribute.display_name}: конфликт данных"
     value_text = _format_value(attribute.value, attribute.unit)
     return f"\U0001f539 {attribute.display_name}: {value_text} (не подтверждено)"
+
+
+def _fallback_display_name(canonical_name: str) -> str:
+    return canonical_name.replace("_", " ").strip() or canonical_name
+
+
+def _status_section_lines(
+    result: VerifyProductResult,
+    *,
+    max_attributes: int,
+) -> list[str]:
+    """Render bounded lists from the stable result's structured status fields."""
+    limit = max(0, max_attributes)
+    by_name = {item.canonical_name: item for item in result.attributes}
+    confirmed = _sorted_attributes([
+        item for item in result.attributes if item.status == "Confirmed"
+    ])
+
+    conflict_names = list(dict.fromkeys(result.conflicts))
+    for item in result.attributes:
+        if item.status == "Conflict" and item.canonical_name not in conflict_names:
+            conflict_names.append(item.canonical_name)
+
+    unresolved_names = list(dict.fromkeys(result.unresolved))
+    for item in result.attributes:
+        if (
+            item.status not in ("Confirmed", "Conflict")
+            and item.canonical_name not in unresolved_names
+        ):
+            unresolved_names.append(item.canonical_name)
+
+    lines: list[str] = []
+
+    def add_section(title: str, rendered: list[str]) -> None:
+        if not rendered:
+            return
+        shown = rendered[:limit]
+        lines.extend(("", f"{title} ({len(rendered)}):", *shown))
+        remaining = len(rendered) - len(shown)
+        if remaining > 0:
+            lines.append(f"… и ещё {remaining}")
+
+    add_section(
+        "✅ Подтверждено",
+        [_attribute_line(item) for item in confirmed],
+    )
+
+    conflict_lines = []
+    for name in conflict_names:
+        attribute = by_name.get(name)
+        display_name = attribute.display_name if attribute else _fallback_display_name(name)
+        conflict_lines.append(f"❗ {display_name}: конфликт данных")
+    add_section("❗ Конфликты", conflict_lines)
+
+    unresolved_lines = []
+    for name in unresolved_names:
+        attribute = by_name.get(name)
+        display_name = attribute.display_name if attribute else _fallback_display_name(name)
+        if attribute is not None and attribute.value is not None:
+            value_text = _format_value(attribute.value, attribute.unit)
+            unresolved_lines.append(
+                f"🔹 {display_name}: {value_text} (не подтверждено)"
+            )
+        else:
+            unresolved_lines.append(f"▫️ {display_name}")
+    add_section("▫️ Не определено", unresolved_lines)
+    return lines
+
+
+def _insufficient_reason_lines(result: VerifyProductResult) -> list[str]:
+    quality = result.quality
+    if quality is None or quality.status != "insufficient":
+        return []
+    reasons: list[str] = []
+    for value in (*quality.reasons, *quality.warnings):
+        normalized = " ".join(value.split())
+        if normalized and normalized not in reasons:
+            reasons.append(normalized)
+        if len(reasons) == DEFAULT_MAX_REASONS:
+            break
+    if not reasons:
+        return []
+    return ["", "Почему данных недостаточно:", *(f"• {item}" for item in reasons)]
 
 
 def _summary_lines(result: VerifyProductResult) -> list[str]:
@@ -133,24 +216,50 @@ def _summary_lines(result: VerifyProductResult) -> list[str]:
     return lines
 
 
+def utf16_code_units(text: str) -> int:
+    """Return Telegram's message-length unit without encoding side effects."""
+    return sum(2 if ord(character) > 0xFFFF else 1 for character in text)
+
+
+def _truncate_utf16(text: str, max_units: int) -> str:
+    if utf16_code_units(text) <= max_units:
+        return text
+    ellipsis = "…"
+    budget = max_units - utf16_code_units(ellipsis)
+    if budget <= 0:
+        return ellipsis[:max_units]
+    used = 0
+    kept: list[str] = []
+    for character in text:
+        character_units = 2 if ord(character) > 0xFFFF else 1
+        if used + character_units > budget:
+            break
+        kept.append(character)
+        used += character_units
+    return "".join(kept) + ellipsis
+
+
 def chunk_lines(lines: list[str], max_length: int) -> list[str]:
-    """Group lines into blocks of <= max_length characters, joined by "\\n".
+    """Group lines by UTF-16 code units, joined by ``\\n``.
 
     Never splits a single line across chunks; a single line longer than
-    max_length is truncated with an ellipsis so no chunk can ever exceed the
-    limit, regardless of how verbose one line is.
+    the effective limit is truncated with an ellipsis.  The effective limit
+    is always below Telegram's 4096 UTF-16-code-unit hard cap.
     """
+    if max_length < 1:
+        raise ValueError("max_length must be at least 1")
+    effective_limit = min(max_length, TELEGRAM_MESSAGE_LIMIT - 1)
     chunks: list[str] = []
     current: list[str] = []
     current_length = 0
     for line in lines:
-        if len(line) > max_length:
-            line = line[: max_length - 1] + "…"
-        added_length = len(line) + (1 if current else 0)
-        if current and current_length + added_length > max_length:
+        line = _truncate_utf16(line, effective_limit)
+        line_length = utf16_code_units(line)
+        added_length = line_length + (1 if current else 0)
+        if current and current_length + added_length > effective_limit:
             chunks.append("\n".join(current))
             current = [line]
-            current_length = len(line)
+            current_length = line_length
         else:
             current.append(line)
             current_length += added_length
@@ -170,15 +279,8 @@ def format_result(
         return format_error(result)
 
     lines = _summary_lines(result)
-    eligible = _eligible_attributes(result.attributes)
-    shown = eligible[:max_attributes]
-    if shown:
-        lines.append("")
-        lines.append("Основные характеристики:")
-        lines.extend(_attribute_line(item) for item in shown)
-    remaining = len(eligible) - len(shown)
-    if remaining > 0:
-        lines.append(f"… и ещё {remaining} характеристик(-и)")
+    lines.extend(_insufficient_reason_lines(result))
+    lines.extend(_status_section_lines(result, max_attributes=max_attributes))
 
     return chunk_lines(lines, max_message_length)
 

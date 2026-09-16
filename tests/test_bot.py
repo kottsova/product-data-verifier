@@ -10,6 +10,7 @@ and configuration/wiring.
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
 from pathlib import Path
 import tempfile
 import unittest
@@ -26,11 +27,13 @@ from bot.formatters import (
     format_result,
     format_started,
     format_status,
+    utf16_code_units,
 )
 from bot.handlers import (
     HELP_MESSAGE,
     PARSE_ERROR_MESSAGE,
     START_MESSAGE,
+    _safe_reply,
     build_cancel_command,
     build_status_command,
     build_verify_command,
@@ -41,7 +44,7 @@ from bot.handlers import (
 from bot.jobs import Job, JobManager
 from bot.parser import ParsedProductQuery, parse_product_query
 from bot.service_factory import build_product_verifier_service
-from bot.telegram_bot import build_job_manager
+from bot.telegram_bot import build_application, build_job_manager
 from config import AppConfig
 from services.cache import SqliteProductVerificationRepository
 from services.product_verifier import (
@@ -180,6 +183,50 @@ class FormatterQualityStatusTests(unittest.TestCase):
         self.assertIn("insufficient", text)
         self.assertIn("Недостаточно", text)
 
+    def test_structured_status_lists_and_insufficient_reasons_are_visible(self):
+        base = make_result(status="insufficient", attribute_count=0)
+        confirmed = ServiceAttribute(
+            canonical_name="power", display_name="Power", value="1000", unit="W",
+            status="Confirmed", confidence="high", source="https://example.test",
+            evidence="power: 1000 W", priority="critical", expected=True, discovered=False,
+        )
+        conflict = ServiceAttribute(
+            canonical_name="voltage", display_name="Voltage", value=None, unit="V",
+            status="Conflict", confidence="low", source=None, evidence=None,
+            priority="high", expected=True, discovered=False,
+        )
+        unresolved = ServiceAttribute(
+            canonical_name="timer", display_name="Timer", value="yes", unit=None,
+            status="Unresolved", confidence="low", source="https://example.test",
+            evidence="timer: yes", priority="medium", expected=True, discovered=False,
+        )
+        quality = replace(
+            base.quality,
+            reasons=("Core identity is not confirmed.", "Too few trusted sources."),
+            warnings=("One more warning must stay hidden.",),
+            confirmed_count=1,
+            unresolved_count=1,
+            conflict_count=1,
+        )
+        result = replace(
+            base,
+            attributes=(confirmed, conflict, unresolved),
+            unresolved=("timer",),
+            conflicts=("voltage",),
+            quality=quality,
+        )
+
+        text = "\n".join(format_result(result))
+        self.assertIn("Подтверждено (1)", text)
+        self.assertIn("Конфликты (1)", text)
+        self.assertIn("Не определено (1)", text)
+        self.assertIn("Power: 1000 W", text)
+        self.assertIn("Voltage: конфликт данных", text)
+        self.assertIn("Timer: yes (не подтверждено)", text)
+        self.assertIn("Core identity is not confirmed.", text)
+        self.assertIn("Too few trusted sources.", text)
+        self.assertNotIn("One more warning must stay hidden.", text)
+
     def test_verified_and_partial_are_distinguishable(self):
         verified_text = "\n".join(format_result(make_result(status="verified")))
         partial_text = "\n".join(format_result(make_result(status="partial")))
@@ -265,6 +312,17 @@ class FormatterLengthLimitTests(unittest.TestCase):
         chunks = chunk_lines(["x" * 100], max_length=20)
         self.assertEqual(len(chunks), 1)
         self.assertLessEqual(len(chunks[0]), 20)
+
+    def test_chunks_are_bounded_by_utf16_code_units(self):
+        chunks = chunk_lines(["😀" * 3000], max_length=3500)
+        self.assertEqual(len(chunks), 1)
+        self.assertLessEqual(utf16_code_units(chunks[0]), 3500)
+        self.assertLess(utf16_code_units(chunks[0]), 4096)
+
+    def test_requested_limit_cannot_exceed_telegram_hard_limit(self):
+        chunks = chunk_lines(["😀" * 3000], max_length=10000)
+        self.assertEqual(len(chunks), 1)
+        self.assertLess(utf16_code_units(chunks[0]), 4096)
 
 
 def make_job(*, state="queued", request=None, result=None, error=None) -> Job:
@@ -477,6 +535,23 @@ class FakeUpdate:
 
 
 class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
+    async def test_application_registers_commands_and_plain_text_handler(self):
+        manager = JobManager(TrackingFakeService(make_result()), max_concurrent_jobs=1)
+        application = build_application("123:test-token", manager)
+        handlers = [handler for group in application.handlers.values() for handler in group]
+        registered_commands = {
+            command
+            for handler in handlers
+            for command in (getattr(handler, "commands", None) or ())
+        }
+        self.assertEqual(registered_commands, {"start", "help", "status", "cancel"})
+        text_handlers = [
+            handler for handler in handlers if type(handler).__name__ == "MessageHandler"
+        ]
+        self.assertEqual(len(text_handlers), 1)
+        self.assertIn("filters.TEXT", repr(text_handlers[0].filters))
+        self.assertIn("filters.COMMAND", repr(text_handlers[0].filters))
+
     async def test_start_command_sends_the_start_message(self):
         message = FakeMessage()
         await start_command(FakeUpdate(message), None)
@@ -498,6 +573,22 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(message.sent)
         self.assertIn("Bosch", message.sent[0])
 
+    async def test_one_valid_message_creates_exactly_one_typed_request(self):
+        service = TrackingFakeService(make_result(status="partial"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
+        message = FakeMessage(text="ExampleCo | Model 200 | ART-7")
+        await verify_command(FakeUpdate(message), None)
+        for _ in range(50):
+            if service.calls:
+                break
+            await asyncio.sleep(0.01)
+        self.assertEqual(len(service.calls), 1)
+        self.assertEqual(
+            service.calls[0],
+            VerifyProductRequest(brand="ExampleCo", model="Model 200", article="ART-7"),
+        )
+
     async def test_verify_command_on_parse_failure_never_creates_a_job(self):
         service = TrackingFakeService(make_result())
         manager = JobManager(service, max_concurrent_jobs=1)
@@ -514,6 +605,13 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         except Exception as error:  # pragma: no cover - failure path under test
             self.fail(f"start_command must not propagate a send failure, got {error!r}")
         self.assertEqual(message.sent, [])  # the send failed, but silently
+
+    async def test_safe_reply_bounds_every_outbound_chunk_by_utf16_units(self):
+        message = FakeMessage()
+        await _safe_reply(message, "😀" * 3000)
+        self.assertTrue(message.sent)
+        for chunk in message.sent:
+            self.assertLess(utf16_code_units(chunk), 4096)
 
     async def test_status_command_reports_no_active_jobs(self):
         manager = JobManager(TrackingFakeService(make_result()), max_concurrent_jobs=1)
