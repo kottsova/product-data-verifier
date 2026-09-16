@@ -74,6 +74,11 @@ COMPARISON_TOLERANCES = {
     "length_mm": Decimal("0.1"),
 }
 
+PLACEHOLDER_VALUES = {
+    "-", "–", "—", "n/a", "na", "not available", "not specified",
+    "unknown", "нет данных", "не указано", "невідомо", "не вказано",
+}
+
 
 @dataclass(frozen=True, slots=True)
 class CandidateFact:
@@ -276,10 +281,15 @@ def equivalent_values(left: _NormalizedValue, right: _NormalizedValue) -> bool:
 
 def _concrete_value(value: object) -> bool:
     if isinstance(value, DimensionValue):
-        return all(_clean_text(item) for item in (
+        return all(
+            _clean_text(item).casefold() not in PLACEHOLDER_VALUES
+            and bool(_clean_text(item))
+            for item in (
             value.height, value.width, value.depth, value.unit,
-        ))
-    return bool(_clean_text(value))
+            )
+        )
+    text = _clean_text(value)
+    return bool(text) and text.casefold() not in PLACEHOLDER_VALUES
 
 
 def _authority_rank(fact: CandidateFact) -> int:
@@ -495,14 +505,17 @@ def _unresolved_reason(
         gap = gap_analysis.by_name.get(canonical_name)
         if gap and gap.gap_state == "ambiguous_existing":
             return "ambiguous_scope"
-    if candidates and any(not _provenance_valid(fact) for fact in candidates):
-        return "missing_provenance"
-    if candidates and any(
-        not _identity_compatible(fact, variant_sensitive) for fact in candidates
-    ):
+    provenance_valid = [fact for fact in candidates if _provenance_valid(fact)]
+    identity_compatible = [
+        fact for fact in provenance_valid
+        if _identity_compatible(fact, variant_sensitive)
+    ]
+    if identity_compatible:
+        return "insufficient_source_quality"
+    if provenance_valid:
         return "insufficient_identity"
     if candidates:
-        return "insufficient_source_quality"
+        return "missing_provenance"
     return "no_valid_evidence"
 
 
@@ -653,7 +666,7 @@ def _resolve_field(
     reason = _unresolved_reason(
         canonical_name, usable, mapping, gap_analysis, targeted, variant_sensitive,
     )
-    weak = tuple(sorted(usable, key=_fact_sort_key))
+    weak = tuple(sorted(eligible, key=_fact_sort_key))
     primary = weak[0] if weak else None
     return ValidatedFact(
         canonical_name=canonical_name,

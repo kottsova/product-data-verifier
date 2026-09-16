@@ -312,18 +312,18 @@ def _run_product_workflow_with_services(
         return _candidate_fetch_view(fetch_cache[key], candidate)
 
     fetched: list[FetchResult] = []
+    extracted: list[RawAttribute] = []
     for candidate in selected_candidates:
         if not budget.can_start("initial_fetch", minimum_seconds=0.25):
             break
-        fetched.append(fetch_once(candidate))
-    fetched_sources = tuple(fetched)
-    extracted: list[RawAttribute] = []
-    for source in fetched_sources:
+        source = fetch_once(candidate)
+        fetched.append(source)
         if source.get("status") != "success":
             continue
         if not budget.can_start("initial_extraction", minimum_seconds=0.05):
-            break
+            continue
         extracted.extend(active.extract(source))
+    fetched_sources = tuple(fetched)
     raw_attributes = tuple(extracted)
     category = detect_category(
         identity,

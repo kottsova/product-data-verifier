@@ -7,6 +7,7 @@ from core.schema import (
     get_expected_attributes,
     resolve_attribute_definition,
 )
+from core.normalize import attribute_label_variants
 
 
 EXPECTED_BY_CATEGORY = {
@@ -109,6 +110,19 @@ class SchemaTests(unittest.TestCase):
                 definition = resolve_attribute_definition(alias, category)
                 self.assertIsNotNone(definition)
                 self.assertEqual(definition.canonical_name, expected)
+
+    def test_aliases_do_not_resolve_to_conflicting_canonical_fields(self) -> None:
+        for category in EXPECTED_BY_CATEGORY:
+            aliases: dict[str, set[str]] = {}
+            for definition in get_attribute_schema(category):
+                for alias in (definition.canonical_name, *definition.aliases):
+                    for key in attribute_label_variants(alias):
+                        aliases.setdefault(key, set()).add(definition.canonical_name)
+            conflicts = {
+                key: names for key, names in aliases.items() if len(names) > 1
+            }
+            with self.subTest(category=category):
+                self.assertEqual(conflicts, {})
 
 
 if __name__ == "__main__":

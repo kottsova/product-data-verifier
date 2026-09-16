@@ -391,6 +391,23 @@ class RejectionAndUnresolvedTests(unittest.TestCase):
         self.assertEqual(result.value, "1000")
         self.assertEqual(result.conflicting_facts, ())
 
+    def test_placeholder_value_cannot_override_concrete_weak_evidence(self):
+        placeholder = candidate(
+            "power", "-", source="https://official.example/X100",
+            source_type="manufacturer", authority="verified",
+        )
+        concrete = candidate(
+            "power", "1000", unit="W", source="https://retailer.example/X100",
+            source_type="retailer", authority="unknown",
+        )
+
+        result = validate("power", [placeholder, concrete])
+
+        self.assertEqual(result.status, "Unresolved")
+        self.assertEqual(result.value, "1000")
+        self.assertEqual(result.supporting_facts, (concrete,))
+        self.assertEqual(result.resolution_reason, "insufficient_source_quality")
+
     def test_retailer_only_evidence_remains_unresolved(self):
         result = validate("power", [candidate(
             "power", "1000", unit="W", source_type="retailer", authority="unknown",

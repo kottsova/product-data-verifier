@@ -133,6 +133,46 @@ class DirectMappingTests(unittest.TestCase):
             "95°C",
         )
 
+    def test_ukrainian_wet_dry_aliases_map_to_canonical_fields(self) -> None:
+        cases = (
+            ("Сила всмоктування", "23000", "Па", "suction_power", "Pa"),
+            ("Потужність споживання", "300", "Вт", "rated_power", "W"),
+            ("Ємність акумулятора", "2500", "мА·год", "battery_capacity", "mAh"),
+            ("Ємність аккумулятору", "2500", "мА·год", "battery_capacity", "mAh"),
+            ("Час роботи на одному заряді", "35", "хв", "runtime", "min"),
+            ("Час повної зарядки", "3", "год", "charging_time", "h"),
+            ("Об'єм резервуару для чистої води", "800", "мл", "clean_water_tank", "ml"),
+            ("Об'єм резервуару для відпрацьованої води", "700", "мл", "dirty_water_tank", "ml"),
+            ("Режими прибирання", "Автоматичний, Турбо", None, "modes", None),
+        )
+        for label, value, unit, expected_name, expected_unit in cases:
+            with self.subTest(label=label):
+                result = map_attributes(
+                    [raw(label, f"{value} {unit}" if unit else value, value=value, unit=unit)],
+                    category="wet_dry_vacuum",
+                )
+                self.assertEqual(len(result.mapped), 1)
+                self.assertEqual(result.mapped[0].canonical_name, expected_name)
+                self.assertEqual(result.mapped[0].unit, expected_unit)
+
+    def test_korean_identity_labels_map_without_product_specific_rules(self) -> None:
+        result = map_attributes(
+            [raw("브랜드", "Acme"), raw("모델", "Floor 12")],
+            category="wet_dry_vacuum",
+        )
+
+        self.assertEqual(
+            [item.canonical_name for item in result.mapped],
+            ["brand", "model"],
+        )
+
+    def test_unrelated_ukrainian_cleaning_fact_remains_discovered(self) -> None:
+        item = raw("Автоматичне сушіння валиків", "Так")
+        result = map_attributes([item], category="wet_dry_vacuum")
+
+        self.assertEqual(result.mapped, [])
+        self.assertEqual(result.unmapped, [item])
+
     def test_strong_weight_aliases(self) -> None:
         cases = (
             ("Net weight", "net_weight"),

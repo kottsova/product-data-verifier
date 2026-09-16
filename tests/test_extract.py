@@ -31,6 +31,12 @@ class ExtractTests(unittest.TestCase):
         self.assertEqual(split_value_unit("220-240 V"), ("220-240", "V"))
         self.assertEqual(split_value_unit("50; 60 Hz"), ("50; 60", "Hz"))
 
+    def test_split_ukrainian_wet_dry_units_when_unambiguous(self):
+        self.assertEqual(split_value_unit("23000 Па"), ("23000", "Па"))
+        self.assertEqual(split_value_unit("2500 мА·год"), ("2500", "мА·год"))
+        self.assertEqual(split_value_unit("35 хв"), ("35", "хв"))
+        self.assertEqual(split_value_unit("3 год"), ("3", "год"))
+
     def test_complex_value_is_not_split(self):
         value = "180 mm, 1.8 KW (max. power 3.1 KW)"
         self.assertEqual(split_value_unit(value), (value, None))
@@ -244,6 +250,37 @@ class ExtractTests(unittest.TestCase):
         self.assertTrue({("Machine type", "Electromechanical"),
                          ("Shuttle type", "Vertical"), ("Operations", "12"),
                          ("Lighting", "LED")} <= pairs)
+
+    def test_feature_cards_recover_labelled_measurements_without_brand_rules(self):
+        html = """
+        <section class="product-features">
+          <div class="feature-card"><span>3000nits</span><span>Peak Brightness</span></div>
+          <div class="feature-card"><span>120Hz</span><span>Refresh Rate 15</span></div>
+          <div class="feature-card"><span>Ultra-slim Design &amp;</span><span>7000mAh Battery</span></div>
+        </section>
+        """
+
+        attrs = extract_attributes(fetched(html=html))
+        pairs = {(item.name, item.value, item.unit) for item in attrs}
+
+        self.assertIn(("Peak Brightness", "3000", "nits"), pairs)
+        self.assertIn(("Refresh Rate", "120", "Hz"), pairs)
+        self.assertIn(("Battery Capacity", "7000", "mAh"), pairs)
+        self.assertNotIn(("Peak Brightness", "120", "Hz"), pairs)
+        self.assertNotIn(("Refresh Rate", "15", None), pairs)
+
+    def test_feature_cards_do_not_infer_unrecognised_marketing_measurements(self):
+        html = """
+        <section class="product-features">
+          <div class="feature-card"><span>2m</span><span>Drop resistance</span></div>
+          <div class="feature-card"><span>6 years</span><span>Battery health</span></div>
+          <div class="feature-card"><span>1000+</span><span>Charge cycles</span></div>
+        </section>
+        """
+
+        attrs = extract_attributes(fetched(html=html))
+
+        self.assertFalse(any(item.name == "Battery Capacity" for item in attrs))
 
     def test_inline_bold_feature_rows_do_not_leak_into_weak_colon_pairs(self):
         html = """<div class='product-detail-text'>

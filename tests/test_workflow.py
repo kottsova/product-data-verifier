@@ -168,6 +168,55 @@ class ProductWorkflowTests(unittest.TestCase):
         self.assertEqual(budget["exhausted_stage"], "initial_fetch")
         self.assertIn("Insufficient workflow budget", budget["exhaustion_reason"])
 
+    def test_successful_source_is_extracted_before_later_fetches_exhaust_budget(self):
+        class Clock:
+            now = 0.0
+
+            def __call__(self):
+                return self.now
+
+        clock = Clock()
+        urls = [
+            "https://one.example/product/X100",
+            "https://two.example/product/X100",
+        ]
+        items = [candidate(url, title="Acme Air fryer X100") for url in urls]
+        fetch_calls = []
+        extract_calls = []
+
+        def fetch(item):
+            fetch_calls.append(item["url"])
+            clock.now += 0.48
+            return fetch_result(item)
+
+        def extract(source):
+            extract_calls.append(source["source_url"])
+            clock.now += 0.10
+            return [raw("Power", "1000 W", source["source_url"])]
+
+        services = WorkflowServices(
+            discover_initial=lambda _identity, _market: DiscoveryOutcome(
+                items, "success", ["initial"], ["initial"], [],
+            ),
+            fetch=fetch,
+            extract=extract,
+            clock=clock,
+        )
+
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+                wall_clock_budget_seconds=1.0,
+            ),
+            services=services,
+        )
+
+        self.assertEqual(fetch_calls, urls)
+        self.assertEqual(extract_calls, [urls[0]])
+        self.assertEqual([item.name for item in result.raw_attributes], ["Power"])
+
     def test_relevance_gate_may_select_fewer_sources_and_never_fetches_rejected(self):
         accepted_url = "https://shop.example/product/X100"
         rejected_urls = [

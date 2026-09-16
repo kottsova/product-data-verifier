@@ -67,6 +67,7 @@ TEXT_SIGNALS: dict[str, tuple[_Signal, ...]] = {
     "smartphone": (
         _Signal(_pattern("smartphone", "smart phone", "mobile phone", "смартфон"),
                 7, "explicit smartphone product phrase"),
+        _Signal(_pattern("phone", "phones"), 3, "phone product taxonomy"),
     ),
     "sewing_machine": (
         _Signal(_pattern("sewing machine", "швейная машина", "швейную машину", "швейную машинку"),
@@ -78,7 +79,9 @@ TEXT_SIGNALS: dict[str, tuple[_Signal, ...]] = {
     ),
     "wet_dry_vacuum": (
         _Signal(_pattern("wet dry vacuum", "wet/dry vacuum", "wet & dry vacuum",
-                         "wet and dry vacuum", "моющий пылесос", "floor washer"),
+                         "wet and dry vacuum", "моющий пылесос", "floor washer",
+                         "миючий пилосос", "мийний пилосос",
+                         "пилосос для вологого та сухого прибирання"),
                 7, "explicit wet/dry vacuum product phrase"),
         _Signal(_pattern("wet & dry", "wet and dry"), 4, "wet/dry product phrase"),
     ),
@@ -96,6 +99,8 @@ ATTRIBUTE_SIGNALS: dict[str, tuple[_Signal, ...]] = {
         _Signal(_pattern("cpu model", "processor", "gpu", "ram", "internal storage",
                          "rear camera", "front camera", "sim card", "display resolution",
                          "battery capacity"), 2, "smartphone attribute"),
+        _Signal(_pattern("refresh rate", "peak brightness", "screen brightness"),
+                2, "smartphone display attribute"),
     ),
     "sewing_machine": (
         _Signal(_pattern("machine type", "shuttle type", "operation count", "buttonhole type",
@@ -113,6 +118,9 @@ ATTRIBUTE_SIGNALS: dict[str, tuple[_Signal, ...]] = {
         _Signal(_pattern("suction power", "clean water tank", "dirty water tank",
                          "self cleaning", "self-cleaning", "charging time",
                          "всасывания", "бак для чистой воды", "бак для грязной воды",
+                         "сила всмоктування", "потужність всмоктування",
+                         "резервуару для чистої води", "резервуару для відпрацьованої води",
+                         "час роботи на одному заряді", "час повної зарядки",
                          "самоочистка", "შესრუტვის სიმძლავრე",
                          "სუფთა წყლის კონტეინერის მოცულობა",
                          "ჭუჭყიანი წყლის კონტეინერის მოცულობა"),
@@ -204,7 +212,7 @@ def detect_category(
     winner = ranked[0]
     winner_score = scores[winner]
     runner_up = scores[ranked[1]] if len(ranked) > 1 else 0
-    if winner_score < 4 or winner_score == runner_up:
+    if winner_score < 4 or winner_score - runner_up < 2:
         return _unknown(["No category has sufficient unambiguous product evidence."])
 
     if winner_score >= 7 and winner_score - runner_up >= 3:

@@ -47,8 +47,8 @@ PRODUCT_FIELD_PATTERN = re.compile(
     re.IGNORECASE,
 )
 UNIT_TOKEN = (
-    r"mm|cm|km|m|mg|kg|g|lb|oz|ml|cl|l|mAh|Ah|kW|W|V|A|Hz|MHz|GHz|GB|TB|MB|°C|°F|%|rpm|dB|"
-    r"мм|см|км|мг|кг|г|мл|кл|л|мАч|Ач|кВт|Вт|В|Гц|кГц|МГц|мин|об/мин|дБ"
+    r"mm|cm|km|m|mg|kg|g|lb|oz|ml|cl|l|mAh|mA·h|Ah|kPa|Pa|kW|W|V|A|Hz|MHz|GHz|GB|TB|MB|nit|nits|°C|°F|%|rpm|dB|"
+    r"мм|см|км|мг|кг|г|мл|кл|л|мАч|мА·год|Ач|А·год|кПа|Па|кВт|Вт|В|Гц|кГц|МГц|мин|хв|год|об/мин|дБ"
 )
 UNIT_PATTERN = re.compile(
     rf"^\s*([-+]?\d+(?:[.,]\d+)?(?:\s*(?:[x×;]|[-–—])\s*[-+]?\d+(?:[.,]\d+)?)*)\s*({UNIT_TOKEN})\s*$",
@@ -785,6 +785,67 @@ def _extract_feature_temperatures(
     return found
 
 
+FEATURE_MEASUREMENT_PATTERNS = (
+    (
+        re.compile(
+            r"(?P<value>\d+(?:[.,]\d+)?)\s*(?P<unit>hz)\b.{0,30}?\brefresh\s+rate\b",
+            re.IGNORECASE,
+        ),
+        "Refresh Rate",
+    ),
+    (
+        re.compile(
+            r"(?P<value>\d+(?:[.,]\d+)?)\s*(?P<unit>nits?)\b.{0,30}?\bpeak\s+brightness\b",
+            re.IGNORECASE,
+        ),
+        "Peak Brightness",
+    ),
+    (
+        re.compile(
+            r"(?P<value>\d+(?:[.,]\d+)?)\s*(?P<unit>mah|ma·h|мАч|мА·год)\b"
+            r".{0,30}?\b(?:battery|аккумулятор|акумулятор)\b",
+            re.IGNORECASE,
+        ),
+        "Battery Capacity",
+    ),
+)
+
+
+def _extract_labeled_feature_measurements(
+    name: str,
+    value: str,
+    source_url: str,
+    source_type: str | None,
+    *,
+    extraction_method: str,
+    confidence: str,
+    evidence: str,
+    context: str | None,
+) -> list[RawAttribute]:
+    """Recover explicit measurement + semantic-label feature-card facts."""
+    text = _clean(f"{name} {value}")
+    found: list[RawAttribute] = []
+    for pattern, canonical_label in FEATURE_MEASUREMENT_PATTERNS:
+        match = pattern.search(text)
+        if not match:
+            continue
+        raw_value = f"{match.group('value')} {match.group('unit')}"
+        item = _attribute(
+            canonical_label,
+            raw_value,
+            source_url,
+            source_type,
+            extraction_method,
+            confidence,
+            evidence=evidence or text[:300],
+            generic=True,
+            context=context,
+        )
+        if item:
+            found.append(item)
+    return found
+
+
 def _extract_inline_label_blocks(
     soup: BeautifulSoup,
     source_url: str,
@@ -1118,8 +1179,11 @@ def _deduplicate(attributes: Iterable[RawAttribute]) -> list[RawAttribute]:
     result: list[RawAttribute] = []
     positions: dict[tuple[str, str], int] = {}
     for item in attributes:
+        normalized_name = _clean(item.name).casefold().rstrip(":")
         weak_reconstruction = _clean(f"{item.name} {item.raw_value}").casefold().rstrip(":")
-        if item.extraction_method == "spec_block" and weak_reconstruction in strong_names:
+        if item.extraction_method == "spec_block" and (
+            normalized_name in strong_names or weak_reconstruction in strong_names
+        ):
             continue
         key = (_clean(item.name).casefold().rstrip(":"), _clean(item.raw_value).casefold())
         position = positions.get(key)
@@ -1160,4 +1224,17 @@ def extract_attributes(fetch_result: dict[str, Any]) -> list[RawAttribute]:
     elif document_type == "text":
         attributes.extend(_pairs_from_lines(fetch_result.get("text", ""), "plain_text", "low",
                                             source_url, source_type))
+    derived_features: list[RawAttribute] = []
+    for item in attributes:
+        derived_features.extend(_extract_labeled_feature_measurements(
+            item.name,
+            item.raw_value,
+            item.source_url,
+            item.source_type,
+            extraction_method=item.extraction_method,
+            confidence=item.confidence,
+            evidence=item.evidence,
+            context=item.context,
+        ))
+    attributes.extend(derived_features)
     return _deduplicate(attributes)

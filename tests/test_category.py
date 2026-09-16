@@ -41,6 +41,45 @@ class CategoryDetectionTests(unittest.TestCase):
         self.assertEqual(result.category_id, "smartphone")
         self.assertEqual(result.source, "extracted_attributes")
 
+    def test_phone_taxonomy_and_display_signature_recover_smartphone(self) -> None:
+        result = detect_category(
+            resolve_product_identity("Acme X8"),
+            attributes=[
+                attribute("Refresh Rate", "120 Hz"),
+                attribute("Peak Brightness", "3000 nits"),
+            ],
+            product_texts=["Acme › Phones › Acme X8"],
+        )
+
+        self.assertEqual(result.category_id, "smartphone")
+        self.assertEqual(result.source, "mixed")
+
+    def test_close_conflicting_category_signatures_remain_unknown(self) -> None:
+        result = detect_category(
+            resolve_product_identity("Acme X8"),
+            attributes=[
+                attribute("Refresh Rate", "120 Hz"),
+                attribute("Suction Power", "20 kPa"),
+                attribute("Clean Water Tank", "800 ml"),
+            ],
+            product_texts=["Acme › Phones › Acme X8"],
+        )
+
+        self.assertEqual(result.category_id, "unknown")
+
+    def test_ukrainian_wet_dry_product_evidence_is_detected(self) -> None:
+        result = detect_category(
+            resolve_product_identity("Acme Floor 12"),
+            attributes=[
+                attribute("Тип товару", "Миючий пилосос"),
+                attribute("Сила всмоктування", "23000 Па"),
+                attribute("Об'єм резервуару для чистої води", "800 мл"),
+            ],
+        )
+
+        self.assertEqual(result.category_id, "wet_dry_vacuum")
+        self.assertEqual(result.source, "extracted_attributes")
+
     def test_janome_sewing_machine(self) -> None:
         result = detect_category(
             resolve_product_identity("Janome Sakura 95"),
