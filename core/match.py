@@ -106,6 +106,24 @@ def model_match(model: str | None, text: str | None) -> str:
 def candidate_model_match(model: str | None, title: str | None, url: str | None) -> str:
     """Match identity signals without letting an incidental URL override another titled SKU."""
     expected = normalize_model(model)
+    # A search snippet may echo the requested phrase while its destination URL
+    # names a different regional/model code. Distinctive alphanumeric parts
+    # in the request are safer than the provider-generated snippet in this
+    # direct disagreement (for example ABC400UK versus ABC400ME).
+    expected_identifiers = [
+        part
+        for part in _model_parts(model)
+        if len(part) >= 5
+        and any(character.isalpha() for character in part)
+        and any(character.isdigit() for character in part)
+    ]
+    url_parts = re.findall(r"[\w]+", url or "")
+    if any(
+        model_match(identifier, part) == "mismatch"
+        for identifier in expected_identifiers
+        for part in url_parts
+    ):
+        return "mismatch"
     title_result = model_match(model, title)
     if title_result in {"exact", "likely_variant", "likely", "mismatch"}:
         return title_result

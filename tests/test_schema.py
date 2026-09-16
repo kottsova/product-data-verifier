@@ -19,6 +19,10 @@ EXPECTED_BY_CATEGORY = {
         "ram", "storage", "battery_capacity", "charging_power", "display_size",
         "processor", "color",
     },
+    "laptop": {
+        "display_size", "display_resolution", "processor", "gpu", "ram",
+        "storage", "battery_capacity", "ports", "wireless",
+    },
     "sewing_machine": {
         "machine_type", "shuttle_type", "operation_count", "buttonhole_type",
         "stitch_length", "stitch_width", "power",

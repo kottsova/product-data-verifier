@@ -1,7 +1,9 @@
 """Evidence-based source-role authority recovery.
 
-``core.discovery.discover_global_official_domains`` only trusts an explicit
-"official site" search-engine snippet naming the brand. Many real
+``core.discovery.discover_global_official_domains`` trusts either an explicit
+"official site" search-engine snippet naming the brand or the stricter
+combination of exact brand/root-domain equality, official-intent search
+provenance, and a separate exact-model result on that domain. Many real
 manufacturer-, distributor-, or dealer-operated domains never produce such a
 snippet, so authority for them stays "unknown" even though the fetched page
 itself carries evidence of the relationship. This module recovers a

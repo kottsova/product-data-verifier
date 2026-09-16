@@ -9,6 +9,7 @@ from core.discovery import (
     ProviderTimeoutError,
     ResilientSearchSession,
     SearchResultRecord,
+    assess_candidate_relevance,
     _DuckDuckGoHtmlParser,
     _parse_google_browser_items,
     _google_result_layout_ready,
@@ -43,6 +44,16 @@ class MatchTests(unittest.TestCase):
     def test_regional_variant_match(self) -> None:
         self.assertEqual(model_match("WW90T554CAT", "WW90T554CAT/LP"), "likely_variant")
         self.assertEqual(model_match("WW90T554CAT", "WW90T554CAT/LD"), "likely_variant")
+
+    def test_conflicting_distinctive_code_in_url_overrides_echoed_query_snippet(self) -> None:
+        self.assertEqual(
+            candidate_model_match(
+                "Foodi MAX Dual Zone AF400UK",
+                "Ninja Foodi MAX Dual Zone AF400UK product result",
+                "/product/ninja-foodi-max-dual-zone-air-fryer-af400me",
+            ),
+            "mismatch",
+        )
 
     def test_other_sku_is_not_a_variant(self) -> None:
         self.assertNotEqual(model_match("WW90T554CAT", "WW10T554DAW/S1"), "likely_variant")
@@ -377,6 +388,38 @@ class DiscoveryTests(unittest.TestCase):
         ])
         self.assertEqual(evidence, [("acme.example", "https://acme.example/")])
 
+    def test_exact_brand_root_and_separate_exact_product_prove_official_domain(self) -> None:
+        evidence = discover_global_official_domains(
+            "Acme",
+            [("https://support.acme.com/", "Acme support")],
+            product_results=[
+                ("https://www.acme.com/products/X100/specs", "Acme X100 specifications"),
+            ],
+            model="X100",
+        )
+        self.assertEqual(evidence, [("acme.com", "https://support.acme.com/")])
+
+    def test_brand_root_fallback_rejects_lookalikes_and_uncorroborated_homonyms(self) -> None:
+        product = [("https://acme-support.example/X100", "Acme X100")]
+        self.assertEqual(discover_global_official_domains(
+            "Acme",
+            [("https://acme-support.example/", "Acme")],
+            product_results=product,
+            model="X100",
+        ), [])
+        self.assertEqual(discover_global_official_domains(
+            "Acme",
+            [("https://acme.evil.example/", "Acme")],
+            product_results=[("https://acme.evil.example/X100", "Acme X100")],
+            model="X100",
+        ), [])
+        self.assertEqual(discover_global_official_domains(
+            "Acme",
+            [("https://acme.com/", "Acme industrial systems")],
+            product_results=[("https://acme.com/about", "Acme industrial systems")],
+            model="X100",
+        ), [])
+
     def test_authority_and_model_relevance_are_independent(self) -> None:
         candidates = rank_candidates([
             ("https://acme.example/", "Acme official website"),
@@ -389,6 +432,23 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(homepage["model_relevance"], "unknown")
         self.assertEqual(retailer["authority_status"], "unknown")
         self.assertEqual(retailer["model_relevance"], "exact_base_model")
+
+    def test_press_and_refurbished_results_do_not_enter_product_candidates(self) -> None:
+        candidates = rank_candidates([
+            ("https://acme.example/newsroom/launch/X100", "Acme launches X100"),
+            ("https://acme.example/shop/refurbished-X100", "Refurbished Acme X100"),
+            ("https://acme.example/shop/X100-%EC%BC%80%EC%9D%B4%EC%8A%A4", "Acme X100"),
+            ("https://acme.example/product/X100", "Acme X100 specifications"),
+        ], "Acme", "X100")
+        accepted, rejected = [], []
+        for item in candidates:
+            relation, _ = assess_candidate_relevance(item, "Acme", "X100")
+            (rejected if relation == "reject" else accepted).append(item["url"])
+
+        self.assertEqual(accepted, ["https://acme.example/product/X100"])
+        self.assertNotIn("https://acme.example/newsroom/launch/X100", [item["url"] for item in candidates])
+        self.assertIn("https://acme.example/shop/refurbished-X100", rejected)
+        self.assertIn("https://acme.example/shop/X100-%EC%BC%80%EC%9D%B4%EC%8A%A4", rejected)
 
     def test_headless_is_true_by_default(self) -> None:
         with patch.dict("os.environ", {}, clear=True):

@@ -14,6 +14,7 @@ from core.workflow import (
     _discover_initial_with_released_browser,
     _discover_targeted_with_released_browser,
     run_product_workflow,
+    select_source_candidates,
 )
 
 
@@ -129,6 +130,42 @@ class FixtureServices:
 
 
 class ProductWorkflowTests(unittest.TestCase):
+    def test_selection_reserves_verified_exact_official_document(self):
+        broad = [
+            candidate(
+                f"https://acme.example/product/X100-{index}",
+                score=200 - index,
+            )
+            for index in range(3)
+        ]
+        specification = candidate(
+            "https://support.acme.example/specifications/X100",
+            source_type="official_document",
+            score=100,
+        )
+
+        selected = select_source_candidates([*broad, specification], 3)
+
+        self.assertEqual(len(selected), 3)
+        self.assertIn(specification, selected)
+        self.assertEqual(selected[:2], tuple(broad[:2]))
+
+    def test_selection_limits_weak_multi_product_pages_to_one(self):
+        exact = candidate("https://acme.example/product/X100", score=100)
+        weak = [
+            candidate(
+                f"https://acme.example/compare/X100-{index}",
+                relevance="weak",
+                score=200 - index,
+            )
+            for index in range(3)
+        ]
+
+        selected = select_source_candidates([*weak, exact], 5)
+
+        self.assertEqual(selected[0], exact)
+        self.assertEqual(len([item for item in selected if item["relevance_relation"] == "weak"]), 1)
+
     def test_budget_exhaustion_returns_best_partial_result_without_new_fetch(self):
         class Clock:
             now = 0.0
@@ -278,6 +315,90 @@ class ProductWorkflowTests(unittest.TestCase):
         self.assertEqual(result.final_profile.identity.brand, "Acme")
         self.assertEqual(result.final_profile.metadata["workflow_version"], "1.0")
         self.assertEqual(result.quality, assess_product_quality(result.final_profile))
+
+    def test_verified_exact_official_page_supplies_missing_brand_and_model_facts(self):
+        url = "https://acme.example/support/X100/specifications"
+        item = candidate(url, title="Acme X100 specifications")
+        fixtures = FixtureServices([item], {url: []})
+
+        def fetch(candidate_item):
+            result = fetch_result(candidate_item)
+            result["text"] = "Official technical specifications for Acme X100."
+            result["html"] = "<html><body>Official technical specifications for Acme X100.</body></html>"
+            return result
+
+        fixtures.fetch = fetch
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100", brand="Acme", targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+
+        self.assertEqual(
+            [item.name for item in result.raw_attributes],
+            ["Brand", "Model"],
+        )
+        self.assertEqual(result.final_profile.by_name["brand"].status, "Confirmed")
+        self.assertEqual(result.final_profile.by_name["model"].status, "Confirmed")
+
+    def test_identity_synthesis_rejects_unknown_authority_and_non_exact_page_text(self):
+        cases = (
+            candidate(
+                "https://shop.example/X100",
+                source_type="retailer",
+                authority="unknown",
+            ),
+            candidate("https://acme.example/support/X100"),
+        )
+        page_texts = (
+            "Acme X100 product details",
+            "Official technical specifications for Acme X100 Pro",
+        )
+        for item, page_text in zip(cases, page_texts):
+            with self.subTest(url=item["url"]):
+                fixtures = FixtureServices([item], {item["url"]: []})
+
+                def fetch(candidate_item, text=page_text):
+                    result = fetch_result(candidate_item)
+                    result["text"] = text
+                    result["html"] = f"<html><body>{text}</body></html>"
+                    return result
+
+                fixtures.fetch = fetch
+                result = run_product_workflow(
+                    ProductWorkflowRequest(
+                        "Acme X100", brand="Acme", targeted_search_enabled=False,
+                    ),
+                    services=fixtures.services(),
+                )
+                self.assertEqual(result.raw_attributes, ())
+
+    def test_identity_synthesis_does_not_overwrite_extracted_model_alias(self):
+        url = "https://support.acme.example/specifications/X100"
+        item = candidate(url)
+        fixtures = FixtureServices([item], {
+            url: [raw("Model Number", "X100-US", url)],
+        })
+
+        def fetch(candidate_item):
+            result = fetch_result(candidate_item)
+            result["text"] = "Official technical specifications for Acme X100."
+            result["html"] = "<html><body>Official technical specifications for Acme X100.</body></html>"
+            return result
+
+        fixtures.fetch = fetch
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100", brand="Acme", targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+
+        self.assertEqual(
+            [(item.name, item.value) for item in result.raw_attributes],
+            [("Model Number", "X100-US"), ("Brand", "Acme")],
+        )
         self.assertIn(result.quality.status, ("verified", "partial", "insufficient", "conflicted"))
 
     def test_retailer_authority_is_preserved_and_fact_stays_unresolved(self):

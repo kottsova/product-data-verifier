@@ -60,6 +60,61 @@ class FetchSourceTests(unittest.TestCase):
         self.assertEqual(result["discovery_metadata"], candidate)
         self.assertEqual(extract_attributes(result)[0].source_type, "manufacturer")
 
+    def test_blocked_verified_manufacturer_retries_with_browser(self):
+        candidate = {
+            "url": "https://acme.example/product/X100",
+            "source_type": "manufacturer",
+            "authority_status": "verified",
+        }
+        rendered = "<html><body>Acme X100 specifications and product details</body></html>"
+        with patch(
+            "core.fetch._fetch_with_playwright",
+            return_value=(candidate["url"], 200, rendered),
+        ) as browser:
+            result = fetch_candidate(
+                candidate,
+                session=FakeSession(html_response("Access Denied", 403)),
+            )
+
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["fetch_method"], "playwright")
+        browser.assert_called_once()
+
+    def test_blocked_unknown_source_does_not_retry_with_browser(self):
+        candidate = {
+            "url": "https://shop.example/product/X100",
+            "source_type": "retailer",
+            "authority_status": "unknown",
+        }
+        with patch("core.fetch._fetch_with_playwright") as browser:
+            result = fetch_candidate(
+                candidate,
+                session=FakeSession(html_response("Access Denied", 403)),
+            )
+
+        self.assertEqual(result["status"], "blocked")
+        browser.assert_not_called()
+
+    def test_verified_browser_retry_keeps_rendered_challenge_blocked(self):
+        candidate = {
+            "url": "https://acme.example/product/X100",
+            "source_type": "official_document",
+            "authority_status": "verified",
+        }
+        rendered = "<html><body>Verify you are human</body></html>"
+        with patch(
+            "core.fetch._fetch_with_playwright",
+            return_value=(candidate["url"], 200, rendered),
+        ):
+            result = fetch_candidate(
+                candidate,
+                session=FakeSession(html_response("Access Denied", 403)),
+            )
+
+        self.assertEqual(result["status"], "blocked")
+        self.assertEqual(result["fetch_method"], "playwright")
+        self.assertEqual(result["blocked_reason"], "bot_challenge")
+
     def test_normal_html_returns_meaningful_text_without_playwright(self):
         body = "<html><head><title>Model X100</title><meta name='description' content='Product description'></head><body><script>bad()</script><h1>Model X100</h1><table><tr><td>Weight</td><td>10 kg</td></tr></table><p>" + "Useful product information. " * 5 + "</p></body></html>"
         with patch("core.fetch._fetch_with_playwright") as browser:

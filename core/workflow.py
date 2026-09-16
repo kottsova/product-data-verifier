@@ -30,7 +30,12 @@ from core.discovery import (
 from core.extract import RawAttribute, extract_attributes
 from core.fetch import FetchResult, fetch_candidate
 from core.gaps import GapAnalysisResult, analyze_gaps
-from core.identity import IdentityEvidence, ProductIdentity, resolve_product_identity
+from core.identity import (
+    IdentityEvidence,
+    ProductIdentity,
+    base_model_in_text,
+    resolve_product_identity,
+)
 from core.mapping import MappingResult, map_attributes
 from core.profile import FinalProductProfile, build_final_profile
 from core.quality import QualityAssessment, assess_product_quality
@@ -40,6 +45,7 @@ from core.schema import (
     SchemaDiagnostics,
     analyze_schema_coverage,
     extend_schema_with_discovered,
+    resolve_attribute_definition,
 )
 from core.targeted_search import (
     TargetedSearchConfig,
@@ -236,7 +242,13 @@ def select_source_candidates(
     candidates: list[Candidate],
     limit: int,
 ) -> tuple[Candidate, ...]:
-    """Apply canonical dedupe and final score ordering before the fetch limit."""
+    """Apply canonical dedupe and final score ordering before the fetch limit.
+
+    Preserve one verified exact official document when ranking would otherwise
+    fill every slot with broader first-party pages. This is a source-role
+    diversity rule, not a product override; relevance and exact-model gates
+    have already run.
+    """
     if limit < 1:
         raise ValueError("source limit must be positive")
     deduplicated: dict[str, Candidate] = {}
@@ -259,7 +271,28 @@ def select_source_candidates(
         deduplicated.values(),
         key=lambda item: (-item["score"], item["url"]),
     )
-    return tuple(ranked[:limit])
+    strong = [item for item in ranked if item.get("relevance_relation") != "weak"]
+    weak = [item for item in ranked if item.get("relevance_relation") == "weak"]
+    selected = strong[:limit]
+    # A comparison/catalog page can still provide useful fallback evidence,
+    # but several such pages repeat multi-product facts and amplify conflicts.
+    if len(selected) < limit and weak:
+        selected.append(weak[0])
+    exact_official_documents = [
+        item
+        for item in ranked
+        if item.get("source_type") == "official_document"
+        and item.get("authority_status") == "verified"
+        and item.get("model_match") == "exact"
+        and item.get("identity_relation") in {"same_base_model", "exact_variant"}
+    ]
+    if (
+        selected
+        and exact_official_documents
+        and not any(item in selected for item in exact_official_documents)
+    ):
+        selected[-1] = exact_official_documents[0]
+    return tuple(selected)
 
 
 def _product_texts(fetched_sources: tuple[FetchResult, ...]) -> list[str]:
@@ -363,6 +396,62 @@ def _resolve_authority_roles(sources: list[FetchResult], brand: str) -> None:
         source["discovery_metadata"] = metadata
 
 
+def _official_identity_attributes(
+    source: FetchResult,
+    identity: ProductIdentity,
+    extracted: list[RawAttribute],
+) -> list[RawAttribute]:
+    """Materialize identity only when an exact verified first-party page says it.
+
+    The values come from the resolved request identity, but the evidence gate is
+    the fetched official document itself. This fills a common structured-data
+    omission without treating the user's input or a search snippet as proof.
+    """
+    if source.get("status") != "success":
+        return []
+    if source.get("authority_status") != "verified":
+        return []
+    if source.get("source_type") not in {"manufacturer", "official_document"}:
+        return []
+    if source.get("model_relevance") != "exact_base_model":
+        return []
+    if source.get("identity_relation") not in {"same_base_model", "exact_variant"}:
+        return []
+
+    model = identity.base_model or identity.commercial_model
+    page_text = " ".join((str(source.get("text") or ""), str(source.get("html") or "")))
+    if not model or not base_model_in_text(model, page_text):
+        return []
+
+    present = {
+        definition.canonical_name
+        for item in extracted
+        if (definition := resolve_attribute_definition(item.name, "unknown")) is not None
+    }
+    source_url = str(source.get("final_url") or source.get("source_url") or "")
+    source_type = str(source.get("source_type") or "manufacturer")
+    values = (("Brand", identity.brand), ("Model", model))
+    return [
+        RawAttribute(
+            name=name,
+            value=value,
+            unit=None,
+            source_url=source_url,
+            source_type=source_type,
+            evidence=(
+                f"Verified first-party page contains the exact model phrase {model!r}."
+            ),
+            extraction_method="structured_data",
+            confidence="high",
+            raw_value=value,
+            attribute_kind="identity",
+            context="verified official exact-model page",
+        )
+        for name, value in values
+        if value and name.casefold() not in present
+    ]
+
+
 def _run_product_workflow_with_services(
     request: ProductWorkflowRequest,
     active: WorkflowServices,
@@ -402,7 +491,13 @@ def _run_product_workflow_with_services(
             continue
         if not budget.can_start("initial_extraction", minimum_seconds=0.05):
             continue
-        extracted.extend(active.extract(source))
+        source_attributes = active.extract(source)
+        extracted.extend(source_attributes)
+        extracted.extend(_official_identity_attributes(
+            source,
+            identity,
+            source_attributes,
+        ))
     fetched_sources = tuple(fetched)
     raw_attributes = tuple(extracted)
     category = detect_category(

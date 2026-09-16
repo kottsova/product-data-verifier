@@ -435,6 +435,68 @@ def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
                    text_status="available")
 
 
+def _retry_verified_candidate_with_browser(
+    result: FetchResult,
+    candidate: Mapping[str, object],
+    timeout: float,
+) -> FetchResult:
+    """Retry a blocked, discovery-verified first-party page in a real browser.
+
+    Retailers and unknown domains deliberately remain requests-only here. The
+    retry changes transport, never authority, and rendered challenge pages
+    remain structured as blocked.
+    """
+    if result.get("status") != "blocked":
+        return result
+    if candidate.get("authority_status") != "verified":
+        return result
+    if candidate.get("source_type") not in {"manufacturer", "official_document"}:
+        return result
+
+    source_url = str(candidate.get("url") or result.get("source_url") or "")
+    try:
+        rendered_url, rendered_status, rendered_html = _fetch_with_playwright(
+            source_url, timeout,
+        )
+    except Exception:
+        return result
+
+    rendered_text = _extract_html_text(rendered_html)
+    rendered_reason = _blocked_reason(
+        f"{rendered_html[:200_000]} {rendered_text[:20_000]}"
+    )
+    if rendered_reason:
+        return _result(
+            source_url,
+            final_url=rendered_url,
+            status="blocked",
+            http_status=rendered_status,
+            fetch_method="playwright",
+            content_type="text/html",
+            document_type="html",
+            html=rendered_html,
+            content=rendered_html.encode("utf-8"),
+            text=rendered_text,
+            text_status="available" if rendered_text else "text_not_available",
+            blocked_reason=rendered_reason,
+        )
+    if not rendered_text:
+        return result
+    return _result(
+        source_url,
+        final_url=rendered_url,
+        status="success",
+        http_status=rendered_status,
+        fetch_method="playwright",
+        content_type="text/html",
+        document_type="html",
+        html=rendered_html,
+        content=rendered_html.encode("utf-8"),
+        text=rendered_text,
+        text_status="available",
+    )
+
+
 def fetch_candidate(
     candidate: Mapping[str, object],
     *,
@@ -449,6 +511,7 @@ def fetch_candidate(
         max_bytes=max_bytes,
         session=session,
     )
+    result = _retry_verified_candidate_with_browser(result, candidate, timeout)
     result["discovery_metadata"] = dict(candidate)
     for field in (
         "source_type",

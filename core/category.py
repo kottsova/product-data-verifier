@@ -17,6 +17,7 @@ CATEGORY_NAMES = {
     "unknown": ("Unknown", None),
     "cooktop": ("Cooktop", "major_appliance"),
     "smartphone": ("Smartphone", "consumer_electronics"),
+    "laptop": ("Laptop", "consumer_electronics"),
     "sewing_machine": ("Sewing machine", "sewing"),
     "air_fryer": ("Air fryer", "small_appliance"),
     "wet_dry_vacuum": ("Wet/dry vacuum", "home_cleaning"),
@@ -61,13 +62,18 @@ def _pattern(*phrases: str) -> re.Pattern[str]:
 
 TEXT_SIGNALS: dict[str, tuple[_Signal, ...]] = {
     "cooktop": (
-        _Signal(_pattern("cooktop", "induction hob", "electric hob", "варочная панель",
+        _Signal(_pattern("cooktop", "induction hob", "electric hob", "induktionskochfeld",
+                         "kochfeld", "варочная панель",
                          "индукционная панель"), 7, "explicit cooktop product phrase"),
     ),
     "smartphone": (
         _Signal(_pattern("smartphone", "smart phone", "mobile phone", "смартфон"),
                 7, "explicit smartphone product phrase"),
         _Signal(_pattern("phone", "phones"), 3, "phone product taxonomy"),
+    ),
+    "laptop": (
+        _Signal(_pattern("laptop", "notebook computer", "notebook pc", "ultrabook",
+                         "portable computer"), 7, "explicit laptop product phrase"),
     ),
     "sewing_machine": (
         _Signal(_pattern("sewing machine", "швейная машина", "швейную машину", "швейную машинку"),
@@ -79,7 +85,8 @@ TEXT_SIGNALS: dict[str, tuple[_Signal, ...]] = {
     ),
     "wet_dry_vacuum": (
         _Signal(_pattern("wet dry vacuum", "wet/dry vacuum", "wet & dry vacuum",
-                         "wet and dry vacuum", "моющий пылесос", "floor washer",
+                         "wet and dry vacuum", "nass trockensauger", "nass- und trockensauger",
+                         "моющий пылесос", "floor washer",
                          "миючий пилосос", "мийний пилосос",
                          "пилосос для вологого та сухого прибирання"),
                 7, "explicit wet/dry vacuum product phrase"),
@@ -101,6 +108,14 @@ ATTRIBUTE_SIGNALS: dict[str, tuple[_Signal, ...]] = {
                          "battery capacity"), 2, "smartphone attribute"),
         _Signal(_pattern("refresh rate", "peak brightness", "screen brightness"),
                 2, "smartphone display attribute"),
+        _Signal(_pattern("esim", "dual sim", "wi-fi calling", "wireless charging",
+                         "telephoto", "ultra wideband"),
+                2, "smartphone connectivity or camera attribute"),
+    ),
+    "laptop": (
+        _Signal(_pattern("processor", "cpu", "graphics", "gpu", "system memory",
+                         "ram", "solid state drive", "ssd", "display resolution",
+                         "operating system", "thunderbolt"), 2, "laptop attribute"),
     ),
     "sewing_machine": (
         _Signal(_pattern("machine type", "shuttle type", "operation count", "buttonhole type",

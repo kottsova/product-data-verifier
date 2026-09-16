@@ -199,7 +199,7 @@ BLOCKED_DOMAINS = {
     "youtube.com", "youtu.be",
 }
 BLOCKED_PATH_SEGMENTS = {
-    "about", "account", "blog", "contact", "login", "news", "privacy",
+    "about", "account", "blog", "contact", "login", "news", "newsroom", "privacy",
     "register", "signin", "terms", "warranty",
 }
 CATALOG_SEGMENTS = {
@@ -219,7 +219,7 @@ WEAK_PATH_HINTS = {
 }
 ACCESSORY_CONTEXT_TERMS = {
     "assembly", "case", "cover", "digitizer", "protector", "replacement",
-    "spare", "wallet",
+    "refurbished", "renewed", "spare", "wallet", "hülle", "кейс", "чехол", "케이스",
 }
 NON_PRODUCT_CONTEXT_TERMS = {
     "athlete", "biography", "coach", "defender", "football", "forward",
@@ -302,6 +302,28 @@ def build_search_queries(brand: str, model: str, article: str | None = None) -> 
 
 def _host(url: str) -> str:
     return (urlparse(url).hostname or "").lower().removeprefix("www.")
+
+
+_COUNTRY_CODE_SECOND_LEVEL_DOMAINS = {
+    "ac.uk", "co.jp", "co.kr", "co.nz", "co.uk", "com.au", "com.br",
+    "com.cn", "com.hk", "com.mx", "com.sg", "com.tr", "com.tw",
+}
+
+
+def _registrable_domain(domain: str) -> str:
+    """Return the root domain needed for a conservative brand equality check."""
+    labels = (domain or "").lower().removeprefix("www.").split(".")
+    if len(labels) < 2:
+        return labels[0] if labels else ""
+    suffix = ".".join(labels[-2:])
+    if suffix in _COUNTRY_CODE_SECOND_LEVEL_DOMAINS and len(labels) >= 3:
+        return ".".join(labels[-3:])
+    return suffix
+
+
+def _registrable_domain_label(domain: str) -> str:
+    root = _registrable_domain(domain)
+    return re.sub(r"[^a-z0-9]", "", root.split(".")[0])
 
 
 def url_belongs_to_domain(url: str, domain: str) -> bool:
@@ -406,26 +428,61 @@ def _page_kind(url: str) -> str:
 def discover_global_official_domains(
     brand: str,
     results: Iterable[SearchResultLike],
+    *,
+    product_results: Iterable[SearchResultLike] = (),
+    model: str | None = None,
 ) -> list[tuple[str, str]]:
-    """Return conservatively proven official domains and their evidence URLs."""
+    """Return conservatively proven official domains and their evidence URLs.
+
+    An explicit search-result claim remains sufficient. A provider that omits
+    the word "official" may use the stricter fallback: exact brand/root-domain
+    equality plus a separate exact-model result on that same root domain.
+    """
     brand_key = normalize_model(brand).lower()
+    product_records = [
+        _search_result_record(item, rank=position + 1)
+        for position, item in enumerate(product_results)
+    ]
     ranked: list[tuple[int, str, str]] = []
     for position, item in enumerate(results):
         record = _search_result_record(item, rank=position + 1)
         url, title = record.url, f"{record.title} {record.snippet}".strip()
         domain = _host(url)
         label = re.sub(r"[^a-z0-9]", "", domain.split(".")[0])
+        root_label = _registrable_domain_label(domain)
         title_norm = normalize_text(title)
-        if not brand_key or (brand_key not in label and label not in brand_key):
+        label_consistent = brand_key in label or label in brand_key
+        exact_root = root_label == re.sub(r"[^a-z0-9]", "", brand_key)
+        if not brand_key or not (label_consistent or exact_root):
             continue
         brand_in_title = normalize_model(brand) in normalize_model(title)
         official_signal = "official" in title_norm or "официаль" in title_norm
         # Domain/brand similarity is only a consistency check. Verification
-        # requires an explicit result claim linking this brand to an official
-        # site; a similarly named homepage is not evidence by itself.
-        if not official_signal or not brand_in_title:
+        # requires either an explicit claim or corroborating exact-product
+        # search evidence; a similarly named homepage is not enough.
+        if official_signal and brand_in_title:
+            ranked.append((120 - position, domain, canonicalize_url(url)))
             continue
-        ranked.append((120 - position, domain, canonicalize_url(url)))
+
+        root_domain = _registrable_domain(domain)
+        evidence_url = canonicalize_url(url)
+        exact_brand_root = (
+            len(brand_key) >= 3
+            and exact_root
+        )
+        exact_product_result = next((
+            product
+            for product in product_records
+            if model
+            and canonicalize_url(product.url) != evidence_url
+            and url_belongs_to_domain(product.url, root_domain)
+            and model_match(
+                model,
+                f"{product.title} {product.snippet} {product.url}",
+            ) == "exact"
+        ), None)
+        if exact_brand_root and brand_in_title and exact_product_result is not None:
+            ranked.append((100 - position, root_domain, evidence_url))
     ranked.sort(reverse=True)
     found: list[tuple[str, str]] = []
     seen: set[str] = set()
@@ -451,7 +508,12 @@ def _is_official_document(url: str) -> bool:
     parsed = urlparse(url)
     path = parsed.path.lower()
     segments = [segment for segment in path.split("/") if segment]
-    return path.endswith(".pdf") or _path_has_hint(segments, SUPPORT_PATH_HINTS)
+    host_label = (parsed.hostname or "").lower().removeprefix("www.").split(".")[0]
+    return (
+        path.endswith(".pdf")
+        or host_label in {"docs", "manuals", "support"}
+        or _path_has_hint(segments, SUPPORT_PATH_HINTS)
+    )
 
 
 def _brand_domain_match(brand: str | None, domain: str) -> bool:
@@ -555,7 +617,7 @@ def _has_non_product_context(url: str, title: str) -> bool:
 
 def _has_accessory_context(url: str, title: str) -> bool:
     """Reject accessories and replacement parts that merely name the product."""
-    tokens = set(normalize_text(f"{title} {urlparse(url).path}").split())
+    tokens = set(normalize_text(f"{title} {unquote(urlparse(url).path)}").split())
     return bool(tokens & ACCESSORY_CONTEXT_TERMS)
 
 
@@ -694,7 +756,7 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
         if source_type == "manufacturer" and candidate_evidence:
             authority_status = "verified"
             evidence_url = candidate_evidence
-            authority_reason = "Domain verified from an explicit brand official-site result."
+            authority_reason = "Domain verified from conservative brand official-search evidence."
             if _is_official_document(url):
                 source_type = "official_document"
         match = candidate_model_match(model, search_text, urlparse(url).path)
@@ -1933,7 +1995,12 @@ def discover_with_status(
                 budget_stopped = True
                 break
         if cached is None:
-            official_domains = dict(discover_global_official_domains(brand, official_results))
+            official_domains = dict(discover_global_official_domains(
+                brand,
+                official_results,
+                product_results=raw_results,
+                model=model,
+            ))
             _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
         relevant_domains = [
             domain for domain in official_domains
@@ -2105,6 +2172,7 @@ def discover_identity_query_with_status(
         provider_attempts: list[ProviderAttempt] = []
         attempted: list[str] = []
         raw_results: list[SearchResultLike] = []
+        authority_results: Iterable[SearchResultLike] = ()
 
         if cached is None:
             authority_query = f"{identity.brand} official website"
@@ -2120,8 +2188,8 @@ def discover_identity_query_with_status(
             official_domains = dict(
                 discover_global_official_domains(identity.brand, authority_results)
             )
-            _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
             if any(item.budget_exhausted for item in attempts):
+                _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
                 ranked_candidates = rank_candidates(
                     raw_results,
                     identity.brand,
@@ -2153,6 +2221,15 @@ def discover_identity_query_with_status(
         provider_attempts.extend(attempts)
         issues.extend(query_issues)
         raw_results.extend(found)
+
+        if cached is None:
+            official_domains = dict(discover_global_official_domains(
+                identity.brand,
+                authority_results,
+                product_results=raw_results,
+                model=model,
+            ))
+            _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
 
         ranked_candidates = rank_candidates(
             raw_results,

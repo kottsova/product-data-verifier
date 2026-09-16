@@ -41,6 +41,26 @@ class CategoryDetectionTests(unittest.TestCase):
         self.assertEqual(result.category_id, "smartphone")
         self.assertEqual(result.source, "extracted_attributes")
 
+    def test_laptop_from_explicit_product_phrase_and_attribute_signature(self) -> None:
+        result = detect_category(
+            resolve_product_identity("Acme X13"),
+            attributes=[
+                attribute("Processor", "Example CPU"),
+                attribute("Solid state drive", "1 TB"),
+            ],
+            product_texts=["Acme X13 ultraportable laptop specifications"],
+        )
+        self.assertEqual(result.category_id, "laptop")
+        self.assertEqual(result.confidence, "high")
+        self.assertEqual(result.source, "mixed")
+
+    def test_german_cooktop_phrase_is_detected(self) -> None:
+        result = detect_category(
+            resolve_product_identity("Acme K700"),
+            product_texts=["Acme K700 Induktionskochfeld"],
+        )
+        self.assertEqual(result.category_id, "cooktop")
+
     def test_phone_taxonomy_and_display_signature_recover_smartphone(self) -> None:
         result = detect_category(
             resolve_product_identity("Acme X8"),
@@ -53,6 +73,17 @@ class CategoryDetectionTests(unittest.TestCase):
 
         self.assertEqual(result.category_id, "smartphone")
         self.assertEqual(result.source, "mixed")
+
+    def test_smartphone_from_connectivity_and_camera_signature(self) -> None:
+        result = detect_category(
+            resolve_product_identity("Acme X15"),
+            attributes=[
+                attribute("Dual eSIM", "supported"),
+                attribute("Wireless charging", "15 W"),
+            ],
+        )
+        self.assertEqual(result.category_id, "smartphone")
+        self.assertEqual(result.source, "extracted_attributes")
 
     def test_close_conflicting_category_signatures_remain_unknown(self) -> None:
         result = detect_category(
