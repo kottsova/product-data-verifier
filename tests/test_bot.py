@@ -110,6 +110,23 @@ class ParserTests(unittest.TestCase):
         self.assertIsNone(parse_product_query("Bosch |  | Y"))
         self.assertIsNone(parse_product_query("Bosch |"))
 
+    def test_obvious_russian_conversational_phrases_are_invalid(self):
+        for text in ("что это", "что такое", "помоги мне"):
+            with self.subTest(text=text):
+                self.assertIsNone(parse_product_query(text))
+
+    def test_normal_product_queries_remain_valid(self):
+        cases = {
+            "Apple iPhone 15": ParsedProductQuery(brand="Apple", model="iPhone 15"),
+            "Samsung Galaxy S24": ParsedProductQuery(brand="Samsung", model="Galaxy S24"),
+            "ExampleCo | Model 200 | ART-7": ParsedProductQuery(
+                brand="ExampleCo", model="Model 200", article="ART-7",
+            ),
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(parse_product_query(text), expected)
+
 
 # ---------------------------------------------------------------------------
 # Formatters
@@ -226,6 +243,101 @@ class FormatterQualityStatusTests(unittest.TestCase):
         self.assertIn("Core identity is not confirmed.", text)
         self.assertIn("Too few trusted sources.", text)
         self.assertNotIn("One more warning must stay hidden.", text)
+
+    def test_known_insufficient_reason_and_warning_are_localized(self):
+        base = make_result(status="insufficient", attribute_count=0)
+        quality = replace(
+            base.quality,
+            reasons=(
+                "Category could not be determined, so category-specific critical "
+                "fields cannot be evaluated.",
+            ),
+            warnings=("3 expected attribute(s) remain unresolved.",),
+        )
+
+        text = "\n".join(format_result(replace(base, quality=quality)))
+
+        self.assertIn("Категорию товара определить не удалось", text)
+        self.assertIn("Остались неопределённые характеристики: 3.", text)
+        self.assertNotIn("Category could not be determined", text)
+        self.assertNotIn("expected attribute(s) remain unresolved", text)
+
+    def test_identity_evidence_reason_is_localized_with_readable_fields(self):
+        base = make_result(status="insufficient", attribute_count=0)
+        quality = replace(
+            base.quality,
+            reasons=(
+                "Core identity field(s) have no confirming evidence: brand, model.",
+            ),
+            warnings=(),
+        )
+
+        text = "\n".join(format_result(replace(base, quality=quality)))
+
+        self.assertIn(
+            "Нет подтверждающих данных для основных полей товара: бренд, модель.",
+            text,
+        )
+        self.assertNotIn("Core identity field(s)", text)
+
+    def test_other_known_quality_messages_are_localized(self):
+        cases = {
+            "Product identity was resolved with low confidence.":
+                "Товар определён с низкой уверенностью.",
+            (
+                "Coverage (10%) and/or critical-field discovery (20% of 5) "
+                "fall below the minimum useful threshold."
+            ): "Покрытие данных (10%)",
+            (
+                "2 of 3 confirmed critical field(s) rely on specialized-reference "
+                "evidence rather than a manufacturer-verified source."
+            ): "использованы специализированные источники",
+            (
+                "2 non-critical attribute(s) have conflicting evidence: "
+                "power, net_weight."
+            ): "противоречивые данные (2): power, net weight.",
+            (
+                "Identity carries an unresolved candidate code that was not assigned "
+                "model/SKU semantics."
+            ): "Обнаружен возможный код товара",
+            "Category confidence is low.":
+                "Категория товара определена с низкой уверенностью.",
+        }
+        base = make_result(status="insufficient", attribute_count=0)
+
+        for source, expected in cases.items():
+            with self.subTest(source=source):
+                quality = replace(base.quality, reasons=(source,), warnings=())
+                text = "\n".join(format_result(replace(base, quality=quality)))
+                self.assertIn(expected, text)
+                self.assertNotIn(source, text)
+
+    def test_unknown_insufficient_reason_remains_safe_and_does_not_break_formatting(self):
+        base = make_result(status="insufficient", attribute_count=0)
+        quality = replace(
+            base.quality,
+            reasons=("New human-readable quality reason.",),
+            warnings=(),
+        )
+
+        text = "\n".join(format_result(replace(base, quality=quality)))
+
+        self.assertIn("New human-readable quality reason.", text)
+
+    def test_internal_reason_code_and_traceback_are_not_exposed(self):
+        base = make_result(status="insufficient", attribute_count=0)
+        quality = replace(
+            base.quality,
+            reasons=("internal_quality_code", "Traceback: RuntimeError"),
+            warnings=(),
+        )
+
+        text = "\n".join(format_result(replace(base, quality=quality)))
+
+        self.assertIn("Дополнительных подтверждённых данных недостаточно.", text)
+        self.assertNotIn("internal_quality_code", text)
+        self.assertNotIn("Traceback", text)
+        self.assertNotIn("RuntimeError", text)
 
     def test_verified_and_partial_are_distinguishable(self):
         verified_text = "\n".join(format_result(make_result(status="verified")))
@@ -433,6 +545,17 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
         await handle_product_query("just-one-token", 1, manager, reply=reply)
+        self.assertEqual(service.calls, [])
+        self.assertEqual(reply.messages, [PARSE_ERROR_MESSAGE])
+        self.assertEqual(manager.active_jobs_for_chat(1), [])
+
+    async def test_conversational_input_never_creates_a_verify_request(self):
+        service = TrackingFakeService(make_result())
+        manager = JobManager(service, max_concurrent_jobs=1)
+        reply = RecordingReply()
+
+        await handle_product_query("что это", 1, manager, reply=reply)
+
         self.assertEqual(service.calls, [])
         self.assertEqual(reply.messages, [PARSE_ERROR_MESSAGE])
         self.assertEqual(manager.active_jobs_for_chat(1), [])

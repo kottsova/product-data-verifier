@@ -12,6 +12,8 @@ status/cancelled/outcome) that reuse them for the final result.
 
 from __future__ import annotations
 
+import re
+
 from bot.jobs import Job
 from services.product_verifier import ServiceAttribute, VerifyProductRequest, VerifyProductResult
 
@@ -42,6 +44,41 @@ ERROR_MESSAGES = {
 PRIORITY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 
 _STATUS_ICON = {"Confirmed": "✅", "Conflict": "❗"}
+
+_CATEGORY_UNKNOWN_REASON = (
+    "Category could not be determined, so category-specific critical fields "
+    "cannot be evaluated."
+)
+_IDENTITY_EVIDENCE_PREFIX = "Core identity field(s) have no confirming evidence: "
+_LOW_IDENTITY_REASON = "Product identity was resolved with low confidence."
+_CANDIDATE_CODE_WARNING = (
+    "Identity carries an unresolved candidate code that was not assigned "
+    "model/SKU semantics."
+)
+_LOW_CATEGORY_WARNING = "Category confidence is low."
+
+_COVERAGE_REASON_PATTERN = re.compile(
+    r"Coverage \((?P<coverage>[^)]+)\) and/or critical-field discovery "
+    r"\((?P<critical>[^)]+) of (?P<total>\d+)\) fall below the minimum useful threshold\."
+)
+_UNRESOLVED_WARNING_PATTERN = re.compile(
+    r"(?P<count>\d+) expected attribute\(s\) remain unresolved\."
+)
+_SPECIALIZED_SOURCE_WARNING_PATTERN = re.compile(
+    r"(?P<count>\d+) of (?P<total>\d+) confirmed critical field\(s\) rely on "
+    r"specialized-reference evidence rather than a manufacturer-verified source\."
+)
+_NON_CRITICAL_CONFLICT_PATTERN = re.compile(
+    r"(?P<count>\d+) non-critical attribute\(s\) have conflicting evidence: "
+    r"(?P<fields>.+)\."
+)
+_INTERNAL_REASON_CODE_PATTERN = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+")
+_EXCEPTION_NAME_PATTERN = re.compile(r"\b[A-Za-z]+(?:Error|Exception)\b")
+
+_IDENTITY_FIELD_LABELS = {
+    "brand": "бренд",
+    "model": "модель",
+}
 
 
 def _format_value(value: object, unit: str | None) -> str:
@@ -108,6 +145,72 @@ def _attribute_line(attribute: ServiceAttribute) -> str:
 
 def _fallback_display_name(canonical_name: str) -> str:
     return canonical_name.replace("_", " ").strip() or canonical_name
+
+
+def _localize_quality_message(value: str) -> str:
+    """Translate known structured quality messages for Telegram presentation.
+
+    The service/core contract remains untouched. Unknown human-readable text
+    is returned unchanged so a new upstream reason cannot break formatting or
+    silently lose its meaning; traceback-like text and bare internal codes are
+    replaced with a safe user-facing fallback.
+    """
+    normalized = " ".join(value.split())
+    if normalized == _CATEGORY_UNKNOWN_REASON:
+        return (
+            "Категорию товара определить не удалось, поэтому критически важные "
+            "характеристики для неё нельзя оценить."
+        )
+    if normalized.startswith(_IDENTITY_EVIDENCE_PREFIX) and normalized.endswith("."):
+        raw_fields = normalized[len(_IDENTITY_EVIDENCE_PREFIX):-1]
+        fields = ", ".join(
+            _IDENTITY_FIELD_LABELS.get(field.strip(), _fallback_display_name(field.strip()))
+            for field in raw_fields.split(",")
+            if field.strip()
+        )
+        if fields:
+            return f"Нет подтверждающих данных для основных полей товара: {fields}."
+    if normalized == _LOW_IDENTITY_REASON:
+        return "Товар определён с низкой уверенностью."
+    if match := _COVERAGE_REASON_PATTERN.fullmatch(normalized):
+        return (
+            f"Покрытие данных ({match['coverage']}) и/или найденные критически важные "
+            f"характеристики ({match['critical']} из {match['total']}) ниже минимально "
+            "полезного уровня."
+        )
+    if match := _UNRESOLVED_WARNING_PATTERN.fullmatch(normalized):
+        return f"Остались неопределённые характеристики: {match['count']}."
+    if match := _SPECIALIZED_SOURCE_WARNING_PATTERN.fullmatch(normalized):
+        return (
+            f"Для {match['count']} из {match['total']} подтверждённых критически важных "
+            "характеристик использованы специализированные источники вместо источника "
+            "производителя."
+        )
+    if match := _NON_CRITICAL_CONFLICT_PATTERN.fullmatch(normalized):
+        fields = ", ".join(
+            _fallback_display_name(field.strip())
+            for field in match["fields"].split(",")
+            if field.strip()
+        )
+        suffix = f": {fields}" if fields else ""
+        return (
+            f"Для некритичных характеристик обнаружены противоречивые данные "
+            f"({match['count']}){suffix}."
+        )
+    if normalized == _CANDIDATE_CODE_WARNING:
+        return (
+            "Обнаружен возможный код товара, но недостаточно данных, чтобы считать "
+            "его моделью или артикулом."
+        )
+    if normalized == _LOW_CATEGORY_WARNING:
+        return "Категория товара определена с низкой уверенностью."
+    if (
+        "traceback" in normalized.casefold()
+        or _INTERNAL_REASON_CODE_PATTERN.fullmatch(normalized)
+        or _EXCEPTION_NAME_PATTERN.search(normalized)
+    ):
+        return "Дополнительных подтверждённых данных недостаточно."
+    return normalized
 
 
 def _status_section_lines(
@@ -179,9 +282,9 @@ def _insufficient_reason_lines(result: VerifyProductResult) -> list[str]:
         return []
     reasons: list[str] = []
     for value in (*quality.reasons, *quality.warnings):
-        normalized = " ".join(value.split())
-        if normalized and normalized not in reasons:
-            reasons.append(normalized)
+        localized = _localize_quality_message(value)
+        if localized and localized not in reasons:
+            reasons.append(localized)
         if len(reasons) == DEFAULT_MAX_REASONS:
             break
     if not reasons:

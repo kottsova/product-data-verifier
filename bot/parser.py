@@ -9,11 +9,38 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 
+_CONVERSATIONAL_WORDS = frozenset({
+    "мне",
+    "помоги",
+    "такое",
+    "что",
+    "это",
+})
+_CONVERSATIONAL_PUNCTUATION = ".,!?…:;"
+
+
 @dataclass(frozen=True, slots=True)
 class ParsedProductQuery:
     brand: str
     model: str
     article: str | None = None
+
+
+def _is_obviously_conversational(tokens: list[str]) -> bool:
+    """Recognize a very small set of clearly conversational plain inputs.
+
+    Requiring every token to be a common conversational word keeps this guard
+    conservative: it does not reject Cyrillic or Unicode product names, and
+    any product-like token is enough to leave the existing parser behavior
+    unchanged.
+    """
+    normalized = [
+        token.casefold().strip(_CONVERSATIONAL_PUNCTUATION)
+        for token in tokens
+    ]
+    return 2 <= len(normalized) <= 4 and all(
+        token and token in _CONVERSATIONAL_WORDS for token in normalized
+    )
 
 
 def parse_product_query(text: str) -> ParsedProductQuery | None:
@@ -47,6 +74,8 @@ def parse_product_query(text: str) -> ParsedProductQuery | None:
 
     tokens = cleaned.split(" ")
     if len(tokens) < 2:
+        return None
+    if _is_obviously_conversational(tokens):
         return None
     brand = tokens[0]
     model = " ".join(tokens[1:])
