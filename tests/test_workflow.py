@@ -555,6 +555,73 @@ class ProductWorkflowTests(unittest.TestCase):
             result.final_profile.metadata["initial_provider_attempts"][1]["is_fallback"]
         )
 
+    def test_fetched_page_content_recovers_unknown_authority(self):
+        # Stage 18.5: discovery never produced an explicit "official site"
+        # snippet for this brand-domain-consistent source, so authority is
+        # "unknown" at discovery time. The fetched page's own copyright
+        # footer names the brand as the site owner, so the workflow must
+        # recover authority from that content instead of leaving it unknown.
+        url = "https://acme.example/product/X100"
+        item = candidate(url, source_type="other", authority="unknown")
+        fixtures = FixtureServices(
+            [item],
+            {url: [raw("Net weight", "4 kg", url)]},
+        )
+        html = "<html><body><footer>© 2024 Acme. All rights reserved.</footer></body></html>"
+
+        def fetch(candidate_item):
+            fixtures.fetch_calls.append(candidate_item["url"])
+            result = fetch_result(candidate_item)
+            result["html"] = html
+            result["text"] = "Acme X100 © 2024 Acme. All rights reserved."
+            return result
+
+        fixtures.fetch = fetch
+
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+
+        self.assertEqual(result.fetched_sources[0]["authority_status"], "verified")
+        self.assertEqual(result.fetched_sources[0]["source_type"], "manufacturer")
+        net_weight = result.final_profile.by_name.get("net_weight")
+        self.assertIsNotNone(net_weight)
+        self.assertEqual(net_weight.status, "Confirmed")
+
+    def test_unrelated_domain_content_does_not_gain_authority(self):
+        # A retailer whose domain is not brand-consistent must stay
+        # "unknown" even if the requested brand appears in its page text.
+        url = "https://retailer.example/product/X100"
+        item = candidate(url, source_type="other", authority="unknown")
+        fixtures = FixtureServices([item], {url: []})
+        html = "<html><body><footer>© 2024 Retailer Group</footer></body></html>"
+
+        def fetch(candidate_item):
+            fixtures.fetch_calls.append(candidate_item["url"])
+            result = fetch_result(candidate_item)
+            result["html"] = html
+            result["text"] = "Acme X100 sold here © 2024 Retailer Group"
+            return result
+
+        fixtures.fetch = fetch
+
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100",
+                brand="Acme",
+                targeted_search_enabled=False,
+            ),
+            services=fixtures.services(),
+        )
+
+        self.assertEqual(result.fetched_sources[0]["authority_status"], "unknown")
+        self.assertEqual(result.fetched_sources[0]["source_type"], "other")
+
 
 class WorkflowPlaywrightLifecycleTests(unittest.TestCase):
     def test_initial_discovery_releases_browser_before_fetch_boundary(self):

@@ -140,6 +140,7 @@ def _blocked_reason(value: str) -> str | None:
         ("bot_challenge", (
             "verify you are human", "unusual traffic", "checking your browser",
             "cloudflare ray id", "attention required", "just a moment",
+            "qrator", "__qrator__", "/__qrator/",
         )),
     )
     for reason, markers in patterns:
@@ -262,25 +263,44 @@ def _fetch_with_playwright(url: str, timeout: float) -> tuple[str, int | None, s
             browser.close()
 
 
-def _status_result(source_url: str, final_url: str, http_status: int,
-                   content_type: str, method: FetchMethod = "requests") -> FetchResult | None:
-    if http_status == 404:
-        return _result(source_url, final_url=final_url, status="not_found",
-                       http_status=http_status, fetch_method=method, content_type=content_type)
-    if http_status in {401, 403}:
-        reason = "login_required" if http_status == 401 else "access_denied"
+def _not_found_result(source_url: str, final_url: str, http_status: int,
+                      content_type: str, method: FetchMethod = "requests") -> FetchResult:
+    return _result(source_url, final_url=final_url, status="not_found",
+                   http_status=http_status, fetch_method=method, content_type=content_type)
+
+
+def _error_status_result(source_url: str, final_url: str, http_status: int,
+                         content_type: str, method: FetchMethod = "requests") -> FetchResult:
+    return _result(source_url, final_url=final_url, status="error",
+                   http_status=http_status, fetch_method=method, content_type=content_type,
+                   error=f"Source returned HTTP {http_status}")
+
+
+def _access_denied_result(source_url: str, final_url: str, http_status: int,
+                          content_type: str, content: bytes,
+                          method: FetchMethod = "requests") -> FetchResult:
+    """Classify a 401/403 response from actual body evidence, not status code alone.
+
+    A WAF/bot-mitigation challenge (Qrator, Cloudflare, etc.) commonly answers
+    with 401/403 even though the page is not an authentication wall. Reusing
+    the same evidence markers as a normal blocked page keeps the reason
+    truthful instead of asserting "login_required" whenever a site happens to
+    answer with HTTP 401.
+    """
+    default_reason = "login_required" if http_status == 401 else "access_denied"
+    document_type = _document_type(content_type, final_url, content)
+    if document_type != "html":
         return _result(source_url, final_url=final_url, status="blocked",
                        http_status=http_status, fetch_method=method, content_type=content_type,
-                       blocked_reason=reason)
-    if http_status >= 500:
-        return _result(source_url, final_url=final_url, status="error",
-                       http_status=http_status, fetch_method=method, content_type=content_type,
-                       error=f"Source returned HTTP {http_status}")
-    if http_status >= 400:
-        return _result(source_url, final_url=final_url, status="error",
-                       http_status=http_status, fetch_method=method, content_type=content_type,
-                       error=f"Source returned HTTP {http_status}")
-    return None
+                       document_type=document_type, content=content, blocked_reason=default_reason)
+    html = content.decode("utf-8", errors="replace")
+    text = _extract_html_text(html)
+    reason = _blocked_reason(f"{html[:200_000]} {text[:20_000]}") or default_reason
+    return _result(source_url, final_url=final_url, status="blocked",
+                   http_status=http_status, fetch_method=method, content_type=content_type,
+                   document_type="html", html=html, content=content, text=text,
+                   text_status="available" if text else "text_not_available",
+                   blocked_reason=reason)
 
 
 def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
@@ -314,13 +334,16 @@ def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
     final_url = response.url
     http_status = response.status_code
     content_type = response.headers.get("Content-Type", "")
-    status_result = _status_result(source_url, final_url, http_status, content_type)
-    if status_result:
-        return status_result
+    if http_status == 404:
+        return _not_found_result(source_url, final_url, http_status, content_type)
     content = response.content
     if len(content) > max_bytes:
         return _result(source_url, final_url=final_url, status="error", http_status=http_status,
                        content_type=content_type, error=f"Source exceeds {max_bytes}-byte limit")
+    if http_status in {401, 403}:
+        return _access_denied_result(source_url, final_url, http_status, content_type, content)
+    if http_status >= 400:
+        return _error_status_result(source_url, final_url, http_status, content_type)
     document_type = _document_type(content_type, final_url, content)
 
     if document_type == "pdf":

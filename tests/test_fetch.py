@@ -135,12 +135,42 @@ class FetchSourceTests(unittest.TestCase):
                 browser.assert_not_called()
 
     def test_http_statuses_are_structured(self):
-        for status, expected, reason in ((404, "not_found", None), (403, "blocked", "access_denied"), (500, "error", None)):
+        for status, expected, reason in (
+            (404, "not_found", None), (401, "blocked", "login_required"),
+            (403, "blocked", "access_denied"), (500, "error", None),
+        ):
             with self.subTest(status=status):
                 result = fetch_source("https://example.com/x", session=FakeSession(html_response("error", status)))
                 self.assertEqual(result["status"], expected)
                 self.assertEqual(result["http_status"], status)
                 self.assertEqual(result["blocked_reason"], reason)
+
+    def test_401_with_bot_challenge_body_is_evidence_classified(self):
+        # Reproduces the dns-shop.ru Qrator WAF response observed during Stage
+        # 18.5 live diagnosis: HTTP 401 whose body is a bot-mitigation
+        # challenge, not an authentication wall. The status code alone must
+        # not force "login_required" when the body proves otherwise.
+        body = (
+            '<html><head><script src="/__qrator/qauth_utm_v2d_v9118.js" '
+            'charset="utf-8"></script></head><body>qauth_handle_validate</body></html>'
+        )
+        result = fetch_source("https://example.com/product", session=FakeSession(html_response(body, 401)))
+        self.assertEqual(result["status"], "blocked")
+        self.assertEqual(result["http_status"], 401)
+        self.assertEqual(result["blocked_reason"], "bot_challenge")
+
+    def test_403_with_captcha_body_is_evidence_classified(self):
+        body = "<html><body>Please complete the CAPTCHA to continue</body></html>"
+        result = fetch_source("https://example.com/product", session=FakeSession(html_response(body, 403)))
+        self.assertEqual(result["status"], "blocked")
+        self.assertEqual(result["http_status"], 403)
+        self.assertEqual(result["blocked_reason"], "captcha")
+
+    def test_401_without_evidence_keeps_default_login_required(self):
+        body = "<html><body>Please try again later.</body></html>"
+        result = fetch_source("https://example.com/product", session=FakeSession(html_response(body, 401)))
+        self.assertEqual(result["status"], "blocked")
+        self.assertEqual(result["blocked_reason"], "login_required")
 
     def test_binary_image_is_unsupported(self):
         response = FakeResponse(b"image", content_type="image/png")

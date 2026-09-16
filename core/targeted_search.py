@@ -422,10 +422,20 @@ def _run_targeted_search(
                     fetch_cache[url] = fetcher(candidate)
                 source = dict(fetch_cache[url])
                 source["discovery_metadata"] = dict(candidate)
+                # A fetcher may perform a post-fetch, content-evidence-based
+                # authority upgrade (see core.authority) that the candidate's
+                # own pre-fetch discovery-time classification cannot know
+                # about. Never let the weaker candidate value regress an
+                # already-verified fetched authority back to unknown.
+                already_verified = source.get("authority_status") == "verified"
                 for key in (
                     "source_type", "authority_status", "authority_evidence_url",
                     "model_relevance", "identity_relation",
                 ):
+                    if already_verified and key in {
+                        "source_type", "authority_status", "authority_evidence_url",
+                    }:
+                        continue
                     source[key] = candidate.get(key)
                 fetched.append(source)  # type: ignore[arg-type]
                 if source["status"] != "success":
@@ -454,8 +464,8 @@ def _run_targeted_search(
                     _relevant_raw(canonical_name, raw, exact, related, mapped.ambiguous)
                 )
                 if exact and (
-                    candidate.get("authority_status") == "verified"
-                    and candidate.get("source_type") in {"manufacturer", "official_document"}
+                    source.get("authority_status") == "verified"
+                    and source.get("source_type") in {"manufacturer", "official_document"}
                 ):
                     strong_official = True
 

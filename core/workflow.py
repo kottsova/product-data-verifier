@@ -10,7 +10,9 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import time
 from typing import Callable, Mapping, cast
+from urllib.parse import urlparse
 
+from core.authority import evaluate_content_authority
 from core.budget import WallClockBudget
 from core.category import CategoryResult, detect_category
 from core.discovery import (
@@ -287,6 +289,44 @@ def _candidate_fetch_view(
     return cast(FetchResult, result)
 
 
+def _fetch_domain(source: Mapping[str, object]) -> str:
+    url = str(source.get("final_url") or source.get("source_url") or "")
+    return (urlparse(url).hostname or "").lower().removeprefix("www.")
+
+
+def _apply_content_authority(source: FetchResult, brand: str) -> FetchResult:
+    """Recover manufacturer authority from fetched page content when the
+    discovery-time SERP evidence never proved it (see core.authority).
+
+    Only upgrades a still-"unknown" authority on a successfully fetched HTML
+    page; never downgrades or overrides an authority already established
+    (verified or otherwise) at discovery time.
+    """
+    if source.get("status") != "success" or source.get("document_type") != "html":
+        return source
+    if source.get("authority_status") not in (None, "unknown"):
+        return source
+    domain = _fetch_domain(source)
+    if not domain:
+        return source
+    evidence = evaluate_content_authority(
+        str(source.get("html") or ""), str(source.get("text") or ""), domain, brand,
+    )
+    if not evidence.verified:
+        return source
+    result = dict(source)
+    result["authority_status"] = "verified"
+    result["source_type"] = "manufacturer"
+    result["authority_evidence_url"] = str(source.get("final_url") or source.get("source_url") or "")
+    metadata = dict(source.get("discovery_metadata") or {})
+    metadata["authority_status"] = "verified"
+    metadata["source_type"] = "manufacturer"
+    metadata["authority_evidence_url"] = result["authority_evidence_url"]
+    metadata["authority_reason"] = evidence.reason
+    result["discovery_metadata"] = metadata
+    return cast(FetchResult, result)
+
+
 def _run_product_workflow_with_services(
     request: ProductWorkflowRequest,
     active: WorkflowServices,
@@ -313,7 +353,8 @@ def _run_product_workflow_with_services(
         key = canonicalize_url(url) or url
         if key not in fetch_cache:
             fetch_cache[key] = active.fetch(candidate)
-        return _candidate_fetch_view(fetch_cache[key], candidate)
+        view = _candidate_fetch_view(fetch_cache[key], candidate)
+        return _apply_content_authority(view, identity.brand)
 
     fetched: list[FetchResult] = []
     extracted: list[RawAttribute] = []

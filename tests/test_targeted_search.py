@@ -363,6 +363,36 @@ class TargetedSearchTests(unittest.TestCase):
         self.assertEqual(result.fields[0].stop_reason, "strong_official_evidence")
         self.assertTrue(result.fields[0].useful_evidence_found)
 
+    def test_content_verified_authority_from_fetch_is_not_downgraded_by_candidate(self):
+        # The candidate's own discovery-time authority is "unknown" (no
+        # explicit "official site" search snippet), but the fetcher performs
+        # a post-fetch, content-evidence-based authority upgrade (Stage 18.5
+        # authority recovery) and returns "verified"/"manufacturer". The
+        # candidate's weaker pre-fetch classification must not overwrite it.
+        analysis, plan = one_field_plan("net_weight", queries=3)
+
+        def discovery(_identity, _query):
+            return DiscoveryOutcome([candidate()])
+
+        def content_verified_fetch(_candidate):
+            source = fetched()
+            source["authority_status"] = "verified"
+            source["source_type"] = "manufacturer"
+            return source
+
+        result = run_targeted_search(
+            plan,
+            analysis,
+            identity(),
+            discovery=discovery,
+            fetcher=content_verified_fetch,
+            extractor=lambda _source: [raw("Net weight", "4 kg")],
+        )
+        self.assertEqual(result.fields[0].stop_reason, "strong_official_evidence")
+        fetched_source = result.fields[0].query_results[0].fetched_sources[0]
+        self.assertEqual(fetched_source["authority_status"], "verified")
+        self.assertEqual(fetched_source["source_type"], "manufacturer")
+
     def test_exact_compound_model_candidate_survives_tight_candidate_limit(self):
         """A real (non-synthetic) discovery outcome must rank a genuine exact
         multi-word-model candidate ahead of same-brand partial-match noise,
