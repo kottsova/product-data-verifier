@@ -43,6 +43,7 @@ class FetchResult(TypedDict):
     source_type: str | None
     authority_status: str | None
     authority_evidence_url: str | None
+    authority_role: str | None
     model_relevance: str | None
     identity_relation: str | None
     discovery_metadata: dict[str, object]
@@ -67,6 +68,7 @@ def _result(source_url: str, **updates: object) -> FetchResult:
         "source_type": None,
         "authority_status": None,
         "authority_evidence_url": None,
+        "authority_role": None,
         "model_relevance": None,
         "identity_relation": None,
         "discovery_metadata": {},

@@ -12,7 +12,7 @@ import time
 from typing import Callable, Mapping, cast
 from urllib.parse import urlparse
 
-from core.authority import evaluate_content_authority
+from core.authority import ELEVATED_ROLES, TrustedSource, resolve_authority
 from core.budget import WallClockBudget
 from core.category import CategoryResult, detect_category
 from core.discovery import (
@@ -294,37 +294,73 @@ def _fetch_domain(source: Mapping[str, object]) -> str:
     return (urlparse(url).hostname or "").lower().removeprefix("www.")
 
 
-def _apply_content_authority(source: FetchResult, brand: str) -> FetchResult:
-    """Recover manufacturer authority from fetched page content when the
-    discovery-time SERP evidence never proved it (see core.authority).
+def _role_source_type(role: str) -> str:
+    """Map a fine-grained authority role onto the coarse, pre-existing
+    source_type vocabulary that core.validation._authority_rank already
+    understands, so validation ranking/thresholds are never touched.
 
-    Only upgrades a still-"unknown" authority on a successfully fetched HTML
-    page; never downgrades or overrides an authority already established
-    (verified or otherwise) at discovery time.
+    Only "manufacturer" reaches the rank-4 (Confirmed-eligible) tier;
+    official_distributor/authorized_dealer share the existing "distributor"
+    rank-2 tier with plain retailers - corroboration proves a real
+    relationship, but it does not by itself make a fact reliable enough to
+    confirm alone, exactly as retailer/marketplace evidence already cannot.
     """
-    if source.get("status") != "success" or source.get("document_type") != "html":
-        return source
-    if source.get("authority_status") not in (None, "unknown"):
-        return source
-    domain = _fetch_domain(source)
-    if not domain:
-        return source
-    evidence = evaluate_content_authority(
-        str(source.get("html") or ""), str(source.get("text") or ""), domain, brand,
+    if role == "manufacturer":
+        return "manufacturer"
+    if role in ("official_distributor", "authorized_dealer"):
+        return "distributor"
+    return role
+
+
+def _resolve_authority_roles(sources: list[FetchResult], brand: str) -> None:
+    """Post-pass: recover a generic, evidence-based authority role for every
+    successfully fetched HTML page still "unknown" after discovery, using
+    the full set of pages fetched in this run (see core.authority).
+
+    Mutates each FetchResult dict in place (FetchResult is a plain dict;
+    TypedDict is a type-checking construct only), so it also updates the
+    dicts nested inside an already-built TargetedSearchResult without
+    reconstructing its frozen dataclasses. Runs once after all fetching
+    (initial and targeted) is complete so corroboration sees the full,
+    order-independent set of pages fetched in this run - never a single
+    self-declared page in isolation.
+    """
+    if not brand:
+        return
+    trusted_sources = tuple(
+        TrustedSource(domain=_fetch_domain(source), html=str(source.get("html") or ""))
+        for source in sources
+        if source.get("status") == "success"
+        and source.get("document_type") == "html"
+        and source.get("authority_status") == "verified"
+        and source.get("source_type") == "manufacturer"
+        and _fetch_domain(source)
     )
-    if not evidence.verified:
-        return source
-    result = dict(source)
-    result["authority_status"] = "verified"
-    result["source_type"] = "manufacturer"
-    result["authority_evidence_url"] = str(source.get("final_url") or source.get("source_url") or "")
-    metadata = dict(source.get("discovery_metadata") or {})
-    metadata["authority_status"] = "verified"
-    metadata["source_type"] = "manufacturer"
-    metadata["authority_evidence_url"] = result["authority_evidence_url"]
-    metadata["authority_reason"] = evidence.reason
-    result["discovery_metadata"] = metadata
-    return cast(FetchResult, result)
+    for source in sources:
+        if source.get("status") != "success" or source.get("document_type") != "html":
+            continue
+        if source.get("authority_status") not in (None, "unknown"):
+            continue
+        domain = _fetch_domain(source)
+        if not domain:
+            continue
+        assessment = resolve_authority(
+            str(source.get("html") or ""), str(source.get("text") or ""),
+            domain, brand, trusted_sources=trusted_sources,
+        )
+        source["authority_role"] = assessment.role
+        if assessment.role not in ELEVATED_ROLES:
+            continue
+        evidence_url = str(source.get("final_url") or source.get("source_url") or "")
+        source["authority_status"] = "verified"
+        source["source_type"] = _role_source_type(assessment.role)
+        source["authority_evidence_url"] = evidence_url
+        metadata = dict(source.get("discovery_metadata") or {})
+        metadata["authority_status"] = source["authority_status"]
+        metadata["source_type"] = source["source_type"]
+        metadata["authority_evidence_url"] = evidence_url
+        metadata["authority_reason"] = assessment.reason
+        source["discovery_metadata"] = metadata
 
 
 def _run_product_workflow_with_services(
@@ -353,8 +389,7 @@ def _run_product_workflow_with_services(
         key = canonicalize_url(url) or url
         if key not in fetch_cache:
             fetch_cache[key] = active.fetch(candidate)
-        view = _candidate_fetch_view(fetch_cache[key], candidate)
-        return _apply_content_authority(view, identity.brand)
+        return _candidate_fetch_view(fetch_cache[key], candidate)
 
     fetched: list[FetchResult] = []
     extracted: list[RawAttribute] = []
@@ -407,6 +442,19 @@ def _run_product_workflow_with_services(
             extractor=active.extract,
             budget=budget,
         )
+
+    _resolve_authority_roles(
+        [
+            *fetched,
+            *(
+                source
+                for field_result in (targeted_search.fields if targeted_search else ())
+                for query_result in field_result.query_results
+                for source in query_result.fetched_sources
+            ),
+        ],
+        identity.brand,
+    )
 
     validated = validate_product_profile(
         identity,

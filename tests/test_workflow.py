@@ -555,12 +555,11 @@ class ProductWorkflowTests(unittest.TestCase):
             result.final_profile.metadata["initial_provider_attempts"][1]["is_fallback"]
         )
 
-    def test_fetched_page_content_recovers_unknown_authority(self):
-        # Stage 18.5: discovery never produced an explicit "official site"
-        # snippet for this brand-domain-consistent source, so authority is
-        # "unknown" at discovery time. The fetched page's own copyright
-        # footer names the brand as the site owner, so the workflow must
-        # recover authority from that content instead of leaving it unknown.
+    def test_uncorroborated_self_declared_claim_is_not_elevated(self):
+        # A brand-domain-consistent page whose own copyright names the
+        # brand is a self-declared claim only. With no other trusted page
+        # in this run to corroborate it, it must not become "manufacturer"
+        # (Stage 18.5 follow-up: self-assertion alone is never sufficient).
         url = "https://acme.example/product/X100"
         item = candidate(url, source_type="other", authority="unknown")
         fixtures = FixtureServices(
@@ -587,11 +586,96 @@ class ProductWorkflowTests(unittest.TestCase):
             services=fixtures.services(),
         )
 
-        self.assertEqual(result.fetched_sources[0]["authority_status"], "verified")
-        self.assertEqual(result.fetched_sources[0]["source_type"], "manufacturer")
+        source = result.fetched_sources[0]
+        self.assertEqual(source["authority_status"], "unknown")
+        self.assertEqual(source["authority_role"], "retailer")
+        net_weight = result.final_profile.by_name.get("net_weight")
+        self.assertIsNotNone(net_weight)
+        self.assertEqual(net_weight.status, "Unresolved")
+
+    def test_corroborated_manufacturer_claim_is_elevated_and_confirmable(self):
+        # A second, already-trusted (SERP-verified) source in the same run
+        # links to the candidate's domain - independent, cross-domain
+        # corroboration - so the self-declared manufacturer claim may now
+        # be elevated, and a fact from it can reach Confirmed.
+        anchor_url = "https://acme.example/official"
+        dealer_url = "https://acme-shop.example/product/X100"
+        anchor_item = candidate(anchor_url, source_type="manufacturer", authority="verified")
+        dealer_item = candidate(dealer_url, source_type="other", authority="unknown")
+        fixtures = FixtureServices(
+            [anchor_item, dealer_item],
+            {dealer_url: [raw("Net weight", "4 kg", dealer_url)]},
+        )
+        anchor_html = '<html><body><a href="https://acme-shop.example/">Find a store</a></body></html>'
+        dealer_html = "<html><body><footer>© 2024 Acme. All rights reserved.</footer></body></html>"
+
+        def fetch(candidate_item):
+            fixtures.fetch_calls.append(candidate_item["url"])
+            result = fetch_result(candidate_item)
+            if candidate_item["url"] == anchor_url:
+                result["html"] = anchor_html
+                result["text"] = "Find a store"
+            else:
+                result["html"] = dealer_html
+                result["text"] = "Acme X100 © 2024 Acme. All rights reserved."
+            return result
+
+        fixtures.fetch = fetch
+
+        result = run_product_workflow(
+            ProductWorkflowRequest("Acme X100", brand="Acme", targeted_search_enabled=False),
+            services=fixtures.services(),
+        )
+
+        dealer_source = next(s for s in result.fetched_sources if s["source_url"] == dealer_url)
+        self.assertEqual(dealer_source["authority_status"], "verified")
+        self.assertEqual(dealer_source["source_type"], "manufacturer")
+        self.assertEqual(dealer_source["authority_role"], "manufacturer")
         net_weight = result.final_profile.by_name.get("net_weight")
         self.assertIsNotNone(net_weight)
         self.assertEqual(net_weight.status, "Confirmed")
+
+    def test_corroborated_dealer_is_verified_but_not_confirmable_alone(self):
+        # A corroborated authorized-dealer relationship is real and is
+        # marked "verified", but it must not, by itself, unlock Confirmed -
+        # exactly like the pre-existing retailer/distributor tier. Authority
+        # score/validation semantics are not weakened by this feature.
+        anchor_url = "https://acme.example/official"
+        dealer_url = "https://acme-shop.example/product/X100"
+        anchor_item = candidate(anchor_url, source_type="manufacturer", authority="verified")
+        dealer_item = candidate(dealer_url, source_type="other", authority="unknown")
+        fixtures = FixtureServices(
+            [anchor_item, dealer_item],
+            {dealer_url: [raw("Net weight", "4 kg", dealer_url)]},
+        )
+        anchor_html = '<html><body><a href="https://acme-shop.example/">Find a store</a></body></html>'
+        dealer_html = "<html><body><p>Acme Shop is an authorized dealer of Acme.</p></body></html>"
+
+        def fetch(candidate_item):
+            fixtures.fetch_calls.append(candidate_item["url"])
+            result = fetch_result(candidate_item)
+            if candidate_item["url"] == anchor_url:
+                result["html"] = anchor_html
+                result["text"] = "Find a store"
+            else:
+                result["html"] = dealer_html
+                result["text"] = "Acme Shop is an authorized dealer of Acme."
+            return result
+
+        fixtures.fetch = fetch
+
+        result = run_product_workflow(
+            ProductWorkflowRequest("Acme X100", brand="Acme", targeted_search_enabled=False),
+            services=fixtures.services(),
+        )
+
+        dealer_source = next(s for s in result.fetched_sources if s["source_url"] == dealer_url)
+        self.assertEqual(dealer_source["authority_status"], "verified")
+        self.assertEqual(dealer_source["source_type"], "distributor")
+        self.assertEqual(dealer_source["authority_role"], "authorized_dealer")
+        net_weight = result.final_profile.by_name.get("net_weight")
+        self.assertIsNotNone(net_weight)
+        self.assertEqual(net_weight.status, "Unresolved")
 
     def test_unrelated_domain_content_does_not_gain_authority(self):
         # A retailer whose domain is not brand-consistent must stay

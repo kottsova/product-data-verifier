@@ -1,18 +1,35 @@
-"""Evidence-based manufacturer/official-domain authority recovery.
+"""Evidence-based source-role authority recovery.
 
 ``core.discovery.discover_global_official_domains`` only trusts an explicit
 "official site" search-engine snippet naming the brand. Many real
-manufacturer or brand-operated domains never produce such a snippet, so
-authority for them stays "unknown" even though the fetched page itself
-proves the relationship. This module recovers that authority from the
-fetched page's own content: structured Organization/Brand/Product data, a
-site-identity meta tag, or a copyright line that names the brand as the
-site's owner.
+manufacturer-, distributor-, or dealer-operated domains never produce such a
+snippet, so authority for them stays "unknown" even though the fetched page
+itself carries evidence of the relationship. This module recovers a
+generic, safe *role* for such a page instead of a binary verified/unknown
+flag, because a site that credibly claims a relationship with the brand is
+not automatically its manufacturer:
 
-Domain/brand name similarity is a necessary co-signal, never sufficient by
-itself — a multi-brand retailer whose domain happens to start with the
-brand name, or an unrelated company that merely mentions the brand in body
-text, must not be classified as authoritative.
+    manufacturer | official_distributor | authorized_dealer
+    | retailer | marketplace | unknown
+
+Two evidence tiers, deliberately kept separate:
+
+1. Self-declared signals (copyright, structured Organization/Brand/Product
+   data, a site-identity meta tag, "official distributor"/"authorized
+   dealer" wording, brand/domain-name consistency). These are necessary but
+   never sufficient on their own to grant an elevated role - anyone can put
+   "official distributor" in their own page text.
+2. Independent corroboration: an already-trusted source in the same run
+   (typically the brand's own SERP-verified manufacturer/official domain)
+   linking to the candidate's domain. Only corroboration elevates a
+   self-declared claim to the matching role. Without it, the claim
+   downgrades to "retailer" (we know it is commercial and brand-related,
+   just not that the claimed relationship is proven) or "unknown" (no
+   brand-identifying evidence at all).
+
+Brand/domain consistency, wording, and content signals are generic checks
+against the requested product's own brand - nothing here hardcodes a brand
+or domain name.
 """
 
 from __future__ import annotations
@@ -20,17 +37,56 @@ from __future__ import annotations
 from dataclasses import dataclass
 import json
 import re
+from typing import Iterable, Literal
+from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
+from core.discovery import _is_marketplace_domain
 from core.match import normalize_model, normalize_text
 
 
+Role = Literal[
+    "manufacturer", "official_distributor", "authorized_dealer",
+    "retailer", "marketplace", "unknown",
+]
+
+# Roles that require independent corroboration before they may be granted.
+ELEVATED_ROLES: tuple[Role, ...] = ("manufacturer", "official_distributor", "authorized_dealer")
+
+
 @dataclass(frozen=True, slots=True)
-class AuthorityEvidence:
-    verified: bool
+class SelfDeclaredClaim:
+    """The role a page's own content claims, before any corroboration."""
+
+    role: Role
     signal: str | None = None
     reason: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CorroborationResult:
+    """Independent, cross-domain confirmation of a self-declared claim."""
+
+    found: bool
+    evidence_domain: str | None = None
+    reason: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class AuthorityAssessment:
+    role: Role
+    self_declared: SelfDeclaredClaim
+    corroboration: CorroborationResult
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class TrustedSource:
+    """An already-trusted page in the same run, used to corroborate others."""
+
+    domain: str
+    html: str
 
 
 _CORPORATE_SUFFIXES = frozenset({
@@ -39,6 +95,25 @@ _CORPORATE_SUFFIXES = frozenset({
     "group", "holding", "holdings", "plc",
     "ооо", "оао", "зао", "пао", "ип",
 })
+
+# Self-declared relationship wording. Necessary evidence for an elevated
+# claim, never sufficient by itself (see module docstring).
+_DISTRIBUTOR_MARKERS = (
+    "official distributor", "authorized distributor", "exclusive distributor",
+    "official importer", "authorized importer", "official supplier",
+    "official supply", "official deliveries",
+    "официальный дистрибьютор", "эксклюзивный дистрибьютор",
+    "официальный импортер", "официальный импортёр",
+    "официальные поставки", "официальный поставщик",
+)
+_DEALER_MARKERS = (
+    "authorized dealer", "official dealer", "authorized reseller",
+    "official reseller", "certified dealer", "official partner",
+    "authorized partner", "official retailer", "official seller",
+    "официальный дилер", "авторизованный дилер", "официальный партнер",
+    "официальный партнёр", "официальный продавец", "официальный представитель",
+    "авторизованный реселлер", "официальный реселлер",
+)
 
 
 def _brand_key(value: str) -> str:
@@ -127,30 +202,123 @@ def _copyright_signal(text: str, brand_key: str) -> str | None:
     return None
 
 
-def evaluate_content_authority(html: str, text: str, domain: str, brand: str) -> AuthorityEvidence:
-    """Return generic, evidence-based manufacturer authority for one fetched page.
+def _relationship_wording(haystack: str) -> tuple[Role, str] | None:
+    lowered = haystack.casefold()
+    if any(marker in lowered for marker in _DISTRIBUTOR_MARKERS):
+        return "official_distributor", "distributor_wording"
+    if any(marker in lowered for marker in _DEALER_MARKERS):
+        return "authorized_dealer", "dealer_wording"
+    return None
 
-    Requires brand/domain-name consistency AND at least one independent
-    content signal (structured Organization/Brand/Product data, a
-    site-identity meta tag, or a copyright line) that itself names the
-    brand. Neither signal alone is sufficient.
+
+def classify_self_declared_role(html: str, text: str, domain: str, brand: str) -> SelfDeclaredClaim:
+    """Return the role a page's own content claims, before corroboration.
+
+    Only ever returns an elevated role (manufacturer/official_distributor/
+    authorized_dealer) or "unknown" - never "retailer" or "marketplace",
+    which are decided by ``resolve_authority`` using information this
+    function does not have (marketplace-domain lists, corroboration).
     """
     if not brand or not domain:
-        return AuthorityEvidence(False)
+        return SelfDeclaredClaim("unknown")
     if not _brand_domain_consistent(domain, brand):
-        return AuthorityEvidence(False)
+        return SelfDeclaredClaim("unknown")
     brand_key = _brand_key(brand)
     if not brand_key:
-        return AuthorityEvidence(False)
+        return SelfDeclaredClaim("unknown")
+
+    wording = _relationship_wording(f"{text} {html}")
+    if wording:
+        role, signal = wording
+        return SelfDeclaredClaim(
+            role, signal,
+            f"Brand/domain consistency plus self-declared {signal.replace('_', ' ')}.",
+        )
+
     soup = BeautifulSoup(html or "", "html.parser")
-    signal = (
+    entity_signal = (
         _structured_data_signal(soup, brand_key)
         or _site_name_meta_signal(soup, brand_key)
         or _copyright_signal(text, brand_key)
     )
-    if signal is None:
-        return AuthorityEvidence(False)
-    return AuthorityEvidence(
-        True, signal=signal,
-        reason=f"brand/domain consistency plus {signal} evidence naming the brand as site owner",
+    if entity_signal:
+        return SelfDeclaredClaim(
+            "manufacturer", entity_signal,
+            f"Brand/domain consistency plus {entity_signal} names only the brand as site owner.",
+        )
+    return SelfDeclaredClaim("unknown")
+
+
+def _link_hostnames(html: str) -> set[str]:
+    soup = BeautifulSoup(html or "", "html.parser")
+    hosts: set[str] = set()
+    for anchor in soup.find_all("a", href=True):
+        href = str(anchor.get("href") or "")
+        try:
+            host = (urlparse(href).hostname or "").lower().removeprefix("www.")
+        except ValueError:
+            continue
+        if host:
+            hosts.add(host)
+    return hosts
+
+
+def find_corroboration(domain: str, trusted_sources: Iterable[TrustedSource]) -> CorroborationResult:
+    """Return independent, cross-domain confirmation of a candidate domain.
+
+    A trusted source (typically the brand's own already-verified domain)
+    linking to the candidate's domain is generic, brand-agnostic evidence of
+    a real relationship - unlike anything the candidate says about itself.
+    """
+    target = (domain or "").lower().removeprefix("www.")
+    if not target:
+        return CorroborationResult(False)
+    for anchor in trusted_sources:
+        anchor_domain = (anchor.domain or "").lower().removeprefix("www.")
+        for host in _link_hostnames(anchor.html):
+            if host == target or host.endswith(f".{target}") or target.endswith(f".{host}"):
+                return CorroborationResult(
+                    True, anchor_domain,
+                    f"{anchor_domain} links to {target}.",
+                )
+    return CorroborationResult(False)
+
+
+def resolve_authority(
+    html: str, text: str, domain: str, brand: str,
+    trusted_sources: Iterable[TrustedSource] = (),
+) -> AuthorityAssessment:
+    """Resolve a fetched page's authority role from content evidence alone.
+
+    Safety invariants:
+    - ``brand-domain match + copyright`` never yields "manufacturer" by
+      itself - it only yields a self-declared *claim*.
+    - ``site says "official"`` never yields an elevated role by itself.
+    - An elevated role requires independent corroboration; without it, the
+      claim downgrades to "retailer" (evidence of a commercial site, no
+      proven relationship) or "unknown" (no brand-identifying evidence).
+    """
+    if _is_marketplace_domain(domain):
+        return AuthorityAssessment(
+            "marketplace", SelfDeclaredClaim("marketplace"), CorroborationResult(False),
+            "Marketplace domain; platform-level listings are never brand authority.",
+        )
+
+    claim = classify_self_declared_role(html, text, domain, brand)
+    if claim.role == "unknown":
+        return AuthorityAssessment(
+            "unknown", claim, CorroborationResult(False),
+            "No brand-identifying self-declared evidence found.",
+        )
+
+    corroboration = find_corroboration(domain, trusted_sources)
+    if corroboration.found:
+        return AuthorityAssessment(
+            claim.role, claim, corroboration,
+            f"Self-declared {claim.role} corroborated: {corroboration.reason}",
+        )
+    return AuthorityAssessment(
+        "retailer", claim, corroboration,
+        f"Self-declared {claim.role} claim ({claim.signal}) has no independent corroboration; "
+        "treated as an unconfirmed retailer, not elevated.",
     )
