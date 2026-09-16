@@ -64,6 +64,29 @@ class SchemaTests(unittest.TestCase):
             "gross_weight",
         )
 
+    def test_sewing_accessories_and_presser_feet_are_distinct(self) -> None:
+        # "Стандартная комплектация" (standard kit: pedal, manual, bobbins,
+        # needles, seam ripper) and "Лапки в комплекте" (included presser
+        # feet) are different accessory lists. A single page commonly states
+        # both; collapsing them into one canonical field makes validation
+        # see two different list values from the same source and flag a
+        # conflict where none exists.
+        schema = {item.canonical_name: item for item in get_attribute_schema("sewing_machine")}
+        self.assertIn("accessories", schema)
+        self.assertIn("included_presser_feet", schema)
+        self.assertEqual(
+            resolve_attribute_definition(
+                "Стандартная комплектация", "sewing_machine",
+            ).canonical_name,
+            "accessories",
+        )
+        self.assertEqual(
+            resolve_attribute_definition(
+                "Лапки в комплекте", "sewing_machine",
+            ).canonical_name,
+            "included_presser_feet",
+        )
+
     def test_smartphone_variant_scope(self) -> None:
         schema = {item.canonical_name: item for item in get_attribute_schema("smartphone")}
         self.assertEqual(schema["processor"].attribute_scope, "model_level")

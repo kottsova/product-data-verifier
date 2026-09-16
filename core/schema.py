@@ -191,7 +191,8 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
         _definition("thread_cutter", ("thread cutter", "устройство обрезки нити"), value_type="text", priority="medium"),
         _definition("free_arm", ("free arm", "съемная рукавная платформа"), value_type="boolean", priority="medium"),
         _definition("power", ("power", "мощность вт", "мощность"), value_type="power", unit_family="power", priority="high"),
-        _definition("accessories", ("accessories", "standard accessories", "стандартная комплектация", "лапки в комплекте"), value_type="list", priority="medium"),
+        _definition("accessories", ("accessories", "standard accessories", "стандартная комплектация"), value_type="list", priority="medium"),
+        _definition("included_presser_feet", ("included presser feet", "presser feet included", "лапки в комплекте"), value_type="list", priority="medium"),
     ),
     "air_fryer": (
         _definition("power", ("power", "мощность"), value_type="power", unit_family="power", priority="critical"),
