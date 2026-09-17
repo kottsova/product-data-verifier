@@ -112,6 +112,14 @@ def _provider_attempt(item: Any) -> dict[str, Any]:
         "official_exact_model_candidate_count": item.exact_model_candidate_count,
         "accepted_official_url": item.accepted_official_url,
         "official_failure_reason": item.failure_reason,
+        "browser_invoked": item.browser_invoked,
+        "browser_reason": item.browser_reason,
+        "browser_pages_opened": item.browser_pages_opened,
+        "browser_navigation_seconds": item.browser_navigation_seconds,
+        "browser_rendered_candidate_count": item.browser_rendered_candidate_count,
+        "browser_xhr_candidate_count": item.browser_xhr_candidate_count,
+        "browser_captcha_detected": item.browser_captcha_detected,
+        "browser_budget_used_seconds": item.browser_budget_used_seconds,
     }
 
 

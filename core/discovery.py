@@ -8,18 +8,20 @@ import gzip
 from html import unescape
 from html.parser import HTMLParser
 import io
+import json
 import os
 from pathlib import Path
 import re
 import tempfile
 import time
 from typing import Callable, Iterable, Literal, Mapping, Protocol, TypedDict
-from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urlparse, urlunparse
+from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
 import requests
 
 from core.budget import WallClockBudget
+from core.fetch import _blocked_reason as _detect_blocked_reason
 from core.match import article_matches, candidate_model_match, model_match, normalize_model, normalize_text
 from core.identity import ProductIdentity, base_model_in_text, identity_verification_signals
 from core.provider_health import (
@@ -136,6 +138,14 @@ class ProviderAttempt:
     exact_model_candidate_count: int = 0
     accepted_official_url: str | None = None
     failure_reason: str | None = None
+    browser_invoked: bool = False
+    browser_reason: str | None = None
+    browser_pages_opened: int = 0
+    browser_navigation_seconds: float = 0.0
+    browser_rendered_candidate_count: int = 0
+    browser_xhr_candidate_count: int = 0
+    browser_captcha_detected: bool = False
+    browser_budget_used_seconds: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -196,6 +206,7 @@ DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
     "naver": 8.0,
     "seznam": 8.0,
     "direct_domain_probe": 12.0,
+    "browser_official_discovery": 20.0,
 }
 
 
@@ -1935,6 +1946,35 @@ _MARKET_ROOT_TLDS: dict[str, str] = {
     "DE": "de", "GB": "co.uk", "RU": "ru",
 }
 
+
+def _brand_root_domains(brand: str, market: str) -> list[str]:
+    """Mechanically derive candidate root domains from a brand string.
+
+    Shared by the HTTP and browser-backed official-discovery providers so
+    both probe the same brand-derived roots -- no per-brand domain table.
+    """
+    slug = re.sub(r"[^a-z0-9]", "", brand.casefold())
+    if len(slug) < 3:
+        return []
+    domains: list[str] = []
+    market_tld = _MARKET_ROOT_TLDS.get(market)
+    if market_tld:
+        domains.append(f"{slug}.{market_tld}")
+    domains.append(f"{slug}.com")
+    return list(dict.fromkeys(domains))
+
+
+def _model_token_in_text(model: str, text: str) -> bool:
+    """Loose model-token containment check shared by official-discovery providers."""
+    if not model or not text:
+        return False
+    if model_match(model, unquote(text)) == "exact":
+        return True
+    compact_model = re.sub(r"[^a-z0-9]", "", model.casefold())
+    compact_text = re.sub(r"[^a-z0-9]", "", unquote(text).casefold())
+    return len(compact_model) >= 4 and compact_model in compact_text
+
+
 _TITLE_PATTERN = re.compile(r"<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
 _SITEMAP_LOC_PATTERN = re.compile(
     r"<loc\b[^>]*>(.*?)</loc>", re.IGNORECASE | re.DOTALL,
@@ -2003,6 +2043,154 @@ class _DirectLinkParser(HTMLParser):
         self.links.append((self._href, " ".join(" ".join(self._text).split())))
         self._href = ""
         self._text = []
+
+
+_JSON_LD_SCRIPT_PATTERN = re.compile(
+    r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+    re.IGNORECASE | re.DOTALL,
+)
+
+
+def _json_ld_links(
+    html: str,
+    base_url: str,
+    domain: str,
+    model: str,
+    provider_name: str,
+) -> list[SearchResultRecord]:
+    """Extract Product URLs from rendered JSON-LD, a JS-only-page signal."""
+    records: list[SearchResultRecord] = []
+    for script_match in _JSON_LD_SCRIPT_PATTERN.finditer(html or ""):
+        raw = unescape(script_match.group(1))
+        if len(raw) > 200_000:
+            continue
+        try:
+            payload = json.loads(raw)
+        except (json.JSONDecodeError, TypeError, ValueError):
+            continue
+        pending: list[object] = [payload]
+        while pending:
+            node = pending.pop()
+            if isinstance(node, list):
+                pending.extend(node)
+                continue
+            if not isinstance(node, dict):
+                continue
+            node_type = node.get("@type", [])
+            node_types = node_type if isinstance(node_type, list) else [node_type]
+            if any(str(value).casefold() == "product" for value in node_types):
+                candidate_url = node.get("url") or node.get("@id")
+                name = str(node.get("name") or "")
+                sku = str(node.get("sku") or node.get("mpn") or "")
+                if candidate_url and _model_token_in_text(
+                    model, f"{name} {sku} {candidate_url}",
+                ):
+                    url = canonicalize_url(urljoin(base_url, str(candidate_url)))
+                    if (
+                        url
+                        and url_belongs_to_domain(url, domain)
+                        and _page_kind(url) not in {"homepage", "catalog"}
+                    ):
+                        records.append(SearchResultRecord(
+                            url=url,
+                            title=name or unquote(urlparse(url).path).replace("-", " "),
+                            snippet="Exact model found in rendered JSON-LD Product data.",
+                            provider=provider_name,
+                            raw_url=str(candidate_url),
+                            parse_confidence="high",
+                            discovery_method="json_ld",
+                        ))
+            pending.extend(node.values())
+    return records
+
+
+def _extract_domain_links(
+    html: str,
+    base_url: str,
+    domain: str,
+    model: str,
+    *,
+    provider_name: str,
+    method: str,
+    include_json_ld: bool = False,
+) -> list[SearchResultRecord]:
+    """Find in-domain, exact-model links in an HTML/JSON document.
+
+    Shared by the HTTP official-first provider and the browser-backed
+    fallback: both apply the identical acceptance rules (in-domain, not a
+    homepage/catalog page, exact model token present) to whatever markup
+    they were each able to obtain.
+    """
+    parser = _DirectLinkParser()
+    parser.feed(html or "")
+    records: list[SearchResultRecord] = []
+    for raw_url, title in parser.links:
+        url = canonicalize_url(urljoin(base_url, raw_url))
+        if (
+            not url
+            or not url_belongs_to_domain(url, domain)
+            or _page_kind(url) in {"homepage", "catalog"}
+            or not _model_token_in_text(model, f"{title} {url}")
+        ):
+            continue
+        records.append(SearchResultRecord(
+            url=url,
+            title=title or unquote(urlparse(url).path).replace("-", " "),
+            snippet="Direct manufacturer-site link.",
+            provider=provider_name,
+            raw_url=raw_url,
+            parse_confidence="high" if title else "medium",
+            discovery_method=method,
+        ))
+    for raw_url in parser.canonical_links:
+        url = canonicalize_url(urljoin(base_url, raw_url))
+        if (
+            not url
+            or not url_belongs_to_domain(url, domain)
+            or _page_kind(url) in {"homepage", "catalog"}
+            or not _model_token_in_text(model, f"{html} {url}")
+        ):
+            continue
+        records.append(SearchResultRecord(
+            url=url,
+            title=_extract_page_title(html) or unquote(urlparse(url).path).replace("-", " "),
+            snippet="Exact model found through an official canonical link.",
+            provider=provider_name,
+            raw_url=raw_url,
+            parse_confidence="high",
+            discovery_method="canonical_link",
+        ))
+    # Modern site-search pages often serialize results into JSON/Next.js
+    # state instead of rendering anchors.  Only URL-bearing fields whose
+    # nearby payload contains the exact model are eligible.
+    for match in re.finditer(
+        r"(?:href|url|canonicalUrl|productUrl)\s*[\"']?\s*[:=]\s*"
+        r"[\"'](?P<url>(?:https?:)?(?:\\?/){1,2}[^\"'<>\s]+)[\"']",
+        html or "",
+        re.IGNORECASE,
+    ):
+        raw_url = unescape(match.group("url")).replace("\\/", "/")
+        nearby = (html or "")[max(0, match.start() - 500):match.end() + 500]
+        url = canonicalize_url(urljoin(base_url, raw_url))
+        if (
+            not url
+            or not url_belongs_to_domain(url, domain)
+            or _page_kind(url) in {"homepage", "catalog"}
+            or not _model_token_in_text(model, f"{nearby} {url}")
+        ):
+            continue
+        records.append(SearchResultRecord(
+            url=url,
+            title=_extract_page_title(nearby) or unquote(urlparse(url).path).replace("-", " "),
+            snippet="Exact model found in public structured site-search payload.",
+            provider=provider_name,
+            raw_url=raw_url,
+            parse_confidence="high",
+            discovery_method="public_structured_endpoint",
+        ))
+    if include_json_ld:
+        records.extend(_json_ld_links(html, base_url, domain, model, provider_name))
+    return records
 
 
 @dataclass(frozen=True, slots=True)
@@ -2109,28 +2297,14 @@ class DirectDomainProbeProvider:
             self._failures = []
 
     def _candidate_domains(self, brand: str) -> list[str]:
-        slug = re.sub(r"[^a-z0-9]", "", brand.casefold())
-        if len(slug) < 3:
-            return []
-        domains: list[str] = []
-        market_tld = _MARKET_ROOT_TLDS.get(self.market)
-        if market_tld:
-            domains.append(f"{slug}.{market_tld}")
-        domains.append(f"{slug}.com")
-        return list(dict.fromkeys(domains))
+        return _brand_root_domains(brand, self.market)
 
     def search(self, query: str) -> list[SearchResultLike]:
         return self.search_with_timeout(query, self.timeout_seconds)
 
     @staticmethod
     def _model_in_text(model: str, text: str) -> bool:
-        if not model or not text:
-            return False
-        if model_match(model, unquote(text)) == "exact":
-            return True
-        compact_model = re.sub(r"[^a-z0-9]", "", model.casefold())
-        compact_text = re.sub(r"[^a-z0-9]", "", unquote(text).casefold())
-        return len(compact_model) >= 4 and compact_model in compact_text
+        return _model_token_in_text(model, text)
 
     def _get(
         self,
@@ -2236,76 +2410,10 @@ class DirectDomainProbeProvider:
         *,
         method: str,
     ) -> list[SearchResultRecord]:
-        from urllib.parse import urljoin
-
-        parser = _DirectLinkParser()
-        parser.feed(html or "")
-        records: list[SearchResultRecord] = []
-        for raw_url, title in parser.links:
-            url = canonicalize_url(urljoin(base_url, raw_url))
-            if (
-                not url
-                or not url_belongs_to_domain(url, domain)
-                or _page_kind(url) in {"homepage", "catalog"}
-                or not self._model_in_text(self._model, f"{title} {url}")
-            ):
-                continue
-            records.append(SearchResultRecord(
-                url=url,
-                title=title or unquote(urlparse(url).path).replace("-", " "),
-                snippet="Direct manufacturer-site link.",
-                provider=self.name,
-                raw_url=raw_url,
-                parse_confidence="high" if title else "medium",
-                discovery_method=method,
-            ))
-        for raw_url in parser.canonical_links:
-            url = canonicalize_url(urljoin(base_url, raw_url))
-            if (
-                not url
-                or not url_belongs_to_domain(url, domain)
-                or _page_kind(url) in {"homepage", "catalog"}
-                or not self._model_in_text(self._model, f"{html} {url}")
-            ):
-                continue
-            records.append(SearchResultRecord(
-                url=url,
-                title=_extract_page_title(html) or unquote(urlparse(url).path).replace("-", " "),
-                snippet="Exact model found through an official canonical link.",
-                provider=self.name,
-                raw_url=raw_url,
-                parse_confidence="high",
-                discovery_method="canonical_link",
-            ))
-        # Modern site-search pages often serialize results into JSON/Next.js
-        # state instead of rendering anchors.  Only URL-bearing fields whose
-        # nearby payload contains the exact model are eligible.
-        for match in re.finditer(
-            r"(?:href|url|canonicalUrl|productUrl)\s*[\"']?\s*[:=]\s*"
-            r"[\"'](?P<url>(?:https?:)?(?:\\?/){1,2}[^\"'<>\s]+)[\"']",
-            html or "",
-            re.IGNORECASE,
-        ):
-            raw_url = unescape(match.group("url")).replace("\\/", "/")
-            nearby = (html or "")[max(0, match.start() - 500):match.end() + 500]
-            url = canonicalize_url(urljoin(base_url, raw_url))
-            if (
-                not url
-                or not url_belongs_to_domain(url, domain)
-                or _page_kind(url) in {"homepage", "catalog"}
-                or not self._model_in_text(self._model, f"{nearby} {url}")
-            ):
-                continue
-            records.append(SearchResultRecord(
-                url=url,
-                title=_extract_page_title(nearby) or unquote(urlparse(url).path).replace("-", " "),
-                snippet="Exact model found in public structured site-search payload.",
-                provider=self.name,
-                raw_url=raw_url,
-                parse_confidence="high",
-                discovery_method="public_structured_endpoint",
-            ))
-        return records
+        return _extract_domain_links(
+            html, base_url, domain, self._model,
+            provider_name=self.name, method=method,
+        )
 
     def _sitemap_records(
         self,
@@ -2695,6 +2803,387 @@ class DirectDomainProbeProvider:
         ]
 
 
+@dataclass(frozen=True, slots=True)
+class RenderedPage:
+    """A single browser-rendered navigation result."""
+
+    url: str
+    status_code: int | None
+    html: str
+    xhr_bodies: tuple[tuple[str, str], ...] = ()
+    blocked_reason: str | None = None
+
+
+class BrowserRenderer(Protocol):
+    """Structural interface a real or fake browser page-loader implements."""
+
+    def render(self, url: str, timeout_seconds: float) -> RenderedPage: ...
+
+    def close(self) -> None: ...
+
+
+class _PlaywrightRenderer:
+    """One Chromium browser/context/page reused across a single product's pages.
+
+    Public JSON/XHR responses the page itself requests are captured passively
+    via Playwright's response listener -- nothing is reverse engineered, no
+    auth is forged, and no anti-bot challenge is worked around.
+    """
+
+    _MAX_XHR_BODIES = 20
+    _MAX_XHR_BODY_BYTES = 200_000
+
+    def __init__(self) -> None:
+        self._playwright = None
+        self._browser = None
+        self._context = None
+        self._page = None
+        self._xhr_bodies: list[tuple[str, str]] = []
+
+    def _on_response(self, response: object) -> None:
+        if len(self._xhr_bodies) >= self._MAX_XHR_BODIES:
+            return
+        try:
+            request = getattr(response, "request", None)
+            if getattr(request, "resource_type", None) not in {"xhr", "fetch"}:
+                return
+            headers = getattr(response, "headers", None) or {}
+            content_type = str(headers.get("content-type", ""))
+            if "json" not in content_type.casefold():
+                return
+            body = response.text()
+        except Exception:
+            return
+        if len(body) > self._MAX_XHR_BODY_BYTES:
+            body = body[: self._MAX_XHR_BODY_BYTES]
+        self._xhr_bodies.append((str(getattr(response, "url", "")), body))
+
+    def _ensure_page(self):
+        if self._page is not None:
+            return self._page
+        from playwright.sync_api import sync_playwright
+
+        self._playwright = sync_playwright().start()
+        self._browser = self._playwright.chromium.launch(headless=browser_headless())
+        self._context = self._browser.new_context()
+        self._page = self._context.new_page()
+        self._page.on("response", self._on_response)
+        return self._page
+
+    def render(self, url: str, timeout_seconds: float) -> RenderedPage:
+        page = self._ensure_page()
+        self._xhr_bodies = []
+        budget_ms = int(max(1.0, timeout_seconds) * 1000)
+        # "load" is the primary bound: many sites keep a background
+        # poller/analytics connection open forever, which would make
+        # "networkidle" time out even once the page is fully usable. A
+        # short, separately-bounded settle window still gives client-side
+        # rendering and any XHR/API calls a chance to finish, without
+        # risking the whole navigation on a connection that never idles.
+        response = page.goto(url, wait_until="load", timeout=budget_ms)
+        try:
+            page.wait_for_load_state("networkidle", timeout=min(3000, budget_ms))
+        except Exception:
+            pass
+        html = page.content()
+        return RenderedPage(
+            url=page.url,
+            status_code=response.status if response else None,
+            html=html,
+            xhr_bodies=tuple(self._xhr_bodies),
+        )
+
+    def close(self) -> None:
+        for obj in (self._page, self._context, self._browser):
+            try:
+                if obj is not None:
+                    obj.close()
+            except Exception:
+                pass
+        if self._playwright is not None:
+            try:
+                self._playwright.stop()
+            except Exception:
+                pass
+        self._page = None
+        self._context = None
+        self._browser = None
+        self._playwright = None
+
+
+class BrowserOfficialDiscoveryProvider:
+    """Bounded, browser-backed fallback for official-site discovery (Stage 28).
+
+    ``DirectDomainProbeProvider`` only ever issues plain HTTP GETs, so a JS-
+    rendered search UI, a client-side-routed catalog, or a page that only
+    exposes its product data through an XHR/API call it never sees. This
+    provider retries the *same* brand-derived candidate roots with a single
+    headless Chromium session, reads the rendered DOM (including JSON-LD) and
+    any public JSON/XHR response the page itself requested, and feeds
+    whatever it finds through the identical acceptance rule as the HTTP path
+    (``_extract_domain_links``): in-domain, not a homepage/catalog page, exact
+    model token present. A rendered page is never auto-trusted -- it becomes a
+    plain candidate, subject to the same downstream authority/identity/
+    validation pipeline as any other provider's result.
+
+    It is bounded on every axis the task requires: one renderer (one browser
+    session) per product/domain, ``max_pages`` navigations, a per-navigation
+    timeout, and a global per-product deadline. A captcha/WAF challenge ends
+    this path immediately -- it is recorded as blocked, never bypassed.
+    """
+
+    name = "browser_official_discovery"
+    quality_gate = False
+    always_run = False
+    short_circuit_on_exact_model = True
+
+    _QUERY_PATTERN = re.compile(r"^(.+?) official website$")
+
+    def __init__(
+        self,
+        market: str = "global",
+        *,
+        timeout_seconds: float = 20.0,
+        max_pages: int = 3,
+        navigation_timeout_seconds: float = 8.0,
+        renderer_factory: Callable[[], BrowserRenderer] = _PlaywrightRenderer,
+    ) -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        self.market = market
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        if max_pages <= 0:
+            raise ValueError("max_pages must be positive")
+        self.timeout_seconds = float(timeout_seconds)
+        self.max_pages = int(max_pages)
+        self.navigation_timeout_seconds = float(navigation_timeout_seconds)
+        self._renderer_factory = renderer_factory
+        self._renderer: BrowserRenderer | None = None
+        self.last_transport = "browser"
+        self._brand = ""
+        self._model = ""
+        self._records: tuple[SearchResultRecord, ...] | None = None
+        self._reset_telemetry()
+
+    def _reset_telemetry(self) -> None:
+        self._pages_opened = 0
+        self.last_browser_invoked = False
+        self.last_browser_reason: str | None = None
+        self.last_pages_opened = 0
+        self.last_navigation_seconds = 0.0
+        self.last_rendered_candidate_count = 0
+        self.last_xhr_candidate_count = 0
+        self.last_captcha_detected = False
+        self.last_browser_budget_used_seconds = 0.0
+        self.last_discovery_method: str | None = None
+        self.last_candidate_count = 0
+        self.last_exact_model_candidate_count = 0
+        self.last_accepted_official_url: str | None = None
+        self.last_failure_reason: str | None = None
+        self._failures: list[str] = []
+
+    def configure_identity(self, brand: str, model: str) -> None:
+        """Provide product context without embedding any product/domain table."""
+        brand = " ".join((brand or "").split())
+        model = " ".join((model or "").split())
+        if (brand, model) != (self._brand, self._model):
+            self._brand, self._model = brand, model
+            self._records = None
+            self._reset_telemetry()
+
+    def release_transient_resources(self) -> None:
+        """Close the browser session between the discovery and fetch stages."""
+        if self._renderer is not None:
+            try:
+                self._renderer.close()
+            finally:
+                self._renderer = None
+
+    def search(self, query: str) -> list[SearchResultLike]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(
+        self,
+        query: str,
+        timeout_seconds: float,
+    ) -> list[SearchResultLike]:
+        official_match = self._QUERY_PATTERN.match(query.strip())
+        brand = self._brand or (official_match.group(1) if official_match else "")
+        if not brand:
+            return []
+        is_official_query = bool(official_match)
+        is_model_query = bool(self._model and _model_token_in_text(self._model, query))
+        if not (is_official_query or is_model_query):
+            return []
+        if self._records is None:
+            self._records = self._discover(brand, timeout_seconds)
+        return [
+            record for record in self._records
+            if _model_token_in_text(self._model, f"{record.title} {record.url}")
+        ]
+
+    def _render(self, url: str, deadline: float, method: str) -> RenderedPage | None:
+        if self._pages_opened >= self.max_pages:
+            self._failures.append(f"{method}: browser page budget exhausted")
+            return None
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            self._failures.append(f"{method}: browser discovery deadline exhausted")
+            return None
+        if self._renderer is None:
+            self._renderer = self._renderer_factory()
+        self._pages_opened += 1
+        self.last_pages_opened = self._pages_opened
+        started = time.monotonic()
+        try:
+            page = self._renderer.render(url, min(self.navigation_timeout_seconds, remaining))
+        except Exception as error:
+            self.last_navigation_seconds += max(0.0, time.monotonic() - started)
+            self._failures.append(f"{method}: {type(error).__name__} at {url}")
+            return None
+        self.last_navigation_seconds += max(0.0, time.monotonic() - started)
+        if page.status_code is not None and page.status_code >= 400:
+            self._failures.append(f"{method}: HTTP {page.status_code} at {page.url}")
+            return None
+        blocked = page.blocked_reason or _detect_blocked_reason(page.html)
+        if blocked:
+            self.last_captcha_detected = True
+            self._failures.append(f"{method}: blocked ({blocked}) at {page.url}")
+            return replace(page, blocked_reason=blocked)
+        return page
+
+    def _xhr_records(
+        self, xhr_bodies: Iterable[tuple[str, str]], domain: str,
+    ) -> list[SearchResultRecord]:
+        # Whichever internal extraction pass matches (anchor/canonical/
+        # structured-payload), a candidate observed in a public XHR/API body
+        # is always tagged "xhr_json" so telemetry can tell it apart from a
+        # candidate the rendered DOM itself exposed.
+        records: list[SearchResultRecord] = []
+        for xhr_url, body in xhr_bodies:
+            records.extend(
+                replace(record, discovery_method="xhr_json")
+                for record in _extract_domain_links(
+                    body, xhr_url, domain, self._model,
+                    provider_name=self.name, method="xhr_json",
+                )
+            )
+        return records
+
+    def _exact(self, records: Iterable[SearchResultRecord]) -> list[SearchResultRecord]:
+        return [
+            item for item in records
+            if _page_kind(item.url) not in {"homepage", "catalog"}
+            and _model_token_in_text(self._model, f"{item.title} {item.url}")
+        ]
+
+    def _discover(self, brand: str, timeout_seconds: float) -> tuple[SearchResultRecord, ...]:
+        deadline = time.monotonic() + max(0.1, timeout_seconds)
+        domains = _brand_root_domains(brand, self.market)
+        if not domains:
+            self.last_browser_invoked = False
+            self.last_browser_reason = "brand cannot be converted to a safe domain label"
+            self.last_failure_reason = self.last_browser_reason
+            return ()
+        self.last_browser_invoked = True
+        self.last_browser_reason = (
+            "HTTP official-first discovery had no exact-model candidate; "
+            "retrying the same official surfaces with a rendered browser session"
+        )
+        budget_started = time.monotonic()
+        results: list[SearchResultRecord] = []
+        for domain in domains:
+            if time.monotonic() >= deadline or self._pages_opened >= self.max_pages:
+                break
+            url = f"https://www.{domain}/"
+            page = self._render(url, deadline, "rendered_homepage")
+            if page is None:
+                continue
+            if page.blocked_reason:
+                break
+            final_domain = _registrable_domain(_host(page.url))
+            expected_label = _registrable_domain_label(domain)
+            final_label = _registrable_domain_label(final_domain)
+            if (
+                not final_domain
+                or not (
+                    final_label == expected_label
+                    or (len(expected_label) >= 3 and final_label.startswith(expected_label))
+                )
+            ):
+                self._failures.append(
+                    f"rendered_homepage: redirect left brand-consistent domain ({final_domain})"
+                )
+                continue
+            title = _extract_page_title(page.html)
+            if normalize_model(brand) not in normalize_model(f"{title} {page.html[:100000]}"):
+                self._failures.append(f"rendered_homepage: brand signal absent at {page.url}")
+                continue
+            results.extend(_extract_domain_links(
+                page.html, page.url, final_domain, self._model,
+                provider_name=self.name, method="rendered_homepage", include_json_ld=True,
+            ))
+            results.extend(self._xhr_records(page.xhr_bodies, final_domain))
+            exact_results = self._exact(results)
+            if (
+                not exact_results
+                and time.monotonic() < deadline
+                and self._pages_opened < self.max_pages
+            ):
+                search_url = f"https://{final_domain}/search?{urlencode({'q': self._model})}"
+                search_page = self._render(search_url, deadline, "rendered_site_search")
+                if search_page is not None:
+                    if search_page.blocked_reason:
+                        break
+                    results.extend(_extract_domain_links(
+                        search_page.html, search_page.url, final_domain, self._model,
+                        provider_name=self.name, method="rendered_site_search",
+                        include_json_ld=True,
+                    ))
+                    results.extend(self._xhr_records(search_page.xhr_bodies, final_domain))
+                    exact_results = self._exact(results)
+            if exact_results:
+                break
+
+        self.last_browser_budget_used_seconds = round(
+            max(0.0, time.monotonic() - budget_started), 3,
+        )
+        unique: dict[str, SearchResultRecord] = {}
+        for record in results:
+            canonical = canonicalize_url(record.url)
+            if canonical:
+                unique.setdefault(canonical, record)
+        records = tuple(unique.values())
+        exact = tuple(self._exact(records))
+        self.last_candidate_count = len(records)
+        self.last_exact_model_candidate_count = len(exact)
+        self.last_rendered_candidate_count = sum(
+            1 for item in records if item.discovery_method != "xhr_json"
+        )
+        self.last_xhr_candidate_count = sum(
+            1 for item in records if item.discovery_method == "xhr_json"
+        )
+        if exact:
+            self.last_discovery_method = exact[0].discovery_method
+            # Final authority acceptance happens later in rank_candidates;
+            # discovery must not label a browser-rendered URL official.
+            self.last_accepted_official_url = None
+            if not self.last_captcha_detected:
+                self.last_failure_reason = None
+        else:
+            self.last_discovery_method = None
+            if self.last_captcha_detected:
+                self.last_failure_reason = "; ".join(dict.fromkeys(self._failures[-3:])) or (
+                    "captcha/WAF challenge encountered"
+                )
+            else:
+                self.last_failure_reason = "; ".join(dict.fromkeys(self._failures[-5:])) or (
+                    "browser-rendered official surfaces returned no exact-model candidate"
+                )
+        return records
+
+
 def _provider_status(error: Exception) -> Literal["blocked", "timeout", "parse_error", "error"]:
     if isinstance(error, (ProviderTimeoutError, TimeoutError)):
         return "timeout"
@@ -2834,6 +3323,22 @@ def _provider_discovery_telemetry(provider: SearchProvider) -> dict[str, object]
             provider, "last_accepted_official_url", None,
         ),
         "failure_reason": getattr(provider, "last_failure_reason", None),
+        "browser_invoked": bool(getattr(provider, "last_browser_invoked", False)),
+        "browser_reason": getattr(provider, "last_browser_reason", None),
+        "browser_pages_opened": int(getattr(provider, "last_pages_opened", 0) or 0),
+        "browser_navigation_seconds": float(
+            getattr(provider, "last_navigation_seconds", 0.0) or 0.0
+        ),
+        "browser_rendered_candidate_count": int(
+            getattr(provider, "last_rendered_candidate_count", 0) or 0
+        ),
+        "browser_xhr_candidate_count": int(
+            getattr(provider, "last_xhr_candidate_count", 0) or 0
+        ),
+        "browser_captcha_detected": bool(getattr(provider, "last_captcha_detected", False)),
+        "browser_budget_used_seconds": float(
+            getattr(provider, "last_browser_budget_used_seconds", 0.0) or 0.0
+        ),
     }
 
 
@@ -2887,6 +3392,14 @@ class ResilientSearchSession:
             # through to the SERP providers below.
             DirectDomainProbeProvider(
                 market, timeout_seconds=self.config.timeout_for("direct_domain_probe"),
+            ),
+            # Only actually launches a browser when the HTTP probe above did
+            # not already yield an exact-model candidate for this query (see
+            # BrowserOfficialDiscoveryProvider's short_circuit_on_exact_model
+            # docstring); a homepage-only or empty HTTP result falls through
+            # to here before the third-party SERP providers get a turn.
+            BrowserOfficialDiscoveryProvider(
+                market, timeout_seconds=self.config.timeout_for("browser_official_discovery"),
             ),
             DuckDuckGoHtmlSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("duckduckgo_html"),
@@ -3015,7 +3528,10 @@ class ResilientSearchSession:
                 ))
                 continue
             health_scope = provider.name
-            if provider.name == "direct_domain_probe" and self._brand:
+            if (
+                provider.name in {"direct_domain_probe", "browser_official_discovery"}
+                and self._brand
+            ):
                 # Direct probes touch unrelated manufacturer hosts. A timeout
                 # at one brand is not evidence that another brand's domain is
                 # unhealthy, so cross-process health must follow that actual

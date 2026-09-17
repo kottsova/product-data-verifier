@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from core.discovery import (
     BingSearchProvider,
+    BrowserOfficialDiscoveryProvider,
     DirectDomainProbeProvider,
     DuckDuckGoHtmlSearchProvider,
     DiscoveryRuntimeConfig,
@@ -238,12 +239,14 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(
             [provider.name for provider in session.providers],
             [
-                "direct_domain_probe", "duckduckgo_html", "naver", "seznam",
+                "direct_domain_probe", "browser_official_discovery",
+                "duckduckgo_html", "naver", "seznam",
                 "duckduckgo_lite", "bing", "google",
             ],
         )
         self.assertIsInstance(session.providers[0], DirectDomainProbeProvider)
-        html_provider = session.providers[1]
+        self.assertIsInstance(session.providers[1], BrowserOfficialDiscoveryProvider)
+        html_provider = session.providers[2]
         self.assertIsInstance(html_provider, DuckDuckGoHtmlSearchProvider)
 
     def test_bing_parser_decodes_redirect_and_ignores_navigation_links(self) -> None:
