@@ -1,7 +1,9 @@
 # Stage 23 — Retrieval Reliability & Evidence Conversion
 
-Date: 2026-09-17  
-Baseline commit: `b51f28a4724ec460948de1f710ba57996da51185`  
+Date: 2026-09-17
+
+Baseline commit: `b51f28a4724ec460948de1f710ba57996da51185`
+
 Verdict: **PARTIAL**
 
 The gate is not passed. The primary post-change run improved evidence conversion and runtime substantially, but it did not reach the required confirmed/quality/official-use thresholds. An immediate repeat run also exposed material provider instability, so the stronger first result is not treated as a reliable PASS.
