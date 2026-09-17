@@ -55,6 +55,14 @@ class MatchTests(unittest.TestCase):
             "mismatch",
         )
 
+    def test_named_family_variant_is_not_the_requested_base_model(self) -> None:
+        for title in ("Apple iPhone 15 Pro Max", "Apple iPhone 15 Plus"):
+            with self.subTest(title=title):
+                self.assertEqual(
+                    candidate_model_match("iPhone 15", title, "/phones/iphone-15"),
+                    "different_variant",
+                )
+
     def test_other_sku_is_not_a_variant(self) -> None:
         self.assertNotEqual(model_match("WW90T554CAT", "WW10T554DAW/S1"), "likely_variant")
         self.assertNotEqual(model_match("WW90T554CAT", "WW5500T"), "likely_variant")
@@ -92,6 +100,47 @@ class MatchTests(unittest.TestCase):
 
 
 class DiscoveryTests(unittest.TestCase):
+    def test_google_product_subdomains_are_not_blocked_with_search_host(self) -> None:
+        self.assertTrue(is_obvious_non_product_url("https://google.com/search?q=x100"))
+        self.assertFalse(is_obvious_non_product_url("https://store.google.com/product/x100"))
+        self.assertFalse(is_obvious_non_product_url("https://support.google.com/product/x100"))
+
+    def test_exact_brand_root_product_result_can_bootstrap_authority(self) -> None:
+        found = discover_global_official_domains(
+            "Acme", [],
+            product_results=[("https://acme.com/product/X100", "Acme X100")],
+            model="X100",
+        )
+        self.assertEqual(found, [("acme.com", "https://acme.com/product/X100")])
+
+    def test_specialized_reference_domains_have_existing_rank_three_role(self) -> None:
+        self.assertEqual(classify_source("www.gsmarena.com", None), "specialized_reference")
+        self.assertEqual(classify_source("manua.ls", None), "specialized_reference")
+
+    def test_snippet_echo_does_not_turn_different_title_into_exact_model(self) -> None:
+        row = rank_candidates([
+            SearchResultRecord(
+                "https://brand.example/products/y200",
+                "Brand Y200",
+                "Search for Brand X100 specifications",
+                "test", "Brand X100", 1,
+            ),
+        ], "Brand", "X100")[0]
+        self.assertNotEqual(row["model_match"], "exact")
+
+    def test_generic_verified_support_result_is_weak_until_content_verification(self) -> None:
+        candidate = {
+            "url": "https://support.acme.example/111831",
+            "title": "Acme Support",
+            "snippet": "",
+            "model_match": "unknown",
+            "authority_status": "verified",
+            "source_type": "official_document",
+            "discovery_provenance": [{"query": "Acme X100"}],
+        }
+        relation, reasons = assess_candidate_relevance(candidate, "Acme", "X100")
+        self.assertEqual(relation, "weak")
+        self.assertIn("content verification", reasons[0])
     def test_duckduckgo_html_parser_normalizes_layouts_and_snippets(self) -> None:
         html = """
         <div class="result results_links">

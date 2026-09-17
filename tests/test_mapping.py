@@ -31,6 +31,33 @@ def raw(
 
 
 class DirectMappingTests(unittest.TestCase):
+    def test_generic_label_variants_map_qualifiers_and_leading_counts(self) -> None:
+        cooktop = map_attributes([
+            raw("Connected load (electric)", "7350 W"),
+        ], category="cooktop")
+        self.assertEqual(cooktop.mapped[0].canonical_name, "connection_rating")
+
+        fryer = map_attributes([
+            raw("6 cooking modes", "Air Fry, Roast, Bake"),
+        ], category="air_fryer")
+        self.assertEqual(fryer.mapped[0].canonical_name, "program_count")
+
+    def test_display_composite_maps_size_and_type_with_one_provenance(self) -> None:
+        result = map_attributes([
+            raw("Main Screen", '6.7” Dynamic AMOLED'),
+        ], category="smartphone")
+        self.assertEqual(
+            {item.canonical_name for item in result.derived},
+            {"display_size", "display_type"},
+        )
+        self.assertTrue(all(item.contributors for item in result.derived))
+
+    def test_electric_charge_unit_maps_to_battery_capacity(self) -> None:
+        result = map_attributes([
+            raw("Li-Ion", "4700 mAh", value="4700", unit="mAh"),
+        ], category="smartphone")
+        self.assertEqual(result.mapped[0].canonical_name, "battery_capacity")
+
     def test_russian_air_fryer_aliases_map_to_canonical_fields(self) -> None:
         cases = (
             ("Срок гарантии", "warranty"),

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "stage23-blind-retrieval-conversion-v1",
+  "description": "Frozen 15-product blind regression set carried forward unchanged from Stage 22.",
+  "products": [
+    {"id": "blind-smartphone-google-pixel9pro", "brand": "Google", "model": "Pixel 9 Pro", "article": null, "market": "US", "expected_category": "smartphone"},
+    {"id": "blind-smartphone-samsung-zflip6", "brand": "Samsung", "model": "Galaxy Z Flip6", "article": null, "market": "US", "expected_category": "smartphone"},
+    {"id": "blind-smartphone-sony-xperia1vi", "brand": "Sony", "model": "Xperia 1 VI", "article": null, "market": "GB", "expected_category": "smartphone"},
+    {"id": "blind-laptop-dell-xps13-9340", "brand": "Dell", "model": "XPS 13 9340", "article": null, "market": "US", "expected_category": "laptop"},
+    {"id": "blind-laptop-lenovo-x1carbon-gen12", "brand": "Lenovo", "model": "ThinkPad X1 Carbon Gen 12", "article": null, "market": "US", "expected_category": "laptop"},
+    {"id": "blind-laptop-hp-spectre14-eu0000", "brand": "HP", "model": "Spectre x360 14-eu0000", "article": null, "market": "US", "expected_category": "laptop"},
+    {"id": "blind-cooktop-miele-km7464fl", "brand": "Miele", "model": "KM 7464 FL", "article": null, "market": "DE", "expected_category": "cooktop"},
+    {"id": "blind-cooktop-smeg-si2m7953d", "brand": "Smeg", "model": "SI2M7953D", "article": null, "market": "GB", "expected_category": "cooktop"},
+    {"id": "blind-cooktop-fisherpaykel-ci604dtb4", "brand": "Fisher & Paykel", "model": "CI604DTB4", "article": null, "market": "GB", "expected_category": "cooktop"},
+    {"id": "blind-cleaning-tineco-s7stretch", "brand": "Tineco", "model": "FLOOR ONE S7 Stretch", "article": null, "market": "US", "expected_category": "wet_dry_vacuum"},
+    {"id": "blind-airfryer-ninja-af400uk", "brand": "Ninja", "model": "Foodi MAX Dual Zone AF400UK", "article": null, "market": "GB", "expected_category": "air_fryer"},
+    {"id": "blind-airfryer-philips-na34200", "brand": "Philips", "model": "Airfryer 3000 Series NA342/00", "article": null, "market": "GB", "expected_category": "air_fryer"},
+    {"id": "blind-sewing-pfaff-ambition620", "brand": "PFAFF", "model": "ambition 620", "article": null, "market": "global", "expected_category": "sewing_machine"},
+    {"id": "blind-sewing-husqvarna-opal650", "brand": "Husqvarna VIKING", "model": "OPAL 650", "article": null, "market": "global", "expected_category": "sewing_machine"},
+    {"id": "blind-sewing-elna-experience550", "brand": "Elna", "model": "eXperience 550", "article": null, "market": "global", "expected_category": "sewing_machine"}
+  ]
+}

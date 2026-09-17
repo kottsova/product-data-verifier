@@ -74,6 +74,14 @@ PRODUCT_DIMENSION_CONTEXT = re.compile(
     re.I,
 )
 COMPONENTS = {"height", "width", "depth"}
+DISPLAY_COMPOSITE_LABELS = {
+    "display", "display size and type", "main screen", "screen", "screen size and type",
+}
+DISPLAY_COMPOSITE_RE = re.compile(
+    r"^\s*(?P<size>\d+(?:[.,]\d+)?)\s*(?P<unit>[\"″”]|in(?:ch(?:es)?)?)\s+"
+    r"(?P<kind>[^,;]{2,80})",
+    re.IGNORECASE,
+)
 UNIT_ALIASES = {
     "mm": "mm", "millimeter": "mm", "millimeters": "mm",
     "millimetre": "mm", "millimetres": "mm",
@@ -149,6 +157,67 @@ def _canonical(
         attribute_scope=definition.attribute_scope,
         context=raw.context,
     )
+
+
+def _derived_from_raw(
+    raw: RawAttribute,
+    definition: AttributeDefinition,
+    value: str,
+    unit: str | None,
+    reason: str,
+) -> CanonicalAttribute:
+    return CanonicalAttribute(
+        canonical_name=definition.canonical_name,
+        value=value,
+        unit=unit,
+        raw_label=raw.name,
+        raw_value=raw.raw_value,
+        source_url=raw.source_url,
+        source_type=raw.source_type,
+        fact_evidence=raw.evidence,
+        mapping_confidence="medium",
+        mapping_reason=reason,
+        derived=True,
+        contributors=(raw,),
+        attribute_scope=definition.attribute_scope,
+        context=raw.context,
+    )
+
+
+def _display_composite(
+    raw: RawAttribute,
+    definitions: dict[str, AttributeDefinition],
+) -> list[CanonicalAttribute]:
+    if _key(raw.name) not in DISPLAY_COMPOSITE_LABELS:
+        return []
+    if not {"display_size", "display_type"}.issubset(definitions):
+        return []
+    match = DISPLAY_COMPOSITE_RE.match(_clean(raw.raw_value))
+    if not match:
+        return []
+    kind = match.group("kind").strip(" -–—")
+    if not kind:
+        return []
+    return [
+        _derived_from_raw(
+            raw, definitions["display_size"], match.group("size"), "in",
+            "composite:display_size+display_type",
+        ),
+        _derived_from_raw(
+            raw, definitions["display_type"], kind, None,
+            "composite:display_size+display_type",
+        ),
+    ]
+
+
+def _unit_target(
+    raw: RawAttribute,
+    definitions: dict[str, AttributeDefinition],
+) -> tuple[str, str] | None:
+    unit = _unit(raw.unit)
+    if unit in {"mAh", "Ah"} and "battery_capacity" in definitions:
+        return "battery_capacity", "unit_semantics:electric_charge"
+    return None
 
 
 def _contextual_target(raw: RawAttribute, definitions: dict[str, AttributeDefinition]) -> tuple[str, str] | None:
@@ -273,12 +342,17 @@ def map_attributes(
     definitions = {item.canonical_name: item for item in schema_items}
     aliases = _alias_index(schema_items)
     mapped: list[CanonicalAttribute] = []
+    derived: list[CanonicalAttribute] = []
     unmapped: list[RawAttribute] = []
     ambiguous: list[AmbiguousMapping] = []
     component_items: list[tuple[RawAttribute, str, str, str]] = []
     pending: list[RawAttribute] = []
 
     for raw in raw_items:
+        composite = _display_composite(raw, definitions)
+        if composite:
+            derived.extend(composite)
+            continue
         component = _dimension_component(raw)
         if component and _key(raw.name).split()[-1] in COMPONENTS:
             component_items.append((raw, *component))
@@ -288,6 +362,11 @@ def map_attributes(
         contextual = _contextual_target(raw, definitions)
         if contextual:
             target, reason = contextual
+            mapped.append(_canonical(raw, definitions[target], "medium", reason))
+            continue
+        unit_target = _unit_target(raw, definitions)
+        if unit_target:
+            target, reason = unit_target
             mapped.append(_canonical(raw, definitions[target], "medium", reason))
             continue
         ambiguous_label = next((item for item in labels if item in AMBIGUOUS_LABELS), None)
@@ -320,7 +399,8 @@ def map_attributes(
         else:
             pending.append(raw)
 
-    derived, used_components = _compose_dimensions(component_items, definitions)
+    dimension_derived, used_components = _compose_dimensions(component_items, definitions)
+    derived.extend(dimension_derived)
     for raw, _component, target, _context_key in component_items:
         if id(raw) in used_components:
             continue

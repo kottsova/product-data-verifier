@@ -174,7 +174,7 @@ class DiscoveryRuntimeConfig:
         default_factory=lambda: dict(DEFAULT_PROVIDER_TIMEOUTS),
     )
     circuit_breaker_failures: int = 1
-    provider_time_share: float = 0.5
+    provider_time_share: float = 0.25
 
     def __post_init__(self) -> None:
         normalized = dict(DEFAULT_PROVIDER_TIMEOUTS)
@@ -194,10 +194,11 @@ MARKETPLACE_DOMAINS = {
     "amazon", "aliexpress", "ebay", "ozon", "temu", "wildberries",
 }
 BLOCKED_DOMAINS = {
-    "facebook.com", "google.com", "instagram.com", "linkedin.com",
+    "facebook.com", "instagram.com", "linkedin.com",
     "pinterest.com", "tiktok.com", "twitter.com", "vk.com", "x.com",
     "youtube.com", "youtu.be",
 }
+BLOCKED_EXACT_HOSTS = {"google.com"}
 BLOCKED_PATH_SEGMENTS = {
     "about", "account", "blog", "contact", "login", "news", "newsroom", "privacy",
     "register", "signin", "terms", "warranty",
@@ -220,6 +221,10 @@ WEAK_PATH_HINTS = {
 ACCESSORY_CONTEXT_TERMS = {
     "assembly", "case", "cover", "digitizer", "protector", "replacement",
     "refurbished", "renewed", "spare", "wallet", "hülle", "кейс", "чехол", "케이스",
+}
+SPECIALIZED_REFERENCE_DOMAINS = {
+    "gsmarena.com", "manua.ls", "manuals.co.uk", "manualslib.com",
+    "manuals.plus", "manymanuals.com", "nanoreview.net",
 }
 NON_PRODUCT_CONTEXT_TERMS = {
     "athlete", "biography", "coach", "defender", "football", "forward",
@@ -395,6 +400,8 @@ def is_obvious_non_product_url(url: str) -> bool:
     if not url or not _host(url):
         return True
     host = _host(url)
+    if host in BLOCKED_EXACT_HOSTS:
+        return True
     if any(host == blocked or host.endswith(f".{blocked}") for blocked in BLOCKED_DOMAINS):
         return True
     segments = {segment.lower() for segment in urlparse(url).path.split("/") if segment}
@@ -483,6 +490,23 @@ def discover_global_official_domains(
         ), None)
         if exact_brand_root and brand_in_title and exact_product_result is not None:
             ranked.append((100 - position, root_domain, evidence_url))
+    # Provider result sets sometimes omit the homepage/"official" result but
+    # do return an exact product page on the mechanically expected brand.com
+    # root. Exact root equality + brand in title + exact model in title/URL is
+    # sufficient corroboration; snippets and fuzzy domain prefixes are not.
+    for position, product in enumerate(product_records):
+        domain = _host(product.url)
+        root_domain = _registrable_domain(domain)
+        expected_root = f"{re.sub(r'[^a-z0-9]', '', brand_key)}.com"
+        if root_domain != expected_root:
+            continue
+        title_url = f"{product.title} {product.url}"
+        if (
+            normalize_model(brand) in normalize_model(product.title)
+            and model
+            and candidate_model_match(model, product.title, urlparse(product.url).path) == "exact"
+        ):
+            ranked.append((90 - position, root_domain, canonicalize_url(product.url)))
     ranked.sort(reverse=True)
     found: list[tuple[str, str]] = []
     seen: set[str] = set()
@@ -535,6 +559,9 @@ def classify_source(domain: str, official_domain: str | None) -> str:
     # SERP match promote that marketplace domain itself to manufacturer.
     if _is_marketplace_domain(domain):
         return "marketplace"
+    root = _registrable_domain(domain)
+    if root in SPECIALIZED_REFERENCE_DOMAINS:
+        return "specialized_reference"
     if official_domain and (domain == official_domain or domain.endswith(f".{official_domain}")):
         return "manufacturer"
     if any(word in domain for word in (
@@ -551,6 +578,7 @@ def score_candidate(url: str, title: str, source_type: str, authority_status: st
                     brand: str | None = None) -> int:
     score = {"exact": SCORE_EXACT_MODEL, "likely_variant": SCORE_LIKELY_VARIANT,
              "likely": SCORE_LIKELY_MODEL, "mismatch": SCORE_MISMATCH,
+             "different_variant": SCORE_MISMATCH,
              "unknown": SCORE_UNKNOWN_MODEL}[match]
     haystack = f"{title} {url}"
     if article_matches(article, haystack):
@@ -591,6 +619,7 @@ def _model_relevance(match: str) -> str:
         "likely_variant": "variant_of_base_model",
         "likely": "probable_base_model",
         "mismatch": "different_model",
+        "different_variant": "different_model",
         "unknown": "unknown",
     }[match]
 
@@ -666,10 +695,8 @@ def assess_candidate_relevance(
     expose the requested model/article in its title/snippet or URL; a brand-only
     result cannot become relevant through source type or provider reputation.
     """
-    title = " ".join(filter(None, (
-        str(candidate.get("title") or ""),
-        str(candidate.get("snippet") or ""),
-    )))
+    title = str(candidate.get("title") or "")
+    snippet = str(candidate.get("snippet") or "")
     url = str(candidate.get("url") or "")
     haystack = f"{title} {url}"
     match = str(candidate.get("model_match") or "unknown")
@@ -677,6 +704,8 @@ def assess_candidate_relevance(
     exact_article = article_matches(article, haystack)
     component_relation = _model_component_relation(model, haystack)
 
+    if match == "different_variant":
+        return "reject", ["Search result names a different commercial-model variant."]
     if (
         match == "mismatch"
         and not exact_phrase
@@ -701,7 +730,30 @@ def assess_candidate_relevance(
     if component_relation == "weak":
         return "weak", ["Search result contains a distinctive partial commercial-model relation."]
 
-    brand_present = normalize_model(brand) in normalize_model(haystack)
+    # Some search providers redact titles/snippets for first-party support
+    # pages (for example returning only "Brand Support").  Keep exactly one
+    # such result eligible for a bounded content-verification fetch, but only
+    # when it came from an identity-bearing query and authority was already
+    # independently verified.  It remains weak/unknown until fetched content
+    # proves the model, so query text can never become product evidence.
+    provenance = list(candidate.get("discovery_provenance") or ())
+    exact_query = any(
+        base_model_in_text(model, str(item.get("query") or ""))
+        for item in provenance
+        if isinstance(item, Mapping)
+    )
+    if (
+        match == "unknown"
+        and candidate.get("authority_status") == "verified"
+        and candidate.get("source_type") in {"manufacturer", "official_document"}
+        and exact_query
+        and _page_kind(url) not in {"homepage", "catalog", "weak"}
+    ):
+        return "weak", [
+            "Verified first-party result from an exact-model query requires content verification."
+        ]
+
+    brand_present = normalize_model(brand) in normalize_model(f"{haystack} {snippet}")
     reason = "Requested exact model/article is absent from the search result."
     if brand_present:
         reason += " Brand-only evidence is insufficient."
@@ -759,7 +811,9 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
             authority_reason = "Domain verified from conservative brand official-search evidence."
             if _is_official_document(url):
                 source_type = "official_document"
-        match = candidate_model_match(model, search_text, urlparse(url).path)
+        # Provider snippets are useful ranking context but are not identity
+        # evidence: they often echo the query beside a different SKU.
+        match = candidate_model_match(model, record.title, urlparse(url).path)
         product_match_evidence = None
         if match == "exact":
             product_match_evidence = "Exact normalized model token found in title/snippet or URL."
@@ -1979,7 +2033,14 @@ def discover_with_status(
         # A bot-check on a low-specificity "official website" SERP must not
         # open a provider circuit before it has a chance to return product
         # pages for the exact model.
+        brand_domain_hint = re.sub(r"[^a-z0-9]", "", brand.casefold())
+        hinted_site_query = (
+            f'"{model}" site:{brand_domain_hint}.com'
+            if len(brand_domain_hint) >= 3 else None
+        )
         queries: list[str] = list(base_queries)
+        if hinted_site_query:
+            queries.append(hinted_site_query)
         if cached is None:
             queries.extend((f"{brand} official website", f"{brand} official {model}"))
         budget_stopped = False
@@ -2016,6 +2077,8 @@ def discover_with_status(
         site_domains = relevant_domains or list(official_domains)[:1]
         for domain in (() if budget_stopped else site_domains[:3]):
             query = f'"{model}" site:{domain}'
+            if query in queries:
+                continue
             queries.append(query)
             attempted_queries.append(query)
             found, attempts, query_issues = _search_query(active_searcher, query)
@@ -2064,7 +2127,7 @@ def discover(brand: str, model: str, article: str | None = None,
 
 def _source_identity_relation(identity: ProductIdentity, candidate: Candidate) -> str:
     match = candidate["model_match"]
-    if match == "mismatch":
+    if match in {"mismatch", "different_variant"}:
         return "different_model"
     if match not in {"exact", "likely_variant", "likely"}:
         if not base_model_in_text(

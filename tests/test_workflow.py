@@ -13,6 +13,7 @@ from core.workflow import (
     WorkflowServices,
     _discover_initial_with_released_browser,
     _discover_targeted_with_released_browser,
+    _verify_fetched_identity,
     run_product_workflow,
     select_source_candidates,
 )
@@ -148,7 +149,8 @@ class ProductWorkflowTests(unittest.TestCase):
 
         self.assertEqual(len(selected), 3)
         self.assertIn(specification, selected)
-        self.assertEqual(selected[:2], tuple(broad[:2]))
+        self.assertEqual(selected[0], specification)
+        self.assertEqual(selected[1:], tuple(broad[:2]))
 
     def test_selection_limits_weak_multi_product_pages_to_one(self):
         exact = candidate("https://acme.example/product/X100", score=100)
@@ -250,7 +252,7 @@ class ProductWorkflowTests(unittest.TestCase):
             services=services,
         )
 
-        self.assertEqual(fetch_calls, urls)
+        self.assertEqual(fetch_calls, [urls[0]])
         self.assertEqual(extract_calls, [urls[0]])
         self.assertEqual([item.name for item in result.raw_attributes], ["Power"])
 
@@ -559,6 +561,102 @@ class ProductWorkflowTests(unittest.TestCase):
         self.assertEqual(fixtures.fetch_calls, [urls[1]])
         self.assertEqual(result.selected_candidates[0]["url"], urls[1])
         self.assertEqual(len(result.fetched_sources), 1)
+
+    def test_official_document_and_source_diversity_beat_regional_mirrors(self):
+        rows = [
+            candidate(
+                "https://brand.example/gb/product/X100", score=190,
+            ),
+            candidate(
+                "https://brand.example/de/product/X100", score=180,
+            ),
+            candidate(
+                "https://docs.brand.example/manual/X100.pdf",
+                source_type="official_document", score=130,
+            ),
+            candidate(
+                "https://reference.example/specs/X100",
+                source_type="specialized_reference", authority="unknown", score=100,
+            ),
+        ]
+        selected = select_source_candidates(rows, 3)
+        self.assertEqual(selected[0]["source_type"], "official_document")
+        self.assertEqual(
+            [item["url"] for item in selected],
+            [rows[2]["url"], rows[0]["url"], rows[3]["url"]],
+        )
+
+    def test_verified_support_fetch_upgrades_identity_only_from_page_content(self):
+        item = candidate(
+            "https://support.acme.example/111831",
+            title="Acme Support", source_type="official_document",
+            relation="unknown", relevance="weak", score=20,
+        )
+        item["model_match"] = "unknown"
+        item["model_relevance"] = "unknown"
+        item["relevance_reasons"] = [
+            "Verified first-party result from an exact-model query requires content verification."
+        ]
+        source = fetch_result(item)
+        source["text"] = "Acme X100 technical specifications"
+        source["html"] = "<h1>Acme X100 technical specifications</h1>"
+        identity = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100", brand="Acme", targeted_search_enabled=False,
+            ),
+            services=FixtureServices([], {}).services(),
+        ).identity
+
+        verified = _verify_fetched_identity(source, item, identity)
+        self.assertEqual(verified["identity_relation"], "same_base_model")
+        self.assertEqual(verified["model_relevance"], "exact_base_model")
+        self.assertTrue(verified["discovery_metadata"]["content_identity_verified"])
+
+        absent = fetch_result(item)
+        absent["text"] = "Acme support landing page"
+        self.assertEqual(
+            _verify_fetched_identity(absent, item, identity)["identity_relation"],
+            "unknown",
+        )
+
+        incidental = fetch_result(item)
+        incidental["text"] = "Compare products including Acme X100"
+        incidental["html"] = (
+            "<title>All Acme products</title><h1>Latest products</h1>"
+            "<p>Compare products including Acme X100</p>"
+        )
+        self.assertEqual(
+            _verify_fetched_identity(incidental, item, identity)["identity_relation"],
+            "unknown",
+        )
+
+    def test_exact_reference_precedes_extra_verification_fetch_after_official_hit(self):
+        exact_official = candidate(
+            "https://support.acme.example/manual/X100",
+            source_type="official_document", score=100,
+        )
+        verification = candidate(
+            "https://acme.example/products", title="Acme products",
+            source_type="manufacturer", relation="unknown", relevance="weak",
+            score=150,
+        )
+        verification["model_match"] = "unknown"
+        verification["model_relevance"] = "unknown"
+        verification["relevance_reasons"] = [
+            "Verified first-party result from an exact-model query requires content verification."
+        ]
+        reference = candidate(
+            "https://reference.example/specs/X100",
+            source_type="specialized_reference", authority="unknown", score=80,
+        )
+
+        selected = select_source_candidates(
+            [verification, exact_official, reference], 3,
+        )
+        self.assertEqual(
+            [item["url"] for item in selected],
+            [exact_official["url"], reference["url"], verification["url"]],
+        )
 
     def test_fetch_failure_is_retained_and_not_extracted(self):
         url = "https://broken.example/product/X100"

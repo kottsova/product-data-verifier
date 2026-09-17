@@ -12,6 +12,8 @@ import time
 from typing import Callable, Mapping, cast
 from urllib.parse import urlparse
 
+from bs4 import BeautifulSoup
+
 from core.authority import ELEVATED_ROLES, TrustedSource, resolve_authority
 from core.budget import WallClockBudget
 from core.category import CategoryResult, detect_category
@@ -267,31 +269,96 @@ def select_source_candidates(
         previous = deduplicated.get(url)
         if previous is None or candidate["score"] > previous["score"]:
             deduplicated[url] = candidate
-    ranked = sorted(
-        deduplicated.values(),
-        key=lambda item: (-item["score"], item["url"]),
-    )
-    strong = [item for item in ranked if item.get("relevance_relation") != "weak"]
-    weak = [item for item in ranked if item.get("relevance_relation") == "weak"]
-    selected = strong[:limit]
-    # A comparison/catalog page can still provide useful fallback evidence,
-    # but several such pages repeat multi-product facts and amplify conflicts.
-    if len(selected) < limit and weak:
-        selected.append(weak[0])
-    exact_official_documents = [
-        item
-        for item in ranked
-        if item.get("source_type") == "official_document"
-        and item.get("authority_status") == "verified"
+    has_exact_official = any(
+        item.get("authority_status") == "verified"
+        and item.get("source_type") in {"manufacturer", "official_document"}
         and item.get("model_match") == "exact"
         and item.get("identity_relation") in {"same_base_model", "exact_variant"}
-    ]
-    if (
-        selected
-        and exact_official_documents
-        and not any(item in selected for item in exact_official_documents)
-    ):
-        selected[-1] = exact_official_documents[0]
+        for item in deduplicated.values()
+    )
+
+    def priority(item: Candidate) -> tuple[int, int, str]:
+        verified = item.get("authority_status") == "verified"
+        exact = (
+            item.get("model_match") == "exact"
+            and item.get("identity_relation") in {"same_base_model", "exact_variant"}
+        )
+        source_type = item.get("source_type")
+        verification_fetch = (
+            verified
+            and source_type in {"manufacturer", "official_document"}
+            and item.get("relevance_relation") == "weak"
+            and item.get("identity_relation") == "unknown"
+            and any(
+                "content verification" in str(reason).casefold()
+                for reason in item.get("relevance_reasons") or ()
+            )
+        )
+        ordinary_weak = (
+            item.get("relevance_relation") == "weak" and not verification_fetch
+        )
+        if ordinary_weak:
+            tier = 6
+        elif verified and exact and source_type == "official_document":
+            tier = 0
+        elif verified and exact and source_type == "manufacturer":
+            tier = 1
+        elif source_type == "specialized_reference" and exact:
+            tier = 2 if has_exact_official else 3
+        elif verification_fetch:
+            tier = 3 if has_exact_official else 2
+        elif item.get("relevance_relation") != "weak":
+            tier = 4
+        else:
+            tier = 5
+        return tier, -int(item["score"]), item["url"]
+
+    ranked = sorted(deduplicated.values(), key=priority)
+    # First pass preserves transport/source diversity. Repeated regional
+    # mirrors from one host and role are poor uses of a small fetch budget,
+    # especially when the host blocks automated access consistently.
+    selected: list[Candidate] = []
+    seen_families: set[tuple[str, str]] = set()
+    weak_selected = False
+    for candidate in ranked:
+        verification_fetch = any(
+            "content verification" in str(reason).casefold()
+            for reason in candidate.get("relevance_reasons") or ()
+        )
+        ordinary_weak = (
+            candidate.get("relevance_relation") == "weak" and not verification_fetch
+        )
+        if ordinary_weak and weak_selected:
+            continue
+        family = (
+            (urlparse(candidate["url"]).hostname or "").lower().removeprefix("www."),
+            str(candidate.get("source_type") or "other"),
+        )
+        if family in seen_families:
+            continue
+        selected.append(candidate)
+        weak_selected = weak_selected or ordinary_weak
+        seen_families.add(family)
+        if len(selected) == limit:
+            return tuple(selected)
+    # If diversity cannot fill the configured capacity, retain deterministic
+    # score order for the remaining mirrors.
+    for candidate in ranked:
+        if candidate in selected:
+            continue
+        verification_fetch = any(
+            "content verification" in str(reason).casefold()
+            for reason in candidate.get("relevance_reasons") or ()
+        )
+        ordinary_weak = (
+            candidate.get("relevance_relation") == "weak" and not verification_fetch
+        )
+        if ordinary_weak and weak_selected:
+            continue
+        selected.append(candidate)
+        weak_selected = weak_selected or ordinary_weak
+        if len(selected) == limit:
+            break
     return tuple(selected)
 
 
@@ -320,6 +387,57 @@ def _candidate_fetch_view(
         value = candidate.get(field_name)
         result[field_name] = str(value) if value is not None else None
     return cast(FetchResult, result)
+
+
+def _verify_fetched_identity(
+    source: FetchResult,
+    candidate: Mapping[str, object],
+    identity: ProductIdentity,
+) -> FetchResult:
+    """Upgrade only a verification-fetch whose body proves the exact model.
+
+    Search query text is never evidence. The transition from unknown to
+    same-base-model is based on successfully fetched page content, while all
+    pre-fetch different-model decisions remain irreversible.
+    """
+    if source.get("status") != "success":
+        return source
+    if candidate.get("identity_relation") != "unknown":
+        return source
+    if candidate.get("authority_status") != "verified":
+        return source
+    if candidate.get("source_type") not in {"manufacturer", "official_document"}:
+        return source
+    if not any(
+        "content verification" in str(reason).casefold()
+        for reason in candidate.get("relevance_reasons") or ()
+    ):
+        return source
+    model = identity.base_model or identity.commercial_model
+    html = str(source.get("html") or "")
+    soup = BeautifulSoup(html, "html.parser")
+    identity_texts = [
+        str(source.get("final_url") or ""),
+        soup.title.get_text(" ", strip=True) if soup.title else "",
+    ]
+    identity_texts.extend(
+        heading.get_text(" ", strip=True)
+        for heading in soup.find_all("h1", limit=3)
+    )
+    for selector in ('meta[property="og:title"]', 'meta[name="twitter:title"]'):
+        tag = soup.select_one(selector)
+        if tag and tag.get("content"):
+            identity_texts.append(str(tag.get("content")))
+    if not model or not base_model_in_text(model, " ".join(identity_texts)):
+        return source
+    source["model_relevance"] = "exact_base_model"
+    source["identity_relation"] = "same_base_model"
+    metadata = dict(source.get("discovery_metadata") or candidate)
+    metadata["model_relevance"] = "exact_base_model"
+    metadata["identity_relation"] = "same_base_model"
+    metadata["content_identity_verified"] = True
+    source["discovery_metadata"] = metadata
+    return source
 
 
 def _fetch_domain(source: Mapping[str, object]) -> str:
@@ -478,12 +596,13 @@ def _run_product_workflow_with_services(
         key = canonicalize_url(url) or url
         if key not in fetch_cache:
             fetch_cache[key] = active.fetch(candidate)
-        return _candidate_fetch_view(fetch_cache[key], candidate)
+        view = _candidate_fetch_view(fetch_cache[key], candidate)
+        return _verify_fetched_identity(view, candidate, identity)
 
     fetched: list[FetchResult] = []
     extracted: list[RawAttribute] = []
     for candidate in selected_candidates:
-        if not budget.can_start("initial_fetch", minimum_seconds=0.25):
+        if not budget.can_start("initial_fetch", minimum_seconds=1.0):
             break
         source = fetch_once(candidate)
         fetched.append(source)
@@ -523,7 +642,7 @@ def _run_product_workflow_with_services(
     )
     targeted_search: TargetedSearchResult | None = None
     if request.targeted_search_enabled and budget.can_start(
-        "targeted_search", minimum_seconds=0.25,
+        "targeted_search", minimum_seconds=1.0,
     ):
         targeted_search = run_targeted_search(
             targeted_plan,
@@ -670,7 +789,14 @@ def run_product_workflow(
         budget=budget,
     ) as search:
         def live_fetch(candidate: Mapping[str, object]) -> FetchResult:
-            timeout = budget.timeout_for(30.0, "fetch", minimum_seconds=0.25)
+            # Reserve a small tail for extraction/validation/cleanup and cap
+            # any one transport so a blocked host cannot monopolize the run.
+            remaining = budget.remaining_seconds
+            timeout = budget.timeout_for(
+                min(15.0, max(0.0, remaining - 0.75)),
+                "fetch",
+                minimum_seconds=1.0,
+            )
             if timeout is None:
                 raise RuntimeError(budget.exhaustion_reason or "Workflow budget exhausted.")
             return fetch_candidate(candidate, timeout=timeout)

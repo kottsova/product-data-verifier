@@ -225,9 +225,12 @@ class IdentityDiscoveryTests(unittest.TestCase):
                 "Apple iPhone 18 Pro",
             )]
 
-        candidate = discover_identity(identity, searcher=searcher)[0]
-        self.assertNotEqual(candidate["model_match"], "exact")
-        self.assertNotEqual(candidate["identity_relation"], "same_base_model")
+        outcome = discover_identity_with_status(identity, searcher=searcher)
+        self.assertEqual(outcome.candidates, [])
+        self.assertEqual(len(outcome.rejected_candidates), 1)
+        candidate = outcome.rejected_candidates[0]
+        self.assertEqual(candidate["model_match"], "different_variant")
+        self.assertEqual(candidate["relevance_relation"], "reject")
 
     def test_bosch_suffix_is_variant_relevance_but_same_base_identity(self) -> None:
         identity = resolve_product_identity("Bosch PUE611BB5E")

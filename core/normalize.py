@@ -21,6 +21,8 @@ _DELIMITED_UNIT_SUFFIX_RE = re.compile(
 )
 _BARE_UNIT_SUFFIX_RE = re.compile(rf"\s+{_UNIT_SUFFIX}\s*$", re.IGNORECASE)
 _NUMBERED_LABEL_RE = re.compile(r"\s+(?:(?:no|n)\s*)?\d+\s*$", re.IGNORECASE)
+_LEADING_COUNT_RE = re.compile(r"^\s*\d+\s+(?=[A-Za-z])")
+_TRAILING_QUALIFIER_RE = re.compile(r"\s*[\(\[][^\)\]]{1,40}[\)\]]\s*$")
 
 
 def normalize_attribute_label(value: str | None) -> str:
@@ -61,10 +63,18 @@ def attribute_label_variants(value: str | None) -> tuple[str, ...]:
 
     keys: list[str] = []
     for candidate in candidates:
-        key = normalize_attribute_label(candidate)
-        if key and key not in keys:
-            keys.append(key)
-        base = _NUMBERED_LABEL_RE.sub("", key)
-        if base and base != key and base not in keys:
-            keys.append(base)
+        variants = [candidate]
+        without_qualifier = _TRAILING_QUALIFIER_RE.sub("", candidate)
+        if without_qualifier != candidate:
+            variants.append(without_qualifier)
+        without_count = _LEADING_COUNT_RE.sub("", candidate)
+        if without_count != candidate:
+            variants.append(without_count)
+        for variant in variants:
+            key = normalize_attribute_label(variant)
+            if key and key not in keys:
+                keys.append(key)
+            base = _NUMBERED_LABEL_RE.sub("", key)
+            if base and base != key and base not in keys:
+                keys.append(base)
     return tuple(keys)

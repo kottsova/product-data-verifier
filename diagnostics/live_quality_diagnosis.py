@@ -129,7 +129,11 @@ def _source(source: Mapping[str, object], raw_counts: Mapping[str, int]) -> dict
         "blocked_reason": source.get("blocked_reason"), "error": source.get("error"),
         "source_type": source.get("source_type"),
         "authority_status": source.get("authority_status"),
+        "model_relevance": source.get("model_relevance"),
         "identity_relation": source.get("identity_relation"),
+        "content_identity_verified": bool(
+            (source.get("discovery_metadata") or {}).get("content_identity_verified")
+        ),
         "extracted_attribute_count": raw_counts.get(url, 0),
         "duration_seconds": None,
         "duration_metric_available": False,

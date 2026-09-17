@@ -7,6 +7,9 @@ import unicodedata
 
 MODEL_TOKEN_RE = re.compile(r"(?<!\w)[\w]+(?:[./_-][\w]+)*(?!\w)", re.UNICODE)
 NON_VARIANT_SUFFIXES = {"ASP", "ASPX", "HTM", "HTML", "PDF", "PHP"}
+MODEL_FAMILY_MODIFIERS = {
+    "FE", "LITE", "MAX", "MINI", "PLUS", "PRO", "SE", "ULTRA", "XL",
+}
 
 
 def normalize_model(value: str | None) -> str:
@@ -106,6 +109,20 @@ def model_match(model: str | None, text: str | None) -> str:
 def candidate_model_match(model: str | None, title: str | None, url: str | None) -> str:
     """Match identity signals without letting an incidental URL override another titled SKU."""
     expected = normalize_model(model)
+    requested_parts = _model_parts(model)
+    # A base-family phrase is not the same product when the result immediately
+    # extends it with a well-known commercial variant modifier.  This is kept
+    # generic (rather than naming products) and prevents, for example, a
+    # base-model request from inheriting Pro/Plus/Ultra specifications.
+    for text in (title or "", url or ""):
+        tokens = _model_parts(text)
+        width = len(requested_parts)
+        for index in range(max(0, len(tokens) - width)):
+            if tokens[index:index + width] != requested_parts:
+                continue
+            following = tokens[index + width] if index + width < len(tokens) else ""
+            if following in MODEL_FAMILY_MODIFIERS and following not in requested_parts:
+                return "different_variant"
     # A search snippet may echo the requested phrase while its destination URL
     # names a different regional/model code. Distinctive alphanumeric parts
     # in the request are safer than the provider-generated snippet in this
@@ -128,7 +145,7 @@ def candidate_model_match(model: str | None, title: str | None, url: str | None)
     if title_result in {"exact", "likely_variant", "likely", "mismatch"}:
         return title_result
 
-    own_parts = set(_model_parts(model))
+    own_parts = set(requested_parts)
     explicit_other_model = any(
         candidate != expected
         and candidate not in own_parts

@@ -12,6 +12,7 @@ from io import BytesIO
 import json
 import os
 import re
+import time
 from typing import Literal, Mapping, TypedDict
 from urllib.parse import urlparse
 
@@ -23,6 +24,8 @@ FetchStatus = Literal["success", "blocked", "not_found", "unsupported", "error"]
 FetchMethod = Literal["requests", "playwright", "pdf"]
 DocumentType = Literal["pdf", "html", "text", "binary", "unknown"]
 TextStatus = Literal["available", "text_not_available", "not_applicable"]
+MAX_BROWSER_FALLBACK_SECONDS = 5.0
+MIN_BROWSER_FALLBACK_SECONDS = 1.0
 
 
 class FetchResult(TypedDict):
@@ -319,6 +322,7 @@ def _access_denied_result(source_url: str, final_url: str, http_status: int,
 def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
                  session: requests.Session | None = None) -> FetchResult:
     """Fetch a source requests-first, rendering only insufficient unblocked HTML."""
+    started = time.monotonic()
     source_url = (url or "").strip()
     parsed = urlparse(source_url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
@@ -404,8 +408,21 @@ def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
                        document_type="html", html=html, content=content, text=text,
                        text_status="available")
 
+    remaining = timeout - (time.monotonic() - started)
+    if remaining < MIN_BROWSER_FALLBACK_SECONDS:
+        return _result(
+            source_url, final_url=final_url,
+            status="success" if text else "error", http_status=http_status,
+            content_type=content_type, document_type="html", html=html,
+            content=content, text=text,
+            text_status="available" if text else "text_not_available",
+            error=None if text else "Insufficient fetch deadline for browser fallback.",
+        )
+    browser_timeout = min(MAX_BROWSER_FALLBACK_SECONDS, remaining)
     try:
-        rendered_url, rendered_status, rendered_html = _fetch_with_playwright(source_url, timeout)
+        rendered_url, rendered_status, rendered_html = _fetch_with_playwright(
+            source_url, browser_timeout,
+        )
     except Exception as error:
         return _result(source_url, final_url=final_url, status="error", http_status=http_status,
                        content_type=content_type, document_type="html", html=html,
@@ -440,13 +457,13 @@ def _retry_verified_candidate_with_browser(
     candidate: Mapping[str, object],
     timeout: float,
 ) -> FetchResult:
-    """Retry a blocked, discovery-verified first-party page in a real browser.
+    """Retry a blocked/failed, discovery-verified first-party page in a browser.
 
     Retailers and unknown domains deliberately remain requests-only here. The
     retry changes transport, never authority, and rendered challenge pages
     remain structured as blocked.
     """
-    if result.get("status") != "blocked":
+    if result.get("status") not in {"blocked", "error"}:
         return result
     if candidate.get("authority_status") != "verified":
         return result
@@ -505,13 +522,18 @@ def fetch_candidate(
     session: requests.Session | None = None,
 ) -> FetchResult:
     """Fetch one Discovery candidate and preserve its explicit source metadata."""
+    started = time.monotonic()
     result = fetch_source(
         str(candidate.get("url") or ""),
         timeout=timeout,
         max_bytes=max_bytes,
         session=session,
     )
-    result = _retry_verified_candidate_with_browser(result, candidate, timeout)
+    remaining = timeout - (time.monotonic() - started)
+    if remaining >= MIN_BROWSER_FALLBACK_SECONDS:
+        result = _retry_verified_candidate_with_browser(
+            result, candidate, min(MAX_BROWSER_FALLBACK_SECONDS, remaining),
+        )
     result["discovery_metadata"] = dict(candidate)
     for field in (
         "source_type",
