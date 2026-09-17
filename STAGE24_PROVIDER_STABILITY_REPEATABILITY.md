@@ -256,7 +256,7 @@ both remain explicit blockers rather than being hidden by the nonzero guard.
 ## J. Git
 
 - Baseline: `f9aec2c46f4990fc00a1a06e716a55a7c1222bd7`
-- Implementation/report commit: recorded in the final handoff after commit.
+- Implementation/report commit: `4f58c6c` (`Improve provider repeatability diagnostics`).
 - Push target: `origin/main`.
 - Final handoff records the post-push HEAD equality and clean working tree.
 
