@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from core.discovery import (
+    BingSearchProvider,
     DuckDuckGoHtmlSearchProvider,
     DiscoveryRuntimeConfig,
     ProviderParseError,
@@ -11,6 +12,8 @@ from core.discovery import (
     SearchResultRecord,
     assess_candidate_relevance,
     _DuckDuckGoHtmlParser,
+    _BingParser,
+    _clean_bing_result_url,
     _parse_google_browser_items,
     _google_result_layout_ready,
     DiscoverySearchError,
@@ -113,6 +116,48 @@ class DiscoveryTests(unittest.TestCase):
         )
         self.assertEqual(found, [("acme.com", "https://acme.com/product/X100")])
 
+    def test_exact_regional_brand_root_product_can_bootstrap_authority(self) -> None:
+        found = discover_global_official_domains(
+            "Acme", [],
+            product_results=[(
+                "https://www.acme.co.uk/products/X100",
+                "Acme X100 product specifications",
+            )],
+            model="X100",
+        )
+
+        self.assertEqual(
+            found,
+            [("acme.co.uk", "https://acme.co.uk/products/X100")],
+        )
+
+    def test_fuzzy_regional_brand_root_cannot_bootstrap_authority(self) -> None:
+        found = discover_global_official_domains(
+            "Acme", [],
+            product_results=[(
+                "https://acme-shop.co.uk/products/X100",
+                "Acme X100 product specifications",
+            )],
+            model="X100",
+        )
+
+        self.assertEqual(found, [])
+
+    def test_two_letter_exact_brand_root_requires_exact_product_evidence(self) -> None:
+        found = discover_global_official_domains(
+            "HP", [],
+            product_results=[(
+                "https://support.hp.com/document/x360-14-eu0000",
+                "HP Spectre x360 14-eu0000 specifications",
+            )],
+            model="Spectre x360 14-eu0000",
+        )
+
+        self.assertEqual(
+            found,
+            [("hp.com", "https://support.hp.com/document/x360-14-eu0000")],
+        )
+
     def test_specialized_reference_domains_have_existing_rank_three_role(self) -> None:
         self.assertEqual(classify_source("www.gsmarena.com", None), "specialized_reference")
         self.assertEqual(classify_source("manua.ls", None), "specialized_reference")
@@ -191,10 +236,53 @@ class DiscoveryTests(unittest.TestCase):
 
         self.assertEqual(
             [provider.name for provider in session.providers],
-            ["google", "duckduckgo_html", "duckduckgo_lite", "naver"],
+            ["duckduckgo_html", "naver", "duckduckgo_lite", "bing", "google"],
         )
-        html_provider = session.providers[1]
+        html_provider = session.providers[0]
         self.assertIsInstance(html_provider, DuckDuckGoHtmlSearchProvider)
+
+    def test_bing_parser_decodes_redirect_and_ignores_navigation_links(self) -> None:
+        encoded = "a1aHR0cHM6Ly9hY21lLmV4YW1wbGUvcHJvZHVjdC9YMTAw"
+        parser = _BingParser()
+        parser.feed(f"""
+            <nav><h2><a href="https://navigation.example/">Navigation</a></h2></nav>
+            <li class="b_algo">
+              <h2><a href="https://www.bing.com/ck/a?u={encoded}&amp;ntb=1">
+                Acme <strong>X100</strong> specifications
+              </a></h2>
+            </li>
+        """)
+
+        self.assertEqual(parser.raw_result_count, 1)
+        self.assertEqual(len(parser.results), 1)
+        self.assertEqual(parser.results[0].url, "https://acme.example/product/X100")
+        self.assertEqual(parser.results[0].title, "Acme X100 specifications")
+        self.assertEqual(parser.results[0].provider, "bing")
+        self.assertIn("bing.com/ck/a", parser.results[0].redirect_url)
+
+    def test_bing_direct_result_url_is_canonicalized(self) -> None:
+        self.assertEqual(
+            _clean_bing_result_url("https://www.acme.example/X100/?utm_source=bing"),
+            "https://acme.example/X100",
+        )
+
+    def test_bing_provider_uses_bounded_requests_transport(self) -> None:
+        response = MagicMock()
+        response.text = """
+            <li class="b_algo"><h2>
+              <a href="https://acme.example/product/X100">Acme X100</a>
+            </h2></li>
+        """
+        response.raise_for_status.return_value = None
+        provider = BingSearchProvider("US")
+
+        with patch("core.discovery.requests.get", return_value=response) as request:
+            results = provider.search_with_timeout("Acme X100", 3.5)
+
+        self.assertEqual([item.url for item in results], ["https://acme.example/product/X100"])
+        self.assertEqual(provider.last_raw_result_count, 1)
+        self.assertEqual(request.call_args.kwargs["timeout"], 3.5)
+        self.assertIn("mkt=en-US", request.call_args.args[0])
 
     def test_duckduckgo_html_provider_uses_requests_transport(self) -> None:
         response = MagicMock()
@@ -1015,6 +1103,48 @@ class SearchFallbackTests(unittest.TestCase):
             ["empty", "success"],
         )
         self.assertEqual(fallback.calls, ["Acme X100"])
+
+    def test_low_value_nonempty_result_falls_through_without_opening_circuit(self) -> None:
+        class QueryAwareProvider(self.Provider):
+            def search(self, query):
+                self.calls.append(query)
+                if "Y200" in query:
+                    return [("https://acme.example/Y200", "Acme Y200")]
+                return [("https://unrelated.example/home", "Unrelated home page")]
+
+        primary = QueryAwareProvider("primary", [])
+        primary.quality_gate = True
+        fallback = self.Provider(
+            "fallback", [("https://acme.example/X100", "Acme X100")],
+        )
+        fallback.quality_gate = True
+        session = ResilientSearchSession(providers=(primary, fallback))
+
+        first = session.search_with_status("Acme X100 specifications")
+        second = session.search_with_status("Acme Y200 specifications")
+
+        self.assertEqual([item.status for item in first.attempts], ["low_value", "success"])
+        self.assertEqual(first.attempts[0].result_count, 1)
+        self.assertIn("identity signal", first.attempts[0].message)
+        self.assertEqual([item.status for item in second.attempts], ["success"])
+        self.assertEqual(len(primary.calls), 2)
+
+    def test_query_quality_requires_distinctive_numeric_model_token(self) -> None:
+        primary = self.Provider(
+            "primary", [("https://samsung.example/phones", "Samsung Galaxy phones")],
+        )
+        primary.quality_gate = True
+        fallback = self.Provider(
+            "fallback",
+            [("https://samsung.example/galaxy-z-flip6", "Samsung Galaxy Z Flip6")],
+        )
+        fallback.quality_gate = True
+
+        outcome = ResilientSearchSession(
+            providers=(primary, fallback),
+        ).search_with_status("Samsung Galaxy Z Flip6")
+
+        self.assertEqual([item.status for item in outcome.attempts], ["low_value", "success"])
 
     def test_provider_timeout_opens_request_local_circuit_and_fallback_runs(self) -> None:
         class TimedOutProvider(self.Provider):

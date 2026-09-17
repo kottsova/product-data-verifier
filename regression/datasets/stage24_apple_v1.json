@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "stage24-apple-repeatability-v1",
+  "description": "Isolated Apple iPhone 15 repeatability guard carried forward from Stage 23.",
+  "products": [
+    {
+      "id": "stage24-apple-iphone15",
+      "brand": "Apple",
+      "model": "iPhone 15",
+      "article": null,
+      "market": "US",
+      "expected_category": "smartphone"
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from core.budget import BudgetExhaustedError
 from core.discovery import DiscoveryOutcome, ProviderAttempt
 from core.export import profile_rows, profile_to_dict
 from core.extract import RawAttribute
@@ -206,6 +207,28 @@ class ProductWorkflowTests(unittest.TestCase):
         self.assertTrue(budget["exhausted"])
         self.assertEqual(budget["exhausted_stage"], "initial_fetch")
         self.assertIn("Insufficient workflow budget", budget["exhaustion_reason"])
+
+    def test_fetch_budget_race_returns_degraded_result_not_workflow_failure(self):
+        item = candidate("https://acme.example/product/X100")
+        services = WorkflowServices(
+            discover_initial=lambda _identity, _market: DiscoveryOutcome(
+                [item], "success", ["initial"], ["initial"], [],
+            ),
+            fetch=lambda _item: (_ for _ in ()).throw(
+                BudgetExhaustedError("Insufficient workflow budget to start fetch.")
+            ),
+        )
+
+        result = run_product_workflow(
+            ProductWorkflowRequest(
+                "Acme X100", brand="Acme", targeted_search_enabled=False,
+            ),
+            services=services,
+        )
+
+        self.assertEqual(result.fetched_sources, ())
+        self.assertEqual(len(result.selected_candidates), 1)
+        self.assertEqual(result.quality.status, "insufficient")
 
     def test_successful_source_is_extracted_before_later_fetches_exhaust_budget(self):
         class Clock:

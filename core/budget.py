@@ -7,6 +7,10 @@ import time
 from typing import Callable
 
 
+class BudgetExhaustedError(RuntimeError):
+    """Internal control signal for a stage that lost a budget-start race."""
+
+
 @dataclass(slots=True)
 class WallClockBudget:
     """Monotonic budget which records the first stage that exhausts it."""

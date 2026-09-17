@@ -7,7 +7,7 @@ import re
 from typing import Callable, Iterable, Literal, Mapping
 from urllib.parse import urlparse
 
-from core.budget import WallClockBudget
+from core.budget import BudgetExhaustedError, WallClockBudget
 from core.discovery import (
     Candidate,
     DiscoveryIssue,
@@ -419,7 +419,13 @@ def _run_targeted_search(
                 if domain:
                     domains_this_query.add(domain)
                 if url not in fetch_cache:
-                    fetch_cache[url] = fetcher(candidate)
+                    try:
+                        fetch_cache[url] = fetcher(candidate)
+                    except BudgetExhaustedError:
+                        stop_reason = "budget_exhausted"
+                        global_stop_reason = stop_reason
+                        stop_field = True
+                        break
                 source = dict(fetch_cache[url])
                 source["discovery_metadata"] = dict(candidate)
                 # A fetcher may perform a post-fetch, content-evidence-based

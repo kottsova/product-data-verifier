@@ -15,7 +15,7 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 from core.authority import ELEVATED_ROLES, TrustedSource, resolve_authority
-from core.budget import WallClockBudget
+from core.budget import BudgetExhaustedError, WallClockBudget
 from core.category import CategoryResult, detect_category
 from core.discovery import (
     SUPPORTED_MARKETS,
@@ -604,7 +604,10 @@ def _run_product_workflow_with_services(
     for candidate in selected_candidates:
         if not budget.can_start("initial_fetch", minimum_seconds=1.0):
             break
-        source = fetch_once(candidate)
+        try:
+            source = fetch_once(candidate)
+        except BudgetExhaustedError:
+            break
         fetched.append(source)
         if source.get("status") != "success":
             continue
@@ -798,7 +801,9 @@ def run_product_workflow(
                 minimum_seconds=1.0,
             )
             if timeout is None:
-                raise RuntimeError(budget.exhaustion_reason or "Workflow budget exhausted.")
+                raise BudgetExhaustedError(
+                    budget.exhaustion_reason or "Workflow budget exhausted."
+                )
             return fetch_candidate(candidate, timeout=timeout)
 
         live_services = WorkflowServices(

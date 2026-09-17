@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 import os
@@ -71,7 +72,7 @@ SearchResultLike = SearchResult | SearchResultRecord
 SearchStatus = Literal["success", "partial", "empty", "blocked", "timeout", "error"]
 ProviderStatus = Literal[
     "success", "empty", "blocked", "timeout", "parse_error", "error", "circuit_open",
-    "capped",
+    "capped", "low_value",
 ]
 RelevanceRelation = Literal["exact", "likely_variant", "weak", "reject"]
 
@@ -122,6 +123,7 @@ Searcher = Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome]
 class DiscoveryIssue:
     status: Literal[
         "empty", "blocked", "timeout", "parse_error", "error", "circuit_open", "capped",
+        "low_value",
     ]
     query: str
     message: str
@@ -159,7 +161,8 @@ class ProviderParseError(RuntimeError):
 
 
 DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
-    "google": 25.0,
+    "bing": 8.0,
+    "google": 8.0,
     "duckduckgo_html": 8.0,
     "duckduckgo_lite": 8.0,
     "naver": 8.0,
@@ -491,14 +494,21 @@ def discover_global_official_domains(
         if exact_brand_root and brand_in_title and exact_product_result is not None:
             ranked.append((100 - position, root_domain, evidence_url))
     # Provider result sets sometimes omit the homepage/"official" result but
-    # do return an exact product page on the mechanically expected brand.com
-    # root. Exact root equality + brand in title + exact model in title/URL is
-    # sufficient corroboration; snippets and fuzzy domain prefixes are not.
+    # do return an exact product page on a mechanically exact brand root,
+    # including regional public suffixes (brand.de, brand.co.uk, and so on).
+    # Exact registrable label equality + brand in title + exact model in
+    # title/URL is sufficient corroboration; snippets, fuzzy prefixes, and
+    # parent-company domains are not.
     for position, product in enumerate(product_records):
         domain = _host(product.url)
         root_domain = _registrable_domain(domain)
-        expected_root = f"{re.sub(r'[^a-z0-9]', '', brand_key)}.com"
-        if root_domain != expected_root:
+        expected_label = re.sub(r"[^a-z0-9]", "", brand_key)
+        suffix = root_domain.rsplit(".", 1)[-1]
+        if (
+            suffix in {"example", "invalid", "localhost", "test"}
+            or len(expected_label) < 2
+            or _registrable_domain_label(domain) != expected_label
+        ):
             continue
         title_url = f"{product.title} {product.url}"
         if (
@@ -977,6 +987,153 @@ def _parse_google_browser_items(
     return found
 
 
+def _clean_bing_result_url(raw_url: str) -> str:
+    """Resolve Bing's optional ``/ck/a`` wrapper without following it."""
+    url = unquote((raw_url or "").strip())
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if host == "bing.com" or host.endswith(".bing.com"):
+        encoded = next(iter(parse_qs(parsed.query).get("u", ())), "")
+        if not encoded.startswith("a1"):
+            return ""
+        payload = encoded[2:]
+        try:
+            padding = "=" * (-len(payload) % 4)
+            url = base64.urlsafe_b64decode(payload + padding).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            return ""
+    return canonicalize_url(url)
+
+
+class _BingParser(HTMLParser):
+    """Parse organic Bing results while ignoring navigation/answer links."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.results: list[SearchResultRecord] = []
+        self.raw_result_count = 0
+        self._result_depth = 0
+        self._in_heading = False
+        self._capture_href = ""
+        self._capture_text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        classes = set((values.get("class") or "").split())
+        if not self._result_depth and tag == "li" and "b_algo" in classes:
+            self._result_depth = 1
+            return
+        if not self._result_depth:
+            return
+        self._result_depth += 1
+        if tag == "h2":
+            self._in_heading = True
+        elif tag == "a" and self._in_heading and not self._capture_href:
+            self._capture_href = values.get("href") or ""
+            self._capture_text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._capture_href:
+            self._capture_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if not self._result_depth:
+            return
+        if tag == "a" and self._capture_href:
+            self.raw_result_count += 1
+            raw_url = self._capture_href
+            url = _clean_bing_result_url(raw_url)
+            title = " ".join(" ".join(self._capture_text).split())
+            if url and _is_external_result(url):
+                self.results.append(SearchResultRecord(
+                    url=url,
+                    title=title,
+                    provider="bing",
+                    rank=len(self.results) + 1,
+                    raw_url=raw_url,
+                    redirect_url=raw_url if raw_url != url else None,
+                    parse_status="parsed",
+                    parse_confidence="high" if title else "medium",
+                ))
+            self._capture_href = ""
+            self._capture_text = []
+        if tag == "h2":
+            self._in_heading = False
+        self._result_depth -= 1
+
+
+BING_MARKETS = {
+    "DE": "de-DE",
+    "GB": "en-GB",
+    "RU": "ru-RU",
+    "US": "en-US",
+    "global": "en-US",
+}
+
+
+class BingSearchProvider:
+    """Independent keyless HTML provider with bounded request time."""
+
+    name = "bing"
+    quality_gate = True
+
+    def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        self.market = market
+        self.timeout_seconds = float(timeout_seconds)
+        self.last_raw_result_count = 0
+        self.last_transport = "http"
+
+    def search(self, query: str) -> list[SearchResultRecord]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(
+        self,
+        query: str,
+        timeout_seconds: float,
+    ) -> list[SearchResultRecord]:
+        params = {
+            "q": query,
+            "count": "10",
+            "mkt": BING_MARKETS[self.market],
+            "setlang": BING_MARKETS[self.market].split("-", 1)[0],
+        }
+        try:
+            response = requests.get(
+                f"https://www.bing.com/search?{urlencode(params)}",
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/131.0.0.0 Safari/537.36"
+                    ),
+                    "Accept-Language": "en-US,en;q=0.8",
+                },
+                timeout=max(0.1, min(20.0, timeout_seconds)),
+            )
+            response.raise_for_status()
+        except requests.Timeout as error:
+            raise ProviderTimeoutError("Bing provider deadline exhausted.") from error
+        except requests.RequestException as error:
+            raise RuntimeError(f"Bing search failed: {error}") from error
+        parser = _BingParser()
+        parser.feed(response.text)
+        self.last_raw_result_count = parser.raw_result_count
+        lowered = response.text.lower()
+        if not parser.results and any(marker in lowered for marker in (
+            "captcha", "verify you are a human", "unusual traffic",
+        )):
+            raise RuntimeError("Bing bot-check blocked the search.")
+        if parser.raw_result_count and not parser.results:
+            raise ProviderParseError(
+                "Bing returned organic results but none could be parsed."
+            )
+        return parser.results
+
+
 def _google_result_layout_ready(page: object) -> bool:
     """Recognize result headings even when the anchor wraps a parent/sibling."""
     locator = getattr(page, "locator")
@@ -1029,6 +1186,7 @@ class GoogleSearchSession:
     """HTTP-first Google search with one lazy Playwright browser per discovery."""
 
     name = "google"
+    quality_gate = True
 
     def __init__(self, market: str = "global", *, timeout_seconds: float = 25.0) -> None:
         if market not in SUPPORTED_MARKETS:
@@ -1417,6 +1575,7 @@ class DuckDuckGoHtmlSearchProvider:
     """Keyless DDG HTML route, independent from the frequently blocked Lite UI."""
 
     name = "duckduckgo_html"
+    quality_gate = True
 
     def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
         if market not in SUPPORTED_MARKETS:
@@ -1501,6 +1660,7 @@ class DuckDuckGoLiteSearchProvider:
     """Keyless HTML fallback with the same URL/title result contract."""
 
     name = "duckduckgo_lite"
+    quality_gate = True
 
     def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
         if market not in SUPPORTED_MARKETS:
@@ -1597,6 +1757,7 @@ class NaverSearchProvider:
     """Second keyless fallback for resilient public web discovery."""
 
     name = "naver"
+    quality_gate = True
 
     def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
         if market not in SUPPORTED_MARKETS:
@@ -1653,7 +1814,44 @@ def _provider_status(error: Exception) -> Literal["blocked", "timeout", "parse_e
         return "timeout"
     return "blocked" if any(marker in lowered for marker in (
         "bot-check", "blocked", "captcha", "recaptcha", "unusual traffic",
+        "403", "429", "forbidden", "too many requests",
     )) else "error"
+
+
+_QUERY_QUALITY_STOPWORDS = {
+    "and", "buy", "com", "details", "features", "for", "global", "manual",
+    "official", "product", "review", "site", "spec", "specification",
+    "specifications", "support", "the", "website", "with", "www",
+}
+
+
+def _query_result_quality(
+    query: str,
+    results: Iterable[SearchResultRecord],
+) -> tuple[bool, int, int]:
+    """Reject a non-empty SERP that carries no useful query identity signal.
+
+    This is intentionally provider-neutral.  It uses only lexical overlap
+    between the issued query and returned title/URL/snippet; it does not grant
+    source authority or exact-model status.
+    """
+    without_sites = re.sub(r"\bsite:\S+", " ", query, flags=re.IGNORECASE)
+    tokens = [
+        token for token in re.findall(r"[\w]+", normalize_text(without_sites))
+        if token not in _QUERY_QUALITY_STOPWORDS and (len(token) >= 2 or token.isdigit())
+    ]
+    tokens = list(dict.fromkeys(tokens))
+    if not tokens:
+        return True, 0, 0
+    corpus = normalize_text(" ".join(
+        f"{item.title} {item.url} {item.snippet}" for item in results
+    ))
+    corpus_tokens = set(re.findall(r"[\w]+", corpus))
+    matched = sum(token in corpus_tokens for token in tokens)
+    required = 1 if len(tokens) == 1 else max(2, (len(tokens) + 1) // 2)
+    distinctive = [token for token in tokens if any(character.isdigit() for character in token)]
+    distinctive_match = not distinctive or any(token in corpus_tokens for token in distinctive)
+    return matched >= required and distinctive_match, matched, required
 
 
 class ProviderSearchError(RuntimeError):
@@ -1700,17 +1898,20 @@ class ResilientSearchSession:
         self.budget = budget
         self.budget_stage = "discovery"
         self.providers = tuple(providers) if providers is not None else (
-            GoogleSearchSession(
-                market, timeout_seconds=self.config.timeout_for("google"),
-            ),
             DuckDuckGoHtmlSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("duckduckgo_html"),
+            ),
+            NaverSearchProvider(
+                market, timeout_seconds=self.config.timeout_for("naver"),
             ),
             DuckDuckGoLiteSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("duckduckgo_lite"),
             ),
-            NaverSearchProvider(
-                market, timeout_seconds=self.config.timeout_for("naver"),
+            BingSearchProvider(
+                market, timeout_seconds=self.config.timeout_for("bing"),
+            ),
+            GoogleSearchSession(
+                market, timeout_seconds=self.config.timeout_for("google"),
             ),
         )
         self._open_providers: dict[int, str] = {}
@@ -1879,6 +2080,30 @@ class ResilientSearchSession:
                     transport=getattr(provider, "last_transport", None),
                 ))
                 continue
+            useful, matched_tokens, required_tokens = (
+                _query_result_quality(query, results)
+                if getattr(provider, "quality_gate", False)
+                else (True, 0, 0)
+            )
+            if not useful:
+                attempts.append(ProviderAttempt(
+                    provider=provider.name,
+                    query=query,
+                    status="low_value",
+                    result_count=len(results),
+                    message=(
+                        "Provider results lacked query identity signal "
+                        f"({matched_tokens}/{required_tokens} required tokens matched)."
+                    ),
+                    is_fallback=index > 0,
+                    duration_seconds=round(duration, 6),
+                    timeout_seconds=timeout_seconds,
+                    raw_result_count=raw_result_count,
+                    parsed_result_count=parsed_result_count,
+                    deduped_result_count=deduped_result_count,
+                    transport=getattr(provider, "last_transport", None),
+                ))
+                continue
             self._failure_counts[index] = 0
             attempts.append(ProviderAttempt(
                 provider=provider.name,
@@ -1975,10 +2200,13 @@ def _search_status_from_issues(issues: Iterable[DiscoveryIssue]) -> SearchStatus
     statuses = [item.status for item in issues]
     if not statuses:
         return "success"
-    for status in ("timeout", "blocked", "error", "parse_error", "empty", "circuit_open", "capped"):
+    for status in (
+        "timeout", "blocked", "error", "parse_error", "low_value", "empty",
+        "circuit_open", "capped",
+    ):
         if status not in statuses:
             continue
-        if status in {"parse_error", "circuit_open", "capped"}:
+        if status in {"parse_error", "low_value", "circuit_open", "capped"}:
             return "error"
         return status  # type: ignore[return-value]
     return "error"
