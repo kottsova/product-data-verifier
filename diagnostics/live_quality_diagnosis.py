@@ -14,6 +14,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta, timezone
 import importlib.metadata
 import json
+import os
 import platform
 from pathlib import Path
 import sys
@@ -23,6 +24,7 @@ import uuid
 
 from core.discovery import discover_identity_with_status
 from core.identity import IdentityEvidence, resolve_product_identity
+from core.provider_health import ProviderHealthStore
 from diagnostics.attribute_coverage_audit import AuditProduct, audit_result
 from regression.runner import atomic_write_json, run_products, utc_now
 from services.product_verifier import ProductVerifierService, VerifyProductRequest
@@ -92,6 +94,10 @@ def _provider_attempt(item: Any) -> dict[str, Any]:
         "parsed_result_count": item.parsed_result_count,
         "deduped_result_count": item.deduped_result_count,
         "transport": item.transport,
+        "failure_class": item.failure_class,
+        "shared_circuit_open": item.shared_circuit_open,
+        "retried": item.retried,
+        "provider_time_capped": item.provider_time_capped,
     }
 
 
@@ -135,8 +141,10 @@ def _source(source: Mapping[str, object], raw_counts: Mapping[str, int]) -> dict
             (source.get("discovery_metadata") or {}).get("content_identity_verified")
         ),
         "extracted_attribute_count": raw_counts.get(url, 0),
-        "duration_seconds": None,
-        "duration_metric_available": False,
+        "duration_seconds": source.get("duration_seconds"),
+        "duration_metric_available": source.get("duration_seconds") is not None,
+        "failure_class": source.get("failure_class"),
+        "retried": bool(source.get("retried")),
     }
 
 
@@ -492,8 +500,24 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         )
         atomic_write_json(output, artifact)
 
+    health_store = None
+    previous_health_env = os.environ.get("PDV_PROVIDER_HEALTH_PATH")
+    if args.provider_health_path:
+        health_store = ProviderHealthStore(path=args.provider_health_path)
+        health_store.reset()
+        os.environ["PDV_PROVIDER_HEALTH_PATH"] = args.provider_health_path
+
     atomic_write_json(output, artifact)
-    run_products(products, config, save, worker_target=_worker)
+    try:
+        run_products(products, config, save, worker_target=_worker)
+    finally:
+        if args.provider_health_path:
+            if previous_health_env is None:
+                os.environ.pop("PDV_PROVIDER_HEALTH_PATH", None)
+            else:
+                os.environ["PDV_PROVIDER_HEALTH_PATH"] = previous_health_env
+    if health_store is not None:
+        artifact["provider_health_snapshot"] = health_store.snapshot()
     artifact["finished_at"] = utc_now()
     atomic_write_json(output, artifact)
     return artifact
@@ -513,6 +537,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--concurrency", type=int, default=1)
     parser.add_argument(
         "--output", default="diagnostics/results/stage18-live-quality.json",
+    )
+    parser.add_argument(
+        "--provider-health-path", default=None,
+        help=(
+            "Enable the cross-process provider health/circuit-breaker store "
+            "(core.provider_health) at this path for the duration of this run, "
+            "shared by every spawned product process; unset means disabled "
+            "(unchanged legacy behavior). Reset to empty at the start of "
+            "each run() call so independent cold runs never see stale state "
+            "from a previous run."
+        ),
     )
     return parser
 

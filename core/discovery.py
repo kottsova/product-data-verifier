@@ -19,6 +19,13 @@ import requests
 from core.budget import WallClockBudget
 from core.match import article_matches, candidate_model_match, model_match, normalize_model, normalize_text
 from core.identity import ProductIdentity, base_model_in_text, identity_verification_signals
+from core.provider_health import (
+    FailureClass,
+    HEALTH_AFFECTING_FAILURE_CLASSES,
+    ProviderHealthStore,
+)
+
+RETRY_BACKOFF_SECONDS = 0.3
 
 
 class Candidate(TypedDict):
@@ -108,6 +115,9 @@ class ProviderAttempt:
     parsed_result_count: int = 0
     deduped_result_count: int = 0
     transport: str | None = None
+    failure_class: str | None = None
+    shared_circuit_open: bool = False
+    retried: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -166,6 +176,7 @@ DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
     "duckduckgo_html": 8.0,
     "duckduckgo_lite": 8.0,
     "naver": 8.0,
+    "direct_domain_probe": 6.0,
 }
 
 
@@ -1804,6 +1815,125 @@ class NaverSearchProvider:
         return parser.results
 
 
+_MARKET_ROOT_TLDS: dict[str, str] = {
+    "DE": "de", "GB": "co.uk", "RU": "ru",
+}
+
+_TITLE_PATTERN = re.compile(r"<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
+
+
+def _extract_page_title(html: str) -> str:
+    match = _TITLE_PATTERN.search(html or "")
+    if not match:
+        return ""
+    return re.sub(r"\s+", " ", match.group(1)).strip()
+
+
+class DirectDomainProbeProvider:
+    """Independent discovery path: probe a likely official domain directly.
+
+    Every other provider in this session's default tuple is a keyless
+    HTML-scrape of a third-party search engine. Stage 24 (2026-09-17)
+    observed all of them WAF-blocked or timing out within the same
+    live run, which starved discovery for every remaining product in that
+    run even though the manufacturer's own site was, in principle, directly
+    reachable. This provider shares no transport, host, or rate limit with
+    any of them: it never queries a search engine at all, only the brand's
+    own candidate root domain(s), over a small, bounded number of direct
+    HTTP GETs.
+
+    It is intentionally narrow. It only activates for the brand-root
+    "{brand} official website" bootstrap query -- the same one
+    ``discover_global_official_domains`` already consumes -- and a probed
+    domain is never auto-trusted: it becomes a plain candidate result like
+    any other provider's, which still has to clear the existing
+    brand-in-title / exact-model-corroboration acceptance path in
+    ``discover_global_official_domains`` before it can be promoted to
+    verified official authority. This does not weaken authority, identity,
+    or validation, and it carries no per-product/per-brand hardcoded URL --
+    the candidate domain is derived generically from the brand string.
+    """
+
+    name = "direct_domain_probe"
+    quality_gate = False
+
+    _QUERY_PATTERN = re.compile(r"^(.+?) official website$")
+
+    def __init__(
+        self,
+        market: str = "global",
+        *,
+        timeout_seconds: float = 6.0,
+        session: requests.Session | None = None,
+    ) -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        self.market = market
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        self.timeout_seconds = float(timeout_seconds)
+        self._session = session or requests.Session()
+        self.last_transport = "http_direct"
+        self.last_raw_result_count = 0
+
+    def _candidate_domains(self, brand: str) -> list[str]:
+        slug = re.sub(r"[^a-z0-9]", "", brand.casefold())
+        if len(slug) < 3:
+            return []
+        domains = [f"{slug}.com"]
+        market_tld = _MARKET_ROOT_TLDS.get(self.market)
+        if market_tld:
+            domains.append(f"{slug}.{market_tld}")
+        return domains
+
+    def search(self, query: str) -> list[SearchResult]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(self, query: str, timeout_seconds: float) -> list[SearchResult]:
+        self.last_raw_result_count = 0
+        match = self._QUERY_PATTERN.match(query.strip())
+        if not match:
+            return []
+        brand = match.group(1)
+        domains = self._candidate_domains(brand)
+        if not domains:
+            return []
+        per_request_timeout = max(0.5, min(4.0, timeout_seconds / max(1, len(domains))))
+        results: list[SearchResult] = []
+        for domain in domains:
+            url = f"https://www.{domain}/"
+            try:
+                response = self._session.get(
+                    url,
+                    timeout=per_request_timeout,
+                    allow_redirects=True,
+                    headers={
+                        "User-Agent": (
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"
+                        ),
+                    },
+                )
+            except requests.RequestException:
+                continue
+            self.last_raw_result_count += 1
+            if response.status_code >= 400:
+                continue
+            title = _extract_page_title(response.text)
+            # Consistency check only, exactly as documented on
+            # discover_global_official_domains: a brand-named title on a
+            # mechanically exact brand-root domain is not itself proof of
+            # official status, only a plausible candidate for the existing
+            # corroboration logic to accept or reject. The literal word
+            # "official" is never injected here -- that would fabricate the
+            # one signal discover_global_official_domains treats as an
+            # explicit claim.
+            if normalize_model(brand) not in normalize_model(title or domain):
+                continue
+            results.append((str(response.url), title or domain))
+        return results
+
+
 def _provider_status(error: Exception) -> Literal["blocked", "timeout", "parse_error", "error"]:
     if isinstance(error, (ProviderTimeoutError, TimeoutError)):
         return "timeout"
@@ -1816,6 +1946,40 @@ def _provider_status(error: Exception) -> Literal["blocked", "timeout", "parse_e
         "bot-check", "blocked", "captcha", "recaptcha", "unusual traffic",
         "403", "429", "forbidden", "too many requests",
     )) else "error"
+
+
+_CONNECTION_ERROR_MARKERS = (
+    "connection reset", "connection aborted", "connection refused",
+    "econnreset", "econnrefused", "name or service not known",
+    "getaddrinfo failed", "network is unreachable", "remote end closed",
+    "failed to establish a new connection", "nodename nor servname",
+)
+
+
+def _failure_class(status: str, error: Exception) -> str:
+    """Map a provider status/exception onto a generic, retry-decision bucket.
+
+    This is a distinct, finer-grained axis from ``ProviderStatus``: two
+    providers can both report ``status="blocked"`` while one hit an actual
+    WAF/bot challenge (not worth retrying) and the other hit an HTTP 429
+    (worth a single bounded retry with backoff). Keeping ``status`` unchanged
+    preserves every existing consumer of that field; ``failure_class`` is
+    additive.
+    """
+    lowered = (str(error) or error.__class__.__name__).lower()
+    if status == "timeout":
+        return FailureClass.TIMEOUT
+    if status == "parse_error":
+        return FailureClass.MALFORMED
+    if any(marker in lowered for marker in _CONNECTION_ERROR_MARKERS):
+        return FailureClass.CONNECTION_ERROR
+    if status == "blocked":
+        if any(marker in lowered for marker in ("429", "too many requests", "rate limit")):
+            return FailureClass.RATE_LIMITED
+        return FailureClass.BLOCKED
+    if status == "empty":
+        return FailureClass.EMPTY
+    return FailureClass.OTHER
 
 
 _QUERY_QUALITY_STOPWORDS = {
@@ -1889,6 +2053,7 @@ class ResilientSearchSession:
         config: DiscoveryRuntimeConfig | None = None,
         clock: Callable[[], float] = time.monotonic,
         budget: WallClockBudget | None = None,
+        health_store: ProviderHealthStore | None = None,
     ) -> None:
         if market not in SUPPORTED_MARKETS:
             raise ValueError(f"Unsupported market: {market}")
@@ -1897,6 +2062,15 @@ class ResilientSearchSession:
         self._clock = clock
         self.budget = budget
         self.budget_stage = "discovery"
+        # Opt-in cross-process health store: disabled by default (see
+        # ProviderHealthStore.from_env), so existing callers/tests are
+        # unaffected unless PDV_PROVIDER_HEALTH_PATH is explicitly set for
+        # the run. This is layered on top of, not instead of, the
+        # request-local circuit breaker below: the local one reacts within
+        # this one product; the shared one lets a later product in the same
+        # run skip straight past a provider several earlier products already
+        # found dead, instead of rediscovering the same outage from scratch.
+        self.health_store = health_store if health_store is not None else ProviderHealthStore.from_env()
         self.providers = tuple(providers) if providers is not None else (
             DuckDuckGoHtmlSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("duckduckgo_html"),
@@ -1912,6 +2086,14 @@ class ResilientSearchSession:
             ),
             GoogleSearchSession(
                 market, timeout_seconds=self.config.timeout_for("google"),
+            ),
+            # Last: an independent, SERP-free fallback that never shares a
+            # failure domain with the five providers above (see class
+            # docstring). Placed last so it never displaces a genuine SERP
+            # "official" claim; it only ever runs when every provider above
+            # it has already failed/emptied/circuit-opened for this query.
+            DirectDomainProbeProvider(
+                market, timeout_seconds=self.config.timeout_for("direct_domain_probe"),
             ),
         )
         self._open_providers: dict[int, str] = {}
@@ -1980,6 +2162,24 @@ class ResilientSearchSession:
                     circuit_open=True,
                 ))
                 continue
+            shared_key = f"discovery:{provider.name}"
+            if self.health_store.is_open(shared_key):
+                message = (
+                    f"Shared circuit open for {provider.name}: repeated failures "
+                    "observed elsewhere in this run; skipping without a request."
+                )
+                attempts.append(ProviderAttempt(
+                    provider=provider.name,
+                    query=query,
+                    status="circuit_open",
+                    message=message,
+                    is_fallback=index > 0,
+                    timeout_seconds=timeout_seconds,
+                    circuit_open=True,
+                    shared_circuit_open=True,
+                ))
+                self._open_providers[index] = message
+                continue
             if self.budget is not None:
                 cap = self.budget.total_seconds * self.config.provider_time_share
                 spent = self._provider_elapsed.get(index, 0.0)
@@ -1999,37 +2199,65 @@ class ResilientSearchSession:
                     ))
                     continue
             started = self._clock()
-            try:
-                bounded_search = getattr(provider, "search_with_timeout", None)
-                if bounded_search is not None:
-                    raw_results = tuple(bounded_search(query, timeout_seconds))
-                else:
-                    raw_results = tuple(provider.search(query))
-            except Exception as error:
-                duration = max(0.0, self._clock() - started)
-                self._provider_elapsed[index] = self._provider_elapsed.get(index, 0.0) + duration
-                status = _provider_status(error)
-                attempts.append(ProviderAttempt(
-                    provider=provider.name,
-                    query=query,
-                    status=status,
-                    message=str(error) or error.__class__.__name__,
-                    is_fallback=index > 0,
-                    duration_seconds=round(duration, 6),
-                    timeout_seconds=timeout_seconds,
-                    timed_out=status == "timeout",
-                    blocked=status == "blocked",
-                    parse_failure=status == "parse_error",
-                    exception_class=type(error).__name__,
-                    transport=getattr(provider, "last_transport", None),
-                ))
-                self._failure_counts[index] = self._failure_counts.get(index, 0) + 1
-                if status in {"blocked", "timeout", "parse_error"} or (
-                    self._failure_counts[index] >= self.config.circuit_breaker_failures
-                ):
-                    self._open_providers[index] = (
-                        f"Circuit open after {status}: {str(error) or type(error).__name__}"
+            retried = False
+            for attempt_number in range(2):
+                try:
+                    bounded_search = getattr(provider, "search_with_timeout", None)
+                    if bounded_search is not None:
+                        raw_results = tuple(bounded_search(query, timeout_seconds))
+                    else:
+                        raw_results = tuple(provider.search(query))
+                    break
+                except Exception as error:
+                    status = _provider_status(error)
+                    failure_class = _failure_class(status, error)
+                    # A single bounded retry, only for a fast-fail connection
+                    # error (DNS/refused/reset) and only when there is still
+                    # budget headroom -- retrying a WAF block or a timeout
+                    # that already consumed its full deadline would just
+                    # repeat the same outcome at double the cost, monopolizing
+                    # the shared workflow budget (see Stage 24 finding).
+                    can_retry = (
+                        attempt_number == 0
+                        and failure_class == FailureClass.CONNECTION_ERROR
+                        and (self.budget is None or self.budget.remaining_seconds > 1.0)
                     )
+                    if can_retry:
+                        retried = True
+                        time.sleep(RETRY_BACKOFF_SECONDS)
+                        continue
+                    duration = max(0.0, self._clock() - started)
+                    self._provider_elapsed[index] = (
+                        self._provider_elapsed.get(index, 0.0) + duration
+                    )
+                    attempts.append(ProviderAttempt(
+                        provider=provider.name,
+                        query=query,
+                        status=status,
+                        message=str(error) or error.__class__.__name__,
+                        is_fallback=index > 0,
+                        duration_seconds=round(duration, 6),
+                        timeout_seconds=timeout_seconds,
+                        timed_out=status == "timeout",
+                        blocked=status == "blocked",
+                        parse_failure=status == "parse_error",
+                        exception_class=type(error).__name__,
+                        transport=getattr(provider, "last_transport", None),
+                        failure_class=failure_class,
+                        retried=retried,
+                    ))
+                    self._failure_counts[index] = self._failure_counts.get(index, 0) + 1
+                    if failure_class in HEALTH_AFFECTING_FAILURE_CLASSES:
+                        self.health_store.record_failure(shared_key, failure_class)
+                    if status in {"blocked", "timeout", "parse_error"} or (
+                        self._failure_counts[index] >= self.config.circuit_breaker_failures
+                    ):
+                        self._open_providers[index] = (
+                            f"Circuit open after {status}: {str(error) or type(error).__name__}"
+                        )
+                    raw_results = None
+                    break
+            if raw_results is None:
                 continue
             duration = max(0.0, self._clock() - started)
             self._provider_elapsed[index] = self._provider_elapsed.get(index, 0.0) + duration
@@ -2061,8 +2289,10 @@ class ResilientSearchSession:
                     parsed_result_count=parsed_result_count,
                     deduped_result_count=deduped_result_count,
                     transport=getattr(provider, "last_transport", None),
+                    failure_class=FailureClass.TIMEOUT,
                 ))
                 self._open_providers[index] = f"Circuit open after timeout: {error}"
+                self.health_store.record_failure(shared_key, FailureClass.TIMEOUT)
                 continue
             if not results:
                 attempts.append(ProviderAttempt(
@@ -2105,6 +2335,7 @@ class ResilientSearchSession:
                 ))
                 continue
             self._failure_counts[index] = 0
+            self.health_store.record_success(shared_key)
             attempts.append(ProviderAttempt(
                 provider=provider.name,
                 query=query,

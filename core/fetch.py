@@ -19,6 +19,8 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from core.provider_health import FailureClass, HEALTH_AFFECTING_FAILURE_CLASSES, ProviderHealthStore
+
 
 FetchStatus = Literal["success", "blocked", "not_found", "unsupported", "error"]
 FetchMethod = Literal["requests", "playwright", "pdf"]
@@ -26,6 +28,16 @@ DocumentType = Literal["pdf", "html", "text", "binary", "unknown"]
 TextStatus = Literal["available", "text_not_available", "not_applicable"]
 MAX_BROWSER_FALLBACK_SECONDS = 5.0
 MIN_BROWSER_FALLBACK_SECONDS = 1.0
+FETCH_RETRY_BACKOFF_SECONDS = 0.3
+MIN_RETRY_REMAINING_SECONDS = 1.0
+# Failure classes worth one bounded retry before giving up on a fetch. A
+# connection reset/refused or a bare request timeout is plausibly transient;
+# a 429 clears quickly often enough to be worth one retry with backoff.
+# WAF/403 (BLOCKED) and malformed content are deliberately excluded -- the
+# same page will answer the same way immediately.
+_FETCH_RETRYABLE_CLASSES = frozenset({
+    FailureClass.TIMEOUT, FailureClass.CONNECTION_ERROR, FailureClass.RATE_LIMITED,
+})
 
 
 class FetchResult(TypedDict):
@@ -43,6 +55,9 @@ class FetchResult(TypedDict):
     text_status: TextStatus
     blocked_reason: str | None
     error: str | None
+    failure_class: str | None
+    retried: bool
+    duration_seconds: float
     source_type: str | None
     authority_status: str | None
     authority_evidence_url: str | None
@@ -68,6 +83,9 @@ def _result(source_url: str, **updates: object) -> FetchResult:
         "text_status": "not_applicable",
         "blocked_reason": None,
         "error": None,
+        "failure_class": None,
+        "retried": False,
+        "duration_seconds": 0.0,
         "source_type": None,
         "authority_status": None,
         "authority_evidence_url": None,
@@ -319,10 +337,71 @@ def _access_denied_result(source_url: str, final_url: str, http_status: int,
                    blocked_reason=reason)
 
 
+def _classify_request_exception(error: Exception) -> str:
+    if isinstance(error, requests.exceptions.Timeout):
+        return FailureClass.TIMEOUT
+    if isinstance(error, requests.exceptions.ConnectionError):
+        return FailureClass.CONNECTION_ERROR
+    return FailureClass.OTHER
+
+
+def _get_with_retry(
+    client: requests.Session,
+    url: str,
+    *,
+    timeout: float,
+    headers: Mapping[str, str],
+    started: float,
+) -> tuple[requests.Response | None, Exception | None, str | None, bool]:
+    """GET with one bounded retry for a transient failure class.
+
+    Returns ``(response, error, failure_class, retried)``. A connection
+    error/timeout that fails fast, or a 429, gets one retry with a short
+    backoff if there is still time left in ``timeout``; a WAF/403-style
+    response is not an exception here at all (handled by the caller from the
+    status code) so it is never retried by this function.
+    """
+    error: Exception | None = None
+    failure_class: str | None = None
+    retried = False
+    for attempt in (0, 1):
+        remaining = timeout - (time.monotonic() - started)
+        if attempt == 1 and remaining < MIN_RETRY_REMAINING_SECONDS:
+            break
+        request_timeout = timeout if attempt == 0 else max(MIN_RETRY_REMAINING_SECONDS, remaining)
+        try:
+            response = client.get(
+                url, timeout=request_timeout, allow_redirects=True, headers=headers,
+            )
+        except requests.RequestException as exc:
+            error = exc
+            failure_class = _classify_request_exception(exc)
+            if attempt == 0 and failure_class in _FETCH_RETRYABLE_CLASSES:
+                retried = True
+                time.sleep(FETCH_RETRY_BACKOFF_SECONDS)
+                continue
+            return None, error, failure_class, retried
+        if response.status_code == 429 and attempt == 0:
+            retried = True
+            time.sleep(FETCH_RETRY_BACKOFF_SECONDS)
+            continue
+        return response, None, None, retried
+    return None, error, failure_class, retried
+
+
 def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
                  session: requests.Session | None = None) -> FetchResult:
     """Fetch a source requests-first, rendering only insufficient unblocked HTML."""
     started = time.monotonic()
+    result = _fetch_source_impl(url, timeout=timeout, max_bytes=max_bytes, session=session, started=started)
+    result["duration_seconds"] = round(max(0.0, time.monotonic() - started), 6)
+    return result
+
+
+def _fetch_source_impl(
+    url: str, *, timeout: float, max_bytes: int,
+    session: requests.Session | None, started: float,
+) -> FetchResult:
     source_url = (url or "").strip()
     parsed = urlparse(source_url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
@@ -332,21 +411,21 @@ def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
         return _result(source_url, status="error", error="max_bytes must be positive")
 
     client = session or requests.Session()
-    try:
-        response = client.get(
-            source_url,
-            timeout=timeout,
-            allow_redirects=True,
-            headers={
-                "User-Agent": (
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"
-                ),
-                "Accept": "application/pdf,text/html,text/plain;q=0.9,*/*;q=0.5",
-            },
+    response, error, failure_class, retried = _get_with_retry(
+        client, source_url, timeout=timeout, started=started,
+        headers={
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"
+            ),
+            "Accept": "application/pdf,text/html,text/plain;q=0.9,*/*;q=0.5",
+        },
+    )
+    if response is None:
+        return _result(
+            source_url, status="error", error=f"Request failed: {error}",
+            failure_class=failure_class or FailureClass.OTHER, retried=retried,
         )
-    except requests.RequestException as error:
-        return _result(source_url, status="error", error=f"Request failed: {error}")
 
     final_url = response.url
     http_status = response.status_code
@@ -356,11 +435,28 @@ def fetch_source(url: str, *, timeout: float = 30, max_bytes: int = 25_000_000,
     content = response.content
     if len(content) > max_bytes:
         return _result(source_url, final_url=final_url, status="error", http_status=http_status,
-                       content_type=content_type, error=f"Source exceeds {max_bytes}-byte limit")
+                       content_type=content_type, error=f"Source exceeds {max_bytes}-byte limit",
+                       failure_class=FailureClass.OTHER, retried=retried)
     if http_status in {401, 403}:
-        return _access_denied_result(source_url, final_url, http_status, content_type, content)
+        result = _access_denied_result(source_url, final_url, http_status, content_type, content)
+        result["failure_class"] = FailureClass.BLOCKED
+        result["retried"] = retried
+        return result
+    if http_status == 429:
+        result = _error_status_result(source_url, final_url, http_status, content_type)
+        result["failure_class"] = FailureClass.RATE_LIMITED
+        result["retried"] = retried
+        return result
+    if http_status >= 500:
+        result = _error_status_result(source_url, final_url, http_status, content_type)
+        result["failure_class"] = FailureClass.UNAVAILABLE
+        result["retried"] = retried
+        return result
     if http_status >= 400:
-        return _error_status_result(source_url, final_url, http_status, content_type)
+        result = _error_status_result(source_url, final_url, http_status, content_type)
+        result["failure_class"] = FailureClass.OTHER
+        result["retried"] = retried
+        return result
     document_type = _document_type(content_type, final_url, content)
 
     if document_type == "pdf":
@@ -520,20 +616,44 @@ def fetch_candidate(
     timeout: float = 30,
     max_bytes: int = 25_000_000,
     session: requests.Session | None = None,
+    health_store: ProviderHealthStore | None = None,
 ) -> FetchResult:
-    """Fetch one Discovery candidate and preserve its explicit source metadata."""
+    """Fetch one Discovery candidate and preserve its explicit source metadata.
+
+    Like ``ResilientSearchSession``, this consults an opt-in, cross-process
+    ``ProviderHealthStore`` keyed by host: a host with repeated recent
+    timeouts/connection errors/WAF blocks/5xx elsewhere in the same run is
+    skipped without a network call, so one already-known-dead host cannot
+    keep costing every product in the run its own full fetch timeout.
+    """
+    store = health_store if health_store is not None else ProviderHealthStore.from_env()
     started = time.monotonic()
-    result = fetch_source(
-        str(candidate.get("url") or ""),
-        timeout=timeout,
-        max_bytes=max_bytes,
-        session=session,
-    )
-    remaining = timeout - (time.monotonic() - started)
-    if remaining >= MIN_BROWSER_FALLBACK_SECONDS:
-        result = _retry_verified_candidate_with_browser(
-            result, candidate, min(MAX_BROWSER_FALLBACK_SECONDS, remaining),
+    url = str(candidate.get("url") or "")
+    host = urlparse(url).hostname or ""
+    shared_key = f"fetch:{host}" if host else None
+    if shared_key and store.is_open(shared_key):
+        result = _result(
+            url, status="error",
+            error=(
+                f"Shared fetch circuit open for {host}: repeated failures "
+                "observed elsewhere in this run; skipping without a request."
+            ),
+            failure_class=FailureClass.UNAVAILABLE,
         )
+    else:
+        result = fetch_source(url, timeout=timeout, max_bytes=max_bytes, session=session)
+        if shared_key:
+            if result.get("status") == "success":
+                store.record_success(shared_key)
+            else:
+                failure_class = result.get("failure_class")
+                if failure_class in HEALTH_AFFECTING_FAILURE_CLASSES:
+                    store.record_failure(shared_key, str(failure_class))
+        remaining = timeout - (time.monotonic() - started)
+        if remaining >= MIN_BROWSER_FALLBACK_SECONDS:
+            result = _retry_verified_candidate_with_browser(
+                result, candidate, min(MAX_BROWSER_FALLBACK_SECONDS, remaining),
+            )
     result["discovery_metadata"] = dict(candidate)
     for field in (
         "source_type",

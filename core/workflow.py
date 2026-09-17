@@ -32,6 +32,7 @@ from core.discovery import (
 from core.extract import RawAttribute, extract_attributes
 from core.fetch import FetchResult, fetch_candidate
 from core.gaps import GapAnalysisResult, analyze_gaps
+from core.provider_health import ProviderHealthStore
 from core.identity import (
     IdentityEvidence,
     ProductIdentity,
@@ -87,6 +88,10 @@ def _provider_attempt_data(attempt: ProviderAttempt) -> dict[str, object]:
         "parsed_result_count": attempt.parsed_result_count,
         "deduped_result_count": attempt.deduped_result_count,
         "transport": attempt.transport,
+        "failure_class": attempt.failure_class,
+        "shared_circuit_open": attempt.shared_circuit_open,
+        "retried": attempt.retried,
+        "provider_time_capped": attempt.provider_time_capped,
     }
 
 
@@ -786,10 +791,18 @@ def run_product_workflow(
 
     budget = WallClockBudget(request.wall_clock_budget_seconds)
     runtime_config = DiscoveryRuntimeConfig(request.provider_timeouts)
+    # Opt-in, cross-process provider health (PDV_PROVIDER_HEALTH_PATH); a
+    # no-op store when unset, so behavior is unchanged unless a batch runner
+    # explicitly enables it for a run. One store instance is resolved here
+    # and shared by both discovery (via the session) and fetch below, so a
+    # host that discovery already found dead this run and a host fetch finds
+    # dead are tracked in the same place.
+    health_store = ProviderHealthStore.from_env()
     with ResilientSearchSession(
         request.market,
         config=runtime_config,
         budget=budget,
+        health_store=health_store,
     ) as search:
         def live_fetch(candidate: Mapping[str, object]) -> FetchResult:
             # Reserve a small tail for extraction/validation/cleanup and cap
@@ -804,7 +817,7 @@ def run_product_workflow(
                 raise BudgetExhaustedError(
                     budget.exhaustion_reason or "Workflow budget exhausted."
                 )
-            return fetch_candidate(candidate, timeout=timeout)
+            return fetch_candidate(candidate, timeout=timeout, health_store=health_store)
 
         live_services = WorkflowServices(
             discover_initial=lambda identity, market: _discover_initial_with_released_browser(

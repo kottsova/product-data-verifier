@@ -1,3 +1,4 @@
+import itertools
 import unittest
 from unittest.mock import patch
 
@@ -143,8 +144,15 @@ class FetchSourceTests(unittest.TestCase):
             "source_type": "manufacturer",
             "authority_status": "verified",
         }
+        # Internal timing calls (fetch_candidate's own start, fetch_source's
+        # wrapper start/duration, the retry-budget check) all read as 0.0;
+        # once the deadline should look exhausted, every further read (the
+        # exact count is an implementation detail) reports 30.0.
         with (
-            patch("core.fetch.time.monotonic", side_effect=[0.0, 0.0, 30.0]),
+            patch(
+                "core.fetch.time.monotonic",
+                side_effect=itertools.chain([0.0, 0.0, 0.0, 0.0], itertools.repeat(30.0)),
+            ),
             patch("core.fetch._fetch_with_playwright") as browser,
         ):
             result = fetch_candidate(

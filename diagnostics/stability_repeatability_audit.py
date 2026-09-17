@@ -161,6 +161,13 @@ def audit_artifacts(
                     attempt.get("result_count") or 0
                 )
                 provider_runtime[provider] += float(attempt.get("duration_seconds") or 0.0)
+                if attempt.get("shared_circuit_open"):
+                    provider_totals[provider]["shared_circuit_open_count"] += 1
+                if attempt.get("retried"):
+                    provider_totals[provider]["retried_count"] += 1
+                failure_class = attempt.get("failure_class")
+                if failure_class:
+                    provider_totals[provider][f"failure_class:{failure_class}"] += 1
 
     per_product: list[dict[str, Any]] = []
     for product_id in product_ids:
@@ -227,11 +234,25 @@ def audit_artifacts(
             "1-quality-change-rate, 1-confirmed-jump-rate) * 100"
         ),
     }
+    resilience = {
+        "shared_circuit_open_attempts": sum(
+            item.get("shared_circuit_open_count", 0) for item in provider_metrics
+        ),
+        "retried_attempts": sum(
+            item.get("retried_count", 0) for item in provider_metrics
+        ),
+        "provider_health_snapshots": [
+            artifact["provider_health_snapshot"]
+            for artifact in artifacts
+            if artifact.get("provider_health_snapshot")
+        ],
+    }
     return {
         "schema_version": "1.0",
         "runs": run_metrics,
         "stability": stability,
         "providers": provider_metrics,
+        "resilience": resilience,
         "per_product": per_product,
         "cross_run_rows": cross_rows,
     }
