@@ -106,6 +106,12 @@ def _provider_attempt(item: Any) -> dict[str, Any]:
         "independent_success_without_ddg": item.independent_success_without_ddg,
         "accepted_candidate_count": item.accepted_candidate_count,
         "rejected_candidate_count": item.rejected_candidate_count,
+        "official_discovery_method": item.discovery_method,
+        "official_method_requests": dict(item.method_requests),
+        "official_candidate_count": item.candidate_count,
+        "official_exact_model_candidate_count": item.exact_model_candidate_count,
+        "accepted_official_url": item.accepted_official_url,
+        "official_failure_reason": item.failure_reason,
     }
 
 

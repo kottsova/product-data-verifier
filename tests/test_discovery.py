@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 from core.discovery import (
     BingSearchProvider,
+    DirectDomainProbeProvider,
     DuckDuckGoHtmlSearchProvider,
     DiscoveryRuntimeConfig,
     ProviderParseError,
@@ -231,17 +232,18 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(parser.raw_result_count, 2)
         self.assertEqual(len(parser.results), 1)
 
-    def test_default_session_includes_independent_duckduckgo_html_route(self) -> None:
+    def test_default_session_is_official_first_then_serp_fallback(self) -> None:
         session = ResilientSearchSession()
 
         self.assertEqual(
             [provider.name for provider in session.providers],
             [
-                "duckduckgo_html", "naver", "seznam", "duckduckgo_lite", "bing", "google",
-                "direct_domain_probe",
+                "direct_domain_probe", "duckduckgo_html", "naver", "seznam",
+                "duckduckgo_lite", "bing", "google",
             ],
         )
-        html_provider = session.providers[0]
+        self.assertIsInstance(session.providers[0], DirectDomainProbeProvider)
+        html_provider = session.providers[1]
         self.assertIsInstance(html_provider, DuckDuckGoHtmlSearchProvider)
 
     def test_bing_parser_decodes_redirect_and_ignores_navigation_links(self) -> None:

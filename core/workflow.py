@@ -92,6 +92,20 @@ def _provider_attempt_data(attempt: ProviderAttempt) -> dict[str, object]:
         "shared_circuit_open": attempt.shared_circuit_open,
         "retried": attempt.retried,
         "provider_time_capped": attempt.provider_time_capped,
+        "effective_query": attempt.effective_query,
+        "exact_model_hit": attempt.exact_model_hit,
+        "official_domain_hit": attempt.official_domain_hit,
+        "budget_before_seconds": attempt.budget_before_seconds,
+        "budget_after_seconds": attempt.budget_after_seconds,
+        "independent_success_without_ddg": attempt.independent_success_without_ddg,
+        "accepted_candidate_count": attempt.accepted_candidate_count,
+        "rejected_candidate_count": attempt.rejected_candidate_count,
+        "official_discovery_method": attempt.discovery_method,
+        "official_method_requests": dict(attempt.method_requests),
+        "official_candidate_count": attempt.candidate_count,
+        "official_exact_model_candidate_count": attempt.exact_model_candidate_count,
+        "accepted_official_url": attempt.accepted_official_url,
+        "official_failure_reason": attempt.failure_reason,
     }
 
 
