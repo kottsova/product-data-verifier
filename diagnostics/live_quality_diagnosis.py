@@ -98,6 +98,14 @@ def _provider_attempt(item: Any) -> dict[str, Any]:
         "shared_circuit_open": item.shared_circuit_open,
         "retried": item.retried,
         "provider_time_capped": item.provider_time_capped,
+        "effective_query": item.effective_query,
+        "exact_model_hit": item.exact_model_hit,
+        "official_domain_hit": item.official_domain_hit,
+        "budget_before_seconds": item.budget_before_seconds,
+        "budget_after_seconds": item.budget_after_seconds,
+        "independent_success_without_ddg": item.independent_success_without_ddg,
+        "accepted_candidate_count": item.accepted_candidate_count,
+        "rejected_candidate_count": item.rejected_candidate_count,
     }
 
 

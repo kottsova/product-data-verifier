@@ -39,6 +39,7 @@ def _forced_failure(*_args: object, **_kwargs: object) -> None:
 SCENARIOS: dict[str, tuple[str, ...]] = {
     "duckduckgo_html_down": ("DuckDuckGoHtmlSearchProvider",),
     "naver_down": ("NaverSearchProvider",),
+    "seznam_down": ("SeznamSearchProvider",),
     "duckduckgo_lite_down": ("DuckDuckGoLiteSearchProvider",),
     "bing_down": ("BingSearchProvider",),
     "google_down": ("GoogleSearchSession",),
@@ -49,7 +50,8 @@ SCENARIOS: dict[str, tuple[str, ...]] = {
     ),
     "all_serp_providers_down": (
         "DuckDuckGoHtmlSearchProvider", "NaverSearchProvider",
-        "DuckDuckGoLiteSearchProvider", "BingSearchProvider", "GoogleSearchSession",
+        "SeznamSearchProvider", "DuckDuckGoLiteSearchProvider",
+        "BingSearchProvider", "GoogleSearchSession",
     ),
 }
 

@@ -237,7 +237,7 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(
             [provider.name for provider in session.providers],
             [
-                "duckduckgo_html", "naver", "duckduckgo_lite", "bing", "google",
+                "duckduckgo_html", "naver", "seznam", "duckduckgo_lite", "bing", "google",
                 "direct_domain_probe",
             ],
         )

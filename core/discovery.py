@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import base64
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
+from html import unescape
 from html.parser import HTMLParser
 import os
 from pathlib import Path
@@ -118,6 +119,14 @@ class ProviderAttempt:
     failure_class: str | None = None
     shared_circuit_open: bool = False
     retried: bool = False
+    effective_query: str | None = None
+    exact_model_hit: bool = False
+    official_domain_hit: bool = False
+    budget_before_seconds: float | None = None
+    budget_after_seconds: float | None = None
+    independent_success_without_ddg: bool = False
+    accepted_candidate_count: int = 0
+    rejected_candidate_count: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -176,6 +185,7 @@ DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
     "duckduckgo_html": 8.0,
     "duckduckgo_lite": 8.0,
     "naver": 8.0,
+    "seznam": 8.0,
     "direct_domain_probe": 6.0,
 }
 
@@ -1815,18 +1825,142 @@ class NaverSearchProvider:
         return parser.results
 
 
+class _SeznamParser(HTMLParser):
+    """Parse external links; query-quality filtering removes navigation noise."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.results: list[SearchResultRecord] = []
+        self.raw_result_count = 0
+        self._href = ""
+        self._text: list[str] = []
+        self._seen: set[str] = set()
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "a":
+            return
+        href = dict(attrs).get("href") or ""
+        if not href.startswith(("http://", "https://")):
+            return
+        host = _host(href)
+        if host == "seznam.cz" or host.endswith(".seznam.cz"):
+            return
+        self._href = href
+        self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != "a" or not self._href:
+            return
+        self.raw_result_count += 1
+        url = canonicalize_url(self._href)
+        title = " ".join(" ".join(self._text).split())
+        if url and title and url not in self._seen and not is_obvious_non_product_url(url):
+            self._seen.add(url)
+            self.results.append(SearchResultRecord(
+                url=url,
+                title=title,
+                provider="seznam",
+                rank=len(self.results) + 1,
+                raw_url=self._href,
+                parse_confidence="medium",
+            ))
+        self._href = ""
+        self._text = []
+
+
+class SeznamSearchProvider:
+    """Independent keyless public index used when earlier providers fail."""
+
+    name = "seznam"
+    quality_gate = True
+
+    def __init__(self, market: str = "global", *, timeout_seconds: float = 8.0) -> None:
+        if market not in SUPPORTED_MARKETS:
+            raise ValueError(f"Unsupported market: {market}")
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be positive")
+        self.market = market
+        self.timeout_seconds = float(timeout_seconds)
+        self.last_transport = "http"
+        self.last_raw_result_count = 0
+
+    def search(self, query: str) -> list[SearchResultRecord]:
+        return self.search_with_timeout(query, self.timeout_seconds)
+
+    def search_with_timeout(
+        self, query: str, timeout_seconds: float,
+    ) -> list[SearchResultRecord]:
+        try:
+            response = requests.get(
+                f"https://search.seznam.cz/?{urlencode({'q': query})}",
+                headers={
+                    "User-Agent": "Mozilla/5.0",
+                    "Accept-Language": "en-US,en;q=0.8",
+                },
+                timeout=max(0.1, min(20.0, timeout_seconds)),
+            )
+            response.raise_for_status()
+        except requests.Timeout as error:
+            raise ProviderTimeoutError("Seznam provider deadline exhausted.") from error
+        except requests.RequestException as error:
+            raise RuntimeError(f"Seznam search failed: {error}") from error
+        parser = _SeznamParser()
+        parser.feed(response.text)
+        self.last_raw_result_count = parser.raw_result_count
+        lowered = response.text.lower()
+        if not parser.results and any(marker in lowered for marker in (
+            "captcha", "verify you are a human", "robot",
+        )):
+            raise RuntimeError("Seznam bot-check blocked the search.")
+        return parser.results[:20]
+
+
 _MARKET_ROOT_TLDS: dict[str, str] = {
     "DE": "de", "GB": "co.uk", "RU": "ru",
 }
 
 _TITLE_PATTERN = re.compile(r"<title[^>]*>(.*?)</title>", re.IGNORECASE | re.DOTALL)
+_SITEMAP_LOC_PATTERN = re.compile(
+    r"<loc\b[^>]*>(.*?)</loc>", re.IGNORECASE | re.DOTALL,
+)
 
 
 def _extract_page_title(html: str) -> str:
     match = _TITLE_PATTERN.search(html or "")
     if not match:
         return ""
-    return re.sub(r"\s+", " ", match.group(1)).strip()
+    return re.sub(r"\s+", " ", unescape(match.group(1))).strip()
+
+
+class _DirectLinkParser(HTMLParser):
+    """Collect ordinary links from one manufacturer page without crawling it."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[tuple[str, str]] = []
+        self._href = ""
+        self._text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "a":
+            return
+        self._href = dict(attrs).get("href") or ""
+        self._text = []
+
+    def handle_data(self, data: str) -> None:
+        if self._href:
+            self._text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag != "a" or not self._href:
+            return
+        self.links.append((self._href, " ".join(" ".join(self._text).split())))
+        self._href = ""
+        self._text = []
 
 
 class DirectDomainProbeProvider:
@@ -1856,6 +1990,7 @@ class DirectDomainProbeProvider:
 
     name = "direct_domain_probe"
     quality_gate = False
+    always_run = True
 
     _QUERY_PATTERN = re.compile(r"^(.+?) official website$")
 
@@ -1875,6 +2010,20 @@ class DirectDomainProbeProvider:
         self._session = session or requests.Session()
         self.last_transport = "http_direct"
         self.last_raw_result_count = 0
+        self._brand = ""
+        self._model = ""
+        self._records: tuple[SearchResultRecord, ...] | None = None
+        self._request_count = 0
+        self.max_requests = 8
+
+    def configure_identity(self, brand: str, model: str) -> None:
+        """Provide product context without embedding any product/domain table."""
+        brand = " ".join((brand or "").split())
+        model = " ".join((model or "").split())
+        if (brand, model) != (self._brand, self._model):
+            self._brand, self._model = brand, model
+            self._records = None
+            self._request_count = 0
 
     def _candidate_domains(self, brand: str) -> list[str]:
         slug = re.sub(r"[^a-z0-9]", "", brand.casefold())
@@ -1886,38 +2035,143 @@ class DirectDomainProbeProvider:
             domains.append(f"{slug}.{market_tld}")
         return domains
 
-    def search(self, query: str) -> list[SearchResult]:
+    def search(self, query: str) -> list[SearchResultLike]:
         return self.search_with_timeout(query, self.timeout_seconds)
 
-    def search_with_timeout(self, query: str, timeout_seconds: float) -> list[SearchResult]:
-        self.last_raw_result_count = 0
-        match = self._QUERY_PATTERN.match(query.strip())
-        if not match:
-            return []
-        brand = match.group(1)
+    @staticmethod
+    def _model_in_text(model: str, text: str) -> bool:
+        if not model or not text:
+            return False
+        if model_match(model, unquote(text)) == "exact":
+            return True
+        compact_model = re.sub(r"[^a-z0-9]", "", model.casefold())
+        compact_text = re.sub(r"[^a-z0-9]", "", unquote(text).casefold())
+        return len(compact_model) >= 4 and compact_model in compact_text
+
+    def _get(self, url: str, deadline: float) -> requests.Response | None:
+        if self._request_count >= self.max_requests:
+            return None
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            return None
+        self._request_count += 1
+        try:
+            response = self._session.get(
+                url,
+                timeout=max(0.2, min(3.0, remaining)),
+                allow_redirects=True,
+                headers={
+                    "User-Agent": (
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"
+                    ),
+                },
+            )
+        except requests.RequestException:
+            return None
+        self.last_raw_result_count += 1
+        return response if response.status_code < 400 else None
+
+    def _matching_links(
+        self,
+        html: str,
+        base_url: str,
+        domain: str,
+    ) -> list[SearchResultRecord]:
+        from urllib.parse import urljoin
+
+        parser = _DirectLinkParser()
+        parser.feed(html or "")
+        records: list[SearchResultRecord] = []
+        for raw_url, title in parser.links:
+            url = canonicalize_url(urljoin(base_url, raw_url))
+            if (
+                not url
+                or not url_belongs_to_domain(url, domain)
+                or _page_kind(url) in {"homepage", "catalog"}
+                or not self._model_in_text(self._model, f"{title} {url}")
+            ):
+                continue
+            records.append(SearchResultRecord(
+                url=url,
+                title=title or unquote(urlparse(url).path).replace("-", " "),
+                snippet="Direct manufacturer-site link.",
+                provider=self.name,
+                raw_url=raw_url,
+                parse_confidence="high" if title else "medium",
+            ))
+        return records
+
+    def _sitemap_records(
+        self,
+        sitemap_urls: Iterable[str],
+        domain: str,
+        deadline: float,
+    ) -> list[SearchResultRecord]:
+        queue = list(dict.fromkeys(sitemap_urls))[:3]
+        visited: set[str] = set()
+        records: list[SearchResultRecord] = []
+        while queue and len(visited) < 4 and self._request_count < self.max_requests:
+            sitemap_url = canonicalize_url(queue.pop(0))
+            if (
+                not sitemap_url
+                or sitemap_url in visited
+                or not url_belongs_to_domain(sitemap_url, domain)
+            ):
+                continue
+            visited.add(sitemap_url)
+            response = self._get(sitemap_url, deadline)
+            if response is None:
+                continue
+            locations = [
+                unescape(re.sub(r"\s+", "", item))
+                for item in _SITEMAP_LOC_PATTERN.findall(response.text or "")
+            ]
+            locations.sort(key=lambda item: (
+                0 if self._model_in_text(self._model, item) else 1,
+                0 if any(
+                    token in item.casefold() for token in ("product", "catalog", "shop")
+                ) else 1,
+                item,
+            ))
+            for location in locations:
+                url = canonicalize_url(location)
+                if not url or not url_belongs_to_domain(url, domain):
+                    continue
+                if url.lower().endswith((".xml", ".xml.gz")):
+                    if len(queue) < 3:
+                        queue.append(url)
+                    continue
+                if not self._model_in_text(self._model, url):
+                    continue
+                if _page_kind(url) in {"homepage", "catalog"}:
+                    continue
+                records.append(SearchResultRecord(
+                    url=url,
+                    title=unquote(urlparse(url).path).replace("-", " ").replace("_", " "),
+                    snippet="Exact model found in manufacturer sitemap URL.",
+                    provider=self.name,
+                    raw_url=location,
+                    parse_confidence="high",
+                ))
+        return records
+
+    def _discover(self, brand: str, timeout_seconds: float) -> tuple[SearchResultRecord, ...]:
+        deadline = time.monotonic() + max(0.1, timeout_seconds)
         domains = self._candidate_domains(brand)
         if not domains:
-            return []
-        per_request_timeout = max(0.5, min(4.0, timeout_seconds / max(1, len(domains))))
-        results: list[SearchResult] = []
+            return ()
+        results: list[SearchResultRecord] = []
         for domain in domains:
+            if time.monotonic() >= deadline or self._request_count >= self.max_requests:
+                break
             url = f"https://www.{domain}/"
-            try:
-                response = self._session.get(
-                    url,
-                    timeout=per_request_timeout,
-                    allow_redirects=True,
-                    headers={
-                        "User-Agent": (
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0 Safari/537.36"
-                        ),
-                    },
-                )
-            except requests.RequestException:
+            response = self._get(url, deadline)
+            if response is None:
                 continue
-            self.last_raw_result_count += 1
-            if response.status_code >= 400:
+            final_url = canonicalize_url(str(response.url))
+            final_domain = _registrable_domain(_host(final_url))
+            if not final_domain or _registrable_domain_label(final_domain) != _registrable_domain_label(domain):
                 continue
             title = _extract_page_title(response.text)
             # Consistency check only, exactly as documented on
@@ -1930,8 +2184,75 @@ class DirectDomainProbeProvider:
             # explicit claim.
             if normalize_model(brand) not in normalize_model(title or domain):
                 continue
-            results.append((str(response.url), title or domain))
-        return results
+            results.append(SearchResultRecord(
+                url=final_url,
+                title=title or domain,
+                snippet="Directly probed brand-root homepage.",
+                provider=self.name,
+                raw_url=url,
+                redirect_url=url if final_url != canonicalize_url(url) else None,
+                parse_confidence="high" if title else "medium",
+            ))
+            results.extend(self._matching_links(response.text, final_url, final_domain))
+
+            robots = self._get(f"https://www.{domain}/robots.txt", deadline)
+            declared: list[str] = []
+            if robots is not None:
+                declared = [
+                    line.split(":", 1)[1].strip()
+                    for line in (robots.text or "").splitlines()
+                    if line.lower().startswith("sitemap:") and ":" in line
+                ]
+            results.extend(self._sitemap_records(
+                [*declared, f"https://www.{domain}/sitemap.xml"],
+                final_domain,
+                deadline,
+            ))
+
+            if self._model and self._request_count < self.max_requests:
+                search_url = f"https://www.{domain}/search?{urlencode({'q': self._model})}"
+                search_response = self._get(search_url, deadline)
+                if search_response is not None:
+                    results.extend(self._matching_links(
+                        search_response.text, str(search_response.url), final_domain,
+                    ))
+
+        unique: dict[str, SearchResultRecord] = {}
+        for record in results:
+            unique.setdefault(canonicalize_url(record.url), record)
+        return tuple(record for url, record in unique.items() if url)
+
+    def search_with_timeout(
+        self,
+        query: str,
+        timeout_seconds: float,
+    ) -> list[SearchResultLike]:
+        self.last_raw_result_count = 0
+        official_match = self._QUERY_PATTERN.match(query.strip())
+        brand = self._brand or (official_match.group(1) if official_match else "")
+        if not brand:
+            return []
+        is_official_query = bool(official_match)
+        is_model_query = bool(
+            self._model and self._model_in_text(self._model, query)
+        )
+        if not (is_official_query or is_model_query):
+            return []
+        if self._records is None:
+            self._records = self._discover(brand, timeout_seconds)
+        records = list(self._records)
+        if is_official_query:
+            # Preserve the provider's long-standing public tuple contract for
+            # homepage bootstrap callers; the session normalizer enriches it.
+            return [
+                (record.raw_url or record.url, record.title)
+                for record in records
+                if _page_kind(record.url) == "homepage"
+            ]
+        return [
+            record for record in records
+            if self._model_in_text(self._model, f"{record.title} {record.url}")
+        ]
 
 
 def _provider_status(error: Exception) -> Literal["blocked", "timeout", "parse_error", "error"]:
@@ -2028,6 +2349,35 @@ class ProviderSearchError(RuntimeError):
         super().__init__(detail)
 
 
+def build_provider_query(provider: str, query: str, brand: str, model: str) -> str:
+    """Adapt syntax to a provider while preserving the caller's intent.
+
+    Bing and Google reliably treat a quoted model as one identity-bearing
+    phrase. Naver's web endpoint has historically performed better with
+    unquoted tokens. DDG and direct discovery retain the original query.
+    This is product-agnostic and never adds a pre-known URL or domain.
+    """
+    query = " ".join((query or "").split())
+    if provider == "naver":
+        return query.replace('"', "")
+    if provider not in {"bing", "google"} or not model:
+        return query
+    quoted_model = f'"{model}"'
+    if quoted_model.casefold() in query.casefold():
+        return query
+    if any(
+        normalize_model(model) in normalize_model(quoted)
+        for quoted in re.findall(r'"([^"]+)"', query)
+    ):
+        return query
+    match = re.search(re.escape(model), query, flags=re.IGNORECASE)
+    if match:
+        return f"{query[:match.start()]}{quoted_model}{query[match.end():]}"
+    if "official website" in query.casefold() and brand:
+        return f'{query} "{model}"'
+    return query
+
+
 class ResilientSearchSession:
     """Try fallback providers only after structured primary failure.
 
@@ -2071,12 +2421,15 @@ class ResilientSearchSession:
         # run skip straight past a provider several earlier products already
         # found dead, instead of rediscovering the same outage from scratch.
         self.health_store = health_store if health_store is not None else ProviderHealthStore.from_env()
-        self.providers = tuple(providers) if providers is not None else (
+        default_providers: tuple[SearchProvider, ...] = (
             DuckDuckGoHtmlSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("duckduckgo_html"),
             ),
             NaverSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("naver"),
+            ),
+            SeznamSearchProvider(
+                market, timeout_seconds=self.config.timeout_for("seznam"),
             ),
             DuckDuckGoLiteSearchProvider(
                 market, timeout_seconds=self.config.timeout_for("duckduckgo_lite"),
@@ -2096,9 +2449,28 @@ class ResilientSearchSession:
                 market, timeout_seconds=self.config.timeout_for("direct_domain_probe"),
             ),
         )
+        disabled = {
+            item.strip().casefold()
+            for item in os.getenv("PDV_DISABLED_DISCOVERY_PROVIDERS", "").split(",")
+            if item.strip()
+        }
+        self.providers = tuple(providers) if providers is not None else tuple(
+            provider for provider in default_providers
+            if provider.name.casefold() not in disabled
+        )
         self._open_providers: dict[int, str] = {}
         self._failure_counts: dict[int, int] = {}
         self._provider_elapsed: dict[int, float] = {}
+        self._brand = ""
+        self._model = ""
+
+    def configure_identity(self, brand: str, model: str) -> None:
+        self._brand = " ".join((brand or "").split())
+        self._model = " ".join((model or "").split())
+        for provider in self.providers:
+            configure = getattr(provider, "configure_identity", None)
+            if configure is not None:
+                configure(self._brand, self._model)
 
     def __enter__(self) -> "ResilientSearchSession":
         for provider in self.providers:
@@ -2131,7 +2503,21 @@ class ResilientSearchSession:
 
     def search_with_status(self, query: str) -> ProviderQueryOutcome:
         attempts: list[ProviderAttempt] = []
+        collected: list[SearchResultLike] = []
+        productive_provider_found = False
         for index, provider in enumerate(self.providers):
+            # Once a productive SERP path has answered, avoid multiplying
+            # third-party requests. Supplemental independent paths still run
+            # and are merged deterministically in configured provider order.
+            if productive_provider_found and not getattr(provider, "always_run", False):
+                continue
+            effective_query = build_provider_query(
+                provider.name, query, self._brand, self._model,
+            )
+            budget_before = (
+                round(self.budget.remaining_seconds, 6)
+                if self.budget is not None else None
+            )
             timeout_seconds = self.config.timeout_for(provider.name)
             if self.budget is not None:
                 bounded_timeout = self.budget.timeout_for(
@@ -2148,6 +2534,9 @@ class ResilientSearchSession:
                         timeout_seconds=0.0,
                         timed_out=True,
                         budget_exhausted=True,
+                        effective_query=effective_query,
+                        budget_before_seconds=budget_before,
+                        budget_after_seconds=0.0,
                     ))
                     break
                 timeout_seconds = bounded_timeout
@@ -2160,9 +2549,20 @@ class ResilientSearchSession:
                     is_fallback=index > 0,
                     timeout_seconds=timeout_seconds,
                     circuit_open=True,
+                    effective_query=effective_query,
+                    budget_before_seconds=budget_before,
+                    budget_after_seconds=budget_before,
                 ))
                 continue
-            shared_key = f"discovery:{provider.name}"
+            health_scope = provider.name
+            if provider.name == "direct_domain_probe" and self._brand:
+                # Direct probes touch unrelated manufacturer hosts. A timeout
+                # at one brand is not evidence that another brand's domain is
+                # unhealthy, so cross-process health must follow that actual
+                # failure domain instead of globally disabling the provider.
+                brand_scope = re.sub(r"[^a-z0-9]", "", self._brand.casefold())
+                health_scope = f"{provider.name}:{brand_scope}"
+            shared_key = f"discovery:{health_scope}"
             if self.health_store.is_open(shared_key):
                 message = (
                     f"Shared circuit open for {provider.name}: repeated failures "
@@ -2177,6 +2577,9 @@ class ResilientSearchSession:
                     timeout_seconds=timeout_seconds,
                     circuit_open=True,
                     shared_circuit_open=True,
+                    effective_query=effective_query,
+                    budget_before_seconds=budget_before,
+                    budget_after_seconds=budget_before,
                 ))
                 self._open_providers[index] = message
                 continue
@@ -2196,6 +2599,9 @@ class ResilientSearchSession:
                         is_fallback=index > 0,
                         timeout_seconds=timeout_seconds,
                         provider_time_capped=True,
+                        effective_query=effective_query,
+                        budget_before_seconds=budget_before,
+                        budget_after_seconds=budget_before,
                     ))
                     continue
             started = self._clock()
@@ -2204,9 +2610,9 @@ class ResilientSearchSession:
                 try:
                     bounded_search = getattr(provider, "search_with_timeout", None)
                     if bounded_search is not None:
-                        raw_results = tuple(bounded_search(query, timeout_seconds))
+                        raw_results = tuple(bounded_search(effective_query, timeout_seconds))
                     else:
-                        raw_results = tuple(provider.search(query))
+                        raw_results = tuple(provider.search(effective_query))
                     break
                 except Exception as error:
                     status = _provider_status(error)
@@ -2245,6 +2651,12 @@ class ResilientSearchSession:
                         transport=getattr(provider, "last_transport", None),
                         failure_class=failure_class,
                         retried=retried,
+                        effective_query=effective_query,
+                        budget_before_seconds=budget_before,
+                        budget_after_seconds=(
+                            round(self.budget.remaining_seconds, 6)
+                            if self.budget is not None else None
+                        ),
                     ))
                     self._failure_counts[index] = self._failure_counts.get(index, 0) + 1
                     if failure_class in HEALTH_AFFECTING_FAILURE_CLASSES:
@@ -2261,7 +2673,7 @@ class ResilientSearchSession:
                 continue
             duration = max(0.0, self._clock() - started)
             self._provider_elapsed[index] = self._provider_elapsed.get(index, 0.0) + duration
-            results = _normalized_search_results(raw_results, provider.name, query)
+            results = _normalized_search_results(raw_results, provider.name, effective_query)
             raw_result_count = int(
                 getattr(provider, "last_raw_result_count", len(raw_results))
             )
@@ -2290,6 +2702,12 @@ class ResilientSearchSession:
                     deduped_result_count=deduped_result_count,
                     transport=getattr(provider, "last_transport", None),
                     failure_class=FailureClass.TIMEOUT,
+                    effective_query=effective_query,
+                    budget_before_seconds=budget_before,
+                    budget_after_seconds=(
+                        round(self.budget.remaining_seconds, 6)
+                        if self.budget is not None else None
+                    ),
                 ))
                 self._open_providers[index] = f"Circuit open after timeout: {error}"
                 self.health_store.record_failure(shared_key, FailureClass.TIMEOUT)
@@ -2308,10 +2726,16 @@ class ResilientSearchSession:
                     parsed_result_count=parsed_result_count,
                     deduped_result_count=deduped_result_count,
                     transport=getattr(provider, "last_transport", None),
+                    effective_query=effective_query,
+                    budget_before_seconds=budget_before,
+                    budget_after_seconds=(
+                        round(self.budget.remaining_seconds, 6)
+                        if self.budget is not None else None
+                    ),
                 ))
                 continue
             useful, matched_tokens, required_tokens = (
-                _query_result_quality(query, results)
+                _query_result_quality(effective_query, results)
                 if getattr(provider, "quality_gate", False)
                 else (True, 0, 0)
             )
@@ -2332,10 +2756,36 @@ class ResilientSearchSession:
                     parsed_result_count=parsed_result_count,
                     deduped_result_count=deduped_result_count,
                     transport=getattr(provider, "last_transport", None),
+                    effective_query=effective_query,
+                    budget_before_seconds=budget_before,
+                    budget_after_seconds=(
+                        round(self.budget.remaining_seconds, 6)
+                        if self.budget is not None else None
+                    ),
                 ))
                 continue
             self._failure_counts[index] = 0
             self.health_store.record_success(shared_key)
+            exact_model_hit = bool(
+                self._model and any(
+                    model_match(
+                        self._model,
+                        f"{item.title} {item.snippet} {item.url}",
+                    ) == "exact"
+                    for item in results
+                )
+            )
+            official_domain_hit = bool(
+                "official" in effective_query.casefold()
+                and any(
+                    normalize_model(self._brand) in normalize_model(item.title)
+                    for item in results
+                )
+            )
+            ddg_unavailable = not any(
+                item.provider == "duckduckgo_html" and item.status == "success"
+                for item in attempts
+            )
             attempts.append(ProviderAttempt(
                 provider=provider.name,
                 query=query,
@@ -2348,9 +2798,22 @@ class ResilientSearchSession:
                 parsed_result_count=parsed_result_count,
                 deduped_result_count=deduped_result_count,
                 transport=getattr(provider, "last_transport", None),
+                effective_query=effective_query,
+                exact_model_hit=exact_model_hit,
+                official_domain_hit=official_domain_hit,
+                budget_before_seconds=budget_before,
+                budget_after_seconds=(
+                    round(self.budget.remaining_seconds, 6)
+                    if self.budget is not None else None
+                ),
+                independent_success_without_ddg=(
+                    provider.name != "duckduckgo_html" and ddg_unavailable
+                ),
             ))
-            return ProviderQueryOutcome(results, tuple(attempts))
-        return ProviderQueryOutcome((), tuple(attempts))
+            collected.extend(results)
+            if not getattr(provider, "always_run", False):
+                productive_provider_found = True
+        return ProviderQueryOutcome(tuple(collected), tuple(attempts))
 
     def search(self, query: str) -> list[SearchResultLike]:
         outcome = self.search_with_status(query)
@@ -2378,6 +2841,17 @@ def _searcher_name(searcher: object) -> str:
         or getattr(searcher, "__name__", None)
         or "injected"
     )
+
+
+def _configure_searcher_identity(
+    searcher: object,
+    brand: str,
+    model: str,
+) -> None:
+    owner = getattr(searcher, "__self__", None)
+    configure = getattr(owner or searcher, "configure_identity", None)
+    if configure is not None:
+        configure(brand, model)
 
 
 def _search_query(
@@ -2443,6 +2917,33 @@ def _search_status_from_issues(issues: Iterable[DiscoveryIssue]) -> SearchStatus
     return "error"
 
 
+def _annotate_attempt_candidate_counts(
+    attempts: Iterable[ProviderAttempt],
+    candidates: Iterable[Candidate],
+    rejected_candidates: Iterable[Candidate],
+) -> list[ProviderAttempt]:
+    """Attach post-ranking conversion counts to provider telemetry."""
+    accepted: dict[str, set[str]] = {}
+    rejected: dict[str, set[str]] = {}
+    for bucket, items in ((accepted, candidates), (rejected, rejected_candidates)):
+        for candidate in items:
+            providers = {
+                str(item.get("provider") or "")
+                for item in candidate.get("discovery_provenance") or ()
+            } or {str(candidate.get("discovery_provider") or "")}
+            for provider in providers:
+                if provider:
+                    bucket.setdefault(provider, set()).add(candidate["url"])
+    return [
+        replace(
+            attempt,
+            accepted_candidate_count=len(accepted.get(attempt.provider, ())),
+            rejected_candidate_count=len(rejected.get(attempt.provider, ())),
+        )
+        for attempt in attempts
+    ]
+
+
 def _official_query_returned_results(attempts: Iterable[ProviderAttempt]) -> bool:
     """Any provider - not only the first/primary one - may seed official-domain
     evidence for an "official website" query.
@@ -2479,6 +2980,7 @@ def discover_with_status(
     def run(
         active_searcher: Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome],
     ) -> DiscoveryOutcome:
+        _configure_searcher_identity(active_searcher, brand, model)
         cache_key = (normalize_model(brand), market)
         cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
         official_domains = dict(cached or ())
@@ -2552,6 +3054,9 @@ def discover_with_status(
         )
         candidates, rejected_candidates = _partition_relevance_candidates(
             ranked_candidates, brand, model, article,
+        )
+        provider_attempts = _annotate_attempt_candidate_counts(
+            provider_attempts, candidates, rejected_candidates,
         )
         if issues and raw_results:
             status: SearchStatus = "partial"
@@ -2687,6 +3192,7 @@ def discover_identity_query_with_status(
     def run(
         active_searcher: Callable[[str], Iterable[SearchResultLike] | ProviderQueryOutcome],
     ) -> DiscoveryOutcome:
+        _configure_searcher_identity(active_searcher, identity.brand, model)
         cache_key = (normalize_model(identity.brand), market)
         cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
         official_domains = dict(cached or ())
@@ -2763,6 +3269,9 @@ def discover_identity_query_with_status(
         )
         candidates, rejected_candidates = _partition_relevance_candidates(
             ranked_candidates, identity.brand, model, article,
+        )
+        provider_attempts = _annotate_attempt_candidate_counts(
+            provider_attempts, candidates, rejected_candidates,
         )
         if issues and raw_results:
             status: SearchStatus = "partial"
