@@ -27,7 +27,7 @@ from services.product_verifier import ProductVerifierService, VerifyProductReque
 
 SCHEMA_VERSION = "1.0"
 SUPPORTED_CATEGORIES = {
-    "cooktop", "smartphone", "sewing_machine", "air_fryer", "wet_dry_vacuum",
+    "cooktop", "smartphone", "laptop", "sewing_machine", "air_fryer", "wet_dry_vacuum",
 }
 SUPPORTED_MARKETS = {"DE", "GB", "RU", "US", "global"}
 QUALITY_STATUSES = {"verified", "partial", "insufficient", "conflicted"}
