@@ -6,7 +6,15 @@ import unittest
 from unittest.mock import patch
 
 from core.category import CategoryResult
-from core.export import CSV_COLUMNS, export_profile_csv, export_profile_json, profile_rows, profile_to_dict
+from core.export import (
+    CSV_COLUMNS,
+    CSV_RESULT_COLUMNS,
+    export_profile_csv,
+    export_profile_json,
+    export_result_csv,
+    profile_rows,
+    profile_to_dict,
+)
 from core.identity import ProductIdentity
 from core.mapping import CanonicalAttribute
 from core.profile import ProfileInvariantError, build_final_profile, validate_final_profile
@@ -393,6 +401,63 @@ class CsvExportTests(unittest.TestCase):
     def test_repeated_csv_export_is_byte_stable(self):
         profile = final_profile([definition("power")], [candidate("power", "1000")])
         self.assertEqual(export_profile_csv(profile), export_profile_csv(profile))
+
+
+class ResultCsvExportTests(unittest.TestCase):
+    """Stage 30: the DTO-agnostic CSV used by the Telegram /export command.
+
+    Deliberately independent of FinalProductProfile -- rows are plain dicts,
+    since this is the function the bot layer (which must never import
+    core.profile) calls into via bot/export.py.
+    """
+
+    def _row(self, **overrides):
+        row = {
+            "canonical_name": "power", "display_name": "Power",
+            "value_text": "1000 W", "status": "Confirmed",
+            "source": "https://brand.example/power", "evidence": "power: 1000 W",
+            "source_type": "manufacturer", "authority_status": "verified",
+            "confidence": "high",
+        }
+        row.update(overrides)
+        return row
+
+    def test_columns_include_brand_model_category_plus_the_evidence_contract(self):
+        header = export_result_csv(
+            brand="Acme", model="X100", category="Cooktop", rows=[self._row()],
+        ).splitlines()[0].split(",")
+        self.assertEqual(tuple(header), CSV_RESULT_COLUMNS)
+        for expected in (
+            "Brand", "Model", "Category", "Attribute", "Value", "Status",
+            "Source", "Evidence", "Confidence", "Authority", "SourceType",
+        ):
+            self.assertIn(expected, header)
+
+    def test_brand_model_category_are_repeated_on_every_row(self):
+        rows = list(csv.DictReader(StringIO(export_result_csv(
+            brand="Acme", model="X100", category="Cooktop",
+            rows=[self._row(canonical_name="power"), self._row(canonical_name="voltage")],
+        ))))
+        self.assertEqual(len(rows), 2)
+        for row in rows:
+            self.assertEqual(row["Brand"], "Acme")
+            self.assertEqual(row["Model"], "X100")
+            self.assertEqual(row["Category"], "Cooktop")
+
+    def test_export_is_deterministic(self):
+        rows = [self._row()]
+        first = export_result_csv(brand="Acme", model="X100", category="Cooktop", rows=rows)
+        second = export_result_csv(brand="Acme", model="X100", category="Cooktop", rows=rows)
+        self.assertEqual(first, second)
+
+    def test_missing_optional_fields_render_as_empty_not_none(self):
+        exported = export_result_csv(
+            brand="Acme", model="X100", category="Cooktop",
+            rows=[self._row(source="", evidence="", source_type="", authority_status="")],
+        )
+        rows = list(csv.DictReader(StringIO(exported)))
+        self.assertEqual(rows[0]["Source"], "")
+        self.assertNotIn("None", exported)
 
 
 if __name__ == "__main__":

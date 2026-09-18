@@ -15,7 +15,12 @@ from __future__ import annotations
 import re
 
 from bot.jobs import Job
-from services.product_verifier import ServiceAttribute, VerifyProductRequest, VerifyProductResult
+from services.product_verifier import (
+    ServiceAttribute,
+    ServiceEvidence,
+    VerifyProductRequest,
+    VerifyProductResult,
+)
 
 
 # Telegram's hard cap is 4096 UTF-16 code units per message.  The default
@@ -27,10 +32,10 @@ DEFAULT_MAX_ATTRIBUTES = 12
 DEFAULT_MAX_REASONS = 2
 
 QUALITY_LABELS = {
-    "verified": "✅ Подтверждено (verified)",
-    "partial": "\U0001f7e1 Частично подтверждено (partial)",
-    "insufficient": "⚠️ Недостаточно данных (insufficient)",
-    "conflicted": "❗ Обнаружены противоречия (conflicted)",
+    "verified": "✅ Данные подтверждены",
+    "partial": "\U0001f7e1 Данные подтверждены частично",
+    "insufficient": "⚠️ Недостаточно данных для проверки",
+    "conflicted": "❗ Источники расходятся по части характеристик",
 }
 
 CONFIDENCE_LABELS = {"high": "высокая", "medium": "средняя", "low": "низкая"}
@@ -81,7 +86,7 @@ _IDENTITY_FIELD_LABELS = {
 }
 
 
-def _format_value(value: object, unit: str | None) -> str:
+def format_attribute_value(value: object, unit: str | None) -> str:
     if value is None:
         return "—"
     if isinstance(value, dict) and {"height", "width", "depth", "unit"} <= value.keys():
@@ -131,15 +136,43 @@ def _sorted_attributes(attributes: list[ServiceAttribute]) -> list[ServiceAttrib
     )
 
 
+# Stage 30 provenance: source_type values are set by core.discovery.classify_source
+# (manufacturer/official_document = official; marketplace/retailer/
+# specialized_reference/other/unknown = secondary). Only this fixed set maps
+# to "official" -- everything else, including an unrecognized or future
+# source_type string, safely falls back to "secondary" rather than ever
+# echoing the raw internal value to the user.
+_OFFICIAL_SOURCE_TYPES = {"manufacturer", "official_document"}
+
+
+def _provenance_suffix(evidence: ServiceEvidence) -> str:
+    kind = "официальный источник" if evidence.source_type in _OFFICIAL_SOURCE_TYPES else "сторонний источник"
+    source = (evidence.source or "").strip()
+    return f"\U0001f517 {kind}: {source}" if source else f"\U0001f517 {kind}"
+
+
+def _confirmed_provenance_line(attribute: ServiceAttribute) -> str | None:
+    """One compact provenance line for a Confirmed attribute, if evidence exists.
+
+    Only Confirmed attributes get provenance (per Stage 30 spec) -- an
+    Unresolved/Conflict attribute has no single confirming source to show.
+    """
+    if not attribute.supporting_sources:
+        return None
+    return f"    {_provenance_suffix(attribute.supporting_sources[0])}"
+
+
 def _attribute_line(attribute: ServiceAttribute) -> str:
     if attribute.status == "Confirmed":
         icon = _STATUS_ICON["Confirmed"]
-        value_text = _format_value(attribute.value, attribute.unit)
-        return f"{icon} {attribute.display_name}: {value_text}"
+        value_text = format_attribute_value(attribute.value, attribute.unit)
+        line = f"{icon} {attribute.display_name}: {value_text}"
+        provenance = _confirmed_provenance_line(attribute)
+        return f"{line}\n{provenance}" if provenance else line
     if attribute.status == "Conflict":
         icon = _STATUS_ICON["Conflict"]
-        return f"{icon} {attribute.display_name}: конфликт данных"
-    value_text = _format_value(attribute.value, attribute.unit)
+        return f"{icon} {attribute.display_name}: данные расходятся"
+    value_text = format_attribute_value(attribute.value, attribute.unit)
     return f"\U0001f539 {attribute.display_name}: {value_text} (не подтверждено)"
 
 
@@ -258,7 +291,7 @@ def _status_section_lines(
     for name in conflict_names:
         attribute = by_name.get(name)
         display_name = attribute.display_name if attribute else _fallback_display_name(name)
-        conflict_lines.append(f"❗ {display_name}: конфликт данных")
+        conflict_lines.append(f"❗ {display_name}: данные расходятся")
     add_section("❗ Конфликты", conflict_lines)
 
     unresolved_lines = []
@@ -266,7 +299,7 @@ def _status_section_lines(
         attribute = by_name.get(name)
         display_name = attribute.display_name if attribute else _fallback_display_name(name)
         if attribute is not None and attribute.value is not None:
-            value_text = _format_value(attribute.value, attribute.unit)
+            value_text = format_attribute_value(attribute.value, attribute.unit)
             unresolved_lines.append(
                 f"🔹 {display_name}: {value_text} (не подтверждено)"
             )

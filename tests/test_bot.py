@@ -30,11 +30,13 @@ from bot.formatters import (
     utf16_code_units,
 )
 from bot.handlers import (
+    EXPORT_NO_RESULT_MESSAGE,
     HELP_MESSAGE,
     PARSE_ERROR_MESSAGE,
     START_MESSAGE,
     _safe_reply,
     build_cancel_command,
+    build_export_command,
     build_status_command,
     build_verify_command,
     handle_product_query,
@@ -51,6 +53,7 @@ from services.product_verifier import (
     ProductVerifierService,
     ServiceAttribute,
     ServiceCategory,
+    ServiceEvidence,
     ServiceIdentity,
     ServiceQuality,
     VerifyProductError,
@@ -189,15 +192,17 @@ class FormatterQualityStatusTests(unittest.TestCase):
         self.assertEqual(len(set(labels.values())), 4)
 
     def test_conflicted_status_is_shown_not_hidden(self):
+        # Stage 30: the scary bare English word is gone -- replaced with a
+        # plain-language explanation of what "conflicted" actually means.
         result = make_result(status="conflicted")
         text = "\n".join(format_result(result))
-        self.assertIn("conflicted", text)
-        self.assertIn("противоречия", text)
+        self.assertNotIn("conflicted", text)
+        self.assertIn("расходятся", text)
 
     def test_insufficient_status_is_shown_not_hidden(self):
         result = make_result(status="insufficient")
         text = "\n".join(format_result(result))
-        self.assertIn("insufficient", text)
+        self.assertNotIn("insufficient", text)
         self.assertIn("Недостаточно", text)
 
     def test_structured_status_lists_and_insufficient_reasons_are_visible(self):
@@ -238,7 +243,7 @@ class FormatterQualityStatusTests(unittest.TestCase):
         self.assertIn("Конфликты (1)", text)
         self.assertIn("Не определено (1)", text)
         self.assertIn("Power: 1000 W", text)
-        self.assertIn("Voltage: конфликт данных", text)
+        self.assertIn("Voltage: данные расходятся", text)
         self.assertIn("Timer: yes (не подтверждено)", text)
         self.assertIn("Core identity is not confirmed.", text)
         self.assertIn("Too few trusted sources.", text)
@@ -343,6 +348,100 @@ class FormatterQualityStatusTests(unittest.TestCase):
         verified_text = "\n".join(format_result(make_result(status="verified")))
         partial_text = "\n".join(format_result(make_result(status="partial")))
         self.assertNotEqual(verified_text.split("\n")[2], partial_text.split("\n")[2])
+
+
+class FormatterProvenanceTests(unittest.TestCase):
+    """Stage 30: confirmed attributes show source/official-secondary/URL/status,
+    and only that -- never a raw internal code, provider name, or debug field."""
+
+    def _result_with_attribute(self, attribute: ServiceAttribute) -> VerifyProductResult:
+        base = make_result(status="partial", attribute_count=0)
+        return replace(base, attributes=(attribute,))
+
+    def test_manufacturer_source_is_labeled_official_with_url(self):
+        attribute = ServiceAttribute(
+            canonical_name="power", display_name="Power", value="1000", unit="W",
+            status="Confirmed", confidence="high", source="https://brand.example/power",
+            evidence="power: 1000 W", priority="high", expected=True, discovered=False,
+            supporting_sources=(
+                ServiceEvidence(
+                    value="1000", unit="W", source="https://brand.example/power",
+                    source_type="manufacturer", evidence="power: 1000 W",
+                    authority_status="verified", confidence="high", origin="fetch",
+                ),
+            ),
+        )
+        text = "\n".join(format_result(self._result_with_attribute(attribute)))
+        self.assertIn("официальный источник: https://brand.example/power", text)
+
+    def test_retailer_source_is_labeled_secondary(self):
+        attribute = ServiceAttribute(
+            canonical_name="power", display_name="Power", value="1000", unit="W",
+            status="Confirmed", confidence="high", source="https://shop.example/power",
+            evidence="power: 1000 W", priority="high", expected=True, discovered=False,
+            supporting_sources=(
+                ServiceEvidence(
+                    value="1000", unit="W", source="https://shop.example/power",
+                    source_type="retailer", evidence="power: 1000 W",
+                    authority_status="unverified", confidence="medium", origin="fetch",
+                ),
+            ),
+        )
+        text = "\n".join(format_result(self._result_with_attribute(attribute)))
+        self.assertIn("сторонний источник: https://shop.example/power", text)
+        self.assertNotIn("официальный источник", text)
+
+    def test_unrecognized_source_type_falls_back_to_secondary_and_never_leaks_raw_value(self):
+        attribute = ServiceAttribute(
+            canonical_name="power", display_name="Power", value="1000", unit="W",
+            status="Confirmed", confidence="high", source="https://example.test/power",
+            evidence="power: 1000 W", priority="high", expected=True, discovered=False,
+            supporting_sources=(
+                ServiceEvidence(
+                    value="1000", unit="W", source="https://example.test/power",
+                    source_type="circuit_open_waf_captcha", evidence="power: 1000 W",
+                    authority_status="unknown", confidence="low", origin="fetch",
+                ),
+            ),
+        )
+        text = "\n".join(format_result(self._result_with_attribute(attribute)))
+        self.assertIn("сторонний источник", text)
+        self.assertNotIn("circuit_open_waf_captcha", text)
+
+    def test_confirmed_without_supporting_sources_has_no_provenance_line(self):
+        attribute = ServiceAttribute(
+            canonical_name="power", display_name="Power", value="1000", unit="W",
+            status="Confirmed", confidence="high", source="https://example.test/power",
+            evidence="power: 1000 W", priority="high", expected=True, discovered=False,
+        )
+        text = "\n".join(format_result(self._result_with_attribute(attribute)))
+        self.assertNotIn("источник", text)
+
+    def test_unconfirmed_attributes_never_show_provenance(self):
+        conflict = ServiceAttribute(
+            canonical_name="voltage", display_name="Voltage", value=None, unit="V",
+            status="Conflict", confidence="low", source=None, evidence=None,
+            priority="high", expected=True, discovered=False,
+            supporting_sources=(
+                ServiceEvidence(
+                    value="220", unit="V", source="https://one.example/voltage",
+                    source_type="manufacturer", evidence="voltage: 220 V",
+                    authority_status="verified", confidence="high", origin="fetch",
+                ),
+            ),
+        )
+        text = "\n".join(format_result(self._result_with_attribute(conflict)))
+        self.assertNotIn("источник", text)
+
+    def test_internal_metadata_never_reaches_the_formatted_message(self):
+        base = make_result(status="partial")
+        result = replace(base, metadata={
+            "provider": "duckduckgo_lite", "circuit_state": "open",
+            "waf_triggered": True, "captcha_required": True,
+        })
+        text = "\n".join(format_result(result)).casefold()
+        for leaked in ("duckduckgo", "circuit", "waf", "captcha", "provider"):
+            self.assertNotIn(leaked, text)
 
 
 class FormatterCacheIndicatorTests(unittest.TestCase):
@@ -580,7 +679,7 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
                 break
             await asyncio.sleep(0.01)
         self.assertEqual(len(service.calls), 1)
-        self.assertTrue(any("verified" in message for message in reply.messages))
+        self.assertTrue(any("Данные подтверждены" in message for message in reply.messages))
 
     async def test_a_raising_fake_service_produces_a_safe_reply_not_a_crash(self):
         class BrokenService:
@@ -640,16 +739,26 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
 # ---------------------------------------------------------------------------
 
 class FakeMessage:
-    def __init__(self, text: str | None = None, *, chat_id: int = 42, fail_send: bool = False):
+    def __init__(
+        self, text: str | None = None, *, chat_id: int = 42,
+        fail_send: bool = False, fail_document: bool = False,
+    ):
         self.text = text
         self.chat_id = chat_id
         self.sent: list[str] = []
+        self.documents: list[tuple[bytes, str | None]] = []
         self._fail_send = fail_send
+        self._fail_document = fail_document
 
     async def reply_text(self, text: str) -> None:
         if self._fail_send:
             raise ConnectionError("Telegram API unreachable")
         self.sent.append(text)
+
+    async def reply_document(self, document: bytes, filename: str | None = None) -> None:
+        if self._fail_document:
+            raise ConnectionError("Telegram API unreachable")
+        self.documents.append((document, filename))
 
 
 class FakeUpdate:
@@ -667,7 +776,7 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
             for handler in handlers
             for command in (getattr(handler, "commands", None) or ())
         }
-        self.assertEqual(registered_commands, {"start", "help", "status", "cancel"})
+        self.assertEqual(registered_commands, {"start", "help", "status", "cancel", "export"})
         text_handlers = [
             handler for handler in handlers if type(handler).__name__ == "MessageHandler"
         ]
@@ -796,6 +905,111 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(manager.active_jobs_for_chat(9), [])
 
 
+async def _wait_for_completed_job(manager: JobManager, chat_id: int) -> None:
+    for _ in range(50):
+        if manager.last_export_job_for_chat(chat_id) is not None:
+            return
+        await asyncio.sleep(0.01)
+    raise AssertionError(f"no completed job for chat {chat_id} after waiting")
+
+
+class ExportCommandTests(unittest.IsolatedAsyncioTestCase):
+    """Stage 30: /export sends the last successful result as CSV."""
+
+    async def test_export_without_a_result_replies_with_a_clear_message(self):
+        manager = JobManager(TrackingFakeService(make_result()), max_concurrent_jobs=1)
+        export_command = build_export_command(manager)
+        message = FakeMessage(chat_id=30)
+        await export_command(FakeUpdate(message), None)
+        self.assertEqual(message.sent, [EXPORT_NO_RESULT_MESSAGE])
+        self.assertEqual(message.documents, [])
+
+    async def test_export_after_a_successful_result_sends_a_csv_document(self):
+        service = TrackingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
+        message = FakeMessage(text="Bosch PUE611BB5E", chat_id=31)
+        await verify_command(FakeUpdate(message), None)
+        await _wait_for_completed_job(manager, 31)
+
+        export_command = build_export_command(manager)
+        export_message = FakeMessage(chat_id=31)
+        await export_command(FakeUpdate(export_message), None)
+
+        self.assertEqual(len(export_message.documents), 1)
+        data, filename = export_message.documents[0]
+        self.assertTrue(filename.endswith(".csv"))
+        text = data.decode("utf-8-sig")
+        self.assertIn("Brand", text.splitlines()[0])
+        self.assertIn("Acme", text)  # make_result()'s fixed identity.brand
+        self.assertIn("X100", text)  # make_result()'s fixed identity.commercial_model
+        self.assertIn("Cooktop", text)  # make_result()'s fixed category.category_name
+
+    async def test_export_csv_is_deterministic_across_calls(self):
+        service = TrackingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
+        message = FakeMessage(text="Bosch PUE611BB5E", chat_id=32)
+        await verify_command(FakeUpdate(message), None)
+        await _wait_for_completed_job(manager, 32)
+
+        export_command = build_export_command(manager)
+        first, second = FakeMessage(chat_id=32), FakeMessage(chat_id=32)
+        await export_command(FakeUpdate(first), None)
+        await export_command(FakeUpdate(second), None)
+        self.assertEqual(first.documents[0][0], second.documents[0][0])
+
+    async def test_export_is_isolated_per_chat(self):
+        service_a = TrackingFakeService(make_result(status="verified"))
+        service_b = TrackingFakeService(make_result(status="partial"))
+        manager_a = JobManager(service_a, max_concurrent_jobs=1)
+        manager_b = JobManager(service_b, max_concurrent_jobs=1)
+
+        await build_verify_command(manager_a)(
+            FakeUpdate(FakeMessage(text="Bosch PUE611BB5E", chat_id=40)), None,
+        )
+        await _wait_for_completed_job(manager_a, 40)
+
+        # Chat 41 never submitted anything to manager_a: no cross-chat leak.
+        export_command = build_export_command(manager_a)
+        other_chat_message = FakeMessage(chat_id=41)
+        await export_command(FakeUpdate(other_chat_message), None)
+        self.assertEqual(other_chat_message.documents, [])
+        self.assertEqual(other_chat_message.sent, [EXPORT_NO_RESULT_MESSAGE])
+
+    async def test_failed_job_does_not_overwrite_the_last_usable_export(self):
+        class TogglingFakeService:
+            """Succeeds once, then raises -- matches ProductVerifierService's
+            duck-typed one-argument shape (see bot/jobs.py's _run branch)."""
+
+            def __init__(self, first_result: VerifyProductResult) -> None:
+                self._outcomes: list[object] = [first_result, RuntimeError("network down")]
+
+            def verify(self, request: VerifyProductRequest) -> VerifyProductResult:
+                outcome = self._outcomes.pop(0)
+                if isinstance(outcome, Exception):
+                    raise outcome
+                return outcome
+
+        service = TogglingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        verify_command = build_verify_command(manager)
+
+        await verify_command(
+            FakeUpdate(FakeMessage(text="Bosch PUE611BB5E", chat_id=33)), None,
+        )
+        await _wait_for_completed_job(manager, 33)
+        good_job = manager.last_export_job_for_chat(33)
+        self.assertIsNotNone(good_job)
+
+        await verify_command(FakeUpdate(FakeMessage(text="Acme Y1", chat_id=33)), None)
+        for _ in range(50):
+            if not manager.active_jobs_for_chat(33):
+                break
+            await asyncio.sleep(0.01)
+        self.assertIs(manager.last_export_job_for_chat(33), good_job)
+
+
 # ---------------------------------------------------------------------------
 # Architecture: the bot layer must depend only on the stable service boundary
 # ---------------------------------------------------------------------------
@@ -811,7 +1025,7 @@ class ArchitectureBoundaryTests(unittest.TestCase):
         "run_product_workflow", "ValidatedFact", "ValidatedProductProfile",
     }
     BOT_MODULES = (
-        "bot/handlers.py", "bot/formatters.py", "bot/parser.py",
+        "bot/handlers.py", "bot/formatters.py", "bot/export.py", "bot/parser.py",
         "bot/telegram_bot.py", "bot/service_factory.py", "bot/jobs.py",
     )
 

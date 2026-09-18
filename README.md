@@ -88,6 +88,16 @@ No other module reads `os.environ`/`os.getenv` for application settings.
 | `PRODUCT_VERIFIER_LOG_LEVEL` | No | `INFO` | Central application log level: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`. |
 | `PRODUCT_VERIFIER_LOG_FORMAT` | No | `text` | Operational log format: `text` or single-line `json`. |
 
+Two Stage 25 discovery-layer settings are a deliberate, pre-existing
+exception: `core/provider_health.py` and `core/discovery.py` read them
+directly rather than through `config.py` (see
+`tests/test_config.py`'s `EnvironmentReadingBoundaryTests`).
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `PDV_PROVIDER_HEALTH_PATH` | No | unset (breaker disabled) | Writable file path for the cross-process discovery-provider circuit breaker. Unset means every provider is always tried live. |
+| `PDV_DISABLED_DISCOVERY_PROVIDERS` | No | unset | Comma-separated discovery provider names to skip outright. The MVP production profile (`.env.example`, `compose.yaml`) sets this to `duckduckgo_lite` -- Stage 29's blind benchmark showed it contributes 0 accepted evidence while still consuming full retrieval budget. |
+
 Invalid values (non-numeric, or below the stated minimum) fail fast with a
 `ConfigurationError`, before the bot starts polling. The Telegram token is
 validated separately from the rest of the settings, so a plain
@@ -110,7 +120,11 @@ Commands:
 - `/start` — onboarding and a short request example;
 - `/help` — formats and command summary;
 - `/status` — current queued/running jobs for the chat;
-- `/cancel` — cancel queued jobs and discard results of running jobs.
+- `/cancel` — cancel queued jobs and discard results of running jobs;
+- `/export` — CSV of the chat's last successfully completed verification
+  (brand, model, category, and per-attribute status/source/evidence/
+  confidence/authority). A later failed check never overwrites this until
+  another one succeeds.
 
 Verification runs as a **background job**, not inline in the handler: you
 get an immediate "Принял..." reply, then a "started" update once processing

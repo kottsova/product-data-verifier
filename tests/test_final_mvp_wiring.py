@@ -114,7 +114,8 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
             definition("timer"),
         ])
         joined = await self._run_profile(profile, chat_id=20)
-        self.assertIn("insufficient", joined)
+        self.assertNotIn("insufficient", joined)
+        self.assertIn("Недостаточно данных", joined)
         self.assertIn("Не определено (2)", joined)
         self.assertIn("power", joined.casefold())
         self.assertIn("timer", joined.casefold())
@@ -138,12 +139,13 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
             ],
         )
         joined = await self._run_profile(profile, chat_id=21)
-        self.assertIn("conflicted", joined)
+        self.assertNotIn("conflicted", joined)
+        self.assertIn("расходятся", joined)
         self.assertIn("Подтверждено (3)", joined)
         self.assertIn("Конфликты (1)", joined)
         self.assertIn("Не определено (1)", joined)
         self.assertIn("power: 1000 w", joined.casefold())
-        self.assertIn("voltage: конфликт данных", joined.casefold())
+        self.assertIn("voltage: данные расходятся", joined.casefold())
         self.assertIn("timer", joined.casefold())
 
 

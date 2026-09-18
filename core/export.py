@@ -5,7 +5,7 @@ from __future__ import annotations
 import csv
 from io import StringIO
 import json
-from typing import Iterable
+from typing import Iterable, Mapping
 
 from core.mapping import DimensionValue
 from core.profile import (
@@ -274,4 +274,59 @@ def export_profile_csv(profile: FinalProductProfile) -> str:
     writer = csv.DictWriter(output, fieldnames=CSV_COLUMNS, lineterminator="\n")
     writer.writeheader()
     writer.writerows(profile_rows(profile))
+    return output.getvalue()
+
+
+# ---------------------------------------------------------------------------
+# Stage 30: /export CSV for the stable service boundary (VerifyProductResult).
+#
+# Deliberately independent of FinalProductProfile/ProfileAttribute: rows are
+# plain dicts so this stays safe to call from the bot layer, which must never
+# import core.profile/core.workflow/core.quality (see
+# tests.test_bot.ArchitectureBoundaryTests). bot/export.py builds these dicts
+# from services.product_verifier's ServiceAttribute/ServiceEvidence.
+# ---------------------------------------------------------------------------
+
+CSV_RESULT_COLUMNS = (
+    "Brand",
+    "Model",
+    "Category",
+    "Attribute",
+    "DisplayName",
+    "Value",
+    "Status",
+    "Source",
+    "Evidence",
+    "Confidence",
+    "Authority",
+    "SourceType",
+)
+
+
+def _result_row(brand: str, model: str, category: str, attribute: Mapping[str, object]) -> dict[str, str]:
+    return {
+        "Brand": brand,
+        "Model": model,
+        "Category": category,
+        "Attribute": str(attribute.get("canonical_name", "")),
+        "DisplayName": str(attribute.get("display_name", "")),
+        "Value": str(attribute.get("value_text", "")),
+        "Status": str(attribute.get("status", "")),
+        "Source": str(attribute.get("source") or ""),
+        "Evidence": str(attribute.get("evidence") or ""),
+        "Confidence": str(attribute.get("confidence", "")),
+        "Authority": str(attribute.get("authority_status", "")),
+        "SourceType": str(attribute.get("source_type", "")),
+    }
+
+
+def export_result_csv(
+    *, brand: str, model: str, category: str, rows: Iterable[Mapping[str, object]],
+) -> str:
+    """Deterministic CSV over already-flattened, plain-dict attribute rows."""
+    output = StringIO(newline="")
+    writer = csv.DictWriter(output, fieldnames=CSV_RESULT_COLUMNS, lineterminator="\n")
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(_result_row(brand, model, category, row))
     return output.getvalue()

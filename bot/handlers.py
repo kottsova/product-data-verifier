@@ -16,8 +16,10 @@ services.product_verifier.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Awaitable, Callable
 
+from bot.export import export_result_csv
 from bot.formatters import (
     DEFAULT_MAX_MESSAGE_LENGTH,
     chunk_lines,
@@ -62,7 +64,8 @@ HELP_MESSAGE = (
     "я пришлю сообщение, когда результат будет готов.\n\n"
     "Команды:\n"
     "/status — показать ваши текущие (queued/running) задачи\n"
-    "/cancel — отменить ваши активные задачи"
+    "/cancel — отменить ваши активные задачи\n"
+    "/export — скачать CSV с результатом последней проверки"
 )
 
 PARSE_ERROR_MESSAGE = (
@@ -72,6 +75,13 @@ PARSE_ERROR_MESSAGE = (
 )
 
 SHUTTING_DOWN_MESSAGE = "Бот перезапускается, попробуйте отправить запрос через минуту."
+
+EXPORT_NO_RESULT_MESSAGE = (
+    "У вас пока нет готового результата проверки для экспорта. "
+    "Сначала отправьте запрос на проверку товара."
+)
+
+_EXPORT_FILENAME_SAFE_PATTERN = re.compile(r"[^0-9A-Za-zА-Яа-яЁё]+")
 
 
 async def handle_product_query(
@@ -142,6 +152,24 @@ async def _safe_reply(message: object, text: str) -> None:
         )
 
 
+async def _safe_reply_document(message: object, data: bytes, filename: str) -> None:
+    """Adapter-level guard: a failed Telegram document send must not crash the bot."""
+    try:
+        await message.reply_document(document=data, filename=filename)  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001 - Telegram/API send failures are logged, not raised
+        chat_id = getattr(message, "chat_id", None)
+        log_exception_event(
+            logger, "export_send_failure",
+            chat=scoped_id(chat_id) if chat_id is not None else "unknown",
+        )
+
+
+def _export_filename(job: Job) -> str:
+    raw = f"{job.request.brand}_{job.request.model}"
+    safe = _EXPORT_FILENAME_SAFE_PATTERN.sub("_", raw).strip("_") or "product"
+    return f"verification_{safe}.csv"
+
+
 def _chat_id(update) -> int:  # noqa: ANN001 - telegram.Update, kept duck-typed for testability
     return update.message.chat_id
 
@@ -193,3 +221,23 @@ def build_cancel_command(manager: JobManager):
         await _safe_reply(update.message, format_cancelled(count))
 
     return cancel_command
+
+
+def build_export_command(manager: JobManager):
+    async def export_command(update, context) -> None:  # noqa: ANN001
+        chat_id = _chat_id(update)
+        job = manager.last_export_job_for_chat(chat_id)
+        if job is None or job.result is None:
+            log_event(logger, logging.INFO, "export_no_result", chat=scoped_id(chat_id))
+            await _safe_reply(update.message, EXPORT_NO_RESULT_MESSAGE)
+            return
+        csv_text = export_result_csv(job.result)
+        log_event(
+            logger, logging.INFO, "export_sent",
+            chat=scoped_id(chat_id), job_id=job.id,
+        )
+        await _safe_reply_document(
+            update.message, csv_text.encode("utf-8-sig"), _export_filename(job),
+        )
+
+    return export_command

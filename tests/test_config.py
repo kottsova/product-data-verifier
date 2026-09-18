@@ -193,6 +193,7 @@ class EnvironmentReadingBoundaryTests(unittest.TestCase):
         "app.py",
         "bot/handlers.py",
         "bot/formatters.py",
+        "bot/export.py",
         "bot/parser.py",
         "bot/telegram_bot.py",
         "bot/service_factory.py",
@@ -230,6 +231,39 @@ class EnvironmentReadingBoundaryTests(unittest.TestCase):
         root = Path(__file__).resolve().parent.parent
         source = (root / "config.py").read_text(encoding="utf-8")
         self.assertTrue(self._reads_os_environment(source))
+
+
+# ---------------------------------------------------------------------------
+# Stage 30: MVP production provider profile (.env.example / compose.yaml)
+# ---------------------------------------------------------------------------
+
+class ProductionProviderProfileTests(unittest.TestCase):
+    """core/provider_health.py and core/discovery.py read these two env vars
+    directly (see EnvironmentReadingBoundaryTests above) -- so "enabled in
+    production" means present in the shipped env templates, not in
+    config.py. This is what Stage 30 actually changed."""
+
+    def _env_example(self) -> str:
+        root = Path(__file__).resolve().parent.parent
+        return (root / ".env.example").read_text(encoding="utf-8")
+
+    def _compose(self) -> str:
+        root = Path(__file__).resolve().parent.parent
+        return (root / "compose.yaml").read_text(encoding="utf-8")
+
+    def test_env_example_sets_a_provider_health_path(self):
+        self.assertIn("PDV_PROVIDER_HEALTH_PATH=", self._env_example())
+
+    def test_env_example_disables_duckduckgo_lite(self):
+        self.assertIn("PDV_DISABLED_DISCOVERY_PROVIDERS=duckduckgo_lite", self._env_example())
+
+    def test_compose_sets_a_provider_health_path(self):
+        self.assertIn("PDV_PROVIDER_HEALTH_PATH:", self._compose())
+
+    def test_compose_disables_duckduckgo_lite_by_default(self):
+        compose = self._compose()
+        self.assertIn("PDV_DISABLED_DISCOVERY_PROVIDERS:", compose)
+        self.assertIn("duckduckgo_lite", compose)
 
 
 if __name__ == "__main__":

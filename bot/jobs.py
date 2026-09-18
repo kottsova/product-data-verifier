@@ -120,6 +120,7 @@ class JobManager:
         self._jobs: dict[str, Job] = {}
         self._chat_active: dict[int, list[str]] = {}
         self._chat_terminal_history: dict[int, list[str]] = {}
+        self._chat_last_success: dict[int, Job] = {}
         self._active_by_identity: dict[tuple, str] = {}
         self._tasks: dict[str, asyncio.Task] = {}
         self._callbacks: dict[str, OnUpdate] = {}
@@ -140,6 +141,16 @@ class JobManager:
             self._jobs[job_id] for job_id in self._chat_active.get(chat_id, ())
             if job_id in self._jobs
         ]
+
+    def last_export_job_for_chat(self, chat_id: int) -> Job | None:
+        """The most recent successfully completed job for a chat, for /export.
+
+        Tracked independently of _chat_terminal_history's bounded eviction so
+        a burst of later failed/cancelled jobs never hides a still-usable
+        result (Stage 30: a failed result must not overwrite the last usable
+        export).
+        """
+        return self._chat_last_success.get(chat_id)
 
     def active_job_count(self) -> int:
         """Stage 15 diagnostics: global active (queued+running) job count."""
@@ -316,6 +327,8 @@ class JobManager:
         if state == "completed":
             self._metrics.increment("jobs_completed")
             log_event(logger, logging.INFO, "job_completed", **fields)
+            if result is not None and result.success:
+                self._chat_last_success[job.chat_id] = job
         elif state == "failed":
             self._metrics.increment("jobs_failed")
             log_event(logger, logging.WARNING, "job_failed", had_error=bool(error), **fields)

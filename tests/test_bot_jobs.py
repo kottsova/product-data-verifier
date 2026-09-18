@@ -394,6 +394,68 @@ class RetentionTests(unittest.IsolatedAsyncioTestCase):
         self.assertIsNone(manager.get_job(job.id))
 
 
+class LastExportJobTests(unittest.IsolatedAsyncioTestCase):
+    """Stage 30: last_export_job_for_chat backs the /export command."""
+
+    async def test_no_completed_job_returns_none(self):
+        manager = JobManager(ImmediateService(success_result), max_concurrent_jobs=1)
+        self.assertIsNone(manager.last_export_job_for_chat(1))
+
+    async def test_successful_job_becomes_the_export_candidate(self):
+        service = ImmediateService(success_result)
+        manager = JobManager(service, max_concurrent_jobs=1)
+        recorder = UpdateRecorder()
+        job, _ = await manager.submit(1, request(), on_update=recorder)
+        await recorder.wait()
+        self.assertIs(manager.last_export_job_for_chat(1), job)
+
+    async def test_failed_job_never_becomes_the_export_candidate(self):
+        service = RaisingService(RuntimeError("boom"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        recorder = UpdateRecorder()
+        await manager.submit(1, request(), on_update=recorder)
+        await recorder.wait()
+        self.assertIsNone(manager.last_export_job_for_chat(1))
+
+    async def test_survives_eviction_from_bounded_terminal_history(self):
+        """A success stays exportable even after later *failed* jobs (which
+        never update last_export_job_for_chat) evict it from the bounded
+        per-chat terminal history."""
+
+        class SucceedsOnceThenFails:
+            def __init__(self) -> None:
+                self._remaining_successes = 1
+
+            def verify(self, req: VerifyProductRequest) -> VerifyProductResult:
+                if self._remaining_successes > 0:
+                    self._remaining_successes -= 1
+                    return success_result(req)
+                raise RuntimeError("boom")
+
+        manager = JobManager(SucceedsOnceThenFails(), max_concurrent_jobs=1, history_limit=1)
+        first_recorder = UpdateRecorder()
+        first_job, _ = await manager.submit(1, request(model="M0"), on_update=first_recorder)
+        await first_recorder.wait()
+        self.assertIsNotNone(manager.get_job(first_job.id))  # not evicted yet: still current
+
+        for index in range(1, 3):
+            recorder = UpdateRecorder()
+            await manager.submit(1, request(model=f"M{index}"), on_update=recorder)
+            await recorder.wait()
+        self.assertIsNone(manager.get_job(first_job.id))  # now evicted from _jobs/history
+
+        self.assertIs(manager.last_export_job_for_chat(1), first_job)
+
+    async def test_isolated_per_chat(self):
+        service = ImmediateService(success_result)
+        manager = JobManager(service, max_concurrent_jobs=1)
+        recorder = UpdateRecorder()
+        job, _ = await manager.submit(1, request(), on_update=recorder)
+        await recorder.wait()
+        self.assertIs(manager.last_export_job_for_chat(1), job)
+        self.assertIsNone(manager.last_export_job_for_chat(2))
+
+
 class ShutdownTests(unittest.IsolatedAsyncioTestCase):
     async def test_shutdown_with_no_jobs_returns_immediately(self):
         manager = JobManager(ImmediateService(success_result))
