@@ -39,6 +39,7 @@ class CanonicalAttribute:
     contributors: tuple[RawAttribute, ...] = ()
     attribute_scope: str = "unknown"
     context: str | None = None
+    model_wide: bool = False
 
 
 @dataclass(frozen=True, slots=True)
@@ -170,6 +171,7 @@ def _canonical(
         contributors=(raw,),
         attribute_scope=definition.attribute_scope,
         context=raw.context,
+        model_wide=raw.model_wide,
     )
 
 
@@ -195,6 +197,7 @@ def _derived_from_raw(
         contributors=(raw,),
         attribute_scope=definition.attribute_scope,
         context=raw.context,
+        model_wide=raw.model_wide,
     )
 
 
@@ -348,6 +351,7 @@ def _compose_dimensions(
             contributors=contributors,
             attribute_scope=definitions[target].attribute_scope,
             context=context,
+            model_wide=all(item.model_wide for item in contributors),
         ))
         used.update(id(item) for item in contributors)
     return derived, used
@@ -371,6 +375,11 @@ def map_attributes(
     pending: list[RawAttribute] = []
 
     for raw in raw_items:
+        if raw.canonical and raw.canonical in definitions:
+            mapped.append(_canonical(
+                raw, definitions[raw.canonical], "high", f"official_atomic:{raw.canonical}",
+            ))
+            continue
         composite = _display_composite(raw, definitions)
         if composite:
             derived.extend(composite)

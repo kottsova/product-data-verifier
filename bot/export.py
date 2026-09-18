@@ -24,12 +24,16 @@ from io import StringIO
 from bot.attribute_filter import filter_user_facing, has_usable_value
 from bot.formatters import _OFFICIAL_SOURCE_TYPES, format_attribute_value
 from bot.i18n import DEFAULT_LANGUAGE, Language, export_header, ui
+from bot.localize import category_name
 from bot.i18n import display_name as localized_display_name
 from services.product_verifier import ServiceAttribute, VerifyProductResult
 
 
 def _attribute_rows(attribute: ServiceAttribute, language: Language) -> list[dict[str, object]]:
-    value_text = format_attribute_value(attribute.value, attribute.unit)
+    value_text = format_attribute_value(
+        attribute.value, attribute.unit,
+        canonical_name=attribute.canonical_name, language=language,
+    )
     provenance = [
         (item.source, item.evidence, item.source_type, item.authority_status, item.confidence)
         for item in (*attribute.supporting_sources, *attribute.conflicting_values)
@@ -65,7 +69,9 @@ def build_export_rows(
     return rows
 
 
-def _identity_fields(result: VerifyProductResult) -> tuple[str, str, str, str]:
+def _identity_fields(
+    result: VerifyProductResult, language: Language = DEFAULT_LANGUAGE,
+) -> tuple[str, str, str, str]:
     identity = result.identity
     brand = (identity.brand if identity else result.request.brand) or ""
     model = (
@@ -74,7 +80,9 @@ def _identity_fields(result: VerifyProductResult) -> tuple[str, str, str, str]:
         or ""
     )
     article = (identity.manufacturer_article if identity else None) or result.request.article or ""
-    category = result.category.category_name if result.category else ""
+    category = (
+        category_name(result.category.category_name, language) if result.category else ""
+    )
     return brand, model, article, category
 
 
@@ -106,7 +114,7 @@ def build_wide_export_row(
     schema priority), so it stays stable across repeat verifications of the
     same category.
     """
-    brand, model, article, category = _identity_fields(result)
+    brand, model, article, category = _identity_fields(result, language)
     row: dict[str, str] = {
         export_header("brand", language): brand,
         export_header("model", language): model,
@@ -120,7 +128,10 @@ def build_wide_export_row(
             attribute.canonical_name, language, fallback=attribute.display_name,
         )
         if attribute.status == "Confirmed" and has_usable_value(attribute):
-            row[header] = format_attribute_value(attribute.value, attribute.unit)
+            row[header] = format_attribute_value(
+                attribute.value, attribute.unit,
+                canonical_name=attribute.canonical_name, language=language,
+            )
         else:
             row[header] = not_found
     official, secondary = _source_summary(attributes)

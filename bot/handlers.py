@@ -23,9 +23,10 @@ from __future__ import annotations
 
 import logging
 import re
+from urllib.parse import urlparse
 from typing import Awaitable, Callable
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, LinkPreviewOptions
 
 from bot.export import export_result_csv
 from bot.formatters import (
@@ -33,8 +34,10 @@ from bot.formatters import (
     chunk_lines,
     format_accepted,
     format_cancelled,
+    format_auxiliary,
     format_duplicate,
     format_job_outcome,
+    product_image_records,
     format_started,
     format_status,
 )
@@ -57,6 +60,7 @@ logger.addHandler(logging.NullHandler())
 
 Reply = Callable[[str], Awaitable[object]]
 PromptLanguage = Callable[[str, list[tuple[str, str]]], Awaitable[object]]
+ReplyCard = Callable[[str, str | None], Awaitable[object]]
 
 START_MESSAGE = ui("start_message", DEFAULT_LANGUAGE)
 HELP_MESSAGE = ui("help_message", DEFAULT_LANGUAGE)
@@ -65,6 +69,8 @@ SHUTTING_DOWN_MESSAGE = ui("shutting_down", DEFAULT_LANGUAGE)
 EXPORT_NO_RESULT_MESSAGE = ui("export_no_result", DEFAULT_LANGUAGE)
 
 _LANGUAGE_CALLBACK_PREFIX = "lang:"
+_PHOTOS_CALLBACK_PREFIX = "photos:"
+_MAX_MEDIA_GROUP = 10  # Telegram's per-album limit
 
 _EXPORT_FILENAME_SAFE_PATTERN = re.compile(r"[^0-9A-Za-zА-Яа-яЁё]+")
 
@@ -111,6 +117,8 @@ async def _start_verification(
     *,
     language: Language,
     reply: Reply,
+    prompt_photos: PromptLanguage | None = None,
+    reply_card: ReplyCard | None = None,
 ) -> None:
     """Submit the job and reply immediately (accepted/duplicate); Stage 13 flow."""
 
@@ -120,6 +128,31 @@ async def _start_verification(
             return
         for chunk in format_job_outcome(job, language=language):
             await reply(chunk)
+        if job.state != "completed" or job.result is None:
+            return
+        # Stage 31.5: the official source owns spec priority, but the
+        # secondary reference page keeps its rich preview and its
+        # review/opinions/compare/pictures/prices links, below the result.
+        card = format_auxiliary(job.result, language=language)
+        if card is not None:
+            text, preview_url = card
+            if reply_card is not None:
+                await reply_card(text, preview_url)
+            else:
+                await reply(text)
+        # Offer the photo download only when the pipeline found safe product
+        # photos (official first, secondary as a labeled top-up).
+        if prompt_photos is not None:
+            records = product_image_records(job.result)
+            if records:
+                official = sum(1 for _, is_official, _ in records if is_official)
+                await prompt_photos(
+                    ui(
+                        "photos_prompt", language, count=len(records),
+                        official=official, secondary=len(records) - official,
+                    ),
+                    [(ui("photos_button", language), f"{_PHOTOS_CALLBACK_PREFIX}{job.id}")],
+                )
 
     try:
         job, is_duplicate = await manager.submit(
@@ -147,12 +180,24 @@ async def _start_verification(
     await reply(format_accepted(job.request, language=language))
 
 
-async def _safe_reply(message: object, text: str) -> None:
-    """Adapter-level guard: a failed Telegram send must not crash the bot."""
+async def _safe_reply(
+    message: object, text: str, *, preview_url: str | None = None,
+) -> None:
+    """Adapter-level guard: a failed Telegram send must not crash the bot.
+
+    Link previews are off by default (the result message lists several
+    sources); ``preview_url`` turns them on for exactly that URL, which is how
+    the secondary-source card gets its rich preview without the official link
+    (first in the result) stealing it.
+    """
     try:
+        if preview_url is not None:
+            options = LinkPreviewOptions(is_disabled=False, url=preview_url)
+        else:
+            options = LinkPreviewOptions(is_disabled=True)
         lines = text.splitlines() or [""]
         for chunk in chunk_lines(lines, DEFAULT_MAX_MESSAGE_LENGTH):
-            await message.reply_text(chunk)  # type: ignore[attr-defined]
+            await message.reply_text(chunk, link_preview_options=options)  # type: ignore[attr-defined]
     except Exception:  # noqa: BLE001 - Telegram/API send failures are logged, not raised
         chat_id = getattr(message, "chat_id", None)
         log_exception_event(
@@ -255,13 +300,90 @@ def build_language_callback(manager: JobManager):
         async def reply(chunk: str) -> None:
             await _safe_reply(callback_query.message, chunk)
 
-        await _start_verification(request, chat_id, manager, language=language, reply=reply)
+        async def reply_card(text: str, preview_url: str | None) -> None:
+            await _safe_reply(callback_query.message, text, preview_url=preview_url)
+
+        async def prompt_photos(text: str, buttons: list[tuple[str, str]]) -> None:
+            await _safe_reply_with_keyboard(callback_query.message, text, buttons)
+
+        await _start_verification(
+            request, chat_id, manager, language=language, reply=reply,
+            prompt_photos=prompt_photos, reply_card=reply_card,
+        )
         try:
             await callback_query.edit_message_reply_markup(reply_markup=None)
         except Exception:  # noqa: BLE001 - removing the keyboard is cosmetic, never fatal
             pass
 
     return language_callback
+
+
+async def _safe_send_photos(
+    message: object, records: list[tuple[str, bool, str]], language: Language,
+) -> None:
+    """Send photos as albums, official group first; each group's first photo
+    is captioned with its provenance. Falls back to plain links on failure."""
+    urls = [url for url, _, _ in records]
+    try:
+        for is_official in (True, False):
+            group = [item for item in records if item[1] == is_official]
+            for start in range(0, len(group), _MAX_MEDIA_GROUP):
+                batch = group[start:start + _MAX_MEDIA_GROUP]
+                host = (urlparse(batch[0][2]).hostname or "").removeprefix("www.")
+                caption = ui(
+                    "photos_caption", language,
+                    kind=ui("official_source" if is_official else "secondary_source", language),
+                    host=host,
+                ).rstrip(" \u00b7") if start == 0 else None
+                if len(batch) == 1:
+                    await message.reply_photo(photo=batch[0][0], caption=caption)  # type: ignore[attr-defined]
+                else:
+                    await message.reply_media_group(  # type: ignore[attr-defined]
+                        media=[
+                            InputMediaPhoto(media=url, caption=caption if index == 0 else None)
+                            for index, (url, _, _) in enumerate(batch)
+                        ],
+                    )
+    except Exception:  # noqa: BLE001 - Telegram/API send failures are logged, not raised
+        chat_id = getattr(message, "chat_id", None)
+        log_exception_event(
+            logger, "photos_send_failure",
+            chat=scoped_id(chat_id) if chat_id is not None else "unknown",
+        )
+        await _safe_reply(message, "\n".join([ui("photos_failed", language), *urls]))
+
+
+def build_photos_callback(manager: JobManager):
+    """Bind the "download all photos" button to ``manager``'s finished jobs."""
+
+    async def photos_callback(update, context) -> None:  # noqa: ANN001
+        callback_query = update.callback_query
+        data = str(getattr(callback_query, "data", "") or "")
+        chat_id = callback_query.message.chat_id
+        try:
+            await callback_query.answer()
+        except Exception:  # noqa: BLE001 - answering is a courtesy, never fatal
+            log_exception_event(
+                logger, "photos_callback_answer_failure", chat=scoped_id(chat_id),
+            )
+        if not data.startswith(_PHOTOS_CALLBACK_PREFIX):
+            return
+        job = manager.get_job(data[len(_PHOTOS_CALLBACK_PREFIX):])
+        # A job id from another chat is never served, even if guessed.
+        if job is None or job.chat_id != chat_id or job.result is None:
+            await _safe_reply(callback_query.message, ui("photos_expired", DEFAULT_LANGUAGE))
+            return
+        records = product_image_records(job.result)
+        if not records:
+            await _safe_reply(callback_query.message, ui("photos_expired", job.language))
+            return
+        log_event(
+            logger, logging.INFO, "photos_sent",
+            chat=scoped_id(chat_id), job_id=job.id, count=len(records),
+        )
+        await _safe_send_photos(callback_query.message, records, job.language)
+
+    return photos_callback
 
 
 def build_status_command(manager: JobManager):

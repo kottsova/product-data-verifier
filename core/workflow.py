@@ -40,6 +40,21 @@ from core.identity import (
     resolve_product_identity,
 )
 from core.mapping import MappingResult, map_attributes
+from core.attribute_catalog import extension_definitions
+from core.official_spec_table import extract_official_section_specs
+from core.official_source import (
+    OFFICIAL_SOURCE_TYPES,
+    REDIRECTED_AWAY_REASON,
+    build_official_resolution,
+    extract_auxiliary_links,
+    extract_official_spec_links,
+    select_product_image_records,
+    PROSE_FACT_CONTEXT,
+    extract_official_prose_facts,
+    is_official,
+    redirected_away_from_exact_page,
+    source_priority,
+)
 from core.profile import FinalProductProfile, build_final_profile
 from core.quality import QualityAssessment, assess_product_quality
 from core.schema import (
@@ -48,6 +63,7 @@ from core.schema import (
     SchemaDiagnostics,
     analyze_schema_coverage,
     extend_schema_with_discovered,
+    get_attribute_schema,
     resolve_attribute_definition,
 )
 from core.targeted_search import (
@@ -467,6 +483,31 @@ def _verify_fetched_identity(
     return source
 
 
+def _reject_redirected_official_identity(
+    source: FetchResult,
+    candidate: Mapping[str, object],
+    identity: ProductIdentity,
+) -> FetchResult:
+    """Withdraw exact-model identity from an official URL that redirected away.
+
+    An official product URL that bounces to a category/landing page proves
+    nothing about the model (and its page lists many products), so its facts
+    must not be accepted as exact-model official evidence. The decision is
+    recorded for the Official Source Resolution Gate.
+    """
+    if not redirected_away_from_exact_page(source, candidate, identity):
+        return source
+    source["official_rejection_reason"] = REDIRECTED_AWAY_REASON
+    source["model_relevance"] = "unknown"
+    source["identity_relation"] = "unknown"
+    metadata = dict(source.get("discovery_metadata") or candidate)
+    metadata["model_relevance"] = "unknown"
+    metadata["identity_relation"] = "unknown"
+    metadata["official_rejection_reason"] = REDIRECTED_AWAY_REASON
+    source["discovery_metadata"] = metadata
+    return source
+
+
 def _fetch_domain(source: Mapping[str, object]) -> str:
     url = str(source.get("final_url") or source.get("source_url") or "")
     return (urlparse(url).hostname or "").lower().removeprefix("www.")
@@ -597,6 +638,123 @@ def _official_identity_attributes(
     ]
 
 
+def _present_canonical_names(attributes: list[RawAttribute]) -> set[str]:
+    return {
+        definition.canonical_name
+        for item in attributes
+        if (definition := resolve_attribute_definition(item.name, "unknown")) is not None
+    }
+
+
+def _all_fetched_sources(
+    fetched: tuple[FetchResult, ...],
+    targeted_search: TargetedSearchResult | None,
+) -> list[FetchResult]:
+    found = list(fetched)
+    seen = {str(item.get("source_url")) for item in found}
+    for field_result in (targeted_search.fields if targeted_search else ()):
+        for query_result in field_result.query_results:
+            for source in query_result.fetched_sources:
+                if str(source.get("source_url")) not in seen:
+                    seen.add(str(source.get("source_url")))
+                    found.append(source)
+    return found
+
+
+def _official_priority_metadata(
+    identity: ProductIdentity,
+    discovery: DiscoveryOutcome,
+    selected: tuple[Candidate, ...],
+    fetched: tuple[FetchResult, ...],
+    targeted_search: TargetedSearchResult | None,
+    raw_attributes: tuple[RawAttribute, ...],
+    mapping: MappingResult,
+    schema: tuple[AttributeDefinition, ...],
+    validated: ValidatedProductProfile,
+) -> dict[str, object]:
+    """Stage 31.4 gate record, official images, auxiliary links, source order."""
+    all_sources = _all_fetched_sources(fetched, targeted_search)
+    image_records = select_product_image_records(
+        all_sources, identity.base_model or identity.commercial_model,
+    )
+    auxiliary: list[dict[str, str]] = []
+    for source in all_sources:
+        if is_official(source):
+            continue
+        for link in extract_auxiliary_links(source):
+            if not any(item["url"] == link["url"] for item in auxiliary):
+                auxiliary.append(link)
+    ordered = source_priority(
+        (
+            str(item.get("final_url") or item.get("source_url") or ""),
+            item.get("source_type"),
+            item.get("authority_status"),
+        )
+        for item in all_sources
+        if item.get("status") == "success"
+        and item.get("identity_relation") != "different_model"
+        and not item.get("official_rejection_reason")
+    )
+    resolution = build_official_resolution(
+        identity=identity,
+        candidates=discovery.candidates,
+        rejected_candidates=discovery.rejected_candidates,
+        selected=selected,
+        fetched_sources=all_sources,
+        raw_attributes=raw_attributes,
+        canonical_attributes=mapping.canonical_attributes,
+        schema_names=[item.canonical_name for item in schema if item.scope != "discovered"],
+        provider_attempts=discovery.provider_attempts,
+    )
+    # What the user-facing profile finally rests on, so an "accessible official
+    # page" that contributed nothing is visible rather than implied.
+    schema_fields = {item.canonical_name for item in schema if item.scope != "discovered"}
+    confirmed = [
+        fact for fact in validated.facts
+        if fact.status == "Confirmed" and fact.canonical_name in schema_fields
+    ]
+    resolution["official_final_profile_attribute_count"] = sum(
+        fact.authority_status == "verified"
+        and fact.supporting_facts[0].effective_source_type in OFFICIAL_SOURCE_TYPES
+        for fact in confirmed
+    )
+    resolution["secondary_final_profile_attribute_count"] = (
+        len(confirmed) - resolution["official_final_profile_attribute_count"]
+    )
+    return {
+        "official_source_resolution": resolution,
+        "product_images": [item["url"] for item in image_records],
+        "product_image_records": image_records,
+        "auxiliary_links": auxiliary,
+        "source_priority": ordered,
+    }
+
+
+def _schema_with_official_extensions(
+    category: CategoryResult,
+    raw_attributes: tuple[RawAttribute, ...],
+) -> tuple[AttributeDefinition, ...]:
+    """Category schema + dynamic canonical attributes from official atomic facts.
+
+    The schema says what a category is *expected* to have; it never limits what
+    an official source may contribute. A hinted canonical attribute the schema
+    lacks becomes a (non-expected, user-facing) definition for this run; it
+    replaces the "discovered" placeholder the generic path would have made.
+    """
+    definitions = {
+        item.canonical_name: item
+        for item in extend_schema_with_discovered(category, raw_attributes)
+    }
+    static = {item.canonical_name for item in get_attribute_schema(category)}
+    hints = [
+        (item.canonical, item.name, item.value.casefold() in {"yes", "no"})
+        for item in raw_attributes if item.canonical
+    ]
+    for definition in extension_definitions(hints, static):
+        definitions[definition.canonical_name] = definition
+    return tuple(definitions.values())
+
+
 def _run_product_workflow_with_services(
     request: ProductWorkflowRequest,
     active: WorkflowServices,
@@ -624,11 +782,15 @@ def _run_product_workflow_with_services(
         if key not in fetch_cache:
             fetch_cache[key] = active.fetch(candidate)
         view = _candidate_fetch_view(fetch_cache[key], candidate)
-        return _verify_fetched_identity(view, candidate, identity)
+        view = _verify_fetched_identity(view, candidate, identity)
+        return _reject_redirected_official_identity(view, candidate, identity)
 
     fetched: list[FetchResult] = []
     extracted: list[RawAttribute] = []
-    for candidate in selected_candidates:
+    spec_table_diagnostics: list[dict[str, object]] = []
+    queue: list[Mapping[str, object]] = list(selected_candidates)
+    queued = {canonicalize_url(str(item.get("url") or "")) for item in queue}
+    for candidate in queue:  # grows: an official page's own "Tech Specs" link
         if not budget.can_start("initial_fetch", minimum_seconds=1.0):
             break
         try:
@@ -638,23 +800,72 @@ def _run_product_workflow_with_services(
         fetched.append(source)
         if source.get("status") != "success":
             continue
+        # Stage 31.5: search providers do not reliably surface an official
+        # product's spec page, but the accepted product page links to it.
+        # The linked page is fetched as an unverified-identity official
+        # candidate, so its own content must prove the exact model.
+        for link in extract_official_spec_links(source, identity):
+            key = canonicalize_url(link)
+            if key in queued:
+                continue
+            queued.add(key)
+            queue.append({
+                **candidate,
+                "url": link,
+                "discovery_provider": "official_link_expansion",
+                "model_match": "unknown",
+                "model_relevance": "unknown",
+                "identity_relation": "unknown",
+                "relevance_reasons": [
+                    "Official spec page linked from an accepted product page; "
+                    "content verification required."
+                ],
+            })
         if not budget.can_start("initial_extraction", minimum_seconds=0.05):
             continue
         source_attributes = active.extract(source)
+        # Stage 31.5: a side-by-side spec table is read column-bound. The
+        # generic table/spec-block readers cannot tell the model columns
+        # apart, so once the bound reader claims a page their reads of it are
+        # replaced rather than mixed in.
+        spec_attributes, spec_diagnostics = extract_official_section_specs(source, identity)
+        if spec_diagnostics["outcome"] != "not_applicable":
+            spec_table_diagnostics.append({
+                "url": str(source.get("final_url") or source.get("source_url") or ""),
+                **spec_diagnostics,
+            })
+        if spec_attributes:
+            source_attributes = [
+                item for item in source_attributes
+                if item.extraction_method not in {"html_table", "spec_block"}
+            ]
         extracted.extend(source_attributes)
+        extracted.extend(spec_attributes)
         extracted.extend(_official_identity_attributes(
             source,
             identity,
             source_attributes,
         ))
+        extracted.extend(extract_official_prose_facts(
+            source,
+            identity,
+            _present_canonical_names([*source_attributes, *spec_attributes]),
+        ))
     fetched_sources = tuple(fetched)
+    # A column-bound spec-table fact is authoritative over marketing prose
+    # (which names some lenses/values, not the full specification).
+    bound_labels = {item.name.casefold() for item in extracted if item.model_wide}
+    extracted = [
+        item for item in extracted
+        if not (item.context == PROSE_FACT_CONTEXT and item.name.casefold() in bound_labels)
+    ]
     raw_attributes = tuple(extracted)
     category = detect_category(
         identity,
         raw_attributes,
         product_texts=_product_texts(fetched_sources),
     )
-    schema = tuple(extend_schema_with_discovered(category, raw_attributes))
+    schema = _schema_with_official_extensions(category, raw_attributes)
     mapping = map_attributes(raw_attributes, schema=schema, category=category)
     coverage = analyze_schema_coverage(category, mapping, identity=identity)
     gaps = analyze_gaps(
@@ -740,6 +951,11 @@ def _run_product_workflow_with_services(
                 targeted_search.useful_fact_count if targeted_search else 0
             ),
             "wall_clock_budget": budget.snapshot(),
+            **_official_priority_metadata(
+                identity, discovery, selected_candidates, fetched_sources,
+                targeted_search, raw_attributes, mapping, schema, validated,
+            ),
+            "official_spec_table": spec_table_diagnostics,
         },
     )
     return ProductWorkflowResult(

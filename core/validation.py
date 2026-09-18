@@ -279,6 +279,9 @@ def equivalent_values(left: _NormalizedValue, right: _NormalizedValue) -> bool:
     return all(abs(a - b) <= tolerance for a, b in zip(left.values, right.values))
 
 
+_FOREIGN_SCRIPT_RE = re.compile(r"[぀-ヿ㐀-䶿一-鿿가-힣豈-﫿]")
+
+
 def _concrete_value(value: object) -> bool:
     if isinstance(value, DimensionValue):
         return all(
@@ -289,7 +292,13 @@ def _concrete_value(value: object) -> bool:
             )
         )
     text = _clean_text(value)
-    return bool(text) and text.casefold() not in PLACEHOLDER_VALUES
+    # CJK/Hangul/Kana prose is page furniture (a help-centre sentence mapped
+    # onto a canonical alias), never a canonical value for this catalogue.
+    return (
+        bool(text)
+        and text.casefold() not in PLACEHOLDER_VALUES
+        and not _FOREIGN_SCRIPT_RE.search(text)
+    )
 
 
 def _authority_rank(fact: CandidateFact) -> int:
@@ -316,7 +325,12 @@ def _identity_compatible(fact: CandidateFact, variant_sensitive: bool) -> bool:
     if fact.identity_relation == "different_model":
         return False
     if variant_sensitive:
-        return fact.identity_relation == "exact_variant"
+        # A value an official page states for the exact model column without a
+        # variant qualifier (Stage 31.5) holds for every variant of that model.
+        return fact.identity_relation == "exact_variant" or (
+            fact.identity_relation == "same_base_model"
+            and bool(getattr(fact.attribute, "model_wide", False))
+        )
     return fact.identity_relation in {
         "exact_variant", "same_base_model",
     }

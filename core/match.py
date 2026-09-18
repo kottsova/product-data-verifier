@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from urllib.parse import urlparse
 import unicodedata
 
 MODEL_TOKEN_RE = re.compile(r"(?<!\w)[\w]+(?:[./_-][\w]+)*(?!\w)", re.UNICODE)
@@ -106,6 +107,13 @@ def model_match(model: str | None, text: str | None) -> str:
     return "unknown"
 
 
+# Words a product URL appends to the model to name a *page of* that product.
+PAGE_ROLE_WORDS = frozenset({
+    "specs", "spec", "specifications", "specification", "tech", "technical",
+    "overview", "features", "details",
+})
+
+
 def candidate_model_match(model: str | None, title: str | None, url: str | None) -> str:
     """Match identity signals without letting an incidental URL override another titled SKU."""
     expected = normalize_model(model)
@@ -114,15 +122,29 @@ def candidate_model_match(model: str | None, title: str | None, url: str | None)
     # extends it with a well-known commercial variant modifier.  This is kept
     # generic (rather than naming products) and prevents, for example, a
     # base-model request from inheriting Pro/Plus/Ultra specifications.
-    for text in (title or "", url or ""):
+    # A URL whose final path segment is exactly the requested model names this
+    # product page. A family page's title that lists the model *and* its
+    # sibling ("Pixel 9 Pro and Pixel 9 Pro XL") must not veto it; a title that
+    # only names the variant ("iPhone 15 Pro Max") still does.
+    last_segment = urlparse(url or "").path.rstrip("/").rsplit("/", 1)[-1]
+    segment_parts = _model_parts(last_segment)
+    while segment_parts and segment_parts[-1].casefold() in PAGE_ROLE_WORDS and segment_parts != requested_parts:
+        segment_parts = segment_parts[:-1]  # "<model>-specs" is still that model's page
+    url_names_exact_model = bool(requested_parts) and segment_parts == requested_parts
+    for is_title, text in ((True, title or ""), (False, url or "")):
         tokens = _model_parts(text)
         width = len(requested_parts)
-        for index in range(max(0, len(tokens) - width)):
+        plain = modified = False
+        for index in range(max(0, len(tokens) - width + 1)):
             if tokens[index:index + width] != requested_parts:
                 continue
             following = tokens[index + width] if index + width < len(tokens) else ""
             if following in MODEL_FAMILY_MODIFIERS and following not in requested_parts:
-                return "different_variant"
+                modified = True
+            else:
+                plain = True
+        if modified and not (is_title and plain and url_names_exact_model):
+            return "different_variant"
     # A search snippet may echo the requested phrase while its destination URL
     # names a different regional/model code. Distinctive alphanumeric parts
     # in the request are safer than the provider-generated snippet in this

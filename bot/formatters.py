@@ -31,6 +31,7 @@ from bot.i18n import (
     ui,
 )
 from bot.jobs import Job
+from bot.localize import category_name, localize_value
 from services.product_verifier import (
     ServiceAttribute,
     ServiceEvidence,
@@ -44,12 +45,11 @@ from services.product_verifier import (
 # 4095 code units so every returned chunk is strictly below Telegram's cap.
 TELEGRAM_MESSAGE_LIMIT = 4096
 DEFAULT_MAX_MESSAGE_LENGTH = 3500
-DEFAULT_MAX_ATTRIBUTES = 12
+DEFAULT_MAX_ATTRIBUTES = 250
 DEFAULT_MAX_REASONS = 2
+DEFAULT_MAX_SOURCES = 6
 
 PRIORITY_RANK = {"critical": 0, "high": 1, "medium": 2, "low": 3}
-
-_STATUS_ICON = {"Confirmed": "✅", "Conflict": "❗"}
 
 _CATEGORY_UNKNOWN_REASON = (
     "Category could not be determined, so category-specific critical fields "
@@ -82,15 +82,23 @@ _INTERNAL_REASON_CODE_PATTERN = re.compile(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)+")
 _EXCEPTION_NAME_PATTERN = re.compile(r"\b[A-Za-z]+(?:Error|Exception)\b")
 
 
-def format_attribute_value(value: object, unit: str | None) -> str:
+def format_attribute_value(
+    value: object,
+    unit: str | None,
+    *,
+    canonical_name: str = "",
+    language: Language = "en",
+) -> str:
+    """Value + unit as text; in RU mode units/prose are localized (see bot.localize)."""
     if value is None:
         return "—"
     if isinstance(value, dict) and {"height", "width", "depth", "unit"} <= value.keys():
-        return f"{value['height']} × {value['width']} × {value['depth']} {value['unit']}".strip()
-    text = str(value)
-    if unit and not text.casefold().rstrip().endswith(str(unit).casefold()):
-        return f"{text} {unit}"
-    return text
+        text = f"{value['height']} × {value['width']} × {value['depth']} {value['unit']}".strip()
+    else:
+        text = str(value)
+        if unit and not text.casefold().rstrip().endswith(str(unit).casefold()):
+            text = f"{text} {unit}"
+    return localize_value(canonical_name, text, unit, language)
 
 
 def _format_age(seconds: float, language: Language) -> str:
@@ -143,21 +151,105 @@ def _sorted_attributes(attributes: list[ServiceAttribute]) -> list[ServiceAttrib
 _OFFICIAL_SOURCE_TYPES = {"manufacturer", "official_document"}
 
 
-def _provenance_suffix(evidence: ServiceEvidence, language: Language) -> str:
-    kind = ui("official_source", language) if evidence.source_type in _OFFICIAL_SOURCE_TYPES else ui("secondary_source", language)
-    source = (evidence.source or "").strip()
-    return f"\U0001f517 {kind}: {source}" if source else f"\U0001f517 {kind}"
+def ordered_sources(result: VerifyProductResult) -> list[tuple[str, bool]]:
+    """(url, is_official) for every source behind a displayed Confirmed value.
 
-
-def _confirmed_provenance_line(attribute: ServiceAttribute, language: Language) -> str | None:
-    """One compact provenance line for a Confirmed attribute, if evidence exists.
-
-    Only Confirmed attributes get provenance (per Stage 30 spec) -- an
-    Unresolved/Conflict attribute has no single confirming source to show.
+    Official sources come first, secondary sources after; inside each group the
+    source backing more displayed attributes comes first, then first-seen order.
     """
-    if not attribute.supporting_sources:
+    counts: dict[str, int] = {}
+    official: dict[str, bool] = {}
+    for attribute in filter_user_facing(result.attributes):
+        if effective_status(attribute) != "Confirmed":
+            continue
+        for evidence in attribute.supporting_sources:
+            if not evidence.source:
+                continue
+            counts[evidence.source] = counts.get(evidence.source, 0) + 1
+            official[evidence.source] = (
+                official.get(evidence.source, False)
+                or evidence.source_type in _OFFICIAL_SOURCE_TYPES
+            )
+    order = {url: index for index, url in enumerate(counts)}
+    return sorted(
+        ((url, official[url]) for url in counts),
+        key=lambda item: (not item[1], -counts[item[0]], order[item[0]]),
+    )
+
+
+def _source_lines(result: VerifyProductResult, language: Language) -> list[str]:
+    sources = ordered_sources(result)
+    if not sources:
+        return []
+    lines = [f"{ui('section_sources', language)} ({len(sources)}):"]
+    for index, (url, is_official) in enumerate(sources[:DEFAULT_MAX_SOURCES], start=1):
+        kind = ui("official_source" if is_official else "secondary_source", language)
+        lines.append(f"{index}. {kind}: {url}")
+    if len(sources) > DEFAULT_MAX_SOURCES:
+        lines.append(ui("more_items", language, count=len(sources) - DEFAULT_MAX_SOURCES))
+    return lines
+
+
+def product_image_records(result: VerifyProductResult) -> list[tuple[str, bool, str]]:
+    """(url, is_official, source_page) product photos recorded by the pipeline.
+
+    Official photos come first; a record without an explicit role is treated
+    as official (results cached before Stage 31.5 only ever stored official
+    photos). Deduplicated, https only.
+    """
+    metadata = result.metadata or {}
+    records = metadata.get("product_image_records")
+    found: list[tuple[str, bool, str]] = []
+    if isinstance(records, (list, tuple)):
+        for item in records:
+            if isinstance(item, dict) and isinstance(item.get("url"), str):
+                found.append((item["url"], item.get("role") != "secondary", str(item.get("source") or "")))
+    else:
+        images = metadata.get("product_images")
+        if isinstance(images, (list, tuple)):
+            found = [(url, True, "") for url in images if isinstance(url, str)]
+    seen: set[str] = set()
+    unique: list[tuple[str, bool, str]] = []
+    for url, official, source in found:
+        if url.startswith("https://") and url not in seen:
+            seen.add(url)
+            unique.append((url, official, source))
+    return sorted(unique, key=lambda item: not item[1])
+
+
+def product_image_urls(result: VerifyProductResult) -> list[str]:
+    """Safe product photo URLs (official first, then secondary; may be empty)."""
+    return [url for url, _, _ in product_image_records(result)]
+
+
+_AUXILIARY_ORDER = ("review", "opinions", "compare", "pictures", "prices")
+
+
+def format_auxiliary(
+    result: VerifyProductResult, *, language: Language = DEFAULT_LANGUAGE,
+) -> tuple[str, str | None] | None:
+    """Secondary-source rich card: (text, url Telegram should preview) or None.
+
+    The official source owns spec priority; the secondary reference page keeps
+    its user-facing extras (rich preview, review, opinions, compare, pictures,
+    prices; site-wide indexes such as "Videos"/"Reviews" are not product links). "Related devices" is never surfaced.
+    """
+    metadata = result.metadata or {}
+    links = [
+        item for item in (metadata.get("auxiliary_links") or ())
+        if isinstance(item, dict) and str(item.get("url", "")).startswith("https://")
+    ]
+    page = next((str(item["source"]) for item in links if item.get("source")), None)
+    if page is None:
+        page = next((url for url, official in ordered_sources(result) if not official), None)
+    if page is None:
         return None
-    return f"    {_provenance_suffix(attribute.supporting_sources[0], language)}"
+    lines = [ui("section_auxiliary", language, kind=ui("secondary_source", language)), page]
+    by_kind = {str(item.get("kind")): str(item["url"]) for item in links}
+    for kind in _AUXILIARY_ORDER:
+        if kind in by_kind:
+            lines.append(f"{ui('aux_' + kind, language)}: {by_kind[kind]}")
+    return "\n".join(lines), page
 
 
 def _localized_name(attribute: ServiceAttribute, language: Language) -> str:
@@ -165,15 +257,15 @@ def _localized_name(attribute: ServiceAttribute, language: Language) -> str:
 
 
 def _attribute_line(attribute: ServiceAttribute, language: Language) -> str:
-    """Renders a confirmed attribute; callers only pass items already
-    filtered to ``effective_status(item) == "Confirmed"``, so the value is
-    guaranteed usable (see bot.attribute_filter.has_usable_value)."""
+    """``Name = Value`` for a confirmed attribute; callers only pass items
+    already filtered to ``effective_status(item) == "Confirmed"``, so the value
+    is guaranteed usable (see bot.attribute_filter.has_usable_value)."""
     name = _localized_name(attribute, language)
-    icon = _STATUS_ICON["Confirmed"]
-    value_text = format_attribute_value(attribute.value, attribute.unit)
-    line = f"{icon} {name}: {value_text}"
-    provenance = _confirmed_provenance_line(attribute, language)
-    return f"{line}\n{provenance}" if provenance else line
+    value_text = format_attribute_value(
+        attribute.value, attribute.unit,
+        canonical_name=attribute.canonical_name, language=language,
+    )
+    return f"{name} = {value_text}"
 
 
 def _fallback_display_name(canonical_name: str) -> str:
@@ -277,74 +369,48 @@ def _localize_quality_message(value: str, language: Language) -> str:
     return normalized
 
 
-def _status_section_lines(
-    result: VerifyProductResult,
-    *,
-    max_attributes: int,
-    language: Language,
-) -> list[str]:
-    """Render bounded lists from the stable result's structured status fields."""
-    limit = max(0, max_attributes)
+def found_counts(result: VerifyProductResult) -> tuple[int, int]:
+    """(found, total): confirmed user-facing attributes over user-facing attributes.
+
+    The Telegram preview and the wide CSV both derive from
+    ``filter_user_facing``, so this equals the number of populated canonical
+    columns in the export.
+    """
     attributes = filter_user_facing(result.attributes)
-    shown_names = {item.canonical_name for item in attributes}
-    by_name = {item.canonical_name: item for item in attributes}
+    return sum(effective_status(item) == "Confirmed" for item in attributes), len(attributes)
+
+
+def _attribute_lines(
+    result: VerifyProductResult, *, max_attributes: int, language: Language,
+) -> list[str]:
     confirmed = _sorted_attributes([
-        item for item in attributes if effective_status(item) == "Confirmed"
+        item for item in filter_user_facing(result.attributes)
+        if effective_status(item) == "Confirmed"
     ])
-
-    conflict_names = [
-        name for name in dict.fromkeys(result.conflicts) if name in shown_names
-    ]
-    for item in attributes:
-        if effective_status(item) == "Conflict" and item.canonical_name not in conflict_names:
-            conflict_names.append(item.canonical_name)
-
-    unresolved_names = [
-        name for name in dict.fromkeys(result.unresolved) if name in shown_names
-    ]
-    for item in attributes:
-        if (
-            effective_status(item) not in ("Confirmed", "Conflict")
-            and item.canonical_name not in unresolved_names
-        ):
-            unresolved_names.append(item.canonical_name)
-
-    lines: list[str] = []
-
-    def add_section(title: str, rendered: list[str]) -> None:
-        if not rendered:
-            return
-        shown = rendered[:limit]
-        lines.extend(("", f"{title} ({len(rendered)}):", *shown))
-        remaining = len(rendered) - len(shown)
-        if remaining > 0:
-            lines.append(ui("more_items", language, count=remaining))
-
-    add_section(
-        ui("section_confirmed", language),
-        [_attribute_line(item, language) for item in confirmed],
-    )
-
-    conflict_lines = []
-    for name in conflict_names:
-        attribute = by_name.get(name)
-        name_text = display_name(name, language) if attribute is None else _localized_name(attribute, language)
-        conflict_lines.append(f"❗ {name_text}: {ui('conflict_suffix', language)}")
-    add_section(ui("section_conflicts", language), conflict_lines)
-
-    unresolved_lines = []
-    for name in unresolved_names:
-        attribute = by_name.get(name)
-        name_text = display_name(name, language) if attribute is None else _localized_name(attribute, language)
-        if attribute is not None and attribute.value is not None and has_usable_value(attribute):
-            value_text = format_attribute_value(attribute.value, attribute.unit)
-            unresolved_lines.append(
-                f"🔹 {name_text}: {value_text} ({ui('unconfirmed_suffix', language)})"
-            )
-        else:
-            unresolved_lines.append(f"▫️ {name_text}")
-    add_section(ui("section_unresolved", language), unresolved_lines)
+    limit = max(0, max_attributes)
+    lines = [_attribute_line(item, language) for item in confirmed[:limit]]
+    if len(confirmed) > limit:
+        lines.append(ui("more_items", language, count=len(confirmed) - limit))
     return lines
+
+
+def _conflict_warning_lines(result: VerifyProductResult, language: Language) -> list[str]:
+    attributes = filter_user_facing(result.attributes)
+    shown = {item.canonical_name: item for item in attributes}
+    names = [name for name in dict.fromkeys(result.conflicts) if name in shown]
+    for item in attributes:
+        if effective_status(item) == "Conflict" and item.canonical_name not in names:
+            names.append(item.canonical_name)
+    if not names:
+        # Conflicting evidence on a field that is not itself shown (for
+        # example an identity code) still has to be visible, once.
+        if result.quality is not None and result.quality.status == "conflicted":
+            return [quality_label("conflicted", language)]
+        return []
+    labels = [_localized_name(shown[name], language) for name in names[:4]]
+    if len(names) > 4:
+        labels.append(f"+{len(names) - 4}")
+    return [ui("conflicts_warning", language, fields=", ".join(labels))]
 
 
 def _insufficient_reason_lines(result: VerifyProductResult, language: Language) -> list[str]:
@@ -366,24 +432,18 @@ def _insufficient_reason_lines(result: VerifyProductResult, language: Language) 
 def _summary_lines(result: VerifyProductResult, language: Language) -> list[str]:
     identity = result.identity
     category = result.category
-    quality = result.quality
     name = " ".join(filter(None, (
         identity.brand if identity else result.request.brand,
         (identity.commercial_model or identity.base_model) if identity else result.request.model,
     )))
     lines = [f"\U0001f4e6 {name}".rstrip()]
     if category is not None:
-        confidence = confidence_label(category.confidence, language)
-        lines.append(f"{ui('category_label', language)}: {category.category_name} ({confidence})")
-    if quality is not None:
-        status_label = quality_label(quality.status, language)
-        lines.append(f"{ui('quality_label', language)}: {status_label}")
-        lines.append(f"{ui('coverage_label', language)}: {quality.coverage_percent}%")
-        lines.append(ui(
-            "confirmed_summary", language,
-            confirmed=quality.confirmed_count, total=quality.schema_total,
-            unresolved=quality.unresolved_count, conflicts=quality.conflict_count,
-        ))
+        lines.append(category_name(category.category_name, language))
+    found, total = found_counts(result)
+    found_line = ui("found_summary", language, found=found, total=total)
+    if result.quality is not None and result.quality.status != "conflicted":
+        found_line = f"{found_line} · {quality_label(result.quality.status, language)}"
+    lines.append(found_line)
     if result.served_from_cache:
         age = _format_age(result.cache_age_seconds or 0.0, language)
         lines.append(ui("cache_indicator", language, age=age))
@@ -454,8 +514,14 @@ def format_result(
         return format_error(result, language=language)
 
     lines = _summary_lines(result, language)
+    lines.extend(_source_lines(result, language))
     lines.extend(_insufficient_reason_lines(result, language))
-    lines.extend(_status_section_lines(result, max_attributes=max_attributes, language=language))
+    attributes = _attribute_lines(result, max_attributes=max_attributes, language=language)
+    if attributes:
+        lines.extend(("", *attributes))
+    warning = _conflict_warning_lines(result, language)
+    if warning:
+        lines.extend(("", *warning))
 
     return chunk_lines(lines, max_message_length)
 

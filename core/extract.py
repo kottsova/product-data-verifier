@@ -158,6 +158,12 @@ class RawAttribute:
     raw_value: str
     attribute_kind: str
     context: str | None = None
+    # Stage 31.5: stated for the exact model column of an official spec table
+    # without a variant qualifier, so it holds for every variant of the model.
+    model_wide: bool = False
+    # Stage 32: the canonical attribute an official-table reader already decided
+    # on (language-neutral identifier); honoured by mapping before any alias lookup.
+    canonical: str | None = None
 
 
 def _clean(value: Any) -> str:

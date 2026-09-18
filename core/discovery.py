@@ -442,7 +442,14 @@ def _normalized_search_results(
     )
 
 
-def is_obvious_non_product_url(url: str) -> bool:
+# Path segments that are sections of a site rather than a page type: an
+# "about" prefix commonly *contains* product pages (".../about/phones/<model>"),
+# so it only counts as a non-product page when the URL does not itself name the
+# requested model. Article-like segments (blog, news, ...) are never exempt.
+PRODUCT_CONTAINER_SEGMENTS = {"about"}
+
+
+def is_obvious_non_product_url(url: str, model: str | None = None) -> bool:
     if not url or not _host(url):
         return True
     host = _host(url)
@@ -450,8 +457,12 @@ def is_obvious_non_product_url(url: str) -> bool:
         return True
     if any(host == blocked or host.endswith(f".{blocked}") for blocked in BLOCKED_DOMAINS):
         return True
-    segments = {segment.lower() for segment in urlparse(url).path.split("/") if segment}
-    return bool(segments & BLOCKED_PATH_SEGMENTS)
+    path = urlparse(url).path
+    segments = {segment.lower() for segment in path.split("/") if segment}
+    blocked = segments & BLOCKED_PATH_SEGMENTS
+    if blocked and blocked <= PRODUCT_CONTAINER_SEGMENTS and model:
+        return candidate_model_match(model, "", path) != "exact"
+    return bool(blocked)
 
 
 def _path_has_hint(segments: Iterable[str], hints: set[str]) -> bool:
@@ -845,7 +856,7 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
         title = record.title
         search_text = " ".join(part for part in (record.title, record.snippet) if part)
         url = canonicalize_url(raw_url)
-        if not url or is_obvious_non_product_url(url):
+        if not url or is_obvious_non_product_url(url, model):
             continue
         domain = _host(url)
         matched_official_domain = next(
@@ -4051,6 +4062,35 @@ def discover_with_status(
         site_domains = relevant_domains or list(official_domains)[:1]
         for domain in (() if budget_stopped else site_domains[:3]):
             query = f'"{model}" site:{domain}'
+            if query in queries:
+                continue
+            queries.append(query)
+            attempted_queries.append(query)
+            found, attempts, query_issues = _search_query(active_searcher, query)
+            provider_attempts.extend(attempts)
+            issues.extend(query_issues)
+            raw_results.extend(found)
+            if any(item.budget_exhausted for item in attempts):
+                budget_stopped = True
+                break
+        # Stage 31.4: a verified official ecosystem spans several hosts (a
+        # store, a help centre, a carrier or regional site...). A plain
+        # domain-wide SERP is often filled by the two or three busiest hosts,
+        # so the host that actually carries the product overview can be
+        # crowded out. Re-ask the same domain once with the hosts already seen
+        # excluded. Brand/model/domain all come from earlier discovery; no
+        # host name is hardcoded.
+        for domain in (() if budget_stopped else site_domains[:2]):
+            seen_hosts = sorted({
+                host for item in raw_results
+                if (record := _search_result_record(item)).url
+                and url_belongs_to_domain(record.url, domain)
+                and (host := _host(record.url)) != domain
+            })
+            if not seen_hosts:
+                continue
+            exclusions = " ".join(f"-site:{host}" for host in seen_hosts[:4])
+            query = f'"{model}" site:{domain} {exclusions}'
             if query in queries:
                 continue
             queries.append(query)

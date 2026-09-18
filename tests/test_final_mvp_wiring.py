@@ -94,7 +94,7 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         await wait_until_idle(manager, 17)
         self.assertIn(format_accepted(request), first.messages)
         self.assertIn(format_started(request), first.messages)
-        self.assertTrue(any("power" in message.casefold() for message in first.messages))
+        self.assertTrue(any("мощность" in message.casefold() for message in first.messages))
 
         second = ReplyRecorder()
         await ask_and_start("Acme X100", 17, manager, reply=second)
@@ -139,9 +139,7 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         joined = await self._run_profile(profile, chat_id=20)
         self.assertNotIn("insufficient", joined)
         self.assertIn("Недостаточно данных", joined)
-        self.assertIn("Не определено (2)", joined)
-        self.assertIn("power", joined.casefold())
-        self.assertIn("timer", joined.casefold())
+        self.assertIn("Найдено: 0/2", joined)
         self.assertIn("Почему данных недостаточно", joined)
 
     async def test_conflicted_result_keeps_confirmed_conflict_and_unresolved_distinct(self):
@@ -163,19 +161,17 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         )
         joined = await self._run_profile(profile, chat_id=21)
         self.assertNotIn("conflicted", joined)
-        self.assertIn("расходятся", joined)
+        self.assertIn("расхождения", joined)
         # brand/model are Confirmed too (per quality.confirmed_count=3, in
         # the header's "Подтверждено: 3/5" summary), but Stage 31.1 no
         # longer repeats them in the itemized list -- they're already named
         # in the "Acme X100" summary line right above it.
         self.assertIn("Acme X100", joined)
-        self.assertIn("Подтверждено: 3/5", joined)
-        self.assertIn("Подтверждено (1)", joined)
-        self.assertIn("Конфликты (1)", joined)
-        self.assertIn("Не определено (1)", joined)
-        self.assertIn("power: 1000 w", joined.casefold())
-        self.assertIn("voltage: данные расходятся", joined.casefold())
-        self.assertIn("timer", joined.casefold())
+        self.assertIn("Найдено: 1/3", joined)
+        self.assertIn("мощность = 1000 вт", joined.casefold())
+        # Conflicts: one compact warning, not a list; unresolved not listed.
+        self.assertIn("есть расхождения в данных: напряжение", joined.casefold())
+        self.assertNotIn("timer", joined.casefold())
 
 
 if __name__ == "__main__":

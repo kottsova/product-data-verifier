@@ -200,13 +200,14 @@ class ExportLocalizationTests(unittest.TestCase):
         self.assertIn("processor", canonical_names)
         self.assertIn("battery_capacity", canonical_names)
 
-    def test_display_name_is_localized_but_value_and_status_are_not(self) -> None:
+    def test_display_name_and_units_are_localized_but_status_is_not(self) -> None:
         ru_rows = {row["canonical_name"]: row for row in build_export_rows(_pixel_like_result(), language="ru")}
         en_rows = {row["canonical_name"]: row for row in build_export_rows(_pixel_like_result(), language="en")}
         self.assertEqual(ru_rows["processor"]["display_name"], "Процессор")
         self.assertEqual(en_rows["processor"]["display_name"], "Processor")
-        # Technical value/unit text is identical across languages.
-        self.assertEqual(ru_rows["battery_capacity"]["value_text"], en_rows["battery_capacity"]["value_text"])
+        # Stage 31.5: units are localized in RU only; EN keeps the source text.
+        self.assertEqual(en_rows["battery_capacity"]["value_text"], "4700 mAh")
+        self.assertEqual(ru_rows["battery_capacity"]["value_text"], "4700 мА·ч")
         self.assertEqual(ru_rows["processor"]["value_text"], "Google Tensor G4 (4 nm)")
         # Status stays a canonical machine value, not a translated word.
         self.assertEqual(ru_rows["processor"]["status"], "Confirmed")
@@ -284,7 +285,7 @@ class WideCsvShapeTests(unittest.TestCase):
     def test_wide_row_has_one_cell_per_canonical_attribute(self) -> None:
         row = build_wide_export_row(_pixel_like_result(), language="ru")
         self.assertEqual(row["Процессор"], "Google Tensor G4 (4 nm)")
-        self.assertEqual(row["Ёмкость аккумулятора"], "4700 mAh")
+        self.assertEqual(row["Ёмкость аккумулятора"], "4700 мА·ч")
         # Discovered noise never becomes its own column.
         self.assertNotIn("Battery", row)
         self.assertNotIn("Umts 대역 I Viii", row)

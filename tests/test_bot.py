@@ -240,12 +240,13 @@ class FormatterQualityStatusTests(unittest.TestCase):
         )
 
         text = "\n".join(format_result(result))
-        self.assertIn("Подтверждено (1)", text)
-        self.assertIn("Конфликты (1)", text)
-        self.assertIn("Не определено (1)", text)
-        self.assertIn("Power: 1000 W", text)
-        self.assertIn("Voltage: данные расходятся", text)
-        self.assertIn("Timer: yes (не подтверждено)", text)
+        self.assertIn("Найдено: 1/3", text)
+        self.assertIn("Мощность = 1000 Вт", text)
+        # One compact conflict warning at the bottom; no long unresolved list.
+        self.assertTrue(text.rstrip().splitlines()[-1].startswith("⚠️"))
+        self.assertIn("Напряжение", text.rstrip().splitlines()[-1])
+        self.assertNotIn("Не определено", text)
+        self.assertNotIn("Timer", text)
         self.assertIn("Core identity is not confirmed.", text)
         self.assertIn("Too few trusted sources.", text)
         self.assertNotIn("One more warning must stay hidden.", text)
@@ -767,7 +768,7 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
             if len(reply.messages) >= 2:
                 break
             await asyncio.sleep(0.01)
-        self.assertIn("power", "\n".join(reply.messages).casefold())
+        self.assertIn("мощность", "\n".join(reply.messages).casefold())
 
     async def test_workflow_failure_from_the_real_service_is_formatted_safely(self):
         service = ProductVerifierService(run_workflow=raising_runner(RuntimeError("net down")))
@@ -812,15 +813,17 @@ class FakeMessage:
         self.chat_id = chat_id
         self.sent: list[str] = []
         self.reply_markups: list[object] = []
+        self.previews: list[object] = []
         self.documents: list[tuple[bytes, str | None]] = []
         self._fail_send = fail_send
         self._fail_document = fail_document
 
-    async def reply_text(self, text: str, reply_markup=None) -> None:
+    async def reply_text(self, text: str, reply_markup=None, link_preview_options=None) -> None:
         if self._fail_send:
             raise ConnectionError("Telegram API unreachable")
         self.sent.append(text)
         self.reply_markups.append(reply_markup)
+        self.previews.append(link_preview_options)
 
     async def reply_document(self, document: bytes, filename: str | None = None) -> None:
         if self._fail_document:
@@ -881,7 +884,12 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         callback_handlers = [
             handler for handler in handlers if type(handler).__name__ == "CallbackQueryHandler"
         ]
-        self.assertEqual(len(callback_handlers), 1)
+        # Stage 31.1 language pick + Stage 31.4 official-photo download.
+        self.assertEqual(len(callback_handlers), 2)
+        self.assertEqual(
+            sorted(handler.pattern.pattern for handler in callback_handlers),
+            ["^lang:", "^photos:"],
+        )
 
     async def test_start_command_sends_the_start_message(self):
         message = FakeMessage()
@@ -1052,7 +1060,7 @@ class ExportCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("Бренд", text.splitlines()[0])  # RU was chosen above
         self.assertIn("Acme", text)  # make_result()'s fixed identity.brand
         self.assertIn("X100", text)  # make_result()'s fixed identity.commercial_model
-        self.assertIn("Cooktop", text)  # make_result()'s fixed category.category_name
+        self.assertIn("Варочная панель", text)  # make_result()'s category, localized for RU
 
     async def test_export_csv_is_deterministic_across_calls(self):
         service = TrackingFakeService(make_result(status="verified"))

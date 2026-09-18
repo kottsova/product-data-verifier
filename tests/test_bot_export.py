@@ -89,7 +89,7 @@ class BuildExportRowsTests(unittest.TestCase):
             evidence="power: 1000 W", priority="high", expected=True, discovered=False,
         )
         rows = build_export_rows(_result(attributes=(attribute,)))
-        self.assertEqual(rows[0]["value_text"], "1000 W")
+        self.assertEqual(rows[0]["value_text"], "1000 Вт")  # default language is RU
 
 
 class ExportResultCsvTests(unittest.TestCase):
@@ -109,7 +109,7 @@ class ExportResultCsvTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]["Бренд"], "Acme")
         self.assertEqual(rows[0]["Модель"], "X100")
-        self.assertEqual(rows[0]["Категория"], "Cooktop")
+        self.assertEqual(rows[0]["Категория"], "Варочная панель")
 
     def test_english_language_uses_english_headers(self):
         result = _result(attributes=(self._confirmed_attribute(),))
@@ -150,13 +150,13 @@ class ExportResultCsvTests(unittest.TestCase):
         result = _result(attributes=(self._confirmed_attribute(), unresolved))
         ru_row = build_wide_export_row(result, language="ru")
         en_row = build_wide_export_row(result, language="en")
-        self.assertEqual(ru_row["Voltage"], "Не найдено")
+        self.assertEqual(ru_row["Напряжение"], "Не найдено")
         self.assertEqual(en_row["Voltage"], "Not found")
 
     def test_each_canonical_attribute_is_exactly_one_column(self):
         result = _result(attributes=(self._confirmed_attribute(),))
         row = build_wide_export_row(result, language="ru")
-        self.assertEqual(list(row.keys()).count("Power"), 1)
+        self.assertEqual(list(row.keys()).count("Мощность"), 1)
 
 
 if __name__ == "__main__":

@@ -1,14 +1,14 @@
 """Stage 31.1: the two user-facing result languages (RU/EN) for the bot.
 
-Only display text is localized here -- technical values, model numbers,
-units, and source URLs are never translated (see bot.formatters /
-bot.export, which pass those through untouched). Unknown canonical names
-(discovered attributes) fall back to a title-cased rendering of the
-canonical name in either language, since we have no translation for
-extraction leftovers by construction.
+Only display text is localized here -- canonical identifiers and source
+URLs are never translated.  Unknown canonical names are rendered by a
+deterministic semantic-token fallback; if that fallback cannot translate a
+label safely, the original technical label is preserved.
 """
 
 from __future__ import annotations
+
+import re
 
 from typing import Literal
 
@@ -71,6 +71,35 @@ JOB_STATE_LABELS: dict[str, dict[Language, str]] = {
 UI = {
     "official_source": _t("официальный источник", "official source"),
     "secondary_source": _t("сторонний источник", "third-party source"),
+    "section_sources": _t("🔗 Источники", "🔗 Sources"),
+    "photos_button": _t("📸 Скачать все фото", "📸 Download all photos"),
+    "photos_prompt": _t(
+        "Найдено фото: {count} (официальных: {official}, из сторонних источников: {secondary}).",
+        "Photos found: {count} (official: {official}, third-party: {secondary}).",
+    ),
+    "photos_caption": _t("{kind} · {host}", "{kind} · {host}"),
+    "found_summary": _t("Найдено: {found}/{total}", "Found: {found}/{total}"),
+    "conflicts_warning": _t(
+        "⚠️ Есть расхождения в данных: {fields}",
+        "⚠️ Conflicting data: {fields}",
+    ),
+    "section_auxiliary": _t(
+        "📎 Дополнительно ({kind}):", "📎 More ({kind}):",
+    ),
+    "aux_source": _t("Страница товара", "Product page"),
+    "aux_review": _t("Обзор", "Review"),
+    "aux_opinions": _t("Отзывы", "Opinions"),
+    "aux_compare": _t("Сравнение", "Compare"),
+    "aux_pictures": _t("Фотографии", "Pictures"),
+    "aux_prices": _t("Цены", "Prices"),
+    "photos_failed": _t(
+        "Не удалось отправить фото, вот ссылки:",
+        "Could not send the photos, here are the links:",
+    ),
+    "photos_expired": _t(
+        "Фото больше недоступны. Запустите проверку заново.",
+        "The photos are no longer available. Please run the verification again.",
+    ),
     "section_confirmed": _t("✅ Подтверждено", "✅ Confirmed"),
     "section_conflicts": _t("❗ Конфликты", "❗ Conflicts"),
     "section_unresolved": _t("▫️ Не определено", "▫️ Unresolved"),
@@ -231,6 +260,125 @@ ATTRIBUTE_DISPLAY_NAMES: dict[str, dict[Language, str]] = {
 }
 
 
+# Stage 32: names for canonical attributes added by the dynamic catalog
+# (core.attribute_catalog). Keys are the language-neutral canonical names.
+_EXTENSION_NAMES = {
+    "display_ppi": ("Плотность пикселей", "Pixel density"),
+    "display_aspect_ratio": ("Соотношение сторон экрана", "Display aspect ratio"),
+    "cover_glass": ("Защитное стекло", "Cover glass"),
+    "hdr_support": ("Поддержка HDR", "HDR support"),
+    "hdr_brightness": ("Яркость в режиме HDR", "HDR brightness"),
+    "peak_brightness": ("Пиковая яркость", "Peak brightness"),
+    "contrast_ratio": ("Контрастность", "Contrast ratio"),
+    "color_depth": ("Глубина цвета", "Color depth"),
+    "number_of_colors": ("Количество цветов", "Number of colors"),
+    "battery_capacity_min": ("Минимальная ёмкость аккумулятора", "Minimum battery capacity"),
+    "fast_charging": ("Быстрая зарядка", "Fast charging"),
+    "wireless_charging": ("Беспроводная зарядка", "Wireless charging"),
+    "wireless_charging_standard": ("Стандарт беспроводной зарядки", "Wireless charging standard"),
+    "battery_life": ("Время работы от аккумулятора", "Battery life"),
+    "battery_life_power_saving": ("Время работы в режиме экономии", "Battery life (power saving)"),
+    "battery_features": ("Функции аккумулятора", "Battery features"),
+    "security_coprocessor": ("Сопроцессор безопасности", "Security coprocessor"),
+    "security_features": ("Функции защиты данных", "Security features"),
+    "software_update_support": ("Срок поддержки обновлений", "Software update support"),
+    "max_zoom": ("Максимальный зум", "Max zoom"),
+    "rear_camera_features": ("Функции основной камеры", "Rear camera features"),
+    "front_camera_features": ("Функции фронтальной камеры", "Front camera features"),
+    "front_camera_aperture": ("Диафрагма фронтальной камеры", "Front camera aperture"),
+    "front_camera_field_of_view": ("Угол обзора фронтальной камеры", "Front camera field of view"),
+    "front_camera_autofocus": ("Автофокус фронтальной камеры", "Front camera autofocus"),
+    "camera_features": ("Функции камеры", "Camera features"),
+    "editing_features": ("Функции редактирования фото", "Photo editing features"),
+    "rear_video_recording": ("Видеозапись основной камерой", "Rear video recording"),
+    "front_video_recording": ("Видеозапись фронтальной камерой", "Front video recording"),
+    "rear_video_features": ("Видеофункции основной камеры", "Rear video features"),
+    "front_video_features": ("Видеофункции фронтальной камеры", "Front video features"),
+    "slow_motion_video": ("Замедленная съёмка", "Slow-motion video"),
+    "hdr_video_recording": ("Запись HDR-видео", "HDR video recording"),
+    "video_formats": ("Форматы видео", "Video formats"),
+    "video_features": ("Функции видео", "Video features"),
+    "video_audio_features": ("Функции записи звука", "Video audio features"),
+    "materials_and_durability": ("Материалы и прочность", "Materials and durability"),
+    "authentication": ("Аутентификация", "Authentication"),
+    "safety_features": ("Экстренные функции и безопасность", "Safety features"),
+    "sensors": ("Датчики", "Sensors"),
+    "buttons": ("Кнопки", "Buttons"),
+    "speakers": ("Динамики", "Speakers"),
+    "microphone_count": ("Количество микрофонов", "Microphones"),
+    "media_features": ("Аудиофункции", "Audio features"),
+    "wifi_bands": ("Диапазоны Wi-Fi", "Wi-Fi bands"),
+    "wifi_mimo": ("Wi-Fi MIMO", "Wi-Fi MIMO"),
+    "nfc": ("NFC", "NFC"),
+    "uwb": ("Сверхширокополосная связь (UWB)", "Ultra-wideband (UWB)"),
+    "gnss": ("Спутниковая навигация", "GNSS / positioning"),
+    "gnss_dual_band": ("Двухдиапазонный GNSS", "Dual-band GNSS"),
+    "wireless_features": ("Беспроводные функции", "Wireless features"),
+    "esim": ("eSIM", "eSIM"),
+    "network_generations": ("Поколения сети", "Network generations"),
+    "network_5g_type": ("Тип 5G", "5G type"),
+    "model_number": ("Номер модели", "Model number"),
+    "gsm_bands": ("Диапазоны GSM", "GSM bands"),
+    "umts_bands": ("Диапазоны UMTS/HSPA", "UMTS/HSPA bands"),
+    "lte_bands": ("Диапазоны LTE", "LTE bands"),
+    "nr_sub6_bands": ("Диапазоны 5G Sub-6", "5G Sub-6 bands"),
+    "nr_mmwave_bands": ("Диапазоны 5G mmWave", "5G mmWave bands"),
+    "hearing_aid_compatible": ("Совместимость со слуховыми аппаратами", "Hearing aid compatible"),
+    "conversational_gain": ("Усиление речи (conversational gain)", "Conversational gain"),
+    "accessibility_features": ("Специальные возможности", "Accessibility features"),
+}
+_SMALL_WORDS = {"of", "and", "for", "with", "per", "in"}
+
+
+def _title_en(text: str) -> str:
+    """Title Case like the existing English attribute names; acronyms and
+    mixed-case words (HDR, GNSS, eSIM, Wi-Fi) are kept as written."""
+    words = []
+    for index, word in enumerate(text.split(" ")):
+        if index and word in _SMALL_WORDS:
+            words.append(word)
+        elif any(char.isupper() for char in word[1:]) or word[:1].isdigit():
+            words.append(word)
+        else:
+            stripped = word.lstrip("(")
+            words.append(word[:len(word) - len(stripped)] + stripped[:1].upper() + stripped[1:])
+    return " ".join(words)
+
+
+ATTRIBUTE_DISPLAY_NAMES.update({key: _t(ru, _title_en(en)) for key, (ru, en) in _EXTENSION_NAMES.items()})
+
+# Per-lens attributes ("wide_camera_aperture") are composed, not listed.
+_LENS_ROLE_NAMES = {
+    "wide": ("широкоугольной камеры", "Wide camera"),
+    "ultrawide": ("сверхширокоугольной камеры", "Ultrawide camera"),
+    "telephoto": ("телеобъектива", "Telephoto camera"),
+    "periscope": ("перископной камеры", "Periscope camera"),
+    "macro": ("макрокамеры", "Macro camera"),
+    "main": ("основной камеры", "Main camera"),
+    "depth": ("датчика глубины", "Depth camera"),
+}
+_LENS_PART_NAMES = {
+    "aperture": ("Диафрагма", "aperture"),
+    "field_of_view": ("Угол обзора", "field of view"),
+    "sensor_size": ("Размер сенсора", "sensor size"),
+    "autofocus": ("Автофокус", "autofocus"),
+    "optical_zoom": ("Оптический зум", "optical zoom"),
+    "phase_detection": ("Фазовый автофокус", "phase detection"),
+}
+_LENS_ATTRIBUTE_RE = re.compile(
+    r"^(?P<role>" + "|".join(_LENS_ROLE_NAMES) + r")_camera_(?P<part>" + "|".join(_LENS_PART_NAMES) + r")$"
+)
+
+
+def _lens_attribute_name(canonical_name: str, language: "Language") -> str | None:
+    match = _LENS_ATTRIBUTE_RE.match(canonical_name)
+    if not match:
+        return None
+    role_ru, role_en = _LENS_ROLE_NAMES[match["role"]]
+    part_ru, part_en = _LENS_PART_NAMES[match["part"]]
+    return f"{part_ru} {role_ru}" if language == "ru" else _title_en(f"{role_en} {part_en}")
+
+
 def translate(catalog: dict[str, str], language: Language) -> str:
     return catalog.get(language, catalog.get(DEFAULT_LANGUAGE, ""))
 
@@ -269,22 +417,118 @@ def _fallback_display_name(canonical_name: str) -> str:
     return canonical_name.replace("_", " ").strip() or canonical_name
 
 
+# Stage 32.1: aliases which are useful outside any one product/category but
+# do not belong to the static schema catalog.  This is the second lookup tier
+# after ATTRIBUTE_DISPLAY_NAMES and before token composition.  It deliberately
+# contains concepts, not Pixel values.
+_CANONICAL_ALIAS_DISPLAY_NAMES: dict[str, dict[Language, str]] = {
+    "haptic_engine": _t("Вибромотор", "Haptic Engine"),
+    "haptic_levels": _t("Уровни виброотклика", "Haptic Levels"),
+    "camera_sensor_shift": _t("Сдвиг сенсора камеры", "Camera Sensor Shift"),
+}
+
+# Deterministic RU fallback for future dynamic attributes.  We only compose a
+# label when every semantic token is known; partial translations such as
+# "Датчик calibration" are worse than retaining the original technical name.
+_RU_LABEL_TOKENS = {
+    "adaptive": "адаптивный",
+    "audio": "аудио",
+    "battery": "аккумулятор",
+    "camera": "камера",
+    "charging": "зарядка",
+    "color": "цвет",
+    "depth": "глубина",
+    "display": "экран",
+    "engine": "механизм",
+    "feature": "функция",
+    "features": "функции",
+    "front": "фронтальная",
+    "haptic": "тактильный",
+    "level": "уровень",
+    "levels": "уровни",
+    "material": "материал",
+    "materials": "материалы",
+    "maximum": "максимальный",
+    "minimum": "минимальный",
+    "mode": "режим",
+    "modes": "режимы",
+    "network": "сеть",
+    "power": "мощность",
+    "rear": "основная",
+    "sensor": "датчик",
+    "sensors": "датчики",
+    "shift": "сдвиг",
+    "size": "размер",
+    "speed": "скорость",
+    "support": "поддержка",
+    "technology": "технология",
+    "type": "тип",
+    "video": "видео",
+    "voltage": "напряжение",
+    "wireless": "беспроводная",
+}
+_RU_LABEL_STEMS_GENITIVE = {
+    "audio": "аудио",
+    "battery": "аккумулятора",
+    "camera": "камеры",
+    "camera_sensor": "сенсора камеры",
+    "charging": "зарядки",
+    "color": "цвета",
+    "display": "экрана",
+    "haptic": "виброотклика",
+    "material": "материала",
+    "network": "сети",
+    "sensor": "датчика",
+    "video": "видео",
+    "wireless_charging": "беспроводной зарядки",
+}
+_RU_LABEL_SUFFIXES = {
+    "features": "Функции",
+    "levels": "Уровни",
+    "mode": "Режим",
+    "modes": "Режимы",
+    "power": "Мощность",
+    "size": "Размер",
+    "speed": "Скорость",
+    "support": "Поддержка",
+    "type": "Тип",
+}
+
+
+def _generic_display_name(canonical_name: str, language: Language) -> str | None:
+    technical = _fallback_display_name(canonical_name)
+    if language == "en":
+        return _title_en(technical)
+    tokens = [token for token in canonical_name.strip("_").split("_") if token]
+    if not tokens or any(token not in _RU_LABEL_TOKENS for token in tokens):
+        return None
+    if len(tokens) == 1:
+        rendered = _RU_LABEL_TOKENS[tokens[0]]
+        return rendered[:1].upper() + rendered[1:]
+    stem = "_".join(tokens[:-1])
+    if stem in _RU_LABEL_STEMS_GENITIVE and tokens[-1] in _RU_LABEL_SUFFIXES:
+        return f"{_RU_LABEL_SUFFIXES[tokens[-1]]} {_RU_LABEL_STEMS_GENITIVE[stem]}"
+    return None
+
+
 def display_name(canonical_name: str, language: Language, *, fallback: str | None = None) -> str:
     """The localized label for a canonical field, in either language.
 
-    ``fallback`` lets a caller that already has an upstream-computed name
-    (core.profile._display_name's title-cased canonical_name, echoed onto
-    ServiceAttribute.display_name) prefer it over the generic replace-and-
-    strip fallback when no explicit translation is listed -- so an unlisted
-    canonical field (a category we haven't localized yet, or a test fixture)
-    keeps showing its existing name instead of a re-derived one.
+    Resolution order is intentionally stable: explicit schema catalog,
+    composed catalog aliases (for example per-lens fields), semantic dynamic
+    aliases, deterministic token fallback, then the original technical label.
     """
     catalog = ATTRIBUTE_DISPLAY_NAMES.get(canonical_name)
     if catalog:
         return translate(catalog, language)
-    if fallback is not None:
-        return fallback
-    return _fallback_display_name(canonical_name)
+    if (composed := _lens_attribute_name(canonical_name, language)) is not None:
+        return composed
+    alias = _CANONICAL_ALIAS_DISPLAY_NAMES.get(canonical_name)
+    if alias:
+        return translate(alias, language)
+    if (generic := _generic_display_name(canonical_name, language)) is not None:
+        return generic
+    return fallback if fallback is not None else _fallback_display_name(canonical_name)
 
 
 def normalize_language(value: object) -> Language:
