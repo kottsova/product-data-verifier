@@ -23,6 +23,7 @@ import unicodedata
 import uuid
 from typing import Awaitable, Callable, Literal
 
+from bot.i18n import DEFAULT_LANGUAGE, Language
 from observability import (
     Diagnostics,
     MetricsCollector,
@@ -51,6 +52,7 @@ class Job:
     id: str
     chat_id: int
     request: VerifyProductRequest
+    language: Language = DEFAULT_LANGUAGE
     state: JobState = "queued"
     created_at: float = 0.0
     started_at: float | None = None
@@ -118,6 +120,7 @@ class JobManager:
         self._history_limit = history_limit
         self._semaphore = asyncio.Semaphore(max_concurrent_jobs)
         self._jobs: dict[str, Job] = {}
+        self._pending_queries: dict[int, VerifyProductRequest] = {}
         self._chat_active: dict[int, list[str]] = {}
         self._chat_terminal_history: dict[int, list[str]] = {}
         self._chat_last_success: dict[int, Job] = {}
@@ -135,6 +138,18 @@ class JobManager:
 
     def get_job(self, job_id: str) -> Job | None:
         return self._jobs.get(job_id)
+
+    def set_pending_query(self, chat_id: int, request: VerifyProductRequest) -> None:
+        """Stage 31.1: a parsed query awaiting the chat's RU/EN language pick.
+
+        One pending query per chat -- a second product message before the
+        first is answered simply replaces it (last message wins, mirroring
+        how a resent /verify-style message already behaves elsewhere).
+        """
+        self._pending_queries[chat_id] = request
+
+    def pop_pending_query(self, chat_id: int) -> VerifyProductRequest | None:
+        return self._pending_queries.pop(chat_id, None)
 
     def active_jobs_for_chat(self, chat_id: int) -> list[Job]:
         return [
@@ -197,6 +212,7 @@ class JobManager:
         chat_id: int,
         request: VerifyProductRequest,
         *,
+        language: Language = DEFAULT_LANGUAGE,
         on_update: OnUpdate | None = None,
     ) -> tuple[Job, bool]:
         """Create (or reuse) a job for this chat/request. Returns (job, is_duplicate)."""
@@ -210,7 +226,7 @@ class JobManager:
             if existing is not None and existing.state in ACTIVE_STATES:
                 return existing, True
 
-        job = Job(id=uuid.uuid4().hex, chat_id=chat_id, request=request, created_at=self._clock())
+        job = Job(id=uuid.uuid4().hex, chat_id=chat_id, request=request, language=language, created_at=self._clock())
         self._jobs[job.id] = job
         self._chat_active.setdefault(chat_id, []).append(job.id)
         self._active_by_identity[identity_key] = job.id

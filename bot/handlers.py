@@ -7,6 +7,12 @@ on_update callback -- wired to the same ``reply`` here -- delivers further
 updates (started / completed / failed) asynchronously. A cancelled job
 delivers nothing further (see bot.jobs / bot.formatters.format_job_outcome).
 
+Stage 31.1: before a job is submitted, the chat is asked to pick a result
+language (RU/EN, see bot.i18n) via an inline keyboard. handle_product_query
+only parses the message and stores the pending request (bot.jobs.JobManager.
+set_pending_query); build_language_callback's CallbackQueryHandler resolves
+the button tap and actually starts the job, reusing _start_verification.
+
 Parsing (bot.parser) and result formatting (bot.formatters) remain pure,
 framework-free functions from Stage 12. This module still never imports
 core.workflow, core.profile, or core.quality -- only bot.jobs and
@@ -19,6 +25,8 @@ import logging
 import re
 from typing import Awaitable, Callable
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
 from bot.export import export_result_csv
 from bot.formatters import (
     DEFAULT_MAX_MESSAGE_LENGTH,
@@ -30,6 +38,14 @@ from bot.formatters import (
     format_started,
     format_status,
 )
+from bot.i18n import (
+    DEFAULT_LANGUAGE,
+    LANGUAGE_CHOICE_LABELS,
+    Language,
+    language_prompt,
+    normalize_language,
+    ui,
+)
 from bot.jobs import Job, JobManager, JobManagerShuttingDownError
 from bot.parser import parse_product_query
 from observability import log_event, log_exception_event, scoped_id
@@ -40,46 +56,15 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 Reply = Callable[[str], Awaitable[object]]
+PromptLanguage = Callable[[str, list[tuple[str, str]]], Awaitable[object]]
 
-START_MESSAGE = (
-    "Привет! Я проверяю характеристики товара по бренду и модели.\n\n"
-    "Отправьте сообщение в формате:\n"
-    "ExampleCo Model 200\n"
-    "или\n"
-    "ExampleCo | Model 200\n\n"
-    "Проверка выполняется в фоне; я пришлю результат, когда он будет готов.\n"
-    "Команда /help покажет подробности."
-)
+START_MESSAGE = ui("start_message", DEFAULT_LANGUAGE)
+HELP_MESSAGE = ui("help_message", DEFAULT_LANGUAGE)
+PARSE_ERROR_MESSAGE = ui("parse_error", DEFAULT_LANGUAGE)
+SHUTTING_DOWN_MESSAGE = ui("shutting_down", DEFAULT_LANGUAGE)
+EXPORT_NO_RESULT_MESSAGE = ui("export_no_result", DEFAULT_LANGUAGE)
 
-HELP_MESSAGE = (
-    "Формат запроса:\n"
-    "<бренд> <модель>\n"
-    "или\n"
-    "<бренд> | <модель> | <артикул (необязательно)>\n\n"
-    "Примеры:\n"
-    "ExampleCo Model 200\n"
-    "ExampleCo | Model 200\n"
-    "ExampleCo | Model 200 | ART-7\n\n"
-    "Проверка товара выполняется в фоне и может занять несколько минут; "
-    "я пришлю сообщение, когда результат будет готов.\n\n"
-    "Команды:\n"
-    "/status — показать ваши текущие (queued/running) задачи\n"
-    "/cancel — отменить ваши активные задачи\n"
-    "/export — скачать CSV с результатом последней проверки"
-)
-
-PARSE_ERROR_MESSAGE = (
-    "Не удалось понять запрос. Отправьте бренд и модель, например:\n"
-    "ExampleCo Model 200\n"
-    "или ExampleCo | Model 200"
-)
-
-SHUTTING_DOWN_MESSAGE = "Бот перезапускается, попробуйте отправить запрос через минуту."
-
-EXPORT_NO_RESULT_MESSAGE = (
-    "У вас пока нет готового результата проверки для экспорта. "
-    "Сначала отправьте запрос на проверку товара."
-)
+_LANGUAGE_CALLBACK_PREFIX = "lang:"
 
 _EXPORT_FILENAME_SAFE_PATTERN = re.compile(r"[^0-9A-Za-zА-Яа-яЁё]+")
 
@@ -90,11 +75,12 @@ async def handle_product_query(
     manager: JobManager,
     *,
     reply: Reply,
+    prompt_language: PromptLanguage,
 ) -> None:
-    """Parse the message, submit a background job, and reply immediately.
+    """Parse the message and ask which language to show the result in.
 
-    Further updates (started / final result) arrive later through the job's
-    on_update callback, wired to this same ``reply``.
+    The job itself is not submitted here -- see _start_verification, called
+    once the chat answers the language prompt (build_language_callback).
     """
     query = parse_product_query(text)
     if query is None:
@@ -106,22 +92,45 @@ async def handle_product_query(
         return
 
     request = VerifyProductRequest(brand=query.brand, model=query.model, article=query.article)
+    manager.set_pending_query(chat_id, request)
+    buttons = [
+        (LANGUAGE_CHOICE_LABELS["ru"], f"{_LANGUAGE_CALLBACK_PREFIX}ru"),
+        (LANGUAGE_CHOICE_LABELS["en"], f"{_LANGUAGE_CALLBACK_PREFIX}en"),
+    ]
+    log_event(
+        logger, logging.INFO, "language_prompt_sent",
+        chat=scoped_id(chat_id),
+    )
+    await prompt_language(language_prompt(), buttons)
+
+
+async def _start_verification(
+    request: VerifyProductRequest,
+    chat_id: int,
+    manager: JobManager,
+    *,
+    language: Language,
+    reply: Reply,
+) -> None:
+    """Submit the job and reply immediately (accepted/duplicate); Stage 13 flow."""
 
     async def on_update(job: Job) -> None:
         if job.state == "running":
-            await reply(format_started(job.request))
+            await reply(format_started(job.request, language=language))
             return
-        for chunk in format_job_outcome(job):
+        for chunk in format_job_outcome(job, language=language):
             await reply(chunk)
 
     try:
-        job, is_duplicate = await manager.submit(chat_id, request, on_update=on_update)
+        job, is_duplicate = await manager.submit(
+            chat_id, request, language=language, on_update=on_update,
+        )
     except JobManagerShuttingDownError:
         log_event(
             logger, logging.INFO, "request_rejected",
             chat=scoped_id(chat_id), reason="shutting_down",
         )
-        await reply(SHUTTING_DOWN_MESSAGE)
+        await reply(ui("shutting_down", language))
         return
 
     if is_duplicate:
@@ -129,13 +138,13 @@ async def handle_product_query(
             logger, logging.INFO, "duplicate_request",
             chat=scoped_id(chat_id), job_id=job.id,
         )
-        await reply(format_duplicate(job))
+        await reply(format_duplicate(job, language=language))
         return
     log_event(
         logger, logging.INFO, "request_accepted",
-        chat=scoped_id(chat_id), job_id=job.id,
+        chat=scoped_id(chat_id), job_id=job.id, language=language,
     )
-    await reply(format_accepted(job.request))
+    await reply(format_accepted(job.request, language=language))
 
 
 async def _safe_reply(message: object, text: str) -> None:
@@ -148,6 +157,23 @@ async def _safe_reply(message: object, text: str) -> None:
         chat_id = getattr(message, "chat_id", None)
         log_exception_event(
             logger, "reply_send_failure",
+            chat=scoped_id(chat_id) if chat_id is not None else "unknown",
+        )
+
+
+async def _safe_reply_with_keyboard(
+    message: object, text: str, buttons: list[tuple[str, str]],
+) -> None:
+    """Adapter-level guard: send an inline-keyboard prompt (Stage 31.1 language pick)."""
+    try:
+        markup = InlineKeyboardMarkup([
+            [InlineKeyboardButton(label, callback_data=data)] for label, data in buttons
+        ])
+        await message.reply_text(text, reply_markup=markup)  # type: ignore[attr-defined]
+    except Exception:  # noqa: BLE001 - Telegram/API send failures are logged, not raised
+        chat_id = getattr(message, "chat_id", None)
+        log_exception_event(
+            logger, "language_prompt_send_failure",
             chat=scoped_id(chat_id) if chat_id is not None else "unknown",
         )
 
@@ -192,9 +218,50 @@ def build_verify_command(manager: JobManager):
         async def reply(chunk: str) -> None:
             await _safe_reply(update.message, chunk)
 
-        await handle_product_query(text, chat_id, manager, reply=reply)
+        async def prompt_language(text: str, buttons: list[tuple[str, str]]) -> None:
+            await _safe_reply_with_keyboard(update.message, text, buttons)
+
+        await handle_product_query(text, chat_id, manager, reply=reply, prompt_language=prompt_language)
 
     return verify_command
+
+
+def build_language_callback(manager: JobManager):
+    """Bind the RU/EN inline-keyboard CallbackQueryHandler to ``manager``."""
+
+    async def language_callback(update, context) -> None:  # noqa: ANN001
+        callback_query = update.callback_query
+        data = str(getattr(callback_query, "data", "") or "")
+        chat_id = callback_query.message.chat_id
+        try:
+            await callback_query.answer()
+        except Exception:  # noqa: BLE001 - answering is a courtesy, never fatal
+            log_exception_event(
+                logger, "language_callback_answer_failure", chat=scoped_id(chat_id),
+            )
+        if not data.startswith(_LANGUAGE_CALLBACK_PREFIX):
+            return
+        language = normalize_language(data[len(_LANGUAGE_CALLBACK_PREFIX):])
+        request = manager.pop_pending_query(chat_id)
+        if request is None:
+            # Stale/duplicate tap -- the pending query was already consumed
+            # (or the process restarted and lost in-memory state).
+            log_event(
+                logger, logging.INFO, "language_choice_no_pending_query",
+                chat=scoped_id(chat_id),
+            )
+            return
+
+        async def reply(chunk: str) -> None:
+            await _safe_reply(callback_query.message, chunk)
+
+        await _start_verification(request, chat_id, manager, language=language, reply=reply)
+        try:
+            await callback_query.edit_message_reply_markup(reply_markup=None)
+        except Exception:  # noqa: BLE001 - removing the keyboard is cosmetic, never fatal
+            pass
+
+    return language_callback
 
 
 def build_status_command(manager: JobManager):
@@ -231,7 +298,7 @@ def build_export_command(manager: JobManager):
             log_event(logger, logging.INFO, "export_no_result", chat=scoped_id(chat_id))
             await _safe_reply(update.message, EXPORT_NO_RESULT_MESSAGE)
             return
-        csv_text = export_result_csv(job.result)
+        csv_text = export_result_csv(job.result, language=job.language)
         log_event(
             logger, logging.INFO, "export_sent",
             chat=scoped_id(chat_id), job_id=job.id,

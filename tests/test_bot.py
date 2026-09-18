@@ -16,8 +16,6 @@ import tempfile
 import unittest
 
 from bot.formatters import (
-    ERROR_MESSAGES,
-    QUALITY_LABELS,
     chunk_lines,
     format_accepted,
     format_cancelled,
@@ -34,15 +32,18 @@ from bot.handlers import (
     HELP_MESSAGE,
     PARSE_ERROR_MESSAGE,
     START_MESSAGE,
+    _start_verification,
     _safe_reply,
     build_cancel_command,
     build_export_command,
+    build_language_callback,
     build_status_command,
     build_verify_command,
     handle_product_query,
     help_command,
     start_command,
 )
+from bot.i18n import ERROR_MESSAGES, QUALITY_LABELS
 from bot.jobs import Job, JobManager
 from bot.parser import ParsedProductQuery, parse_product_query
 from bot.service_factory import build_product_verifier_service
@@ -187,7 +188,7 @@ def make_result(
 
 class FormatterQualityStatusTests(unittest.TestCase):
     def test_all_four_statuses_have_distinct_human_labels(self):
-        labels = {status: QUALITY_LABELS[status] for status in
+        labels = {status: QUALITY_LABELS[status]["ru"] for status in
                    ("verified", "partial", "insufficient", "conflicted")}
         self.assertEqual(len(set(labels.values())), 4)
 
@@ -622,6 +623,25 @@ class RecordingReply:
         self.messages.append(text)
 
 
+class RecordingPromptLanguage:
+    """Stage 31.1: records the RU/EN inline-keyboard prompt(s) sent."""
+
+    def __init__(self):
+        self.calls: list[tuple[str, list[tuple[str, str]]]] = []
+
+    async def __call__(self, text: str, buttons: list[tuple[str, str]]) -> None:
+        self.calls.append((text, buttons))
+
+
+async def _choose_language(
+    manager: JobManager, chat_id: int, language: str, reply: RecordingReply,
+) -> None:
+    """Simulate the language-choice callback: pop the pending query and start it."""
+    request = manager.pop_pending_query(chat_id)
+    assert request is not None, f"no pending query for chat {chat_id}"
+    await _start_verification(request, chat_id, manager, language=language, reply=reply)
+
+
 class TrackingFakeService:
     """A minimal fake matching ProductVerifierService's public shape."""
 
@@ -643,27 +663,45 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
         service = TrackingFakeService(make_result())
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        await handle_product_query("just-one-token", 1, manager, reply=reply)
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("just-one-token", 1, manager, reply=reply, prompt_language=prompt)
         self.assertEqual(service.calls, [])
         self.assertEqual(reply.messages, [PARSE_ERROR_MESSAGE])
+        self.assertEqual(prompt.calls, [])
         self.assertEqual(manager.active_jobs_for_chat(1), [])
 
     async def test_conversational_input_never_creates_a_verify_request(self):
         service = TrackingFakeService(make_result())
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
+        prompt = RecordingPromptLanguage()
 
-        await handle_product_query("что это", 1, manager, reply=reply)
+        await handle_product_query("что это", 1, manager, reply=reply, prompt_language=prompt)
 
         self.assertEqual(service.calls, [])
         self.assertEqual(reply.messages, [PARSE_ERROR_MESSAGE])
         self.assertEqual(manager.active_jobs_for_chat(1), [])
 
-    async def test_valid_input_replies_immediately_with_an_accepted_message(self):
+    async def test_valid_input_prompts_for_a_language_before_starting_a_job(self):
         service = TrackingFakeService(make_result(status="verified"))
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply)
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply, prompt_language=prompt)
+        self.assertEqual(reply.messages, [])
+        self.assertEqual(len(prompt.calls), 1)
+        text, buttons = prompt.calls[0]
+        self.assertTrue(text)
+        self.assertEqual({data for _, data in buttons}, {"lang:ru", "lang:en"})
+        self.assertEqual(service.calls, [])
+
+    async def test_choosing_a_language_replies_immediately_with_an_accepted_message(self):
+        service = TrackingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        reply = RecordingReply()
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply, prompt_language=prompt)
+        await _choose_language(manager, 1, "ru", reply)
         self.assertTrue(reply.messages)
         self.assertIn("Bosch", reply.messages[0])
         self.assertIn("PUE611BB5E", reply.messages[0])
@@ -672,7 +710,9 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
         service = TrackingFakeService(make_result(status="verified"))
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply)
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply, prompt_language=prompt)
+        await _choose_language(manager, 1, "ru", reply)
         # Give the scheduled background task a chance to run to completion.
         for _ in range(50):
             if len(reply.messages) >= 2:
@@ -681,6 +721,19 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(service.calls), 1)
         self.assertTrue(any("Данные подтверждены" in message for message in reply.messages))
 
+    async def test_final_result_is_rendered_in_english_when_chosen(self):
+        service = TrackingFakeService(make_result(status="verified"))
+        manager = JobManager(service, max_concurrent_jobs=1)
+        reply = RecordingReply()
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply, prompt_language=prompt)
+        await _choose_language(manager, 1, "en", reply)
+        for _ in range(50):
+            if len(reply.messages) >= 2:
+                break
+            await asyncio.sleep(0.01)
+        self.assertTrue(any("Data confirmed" in message for message in reply.messages))
+
     async def test_a_raising_fake_service_produces_a_safe_reply_not_a_crash(self):
         class BrokenService:
             def verify(self, request):
@@ -688,7 +741,9 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
 
         manager = JobManager(BrokenService(), max_concurrent_jobs=1)
         reply = RecordingReply()
-        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply)
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply, prompt_language=prompt)
+        await _choose_language(manager, 1, "ru", reply)
         for _ in range(50):
             if len(reply.messages) >= 2:
                 break
@@ -705,7 +760,9 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
         service = ProductVerifierService(run_workflow=fake_runner(profile))
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        await handle_product_query("Acme X100", 1, manager, reply=reply)
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Acme X100", 1, manager, reply=reply, prompt_language=prompt)
+        await _choose_language(manager, 1, "ru", reply)
         for _ in range(50):
             if len(reply.messages) >= 2:
                 break
@@ -716,7 +773,9 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
         service = ProductVerifierService(run_workflow=raising_runner(RuntimeError("net down")))
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = RecordingReply()
-        await handle_product_query("Acme X100", 1, manager, reply=reply)
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Acme X100", 1, manager, reply=reply, prompt_language=prompt)
+        await _choose_language(manager, 1, "ru", reply)
         for _ in range(50):
             if len(reply.messages) >= 2:
                 break
@@ -729,8 +788,14 @@ class HandleProductQueryTests(unittest.IsolatedAsyncioTestCase):
         service = TrackingFakeService(make_result(status="verified"))
         manager = JobManager(service, max_concurrent_jobs=1)
         reply1, reply2 = RecordingReply(), RecordingReply()
-        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply1)
-        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply2)
+        prompt = RecordingPromptLanguage()
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply1, prompt_language=prompt)
+        await _choose_language(manager, 1, "ru", reply1)
+        # A second message for the same still-active product re-prompts for
+        # language, but resolving it must reuse the active job, not start
+        # a second one.
+        await handle_product_query("Bosch PUE611BB5E", 1, manager, reply=reply2, prompt_language=prompt)
+        await _choose_language(manager, 1, "ru", reply2)
         self.assertTrue(any("уже выполняется" in message for message in reply2.messages))
 
 
@@ -746,14 +811,16 @@ class FakeMessage:
         self.text = text
         self.chat_id = chat_id
         self.sent: list[str] = []
+        self.reply_markups: list[object] = []
         self.documents: list[tuple[bytes, str | None]] = []
         self._fail_send = fail_send
         self._fail_document = fail_document
 
-    async def reply_text(self, text: str) -> None:
+    async def reply_text(self, text: str, reply_markup=None) -> None:
         if self._fail_send:
             raise ConnectionError("Telegram API unreachable")
         self.sent.append(text)
+        self.reply_markups.append(reply_markup)
 
     async def reply_document(self, document: bytes, filename: str | None = None) -> None:
         if self._fail_document:
@@ -764,6 +831,34 @@ class FakeMessage:
 class FakeUpdate:
     def __init__(self, message: FakeMessage):
         self.message = message
+
+
+class FakeCallbackQuery:
+    """Stage 31.1: a tapped inline-keyboard button on a FakeMessage."""
+
+    def __init__(self, data: str, message: FakeMessage):
+        self.data = data
+        self.message = message
+        self.answered = False
+        self.cleared_markup = False
+
+    async def answer(self) -> None:
+        self.answered = True
+
+    async def edit_message_reply_markup(self, reply_markup=None) -> None:
+        self.cleared_markup = reply_markup is None
+
+
+class FakeCallbackUpdate:
+    def __init__(self, callback_query: FakeCallbackQuery):
+        self.callback_query = callback_query
+
+
+async def _tap_language_button(manager: JobManager, message: FakeMessage, language: str) -> FakeCallbackQuery:
+    """Drive the real CallbackQueryHandler end to end, like a Telegram tap."""
+    query = FakeCallbackQuery(f"lang:{language}", message)
+    await build_language_callback(manager)(FakeCallbackUpdate(query), None)
+    return query
 
 
 class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
@@ -783,6 +878,10 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(text_handlers), 1)
         self.assertIn("filters.TEXT", repr(text_handlers[0].filters))
         self.assertIn("filters.COMMAND", repr(text_handlers[0].filters))
+        callback_handlers = [
+            handler for handler in handlers if type(handler).__name__ == "CallbackQueryHandler"
+        ]
+        self.assertEqual(len(callback_handlers), 1)
 
     async def test_start_command_sends_the_start_message(self):
         message = FakeMessage()
@@ -796,14 +895,19 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("/status", HELP_MESSAGE)
         self.assertIn("/cancel", HELP_MESSAGE)
 
-    async def test_verify_command_submits_a_job_and_replies(self):
+    async def test_verify_command_prompts_for_a_language_and_tapping_it_submits_and_replies(self):
         service = TrackingFakeService(make_result(status="partial"))
         manager = JobManager(service, max_concurrent_jobs=1)
         verify_command = build_verify_command(manager)
         message = FakeMessage(text="Bosch PUE611BB5E")
         await verify_command(FakeUpdate(message), None)
         self.assertTrue(message.sent)
-        self.assertIn("Bosch", message.sent[0])
+        self.assertIsNotNone(message.reply_markups[-1])
+
+        query = await _tap_language_button(manager, message, "ru")
+        self.assertTrue(query.answered)
+        self.assertTrue(query.cleared_markup)
+        self.assertIn("Bosch", message.sent[-1])
 
     async def test_one_valid_message_creates_exactly_one_typed_request(self):
         service = TrackingFakeService(make_result(status="partial"))
@@ -811,6 +915,7 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         verify_command = build_verify_command(manager)
         message = FakeMessage(text="ExampleCo | Model 200 | ART-7")
         await verify_command(FakeUpdate(message), None)
+        await _tap_language_button(manager, message, "ru")
         for _ in range(50):
             if service.calls:
                 break
@@ -862,6 +967,7 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         status_command = build_status_command(manager)
         message = FakeMessage(text="Bosch PUE611BB5E", chat_id=7)
         await verify_command(FakeUpdate(message), None)
+        await _tap_language_button(manager, message, "ru")
         await service.wait_started("Bosch", "PUE611BB5E")
 
         status_message = FakeMessage(chat_id=7)
@@ -886,6 +992,7 @@ class TelegramCommandTests(unittest.IsolatedAsyncioTestCase):
         cancel_command = build_cancel_command(manager)
         message = FakeMessage(text="Bosch PUE611BB5E", chat_id=9)
         await verify_command(FakeUpdate(message), None)
+        await _tap_language_button(manager, message, "ru")
         await service.wait_started("Bosch", "PUE611BB5E")
 
         cancel_message = FakeMessage(chat_id=9)
@@ -930,6 +1037,7 @@ class ExportCommandTests(unittest.IsolatedAsyncioTestCase):
         verify_command = build_verify_command(manager)
         message = FakeMessage(text="Bosch PUE611BB5E", chat_id=31)
         await verify_command(FakeUpdate(message), None)
+        await _tap_language_button(manager, message, "ru")
         await _wait_for_completed_job(manager, 31)
 
         export_command = build_export_command(manager)
@@ -951,6 +1059,7 @@ class ExportCommandTests(unittest.IsolatedAsyncioTestCase):
         verify_command = build_verify_command(manager)
         message = FakeMessage(text="Bosch PUE611BB5E", chat_id=32)
         await verify_command(FakeUpdate(message), None)
+        await _tap_language_button(manager, message, "ru")
         await _wait_for_completed_job(manager, 32)
 
         export_command = build_export_command(manager)
@@ -965,9 +1074,9 @@ class ExportCommandTests(unittest.IsolatedAsyncioTestCase):
         manager_a = JobManager(service_a, max_concurrent_jobs=1)
         manager_b = JobManager(service_b, max_concurrent_jobs=1)
 
-        await build_verify_command(manager_a)(
-            FakeUpdate(FakeMessage(text="Bosch PUE611BB5E", chat_id=40)), None,
-        )
+        chat_40_message = FakeMessage(text="Bosch PUE611BB5E", chat_id=40)
+        await build_verify_command(manager_a)(FakeUpdate(chat_40_message), None)
+        await _tap_language_button(manager_a, chat_40_message, "ru")
         await _wait_for_completed_job(manager_a, 40)
 
         # Chat 41 never submitted anything to manager_a: no cross-chat leak.
@@ -995,14 +1104,16 @@ class ExportCommandTests(unittest.IsolatedAsyncioTestCase):
         manager = JobManager(service, max_concurrent_jobs=1)
         verify_command = build_verify_command(manager)
 
-        await verify_command(
-            FakeUpdate(FakeMessage(text="Bosch PUE611BB5E", chat_id=33)), None,
-        )
+        first_message = FakeMessage(text="Bosch PUE611BB5E", chat_id=33)
+        await verify_command(FakeUpdate(first_message), None)
+        await _tap_language_button(manager, first_message, "ru")
         await _wait_for_completed_job(manager, 33)
         good_job = manager.last_export_job_for_chat(33)
         self.assertIsNotNone(good_job)
 
-        await verify_command(FakeUpdate(FakeMessage(text="Acme Y1", chat_id=33)), None)
+        second_message = FakeMessage(text="Acme Y1", chat_id=33)
+        await verify_command(FakeUpdate(second_message), None)
+        await _tap_language_button(manager, second_message, "ru")
         for _ in range(50):
             if not manager.active_jobs_for_chat(33):
                 break
@@ -1027,6 +1138,7 @@ class ArchitectureBoundaryTests(unittest.TestCase):
     BOT_MODULES = (
         "bot/handlers.py", "bot/formatters.py", "bot/export.py", "bot/parser.py",
         "bot/telegram_bot.py", "bot/service_factory.py", "bot/jobs.py",
+        "bot/i18n.py", "bot/attribute_filter.py",
     )
 
     def _code_identifiers_and_imports(self, source: str) -> tuple[set[str], set[str]]:

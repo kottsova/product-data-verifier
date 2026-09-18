@@ -12,6 +12,7 @@ import unittest
 from unittest.mock import patch
 
 from bot.handlers import (
+    _start_verification,
     build_cancel_command,
     build_status_command,
     handle_product_query,
@@ -364,9 +365,19 @@ class TelegramOperationalEventTests(_LoggingIsolationMixin, unittest.IsolatedAsy
         async def reply(text: str):
             replies.append(text)
 
+        async def prompt_language(text: str, buttons):
+            return None
+
+        async def ask_and_start(chat_id: int) -> None:
+            await handle_product_query(
+                "Acme X100", chat_id, manager, reply=reply, prompt_language=prompt_language,
+            )
+            request = manager.pop_pending_query(chat_id)
+            await _start_verification(request, chat_id, manager, language="ru", reply=reply)
+
         raw_chat = 987654321012345
-        await handle_product_query("Acme X100", raw_chat, manager, reply=reply)
-        await handle_product_query("Acme X100", raw_chat, manager, reply=reply)
+        await ask_and_start(raw_chat)
+        await ask_and_start(raw_chat)
         self.assertEqual(len(self.events.events("request_accepted")), 1)
         self.assertEqual(len(self.events.events("duplicate_request")), 1)
 

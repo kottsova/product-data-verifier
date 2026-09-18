@@ -20,11 +20,12 @@ from __future__ import annotations
 import logging
 import signal
 
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, MessageHandler, filters
 
 from bot.handlers import (
     build_cancel_command,
     build_export_command,
+    build_language_callback,
     build_status_command,
     build_verify_command,
     help_command,
@@ -79,6 +80,7 @@ def build_application(token: str, manager: JobManager) -> Application:
     application.add_handler(CommandHandler("status", build_status_command(manager)))
     application.add_handler(CommandHandler("cancel", build_cancel_command(manager)))
     application.add_handler(CommandHandler("export", build_export_command(manager)))
+    application.add_handler(CallbackQueryHandler(build_language_callback(manager), pattern=r"^lang:"))
     application.add_handler(MessageHandler(
         filters.TEXT & ~filters.COMMAND, build_verify_command(manager),
     ))

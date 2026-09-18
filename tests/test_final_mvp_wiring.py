@@ -11,7 +11,7 @@ import asyncio
 import unittest
 
 from bot.formatters import format_accepted, format_duplicate, format_started
-from bot.handlers import handle_product_query
+from bot.handlers import _start_verification, handle_product_query
 from bot.jobs import JobManager
 from services.cache import InMemoryProductVerificationRepository
 from services.product_verifier import ProductVerifierService, VerifyProductRequest
@@ -26,6 +26,29 @@ class ReplyRecorder:
 
     async def __call__(self, message: str) -> None:
         self.messages.append(message)
+
+
+class IgnoredPromptLanguage:
+    """Stage 31.1: the language prompt itself is out of scope here -- see
+    test_bot.py's HandleProductQueryTests for that flow. This suite always
+    picks the default (RU) via ``ask_and_start`` to keep its existing
+    Russian-text assertions."""
+
+    async def __call__(self, text: str, buttons: list[tuple[str, str]]) -> None:
+        return None
+
+
+async def ask_and_start(
+    text: str, chat_id: int, manager: JobManager, *, reply, language: str = "ru",
+) -> None:
+    """Drive both Stage 31.1 steps at once: parse+prompt, then pick a language."""
+    await handle_product_query(
+        text, chat_id, manager, reply=reply, prompt_language=IgnoredPromptLanguage(),
+    )
+    request = manager.pop_pending_query(chat_id)
+    if request is None:
+        return  # invalid input never reached the prompt -- nothing to start
+    await _start_verification(request, chat_id, manager, language=language, reply=reply)
 
 
 async def wait_until_idle(manager: JobManager, chat_id: int, timeout: float = 2.0) -> None:
@@ -45,7 +68,7 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         )
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = ReplyRecorder()
-        await handle_product_query("Acme X100", chat_id, manager, reply=reply)
+        await ask_and_start("Acme X100", chat_id, manager, reply=reply)
         await wait_until_idle(manager, chat_id)
         return "\n".join(reply.messages)
 
@@ -67,14 +90,14 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         request = VerifyProductRequest(brand="Acme", model="X100")
 
         first = ReplyRecorder()
-        await handle_product_query("Acme X100", 17, manager, reply=first)
+        await ask_and_start("Acme X100", 17, manager, reply=first)
         await wait_until_idle(manager, 17)
         self.assertIn(format_accepted(request), first.messages)
         self.assertIn(format_started(request), first.messages)
         self.assertTrue(any("power" in message.casefold() for message in first.messages))
 
         second = ReplyRecorder()
-        await handle_product_query("Acme X100", 17, manager, reply=second)
+        await ask_and_start("Acme X100", 17, manager, reply=second)
         await wait_until_idle(manager, 17)
         self.assertEqual(len(workflow_calls), 1)
         self.assertTrue(any("кэш" in message.casefold() for message in second.messages))
@@ -83,11 +106,11 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         service = GatedService()
         manager = JobManager(service, max_concurrent_jobs=1)
         first, duplicate = ReplyRecorder(), ReplyRecorder()
-        await handle_product_query("Bosch PUE611BB5E", 18, manager, reply=first)
+        await ask_and_start("Bosch PUE611BB5E", 18, manager, reply=first)
         self.assertTrue(await service.wait_started("Bosch", "PUE611BB5E"))
         active_job = manager.active_jobs_for_chat(18)[0]
 
-        await handle_product_query("Bosch PUE611BB5E", 18, manager, reply=duplicate)
+        await ask_and_start("Bosch PUE611BB5E", 18, manager, reply=duplicate)
         self.assertEqual(duplicate.messages, [format_duplicate(active_job)])
         self.assertEqual(len(service.calls), 1)
 
@@ -102,7 +125,7 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         )
         manager = JobManager(service, max_concurrent_jobs=1)
         reply = ReplyRecorder()
-        await handle_product_query("Acme X100", 19, manager, reply=reply)
+        await ask_and_start("Acme X100", 19, manager, reply=reply)
         await wait_until_idle(manager, 19)
         joined = "\n".join(reply.messages)
         self.assertIn("stage17 network down", joined)

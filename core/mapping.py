@@ -74,6 +74,20 @@ PRODUCT_DIMENSION_CONTEXT = re.compile(
     re.I,
 )
 COMPONENTS = {"height", "width", "depth"}
+# A raw "CPU"/"CPU model" label often carries a core-count/clock-speed
+# breakdown (e.g. "Octa-core (1x3.1 GHz Cortex-X4 & ...)"), a distinct fact
+# from the chip/SoC *name* ("chipset"/"soc"/"processor"). Both aliases
+# resolve to the same canonical "processor" field, so without this guard a
+# source listing both rows produces a false Conflict between two facets of
+# the same chip rather than two disagreeing sources.
+_CORE_LAYOUT_RE = re.compile(r"(?i)\b(?:octa|hexa|deca|quad|dual|single)[- ]core\b")
+_WEAK_PROCESSOR_LABELS = {"cpu", "cpu model"}
+# A bare "Battery" label is ambiguous: sometimes it states capacity
+# ("Battery | 4700 mAh"), sometimes an unrelated endurance/test score
+# ("Battery | 50:44h endurance, 1000 cycles"). Only map it onto
+# battery_capacity when the value itself looks like a capacity figure --
+# otherwise leave it unmapped rather than corrupt battery_capacity.
+_CAPACITY_VALUE_RE = re.compile(r"(?i)^\s*\d[\d,.]*\s*m?ah\b")
 DISPLAY_COMPOSITE_LABELS = {
     "display", "display size and type", "main screen", "screen", "screen size and type",
 }
@@ -239,6 +253,14 @@ def _contextual_target(raw: RawAttribute, definitions: dict[str, AttributeDefini
     return None
 
 
+def _battery_bare_target(raw: RawAttribute, definitions: dict[str, AttributeDefinition]) -> tuple[str, str] | None:
+    if _key(raw.name) != "battery" or "battery_capacity" not in definitions:
+        return None
+    if _CAPACITY_VALUE_RE.search(raw.value or "") or _CAPACITY_VALUE_RE.search(raw.raw_value or ""):
+        return "battery_capacity", "value_shape:battery_as_capacity"
+    return None
+
+
 def _ambiguity_candidates(label: str, definitions: dict[str, AttributeDefinition]) -> tuple[str, ...]:
     possible = {
         "weight": ("net_weight", "gross_weight", "weight"),
@@ -364,6 +386,11 @@ def map_attributes(
             target, reason = contextual
             mapped.append(_canonical(raw, definitions[target], "medium", reason))
             continue
+        battery_bare = _battery_bare_target(raw, definitions)
+        if battery_bare:
+            target, reason = battery_bare
+            mapped.append(_canonical(raw, definitions[target], "medium", reason))
+            continue
         unit_target = _unit_target(raw, definitions)
         if unit_target:
             target, reason = unit_target
@@ -384,6 +411,13 @@ def map_attributes(
         }
         if len(matches) == 1:
             definition = next(iter(matches.values()))
+            if (
+                definition.canonical_name == "processor"
+                and label in _WEAK_PROCESSOR_LABELS
+                and _CORE_LAYOUT_RE.search(raw.value or raw.raw_value or "")
+            ):
+                pending.append(raw)
+                continue
             if definition.canonical_name in {"product_dimensions", "package_dimensions", "net_weight", "gross_weight"}:
                 reason = f"explicit_scope:{definition.canonical_name}"
             else:
