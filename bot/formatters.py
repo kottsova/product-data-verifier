@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import re
 
-from bot.attribute_filter import filter_user_facing
+from bot.attribute_filter import effective_status, filter_user_facing, has_usable_value
 from bot.i18n import (
     DEFAULT_LANGUAGE,
     Language,
@@ -165,18 +165,15 @@ def _localized_name(attribute: ServiceAttribute, language: Language) -> str:
 
 
 def _attribute_line(attribute: ServiceAttribute, language: Language) -> str:
+    """Renders a confirmed attribute; callers only pass items already
+    filtered to ``effective_status(item) == "Confirmed"``, so the value is
+    guaranteed usable (see bot.attribute_filter.has_usable_value)."""
     name = _localized_name(attribute, language)
-    if attribute.status == "Confirmed":
-        icon = _STATUS_ICON["Confirmed"]
-        value_text = format_attribute_value(attribute.value, attribute.unit)
-        line = f"{icon} {name}: {value_text}"
-        provenance = _confirmed_provenance_line(attribute, language)
-        return f"{line}\n{provenance}" if provenance else line
-    if attribute.status == "Conflict":
-        icon = _STATUS_ICON["Conflict"]
-        return f"{icon} {name}: {ui('conflict_suffix', language)}"
+    icon = _STATUS_ICON["Confirmed"]
     value_text = format_attribute_value(attribute.value, attribute.unit)
-    return f"\U0001f539 {name}: {value_text} ({ui('unconfirmed_suffix', language)})"
+    line = f"{icon} {name}: {value_text}"
+    provenance = _confirmed_provenance_line(attribute, language)
+    return f"{line}\n{provenance}" if provenance else line
 
 
 def _fallback_display_name(canonical_name: str) -> str:
@@ -292,14 +289,14 @@ def _status_section_lines(
     shown_names = {item.canonical_name for item in attributes}
     by_name = {item.canonical_name: item for item in attributes}
     confirmed = _sorted_attributes([
-        item for item in attributes if item.status == "Confirmed"
+        item for item in attributes if effective_status(item) == "Confirmed"
     ])
 
     conflict_names = [
         name for name in dict.fromkeys(result.conflicts) if name in shown_names
     ]
     for item in attributes:
-        if item.status == "Conflict" and item.canonical_name not in conflict_names:
+        if effective_status(item) == "Conflict" and item.canonical_name not in conflict_names:
             conflict_names.append(item.canonical_name)
 
     unresolved_names = [
@@ -307,7 +304,7 @@ def _status_section_lines(
     ]
     for item in attributes:
         if (
-            item.status not in ("Confirmed", "Conflict")
+            effective_status(item) not in ("Confirmed", "Conflict")
             and item.canonical_name not in unresolved_names
         ):
             unresolved_names.append(item.canonical_name)
@@ -339,7 +336,7 @@ def _status_section_lines(
     for name in unresolved_names:
         attribute = by_name.get(name)
         name_text = display_name(name, language) if attribute is None else _localized_name(attribute, language)
-        if attribute is not None and attribute.value is not None:
+        if attribute is not None and attribute.value is not None and has_usable_value(attribute):
             value_text = format_attribute_value(attribute.value, attribute.unit)
             unresolved_lines.append(
                 f"🔹 {name_text}: {value_text} ({ui('unconfirmed_suffix', language)})"

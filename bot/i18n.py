@@ -159,6 +159,7 @@ UI = {
         "Бот перезапускается, попробуйте отправить запрос через минуту.",
         "The bot is restarting, please try sending the request again in a minute.",
     ),
+    "not_found": _t("Не найдено", "Not found"),
     "export_no_result": _t(
         "У вас пока нет готового результата проверки для экспорта. "
         "Сначала отправьте запрос на проверку товара.",
@@ -171,6 +172,22 @@ IDENTITY_FIELD_LABELS: dict[str, dict[Language, str]] = {
     "brand": _t("бренд", "brand"),
     "model": _t("модель", "model"),
 }
+
+# Stage 31.1: the wide, one-product-per-row /export CSV's fixed leading
+# columns (identity + source summary) -- canonical attribute columns are
+# appended after these using ATTRIBUTE_DISPLAY_NAMES/display_name().
+EXPORT_HEADERS: dict[str, dict[Language, str]] = {
+    "brand": _t("Бренд", "Brand"),
+    "model": _t("Модель", "Model"),
+    "article": _t("Артикул", "Article"),
+    "category": _t("Категория", "Category"),
+    "official_sources": _t("Официальные источники", "Official Sources"),
+    "secondary_sources": _t("Прочие источники", "Secondary Sources"),
+}
+
+
+def export_header(key: str, language: Language) -> str:
+    return translate(EXPORT_HEADERS[key], language)
 
 # Localized display names for canonical schema fields (core.schema). A
 # canonical_name missing here falls back to a title-cased rendering of the
@@ -207,6 +224,7 @@ ATTRIBUTE_DISPLAY_NAMES: dict[str, dict[Language, str]] = {
     "bluetooth": _t("Bluetooth", "Bluetooth"),
     "sim": _t("SIM-карта", "SIM"),
     "ip_rating": _t("Класс защиты (IP)", "IP Rating"),
+    "usb": _t("USB", "USB"),
     "operating_system": _t("Операционная система", "Operating System"),
     "ports": _t("Порты", "Ports"),
     "wireless": _t("Беспроводные модули", "Wireless"),

@@ -1,16 +1,35 @@
 """User-facing attribute filtering for the Telegram message and /export CSV.
 
-Extraction keeps every raw fact it finds (see core.schema's
-``extend_schema_with_discovered`` -- "never discard them"), including
-regulatory boilerplate, help-center instructions, and other page furniture
-that happens to sit next to real specs on a support/legal page. That is the
-right call for the internal VerifyProductResult (diagnostics need it), but
-it is wrong to hand straight to a shopper.
+Stage 31.1 first tried a noise-heuristic blacklist (foreign script, RF-unit
+patterns, oversized values) on top of every attribute the pipeline produced.
+A real Pixel 9 Pro retest showed that approach is fundamentally leaky: a
+support/help page yields dozens of short, plausible-looking English
+fragments ("Pixel", "Features", "Video", "Google Llc", "True", "Cja",
+"Anonymous", "Max", ...) that no length/script heuristic catches, because
+they're not identifiable as noise by their *shape* -- only by the fact that
+they were never part of the category's canonical schema to begin with.
 
-This module is presentation-only: it never touches services.product_verifier
-data, only decides which already-computed ServiceAttribute rows are shown.
-Only bot.formatters and bot.export import it, so the stable service contract
-and the persisted cache are untouched -- rerunning a cached result with a
+So this module is now a strict allowlist: a user-facing row is exactly the
+identity fields plus whatever the category schema defines (core.schema's
+non-"discovered" attributes; see core.profile's discovered flag). Raw
+extraction leftovers (``discovered=True``) never reach the user, full stop
+-- no blacklist to keep extending. They remain in the persisted
+VerifyProductResult/cache for diagnostics; only what's *displayed* is
+narrowed here.
+
+The one remaining edge case an allowlist can't catch: a raw label
+coincidentally matching a canonical alias (e.g. a help-center page's
+"Wi-Fi" toggle-instructions row satisfying the smartphone schema's "wifi"
+alias) can still smuggle unusable prose into an otherwise legitimate
+canonical field. ``has_usable_value`` is a narrow value-shape safety net for
+exactly that: a canonical field with a foreign-script or RF-emission-limit
+value renders as not-found rather than leaking that text, without dropping
+the field/column itself (a missing canonical attribute still needs a stable,
+present, empty column -- see bot.export.build_wide_export_row).
+
+Only bot.formatters and bot.export import this module: it never touches
+services.product_verifier data, only decides which already-computed
+ServiceAttribute rows/values are shown. Rerunning a cached result with a
 newer filter changes what's displayed without re-verifying anything.
 """
 
@@ -22,81 +41,58 @@ from typing import Iterable
 from services.product_verifier import ServiceAttribute
 
 
-# A raw label that means roughly the same thing as an already-present
-# canonical field, but couldn't be safely folded into it (see core.mapping's
-# value-shape guards for "battery" vs "battery_capacity" and "cpu" vs
-# "processor"). Showing it as its own row reads as a confusing duplicate.
-DISCOVERED_SYNONYM_SUPPRESS = {
-    "battery": "battery_capacity",
-    "chipset": "processor",
-    "cpu": "processor",
-    "cpu_model": "processor",
-    "memory": "ram",
-    "internal_memory": "storage",
-}
-
-# discovered=True fields are unvetted extraction leftovers -- held to a
-# tighter noise bar than canonical/expected schema fields, which deserve
-# more leeway for legitimately verbose specs (e.g. a long ports/features
-# list) and are already validated by the mapping layer.
-_DISCOVERED_MAX_LABEL_WORDS = 5
-_DISCOVERED_MAX_VALUE_WORDS = 8
-_DISCOVERED_MAX_VALUE_CHARS = 70
-_CANONICAL_MAX_VALUE_WORDS = 20
-_CANONICAL_MAX_VALUE_CHARS = 200
-
 _RF_UNIT_RE = re.compile(r"dbm|dbua|dbµa", re.IGNORECASE)
-# Non-Latin, non-Cyrillic scripts (CJK/Hangul/Kana and similar): a value or
-# label written in a script our canonical schema and UI never use is either
-# mojibake or page furniture the pipeline couldn't translate -- either way,
-# not a usable characteristic to show as-is.
+# Non-Latin, non-Cyrillic scripts (CJK/Hangul/Kana and similar): our
+# canonical schema and UI never use them, so a canonical field holding one
+# is either mojibake or page furniture the pipeline mapped by accident.
 _FOREIGN_SCRIPT_RE = re.compile(
     r"[぀-ヿ㐀-䶿一-鿿가-힣豈-﫿]"
 )
 
 
-def _looks_foreign(text: str) -> bool:
-    return bool(_FOREIGN_SCRIPT_RE.search(text))
-
-
-def _value_text(value: object) -> str | None:
-    """Plain text to noise-check, or None for a shape (e.g. dimensions) that isn't prose."""
-    if value is None:
-        return ""
-    if isinstance(value, dict):
-        return None
-    return str(value)
-
-
-def _is_noisy(label: str, value: object, *, discovered: bool) -> bool:
-    text = _value_text(value)
-    if _looks_foreign(label) or (text is not None and _looks_foreign(text)):
-        return True
-    if text is not None and _RF_UNIT_RE.search(text):
-        return True
-    if discovered:
-        if len(label.split()) > _DISCOVERED_MAX_LABEL_WORDS:
-            return True
-        if text is not None and (
-            len(text) > _DISCOVERED_MAX_VALUE_CHARS
-            or len(text.split()) > _DISCOVERED_MAX_VALUE_WORDS
-        ):
-            return True
-    elif text is not None and (
-        len(text) > _CANONICAL_MAX_VALUE_CHARS
-        or len(text.split()) > _CANONICAL_MAX_VALUE_WORDS
-    ):
-        return True
-    return False
+# core.schema's universal identity fields already appear in the Telegram
+# summary line / bot.export's identity columns (sourced from
+# VerifyProductResult.identity, the resolved single value) -- they also
+# exist as their own ServiceAttribute in result.attributes (one raw fact
+# among possibly several), so without this exclusion they'd render a second
+# time in the attribute list/CSV columns, redundant with -- and sometimes
+# inconsistent with -- the identity-derived one.
+IDENTITY_CANONICAL_NAMES = frozenset({"brand", "model", "manufacturer_article"})
 
 
 def is_user_facing(attribute: ServiceAttribute) -> bool:
-    """Whether ``attribute`` belongs in a user-facing message/export row."""
-    if _is_noisy(attribute.display_name, attribute.value, discovered=attribute.discovered):
+    """Strict allowlist: only canonical category-schema fields, once each.
+
+    ``discovered`` is core.profile's own flag for "not in the schema" (see
+    core.schema.extend_schema_with_discovered) -- an extraction leftover,
+    however plausible-looking, is never shown automatically. Surfacing a
+    specific discovered field is a deliberate future product decision (a
+    named schema addition), not an automatic passthrough.
+    """
+    if attribute.canonical_name in IDENTITY_CANONICAL_NAMES:
         return False
-    if attribute.discovered and attribute.canonical_name in DISCOVERED_SYNONYM_SUPPRESS:
-        return False
-    return True
+    return not attribute.discovered
+
+
+def has_usable_value(attribute: ServiceAttribute) -> bool:
+    """Whether a canonical attribute's value is safe to show as-is.
+
+    Guards only against the rare alias collision (see module docstring) --
+    it never excludes the attribute/column, only blanks an unusable value so
+    the field renders the same as "not found".
+    """
+    value = attribute.value
+    if value is None or isinstance(value, dict):
+        return True
+    text = str(value)
+    return not (_FOREIGN_SCRIPT_RE.search(text) or _RF_UNIT_RE.search(text))
+
+
+def effective_status(attribute: ServiceAttribute) -> str:
+    """Confirmed-but-unusable renders (and counts, for bucketing) as Unresolved."""
+    if attribute.status == "Confirmed" and not has_usable_value(attribute):
+        return "Unresolved"
+    return attribute.status
 
 
 def filter_user_facing(attributes: Iterable[ServiceAttribute]) -> list[ServiceAttribute]:

@@ -1048,7 +1048,8 @@ class ExportCommandTests(unittest.IsolatedAsyncioTestCase):
         data, filename = export_message.documents[0]
         self.assertTrue(filename.endswith(".csv"))
         text = data.decode("utf-8-sig")
-        self.assertIn("Brand", text.splitlines()[0])
+        self.assertEqual(len(text.strip().splitlines()), 2)  # header + exactly one product row
+        self.assertIn("Бренд", text.splitlines()[0])  # RU was chosen above
         self.assertIn("Acme", text)  # make_result()'s fixed identity.brand
         self.assertIn("X100", text)  # make_result()'s fixed identity.commercial_model
         self.assertIn("Cooktop", text)  # make_result()'s fixed category.category_name

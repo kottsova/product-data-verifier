@@ -164,7 +164,13 @@ class FinalMvpWiringTests(unittest.IsolatedAsyncioTestCase):
         joined = await self._run_profile(profile, chat_id=21)
         self.assertNotIn("conflicted", joined)
         self.assertIn("расходятся", joined)
-        self.assertIn("Подтверждено (3)", joined)
+        # brand/model are Confirmed too (per quality.confirmed_count=3, in
+        # the header's "Подтверждено: 3/5" summary), but Stage 31.1 no
+        # longer repeats them in the itemized list -- they're already named
+        # in the "Acme X100" summary line right above it.
+        self.assertIn("Acme X100", joined)
+        self.assertIn("Подтверждено: 3/5", joined)
+        self.assertIn("Подтверждено (1)", joined)
         self.assertIn("Конфликты (1)", joined)
         self.assertIn("Не определено (1)", joined)
         self.assertIn("power: 1000 w", joined.casefold())

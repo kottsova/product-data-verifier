@@ -176,6 +176,8 @@ CATEGORY_ATTRIBUTES: dict[str, tuple[AttributeDefinition, ...]] = {
         _definition("bluetooth", ("bluetooth",), value_type="text", priority="high"),
         _definition("sim", ("sim", "sim card", "sim card 1", "sim card 2", "sim type"), value_type="list", attribute_scope="variant_level", priority="high"),
         _definition("ip_rating", ("ip rating", "ingress protection"), value_type="enum", priority="medium"),
+        _definition("usb", ("usb", "usb type", "usb version", "usb connector", "usb type-c"), value_type="text", priority="medium"),
+        _definition("operating_system", ("operating system", "os", "android version"), value_type="text", attribute_scope="variant_level", priority="medium"),
         _definition("color", ("colour", "color", "цвет"), value_type="enum", attribute_scope="variant_level", priority="high"),
     ),
     "laptop": (
