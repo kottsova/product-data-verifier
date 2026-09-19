@@ -1,0 +1,33 @@
+🔎 Logitech MX Master 3S
+Статус: PASS · exact official page: да
+Время discovery: 10.0 с · search status: success
+Providers: direct_domain_probe, duckduckgo_html
+Trace: provider raw=22, collected=3, normalized=3, unique=3, accepted=1, rejected=2, duplicates=0
+
+Official product pages (1)
+1. https://www.logitech.com/en-us/shop/p/mx-master-3s
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   logitech.com · en-US
+   expandable_specs: yes · hidden_spec_content: no · interaction_required: unknown [unknown]
+
+Official support pages (0)
+— not found
+
+Official documents (0)
+— not found
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: yes
+• hidden spec content: no
+• interaction required: unknown
+
+Performance: 10.0 с, queries=3, provider attempts=3, raw=22, unique=3, accepted=1, rejected=2, blocked=0, timeout=0, circuit_open=0, first official path=direct_domain_probe:sitemap, direct probe requests=26 (domain probes=14)
+
+Отклонённые кандидаты (2)
+1. https://logitech.com/en-us/shop/p/mx-master-3s-business-wireless-mouse
+   Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.
+2. https://logitech.com/en-us/shop/p/mx-master-3s-mac-bluetooth-mouse
+   Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.

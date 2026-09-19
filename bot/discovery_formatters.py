@@ -169,7 +169,9 @@ def format_discovery_result(
             f"provider attempts={perf.get('provider_attempts')}, raw={perf.get('raw_candidates')}, "
             f"unique={perf.get('unique_candidates')}, accepted={perf.get('accepted')}, "
             f"rejected={perf.get('rejected')}, blocked={perf.get('blocked')}, "
-            f"timeout={perf.get('timeout')}, circuit_open={perf.get('circuit_open')}",
+            f"timeout={perf.get('timeout')}, circuit_open={perf.get('circuit_open')}, "
+            f"first official path={perf.get('first_official_path') or 'n/a'}, "
+            f"direct probe requests={perf.get('probe_requests')} (domain probes={perf.get('domain_probes')})",
         ))
 
     rejected = result.rejected if include_all_rejected else _important_rejected(result.rejected)

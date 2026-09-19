@@ -1,0 +1,33 @@
+🔎 DEWALT DCD796P2
+Статус: PASS · exact official page: да
+Время discovery: 15.2 с · search status: success
+Providers: direct_domain_probe, duckduckgo_html
+Trace: provider raw=48, collected=1, normalized=1, unique=1, accepted=1, rejected=0, duplicates=0
+
+Official product pages (1)
+1. https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries
+   exact — regional SKU suffix '-GB' on the requested base model; Requested base SKU matches; suffix 'GB' is a regional/market code, not a different product variant.; Domain verified from conservative brand official-search evidence.
+   dewalt.co.uk · en-GB
+   expandable_specs: no · hidden_spec_content: yes · interaction_required: no [json_state]
+
+Official support pages (0)
+— not found
+
+Official documents (0)
+— not found
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: no
+• hidden spec content: yes
+• interaction required: no
+
+Отклонённые соседние SKU/варианты (1)
+1. https://manualslib.com/manual/3262148/Dewalt-Dcd796p2t-Qw.html
+   найден: manualslib.com/manual/3262148/Dewalt-Dcd796p2t-Qw.html · запрошен: DCD796P2 · document host is not a verified official domain
+
+Performance: 15.2 с, queries=3, provider attempts=3, raw=48, unique=1, accepted=1, rejected=0, blocked=0, timeout=0, circuit_open=0, first official path=direct_domain_probe:sitemap, direct probe requests=51 (domain probes=13)
+
+Отклонённые кандидаты (0)

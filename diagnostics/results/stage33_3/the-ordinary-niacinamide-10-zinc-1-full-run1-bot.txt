@@ -1,0 +1,43 @@
+🔎 The Ordinary Niacinamide 10% + Zinc 1%
+Статус: PASS · exact official page: да
+Время discovery: 27.0 с · search status: success
+Providers: direct_domain_probe, duckduckgo_html, naver, seznam, duckduckgo_lite, bing, google
+Trace: provider raw=17, collected=2, normalized=2, unique=2, accepted=2, rejected=0, duplicates=0
+
+Official product pages (2)
+1. https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   theordinary.com · en-GE
+   expandable_specs: no · hidden_spec_content: yes · interaction_required: no [json_state]
+2. https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   theordinary.es · .es
+   expandable_specs: no · hidden_spec_content: yes · interaction_required: no [dom_hidden]
+
+Official support pages (0)
+— not found
+
+Official documents (0)
+— not found
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: no
+• hidden spec content: yes
+• interaction required: no
+
+Performance: 27.0 с, queries=4, provider attempts=12, raw=17, unique=2, accepted=2, rejected=0, blocked=4, timeout=1, circuit_open=1, first official path=direct_domain_probe:homepage_links, direct probe requests=28 (domain probes=20)
+
+Отклонённые кандидаты (0)
+
+Сбои/таймауты providers (8):
+• duckduckgo_html: blocked — DuckDuckGo bot-check blocked the HTML search.
+• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.
+• naver: blocked — Naver bot-check blocked the search.
+• duckduckgo_lite: blocked — DuckDuckGo bot-check blocked the Lite search.
+• bing: low_value — Provider results lacked query identity signal (0/2 required tokens matched).
+• google: timeout — Google provider deadline exhausted waiting for results.
+• duckduckgo_html: blocked — DuckDuckGo bot-check blocked the HTML search.
+• naver: low_value — Provider results lacked query identity signal (3/4 required tokens matched).

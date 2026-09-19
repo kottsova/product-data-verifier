@@ -1,0 +1,355 @@
+{
+ "product_name": "Makita DHP484Z",
+ "brand": "Makita",
+ "model": "DHP484Z",
+ "market": "global",
+ "status": "PASS",
+ "exact_official_found": true,
+ "official": [
+  {
+   "url": "https://www.makita.co.nz/products/model/DHP484Z",
+   "domain": "makita.co.nz",
+   "source_type": "manufacturer",
+   "title": "Makita - Product Details - DHP484Z 18V LXT Compact Brushless Hammer Drill Driver",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "dealers": [],
+ "secondary": [],
+ "rejected": [],
+ "runtime_seconds": 30.849,
+ "search_status": "success",
+ "attempted_queries": [
+  "Makita DHP484Z",
+  "\"DHP484Z\" manual site:makita.co.nz",
+  "Makita \"DHP484Z\" declaration of conformity"
+ ],
+ "providers": [
+  "direct_domain_probe"
+ ],
+ "provider_failures": [],
+ "candidate_counts": {
+  "provider_raw": 61,
+  "collected": 1,
+  "normalized": 1,
+  "unique": 1,
+  "duplicates": 0,
+  "accepted": 1,
+  "rejected": 0,
+  "official": 1,
+  "dealer": 0,
+  "secondary": 0,
+  "documents": 0
+ },
+ "official_pages": [
+  {
+   "url": "https://www.makita.co.nz/products/model/DHP484Z",
+   "domain": "makita.co.nz",
+   "source_type": "manufacturer",
+   "title": "Makita - Product Details - DHP484Z 18V LXT Compact Brushless Hammer Drill Driver",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "support_pages": [],
+ "documents": [],
+ "rejected_documents": [
+  {
+   "url": "https://media.makita.co.nz/_media/product-sheets/D/DHP484-PS.pdf",
+   "doc_type": "unknown",
+   "title": "Product Sheet",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.makita.co.nz/products/model/DHP484Z"
+  },
+  {
+   "url": "https://resources.makita.co.nz/_media/user-manuals/D/DHP484-UG.pdf",
+   "doc_type": "manual",
+   "title": "User Manual",
+   "reason": "names a different model identifier (DHP484)",
+   "source_page": "https://www.makita.co.nz/products/model/DHP484Z"
+  },
+  {
+   "url": "https://www.makita.co.nz/library/manuals/",
+   "doc_type": "manual",
+   "title": "User Manuals",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.makita.co.nz/products/model/DHP484Z"
+  }
+ ],
+ "document_fields": {
+  "manual_url": [],
+  "quick_start_guide_url": [],
+  "datasheet_url": [],
+  "safety_document_url": [],
+  "declaration_url": [],
+  "certificate_url": []
+ },
+ "page_inspections": [
+  {
+   "url": "https://www.makita.co.nz/products/model/DHP484Z",
+   "has_expandable_specs": false,
+   "has_hidden_spec_content": "false",
+   "requires_interaction": "false",
+   "spec_controls": [],
+   "signals": [],
+   "spec_rows_visible": 19,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0,
+   "js_shell": false,
+   "spec_location": "visible_dom"
+  }
+ ],
+ "discovery_metadata": {
+  "inspected_pages": 1,
+  "primary_page": "https://www.makita.co.nz/products/model/DHP484Z",
+  "has_expandable_specs": false,
+  "has_hidden_spec_content": "false",
+  "requires_interaction": "false",
+  "any_page_requires_interaction": "false",
+  "signals": [],
+  "spec_controls": []
+ },
+ "official_paths": [
+  {
+   "path": "direct_domain_probe:bounded_crawl",
+   "requests": 4,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:domain_resolution",
+   "requests": 28,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:page_verification",
+   "requests": 1,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:robots",
+   "requests": 5,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:site_search",
+   "requests": 20,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sitemap",
+   "requests": 9,
+   "queries": 1
+  },
+  {
+   "path": "serp_identity_queries",
+   "requests": 0,
+   "queries": 2
+  },
+  {
+   "path": "serp_domain_restricted_queries",
+   "requests": 0,
+   "queries": 1
+  },
+  {
+   "path": "serp_official_bootstrap",
+   "requests": 0,
+   "queries": 0
+  }
+ ],
+ "trace": {
+  "queries": [
+   "Makita DHP484Z",
+   "\"DHP484Z\" manual site:makita.co.nz",
+   "Makita \"DHP484Z\" declaration of conformity"
+  ],
+  "provider_attempts": [
+   {
+    "provider": "direct_domain_probe",
+    "query": "Makita DHP484Z",
+    "status": "success",
+    "result_count": 1,
+    "message": null,
+    "is_fallback": false,
+    "duration_seconds": 28.087925,
+    "timeout_seconds": 36.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 61,
+    "parsed_result_count": 1,
+    "deduped_result_count": 1,
+    "transport": "http_direct",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Makita DHP484Z",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 74.999573,
+    "budget_after_seconds": 46.911364,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 1,
+    "rejected_candidate_count": 0,
+    "discovery_method": "site_search",
+    "method_requests": [
+     [
+      "bounded_crawl",
+      4
+     ],
+     [
+      "domain_resolution",
+      28
+     ],
+     [
+      "page_verification",
+      1
+     ],
+     [
+      "robots",
+      5
+     ],
+     [
+      "site_search",
+      20
+     ],
+     [
+      "sitemap",
+      9
+     ]
+    ],
+    "candidate_count": 19,
+    "exact_model_candidate_count": 1,
+    "accepted_official_url": "https://makita.co.nz/products/model/DHP484Z",
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   }
+  ],
+  "raw_and_normalized": [
+   {
+    "raw_url": "/products/model/DHP484Z",
+    "canonical_url": "https://makita.co.nz/products/model/DHP484Z",
+    "title": "Makita - Product Details - DHP484Z 18V LXT Compact Brushless Hammer Drill Driver",
+    "provider": "direct_domain_probe",
+    "query": "Makita DHP484Z",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   }
+  ],
+  "accepted": [
+   {
+    "url": "https://makita.co.nz/products/model/DHP484Z",
+    "domain": "makita.co.nz",
+    "source_type": "manufacturer",
+    "title": "Makita - Product Details - DHP484Z 18V LXT Compact Brushless Hammer Drill Driver",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "",
+    "page_role": "product"
+   }
+  ],
+  "rejected": [],
+  "documents": [],
+  "rejected_documents": [
+   {
+    "url": "https://media.makita.co.nz/_media/product-sheets/D/DHP484-PS.pdf",
+    "doc_type": "unknown",
+    "title": "Product Sheet",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.makita.co.nz/products/model/DHP484Z"
+   },
+   {
+    "url": "https://resources.makita.co.nz/_media/user-manuals/D/DHP484-UG.pdf",
+    "doc_type": "manual",
+    "title": "User Manual",
+    "reason": "names a different model identifier (DHP484)",
+    "source_page": "https://www.makita.co.nz/products/model/DHP484Z"
+   },
+   {
+    "url": "https://www.makita.co.nz/library/manuals/",
+    "doc_type": "manual",
+    "title": "User Manuals",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.makita.co.nz/products/model/DHP484Z"
+   }
+  ],
+  "provider_errors": []
+ },
+ "page_metadata": [
+  {
+   "url": "https://www.makita.co.nz/products/model/DHP484Z",
+   "domain": "makita.co.nz",
+   "locale_region": ".nz",
+   "model_match": "exact",
+   "expandable_specs": false,
+   "hidden_spec_content": "false",
+   "interaction_required": "false",
+   "spec_location": "visible_dom",
+   "spec_controls": [],
+   "signals": [],
+   "spec_rows_visible": 19,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0
+  }
+ ],
+ "sku_rejections": [],
+ "performance": {
+  "first_official_path": "direct_domain_probe:site_search",
+  "probe_requests": 67,
+  "domain_probes": 28,
+  "probe_methods": {
+   "bounded_crawl": 4,
+   "domain_resolution": 28,
+   "page_verification": 1,
+   "robots": 5,
+   "site_search": 20,
+   "sitemap": 9
+  },
+  "runtime_seconds": 30.8,
+  "slow": "over_30s",
+  "query_count": 3,
+  "provider_attempts": 1,
+  "raw_candidates": 61,
+  "unique_candidates": 1,
+  "accepted": 1,
+  "rejected": 0,
+  "blocked": 0,
+  "timeout": 0,
+  "circuit_open": 0,
+  "attempt_statuses": {
+   "success": 1
+  }
+ },
+ "run": 3,
+ "mode": "nosERP",
+ "oracle": {
+  "page_ok": true,
+  "document_ok": null,
+  "oracle_ok": true
+ },
+ "bosch_target_found": false
+}

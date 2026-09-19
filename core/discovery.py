@@ -17,6 +17,7 @@ import tempfile
 import threading
 import time
 from typing import Callable, Iterable, Literal, Mapping, Protocol, TypedDict
+import socket
 from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
@@ -238,7 +239,7 @@ DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
     "duckduckgo_lite": 8.0,
     "naver": 8.0,
     "seznam": 8.0,
-    "direct_domain_probe": 24.0,
+    "direct_domain_probe": 36.0,
     "browser_official_discovery": 20.0,
 }
 
@@ -653,10 +654,21 @@ def discover_global_official_domains(
             len(regional_ecosystems.get(_registrable_domain_label(domain), ())) >= 2
             and root_domain in regional_ecosystems[_registrable_domain_label(domain)]
         )
+        # A ``<brand><word>`` sibling site is official only with all of:
+        # (1) the official brand site itself links to it (marker set by the
+        # direct probe, which fetched that link), (2) the label is the brand
+        # plus a non-commerce word, (3) below, the fetched page names the
+        # brand and carries the exact model.
+        family_sibling = (
+            product.provider == "direct_domain_probe"
+            and FAMILY_LINK_MARKER in (product.snippet or "")
+            and bool(_compound_brand_suffix(expected_label, root_domain))
+            and not any(word in _compound_brand_suffix(expected_label, root_domain) for word in _NON_PRODUCT_SITE_WORDS)
+        )
         if (
             suffix in {"example", "invalid", "localhost", "test"}
             or len(expected_label) < 2
-            or not (matching_brand_root or corroborated_regional)
+            or not (matching_brand_root or corroborated_regional or family_sibling)
         ):
             continue
         if (
@@ -2227,6 +2239,33 @@ _REGIONAL_ROOT_TLDS: tuple[str, ...] = (
 )
 
 
+# Public suffixes tried (DNS first, HTTP only for live names) when the brand's
+# primary roots yielded no exact-model page.  Generic list, no brand names.
+_EXTENDED_ROOT_SUFFIXES: tuple[str, ...] = (
+    "co.nz", "com.au", "nl", "ca", "ch", "at", "be", "ie", "se", "no", "dk", "fi", "pt",
+    "gr", "ro", "hu", "bg", "sk", "si", "hr", "rs", "lt", "lv", "ee", "ua", "kz", "by",
+    "ge", "ae", "sa", "in", "co.in", "co.za", "com.sg", "com.vn", "com.my", "co.th",
+    "co.id", "com.ph", "com.tr", "co.jp", "jp", "co.kr", "com.cn", "cn", "hk", "com.tw",
+    "co.il", "com.br", "com.mx", "cl", "com.co", "com.pe", "com.ar", "lk", "pk",
+)
+# Sibling-site words that never carry product data (press rooms, careers, ...).
+_NON_PRODUCT_SITE_WORDS: tuple[str, ...] = (
+    "press", "media", "news", "job", "career", "karriere", "blog", "invest", "foundation",
+    "stiftung", "corporate", "group", "csr", "sustainab", "legal", "privacy", "academy",
+    "stories", "shop", "store", "outlet", "reseller", "dealer", "market", "mall",
+)
+FAMILY_LINK_MARKER = "cross-linked from the official brand site"
+_ABSOLUTE_URL_PATTERN = re.compile(r"https?:(?:\\?/){2}[^\s\"'<>)\\]+")
+
+
+def _compound_brand_suffix(brand_slug: str, root: str) -> str:
+    """Suffix of a ``<brand><word>.<tld>`` registrable domain ("" when not compound)."""
+    label = _registrable_domain_label(root)
+    if len(brand_slug) < 4 or not label.startswith(brand_slug):
+        return ""
+    return label[len(brand_slug):] if len(label) - len(brand_slug) >= 3 else ""
+
+
 def _brand_root_domains(brand: str, market: str, *, limit: int = 12) -> list[str]:
     """Mechanically derive candidate root domains from a brand string.
 
@@ -2284,6 +2323,7 @@ class _DirectLinkParser(HTMLParser):
         self._form_action = ""
         self._form_method = "get"
         self._form_inputs: list[str] = []
+        self._form_hidden: list[tuple[str, str]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = dict(attrs)
@@ -2297,10 +2337,13 @@ class _DirectLinkParser(HTMLParser):
             self._form_action = values.get("action") or ""
             self._form_method = (values.get("method") or "get").casefold()
             self._form_inputs = []
+            self._form_hidden = []
         elif tag == "input" and self._form_action:
             name = values.get("name") or ""
             if name:
                 self._form_inputs.append(name)
+                if (values.get("type") or "").casefold() == "hidden" and values.get("value") is not None:
+                    self._form_hidden.append((name, str(values.get("value"))))
 
     def handle_data(self, data: str) -> None:
         if self._href:
@@ -2308,7 +2351,9 @@ class _DirectLinkParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         if tag == "form" and self._form_action:
-            if self._form_method == "get":
+            # A POST search form is usually also served over GET (the hidden
+            # fields decide the action); the probe only ever issues GETs.
+            if self._form_method in {"get", "post"}:
                 search_name = next((
                     name for name in self._form_inputs
                     if name.casefold() in {
@@ -2317,9 +2362,15 @@ class _DirectLinkParser(HTMLParser):
                     }
                 ), None)
                 if search_name:
-                    self.search_forms.append((self._form_action, search_name))
+                    action = self._form_action
+                    hidden = [(k, v) for k, v in self._form_hidden if k != search_name]
+                    if hidden:
+                        separator = "&" if "?" in action else "?"
+                        action = f"{action}{separator}{urlencode(hidden)}"
+                    self.search_forms.append((action, search_name))
             self._form_action = ""
             self._form_inputs = []
+            self._form_hidden = []
             return
         if tag != "a" or not self._href:
             return
@@ -2570,8 +2621,19 @@ class DirectDomainProbeProvider:
         self._stop_after = 0.0
         self.sibling_grace_seconds = 4.0
         self.max_requests = 60
-        self.domain_request_limit = 16
+        self.extra_phase_requests = 70
+        self.domain_request_limit = 20
         self.max_probe_domains = 4
+        self.max_family_domains = 3
+        self.max_extra_domains = 10
+        self.max_route_probes = 12
+        self.enumerate_regional_domains = True
+        self._dns_lookup = socket.getaddrinfo
+        self._family_hits: dict[str, dict[str, object]] = {}
+        self._routes: dict[str, set[str]] = {}
+        self._locales: dict[str, int] = {}
+        self._crawled: dict[str, list[tuple[str, str]]] = {}
+
         self.max_workers = 12
         self.max_domain_candidates = 12
         self.max_sitemaps = 8
@@ -2594,7 +2656,12 @@ class DirectDomainProbeProvider:
             self._brand, self._model = brand, model
             self._records = None
             self.__dict__.pop("_named_domain_records", None)
+            self._family_hits = {}
+            self._routes = {}
+            self._locales = {}
+            self._crawled = {}
             self._request_count = 0
+            self.max_requests = 60
             self.last_method_requests = {}
             self.last_discovery_method = None
             self.last_exact_model_candidate_count = 0
@@ -2724,6 +2791,145 @@ class DirectDomainProbeProvider:
             truncated,
         )
 
+    _LOCALE_SEGMENT = re.compile(r"^[a-z]{2}(?:[-_][a-z]{2})?$", re.IGNORECASE)
+    _SKU_SEGMENT = re.compile(r"^(?=[A-Za-z0-9]*\d)[A-Za-z0-9]{5,14}$")
+
+    def _learn_routes(self, urls: Iterable[str]) -> None:
+        """Learn ``<origin>/<locale..>/<route-word>`` prefixes whose pages end in an SKU."""
+        for raw in urls:
+            parsed = urlparse(raw)
+            segments = [part for part in parsed.path.split("/") if part]
+            locale_width = 0
+            while locale_width < min(2, len(segments)) and self._LOCALE_SEGMENT.match(segments[locale_width]):
+                locale_width += 1
+            if locale_width and segments and not raw.lower().endswith((".xml", ".xml.gz")):
+                locale_prefix = f"{parsed.scheme}://{parsed.netloc}/{'/'.join(segments[:locale_width])}"
+                self._locales[locale_prefix] = self._locales.get(locale_prefix, 0) + 1
+            if len(segments) < 2 or not self._SKU_SEGMENT.match(unquote(segments[-1])):
+                continue
+            index = 0
+            while index < len(segments) - 1 and index < 2 and self._LOCALE_SEGMENT.match(segments[index]):
+                index += 1
+            if index >= len(segments) - 1 or not re.fullmatch(r"[A-Za-z]{3,12}", segments[index]):
+                continue
+            prefix = f"{parsed.scheme}://{parsed.netloc}/{'/'.join(segments[:index + 1])}"
+            self._routes.setdefault(prefix, set()).add(segments[-1].upper())
+
+    def _sku_route_records(self, domain: str, deadline: float) -> list[SearchResultRecord]:
+        """Ask the site for the requested SKU on the product routes its own sitemaps use."""
+        sku = requested_sku(self._model)
+        if sku is None:
+            return []
+        variants = [f"{sku.base_display}_{sku.suffix}", f"{sku.base_display}-{sku.suffix}"] if sku.suffix else [sku.base_display]
+        ranked = sorted(self._routes.items(), key=lambda item: (-len(item[1]), item[0]))
+        # Routes seen with real SKU tails come first; then the widespread
+        # ``/<locale>/product/<SKU>`` convention on the locales the site's own
+        # sitemaps advertise.  The page itself must vouch for the SKU below.
+        learned = [
+            prefix for prefix, skus in ranked
+            if len(skus) >= 2 and url_belongs_to_domain(prefix, domain)
+        ][:6]
+        located = [
+            f"{locale}/product" for locale, _ in sorted(self._locales.items(), key=lambda item: (-item[1], item[0]))
+            if url_belongs_to_domain(locale, domain)
+        ]
+        prefixes = list(dict.fromkeys([*learned, *located]))[:self.max_route_probes]
+        found: list[SearchResultRecord] = []
+        for prefix in prefixes:
+            for variant in variants:
+                if time.monotonic() >= deadline:
+                    return found
+                if len(found) >= 3:
+                    return found
+                url = f"{prefix}/{variant}"
+                response = self._get(url, deadline, "sku_route_probe")
+                if response is None:
+                    continue
+                parser = _DirectLinkParser()
+                parser.feed(response.text[:600_000])
+                canonical = next((
+                    canonicalize_url(urljoin(response.url, raw))
+                    for raw in parser.canonical_links
+                    if url_belongs_to_domain(canonicalize_url(urljoin(response.url, raw)), domain)
+                ), "")
+                title = _extract_page_title(response.text)
+                # The requested URL always contains the SKU; only the page's own
+                # title/canonical may vouch for it (a 200 "no results" echo must not).
+                if not sku_in_text_loosely(self._model, f"{title} {canonical}"):
+                    continue
+                found.append(SearchResultRecord(
+                    url=canonical or canonicalize_url(response.url),
+                    title=title,
+                    snippet="Exact SKU confirmed by a product route learned from the official sitemaps.",
+                    provider=self.name,
+                    raw_url=url,
+                    parse_confidence="high",
+                    discovery_method="sku_route_template",
+                ))
+                break
+        return found
+
+    def _harvest_family(self, html: str, base_url: str, own_domain: str) -> None:
+        try:
+            self._harvest_family_unsafe(html, base_url, own_domain)
+        except Exception as error:  # noqa: BLE001 - an optional widening step must never fail discovery
+            self._failures.append(f"family_harvest: {type(error).__name__}")
+
+    def _harvest_family_unsafe(self, html: str, base_url: str, own_domain: str) -> None:
+        """Record links from an official brand page to ``<brand><word>`` sibling sites."""
+        slug = re.sub(r"[^a-z0-9]", "", self._brand.casefold())
+        own_root = _registrable_domain(own_domain)
+        if len(slug) < 4 or "://" not in base_url:
+            return
+        # Anchors, but also JSON state / data attributes (country selectors and
+        # cross-traffic links are often not <a href> at all).
+        raw_urls = {
+            unescape(match).replace("\\/", "/").rstrip("\\")
+            for match in _ABSOLUTE_URL_PATTERN.findall((html or "")[:1_500_000])
+        }
+        for raw_url in sorted(raw_urls):
+            try:
+                url = canonicalize_url(raw_url)
+            except ValueError:  # JSON fragments such as ``https://x:"TRUE"}}``
+                continue
+            if not url:
+                continue
+            root = _registrable_domain(_host(url))
+            suffix = _compound_brand_suffix(slug, root)
+            if (
+                not suffix or root == own_root
+                or any(word in suffix for word in _NON_PRODUCT_SITE_WORDS)
+                or _registrable_domain_label(own_root).startswith(_registrable_domain_label(root))
+            ):
+                continue
+            entry = self._family_hits.setdefault(root, {"from": own_root, "links": 0})
+            entry["links"] = int(entry["links"]) + 1  # type: ignore[call-overload]
+
+    def _family_candidates(self, exclude: set[str]) -> list[str]:
+        """Sibling sites ranked by how many regional roots share the same label.
+
+        A label the official site links under many public suffixes
+        (``<brand>-<word>.at/.be/.co.uk/...``) is a real multi-market product
+        network; a one-off link (a campaign or press site) ranks last.  One
+        representative root per label (preferring ``.com``, then most links).
+        """
+        labels: dict[str, list[tuple[str, int]]] = {}
+        for root, entry in self._family_hits.items():
+            if root in exclude:
+                continue
+            labels.setdefault(_registrable_domain_label(root), []).append((root, int(entry["links"])))  # type: ignore[call-overload]
+        ranked = sorted(
+            labels.values(),
+            key=lambda roots: (
+                -len(roots), -sum(links for _, links in roots), min(root for root, _ in roots),
+            ),
+        )
+        chosen = [
+            min(roots, key=lambda item: (not item[0].endswith(".com"), -item[1], item[0]))[0]
+            for roots in ranked
+        ]
+        return chosen[:self.max_family_domains]
+
     def _matching_links(
         self,
         html: str,
@@ -2811,6 +3017,7 @@ class DirectDomainProbeProvider:
                 unescape(re.sub(r"\s+", "", item))
                 for item in _SITEMAP_LOC_PATTERN.findall(response.text)
             ]
+            self._learn_routes(locations)
             locations.sort(key=priority)
             nested: list[str] = []
             for location in locations:
@@ -2970,6 +3177,8 @@ class DirectDomainProbeProvider:
             response = self._get(url, deadline, "bounded_crawl")
             if response is None:
                 continue
+            self._crawled.setdefault(domain, []).append((response.url, response.text))
+            self._harvest_family(response.text, response.url, domain)
             records.extend(self._matching_links(
                 response.text,
                 response.url,
@@ -2979,6 +3188,38 @@ class DirectDomainProbeProvider:
             if records:
                 break
         return records
+
+    def _family_crawl(self, domain: str, deadline: float) -> None:
+        """Second hop: children of the product-ish pages already crawled.
+
+        Corporate roots often link to their sibling product sites one level
+        below a "products and services" page, not from the homepage itself.
+        """
+        from urllib.parse import urljoin as _join
+
+        children: list[str] = []
+        for page_url, html in self._crawled.get(domain, [])[:2]:
+            base_path = urlparse(page_url).path.rstrip("/")
+            parser = _DirectLinkParser()
+            parser.feed(html[:1_500_000])
+            for raw_url, _title in parser.links:
+                url = canonicalize_url(_join(page_url, raw_url))
+                if (
+                    url and url_belongs_to_domain(url, domain)
+                    and urlparse(url).path.rstrip("/").startswith(base_path + "/")
+                    and urlparse(url).path.rstrip("/") != base_path
+                    and not _is_static_asset_url(url)
+                    and url not in children
+                ):
+                    children.append(url)
+        for url in children[:5]:
+            if time.monotonic() >= deadline:
+                return
+            response = self._get(url, deadline, "family_crawl")
+            if response is None and not url.endswith("/"):
+                response = self._get(url + "/", deadline, "family_crawl")  # some sites 404 without it
+            if response is not None:
+                self._harvest_family(response.text, response.url, domain)
 
     # -- multi-domain official discovery ---------------------------------------------
     def _resolve_domain(
@@ -3096,6 +3337,8 @@ class DirectDomainProbeProvider:
         self,
         resolved: tuple[SearchResultRecord, _FetchedOfficialSurface, str],
         deadline: float,
+        *,
+        quick: bool = False,
     ) -> list[SearchResultRecord]:
         record, response, final_domain = resolved
         self._local.context = {"domain": final_domain, "requests": 1}
@@ -3105,6 +3348,23 @@ class DirectDomainProbeProvider:
             results.extend(self._matching_links(
                 response.text, final_url, final_domain, method="homepage_links",
             ))
+            self._harvest_family(response.text, final_url, final_domain)
+            if quick:
+                # Cheap pass over many regional roots: only the site's own
+                # search form (found on the homepage), at most two requests.
+                parser = _DirectLinkParser()
+                parser.feed(response.text[:1_500_000])
+                templates = [
+                    (canonicalize_url(urljoin(final_url, action)), parameter)
+                    for action, parameter in parser.search_forms[:1]
+                ]
+                if not any(
+                    self._model_in_text(self._model, f"{item.title} {item.url}")
+                    and _page_kind(item.url) not in {"homepage", "catalog"}
+                    for item in results
+                ) and templates:
+                    results.extend(self._site_search_records(templates, final_domain, deadline))
+                return results
             structure = self._surface_structure(response, final_domain, deadline)
 
             def exact_found() -> list[SearchResultRecord]:
@@ -3125,7 +3385,14 @@ class DirectDomainProbeProvider:
             if not exact_found():
                 results.extend(self._sitemap_records(structure.sitemap_urls, final_domain, deadline))
             if not exact_found():
+                results.extend(self._sku_route_records(final_domain, deadline))
+            if not exact_found():
                 results.extend(self._crawl_records(structure.crawl_seeds, final_domain, deadline))
+            if not exact_found():
+                try:
+                    self._family_crawl(final_domain, deadline)
+                except Exception as error:  # noqa: BLE001
+                    self._failures.append(f"family_crawl: {type(error).__name__}")
             if exact_found():
                 with self._lock:
                     if not self._stop.is_set():
@@ -3174,7 +3441,9 @@ class DirectDomainProbeProvider:
                 title=title or item.title,
                 snippet=(
                     "Requested SKU confirmed in fetched official page content"
-                    + (f"; {BRAND_CONFIRMED_MARKER}." if brand_seen else ".")
+                    + (f"; {BRAND_CONFIRMED_MARKER}" if brand_seen else "")
+                    + (f"; {FAMILY_LINK_MARKER}" if FAMILY_LINK_MARKER in (item.snippet or "") else "")
+                    + "."
                 ),
                 provider=item.provider,
                 raw_url=item.raw_url,
@@ -3219,10 +3488,132 @@ class DirectDomainProbeProvider:
         cache[domain] = records
         return records
 
+    def _has_exact(self, records: Iterable[SearchResultRecord]) -> bool:
+        return any(
+            _page_kind(item.url) not in {"homepage", "catalog"}
+            and (
+                self._model_in_text(self._model, f"{item.title} {item.url}")
+                # ``HX9992/12`` is ``HX9992_12`` in a URL; the same loose SKU
+                # reading the page verification applies afterwards.
+                or _model_token_in_text(self._model, f"{item.title} {item.url}")
+            )
+            for item in records
+        )
+
+    def _dns_live_domains(self, brand: str, exclude: set[str]) -> list[str]:
+        """Brand-label domains under further public suffixes that exist in DNS.
+
+        DNS only (no HTTP): a name is worth a request only if it resolves.
+        """
+        slug = re.sub(r"[^a-z0-9]", "", brand.casefold())
+        if len(slug) < 3:
+            return []
+        names = [
+            f"{slug}.{suffix}" for suffix in _EXTENDED_ROOT_SUFFIXES
+            if f"{slug}.{suffix}" not in exclude
+        ]
+
+        def live(name: str) -> bool:
+            for host in (f"www.{name}", name):
+                try:
+                    if self._dns_lookup(host, 443):
+                        return True
+                except OSError:
+                    continue
+            return False
+
+        pool = ThreadPoolExecutor(max_workers=24)
+        futures = {name: pool.submit(live, name) for name in names}
+        wait(list(futures.values()), timeout=3.5)
+        pool.shutdown(wait=False, cancel_futures=True)
+        return [
+            name for name in names
+            if futures[name].done() and futures[name].exception() is None and futures[name].result()
+        ][:self.max_extra_domains]
+
+    def _probe_extra(
+        self, domains: list[str], brand: str, deadline: float, *, quick: bool, marker: str | None,
+    ) -> tuple[list[SearchResultRecord], set[str]]:
+        """Resolve and probe extra roots; returns records and the roots that answered."""
+        self._stop.clear()
+        self._stop_after = 0.0
+
+        def resolve(domain: str):
+            self._local.context = {"domain": domain, "requests": 0}
+            try:
+                return self._resolve_domain(domain, brand, deadline)
+            finally:
+                self._local.context = None
+
+        pool = ThreadPoolExecutor(max_workers=self.max_workers)
+        futures = [pool.submit(resolve, domain) for domain in domains]
+        started = time.monotonic()
+        while time.monotonic() < deadline and time.monotonic() - started < 6.0:
+            if all(future.done() for future in futures):
+                break
+            wait([future for future in futures if not future.done()], timeout=0.2)
+        pool.shutdown(wait=False, cancel_futures=True)
+        resolved: list[tuple[SearchResultRecord, _FetchedOfficialSurface, str]] = []
+        roots: set[str] = set()
+        for future in futures:
+            if future.done() and future.exception() is None and future.result() is not None:
+                item = future.result()
+                if item[2] not in roots:
+                    roots.add(item[2])
+                    resolved.append(item)
+        records: list[SearchResultRecord] = []
+        if resolved:
+            with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
+                for domain_records in pool.map(
+                    lambda item: self._probe_domain(item, deadline, quick=quick), resolved,
+                ):
+                    records.extend(domain_records)
+        if marker:
+            records = [replace(item, snippet=f"{item.snippet}; {marker}") for item in records]
+        return records, roots
+
+    def _extra_phases(
+        self, brand: str, seen_roots: set[str], results: list[SearchResultRecord], deadline: float,
+    ) -> list[SearchResultRecord]:
+        """Evidence-driven widening, only when the primary roots gave no exact page.
+
+        1. sibling sites the official pages themselves link to (``bosch-home``);
+        2. brand-label roots under other public suffixes that exist in DNS.
+        """
+        if self._has_exact(results):
+            return []
+        phase_deadline = deadline
+        if time.monotonic() >= phase_deadline - 2.0:
+            return []
+        # The widening phases get their own request budget, so a primary phase
+        # that spent its allowance on dead roots cannot starve them.
+        self.max_requests = self._request_count + self.extra_phase_requests
+        out: list[SearchResultRecord] = []
+        family = self._family_candidates(seen_roots)
+        if family:
+            records, roots = self._probe_extra(
+                family, brand, phase_deadline, quick=False, marker=FAMILY_LINK_MARKER,
+            )
+            out.extend(records)
+            seen_roots = seen_roots | roots | set(family)
+        if (
+            not self._has_exact([*results, *out])
+            and self.enumerate_regional_domains
+            and isinstance(self._session, requests.Session)
+        ):
+            extra = self._dns_live_domains(brand, seen_roots)
+            if extra:
+                records, _roots = self._probe_extra(extra, brand, phase_deadline, quick=True, marker=None)
+                out.extend(records)
+        return out
+
     def _discover(self, brand: str, timeout_seconds: float) -> tuple[SearchResultRecord, ...]:
         self._stop.clear()
         self._stop_after = 0.0
-        deadline = time.monotonic() + max(0.1, timeout_seconds)
+        # The primary phase keeps its long-standing allowance; the evidence-driven
+        # widening phases spend what is left of the provider's own timeout.
+        hard_deadline = time.monotonic() + max(0.1, timeout_seconds) - 1.5
+        deadline = min(hard_deadline, time.monotonic() + max(0.1, min(timeout_seconds, 24.0)))
         domains = _brand_root_domains(brand, self.market, limit=self.max_domain_candidates)
         if not domains:
             self.last_failure_reason = "brand cannot be converted to a safe domain label"
@@ -3275,6 +3666,13 @@ class DirectDomainProbeProvider:
                     lambda item: self._probe_domain(item, deadline), resolved,
                 ):
                     results.extend(domain_records)
+        if self._model:
+            try:
+                results.extend(self._extra_phases(
+                    brand, {_registrable_domain(domain) for domain in domains} | seen_roots, results, hard_deadline,
+                ))
+            except Exception as error:  # noqa: BLE001 - widening is optional; keep the primary result
+                self._failures.append(f"extra_phases: {type(error).__name__}")
 
         unique: dict[str, SearchResultRecord] = {}
         for record in results:

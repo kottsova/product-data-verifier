@@ -1,0 +1,368 @@
+{
+ "product_name": "Gressel GAF-1825",
+ "brand": "Gressel",
+ "model": "GAF-1825",
+ "market": "global",
+ "status": "PASS",
+ "exact_official_found": true,
+ "official": [
+  {
+   "url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+   "domain": "gressel.ru",
+   "source_type": "manufacturer",
+   "title": "/catalog/aerogril/aerogril_gressel_gaf_1825",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "dealers": [],
+ "secondary": [],
+ "rejected": [],
+ "runtime_seconds": 6.157,
+ "search_status": "success",
+ "attempted_queries": [
+  "Gressel GAF-1825"
+ ],
+ "providers": [
+  "direct_domain_probe"
+ ],
+ "provider_failures": [],
+ "candidate_counts": {
+  "provider_raw": 11,
+  "collected": 1,
+  "normalized": 1,
+  "unique": 1,
+  "duplicates": 0,
+  "accepted": 1,
+  "rejected": 0,
+  "official": 1,
+  "dealer": 0,
+  "secondary": 0,
+  "documents": 1
+ },
+ "official_pages": [
+  {
+   "url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+   "domain": "gressel.ru",
+   "source_type": "manufacturer",
+   "title": "/catalog/aerogril/aerogril_gressel_gaf_1825",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "support_pages": [],
+ "documents": [
+  {
+   "url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+   "doc_type": "instruction",
+   "canonical_field": "manual_url",
+   "title": "Инструкция GAF-1825",
+   "authority": "official (linked from verified official page)",
+   "model_match": "exact",
+   "reason": "requested model identifier appears in the link text or file name; linked from official page",
+   "source_page": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+   "found_on": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "file_type": "pdf",
+   "locales": []
+  }
+ ],
+ "rejected_documents": [
+  {
+   "url": "https://gressel.ru/upload/iblock/ec1/o0dsnmoiuybde05n3et7093d4jer9ca0.pdf",
+   "doc_type": "unknown",
+   "title": "Книга рецептов",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+  }
+ ],
+ "document_fields": {
+  "manual_url": [
+   "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+  ],
+  "quick_start_guide_url": [],
+  "datasheet_url": [],
+  "safety_document_url": [],
+  "declaration_url": [],
+  "certificate_url": []
+ },
+ "page_inspections": [
+  {
+   "url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+   "has_expandable_specs": true,
+   "has_hidden_spec_content": "true",
+   "requires_interaction": "false",
+   "spec_controls": [
+    "Все характеристики"
+   ],
+   "signals": [
+    "spec control: 'Все характеристики'",
+    "display:none on <div#bx_basket_div_421>",
+    "collapsed container class 'tab-pane'",
+    "control targets in-page sections present in DOM: props"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 21,
+   "json_spec_blocks": 0,
+   "js_shell": false,
+   "spec_location": "dom_hidden"
+  }
+ ],
+ "discovery_metadata": {
+  "inspected_pages": 1,
+  "primary_page": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+  "has_expandable_specs": true,
+  "has_hidden_spec_content": "true",
+  "requires_interaction": "false",
+  "any_page_requires_interaction": "false",
+  "signals": [
+   "spec control: 'Все характеристики'",
+   "display:none on <div#bx_basket_div_421>",
+   "collapsed container class 'tab-pane'",
+   "control targets in-page sections present in DOM: props"
+  ],
+  "spec_controls": [
+   "Все характеристики"
+  ]
+ },
+ "official_paths": [
+  {
+   "path": "direct_domain_probe:domain_resolution",
+   "requests": 22,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:page_verification",
+   "requests": 1,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:robots",
+   "requests": 2,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:site_search",
+   "requests": 3,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sitemap",
+   "requests": 3,
+   "queries": 1
+  },
+  {
+   "path": "serp_identity_queries",
+   "requests": 0,
+   "queries": 1
+  },
+  {
+   "path": "serp_domain_restricted_queries",
+   "requests": 0,
+   "queries": 0
+  },
+  {
+   "path": "serp_official_bootstrap",
+   "requests": 0,
+   "queries": 0
+  }
+ ],
+ "trace": {
+  "queries": [
+   "Gressel GAF-1825"
+  ],
+  "provider_attempts": [
+   {
+    "provider": "direct_domain_probe",
+    "query": "Gressel GAF-1825",
+    "status": "success",
+    "result_count": 1,
+    "message": null,
+    "is_fallback": false,
+    "duration_seconds": 6.154038,
+    "timeout_seconds": 36.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 11,
+    "parsed_result_count": 1,
+    "deduped_result_count": 1,
+    "transport": "http_direct",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Gressel GAF-1825",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 74.999619,
+    "budget_after_seconds": 68.845298,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 1,
+    "rejected_candidate_count": 0,
+    "discovery_method": "site_search",
+    "method_requests": [
+     [
+      "domain_resolution",
+      22
+     ],
+     [
+      "page_verification",
+      1
+     ],
+     [
+      "robots",
+      2
+     ],
+     [
+      "site_search",
+      3
+     ],
+     [
+      "sitemap",
+      3
+     ]
+    ],
+    "candidate_count": 5,
+    "exact_model_candidate_count": 1,
+    "accepted_official_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825",
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   }
+  ],
+  "raw_and_normalized": [
+   {
+    "raw_url": "/catalog/aerogril/aerogril_gressel_gaf_1825/",
+    "canonical_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825",
+    "title": "/catalog/aerogril/aerogril_gressel_gaf_1825",
+    "provider": "direct_domain_probe",
+    "query": "Gressel GAF-1825",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   }
+  ],
+  "accepted": [
+   {
+    "url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825",
+    "domain": "gressel.ru",
+    "source_type": "manufacturer",
+    "title": "/catalog/aerogril/aerogril_gressel_gaf_1825",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "",
+    "page_role": "product"
+   }
+  ],
+  "rejected": [],
+  "documents": [
+   {
+    "url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+    "doc_type": "instruction",
+    "canonical_field": "manual_url",
+    "title": "Инструкция GAF-1825",
+    "authority": "official (linked from verified official page)",
+    "model_match": "exact",
+    "reason": "requested model identifier appears in the link text or file name; linked from official page",
+    "source_page": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+    "found_on": [
+     "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+    ],
+    "file_type": "pdf",
+    "locales": []
+   }
+  ],
+  "rejected_documents": [
+   {
+    "url": "https://gressel.ru/upload/iblock/ec1/o0dsnmoiuybde05n3et7093d4jer9ca0.pdf",
+    "doc_type": "unknown",
+    "title": "Книга рецептов",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   }
+  ],
+  "provider_errors": []
+ },
+ "page_metadata": [
+  {
+   "url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+   "domain": "gressel.ru",
+   "locale_region": ".ru",
+   "model_match": "exact",
+   "expandable_specs": true,
+   "hidden_spec_content": "true",
+   "interaction_required": "false",
+   "spec_location": "dom_hidden",
+   "spec_controls": [
+    "Все характеристики"
+   ],
+   "signals": [
+    "spec control: 'Все характеристики'",
+    "display:none on <div#bx_basket_div_421>",
+    "collapsed container class 'tab-pane'",
+    "control targets in-page sections present in DOM: props"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 21,
+   "json_spec_blocks": 0
+  }
+ ],
+ "sku_rejections": [],
+ "performance": {
+  "first_official_path": "direct_domain_probe:site_search",
+  "probe_requests": 31,
+  "domain_probes": 22,
+  "probe_methods": {
+   "domain_resolution": 22,
+   "page_verification": 1,
+   "robots": 2,
+   "site_search": 3,
+   "sitemap": 3
+  },
+  "runtime_seconds": 6.2,
+  "slow": "",
+  "query_count": 1,
+  "provider_attempts": 1,
+  "raw_candidates": 11,
+  "unique_candidates": 1,
+  "accepted": 1,
+  "rejected": 0,
+  "blocked": 0,
+  "timeout": 0,
+  "circuit_open": 0,
+  "attempt_statuses": {
+   "success": 1
+  }
+ },
+ "run": 1,
+ "mode": "full",
+ "oracle": {
+  "page_ok": true,
+  "document_ok": true,
+  "oracle_ok": true
+ },
+ "bosch_target_found": false
+}

@@ -1,0 +1,33 @@
+🔎 Makita DHP484Z
+Статус: PASS · exact official page: да
+Время discovery: 30.5 с · search status: success
+Providers: direct_domain_probe, duckduckgo_html
+Trace: provider raw=61, collected=1, normalized=1, unique=1, accepted=1, rejected=0, duplicates=0
+
+Official product pages (1)
+1. https://www.makita.co.nz/products/model/DHP484Z
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   makita.co.nz · .nz
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [visible_dom]
+
+Official support pages (0)
+— not found
+
+Official documents (0)
+— not found
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: no
+• hidden spec content: no
+• interaction required: no
+
+Отклонённые соседние SKU/варианты (1)
+1. https://manualslib.com/manual/2279853/Makita-Dhp484.html
+   найден: DHP484 · запрошен: DHP484Z · document host is not a verified official domain
+
+Performance: 30.5 с, queries=3, provider attempts=3, raw=61, unique=1, accepted=1, rejected=0, blocked=0, timeout=0, circuit_open=0, first official path=direct_domain_probe:site_search, direct probe requests=67 (domain probes=28)
+
+Отклонённые кандидаты (0)

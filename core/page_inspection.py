@@ -330,6 +330,10 @@ _FETCH_HEADERS = {
 }
 
 
+def _drop_default_port(url: str) -> str:
+    return re.sub(r"^(https?://[^/:]+):(?:443|80)(?=/|$)", lambda match: match.group(1), url)
+
+
 def fetch_page_html(
     url: str, *, timeout: float = 12.0, max_bytes: int = 4 * 1024 * 1024, session: object | None = None,
 ) -> tuple[str, str] | None:
@@ -365,7 +369,7 @@ def fetch_page_html(
                 text = body.decode("utf-8", errors="replace")
         else:
             text = str(getattr(response, "text", "") or "")[:max_bytes]
-        return str(getattr(response, "url", url)), text
+        return _drop_default_port(str(getattr(response, "url", url))), text
     finally:
         close = getattr(response, "close", None)
         if close is not None:

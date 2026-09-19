@@ -551,7 +551,21 @@ def _performance(outcome: DiscoveryOutcome, counts: dict[str, int], runtime: flo
     statuses: dict[str, int] = {}
     for attempt in outcome.provider_attempts:
         statuses[attempt.status] = statuses.get(attempt.status, 0) + 1
+    methods: dict[str, int] = {}
+    for attempt in outcome.provider_attempts:
+        if attempt.provider == "direct_domain_probe":
+            for method, count in attempt.method_requests:
+                methods[method] = max(methods.get(method, 0), int(count))
+    first_path = next(
+        (f"{attempt.provider}:{attempt.discovery_method}"
+         for attempt in outcome.provider_attempts if attempt.discovery_method),
+        "",
+    )
     return {
+        "first_official_path": first_path,
+        "probe_requests": sum(methods.values()),
+        "domain_probes": methods.get("domain_resolution", 0),
+        "probe_methods": methods,
         "runtime_seconds": round(runtime, 1),
         "slow": "over_60s" if runtime > 60 else "over_30s" if runtime > 30 else "",
         "query_count": len(outcome.attempted_queries),
@@ -630,10 +644,15 @@ def document_queries(brand: str, model: str, domains: list[str]) -> list[str]:
 class DiscoveryDebugService:
     """Synchronous discovery service shared by Telegram and diagnostics."""
 
-    def __init__(self, *, wall_clock_budget_seconds: float = 75.0) -> None:
+    def __init__(
+        self, *, wall_clock_budget_seconds: float = 75.0,
+        providers: Callable[[], Iterable[object]] | None = None,
+    ) -> None:
         if wall_clock_budget_seconds <= 0:
             raise ValueError("wall_clock_budget_seconds must be positive")
         self.wall_clock_budget_seconds = float(wall_clock_budget_seconds)
+        # Diagnostics only: restrict the provider chain (e.g. official-only, no SERP).
+        self._providers = providers
         self._last_by_chat: dict[int, DiscoveryDebugResult] = {}
         self._lock = threading.Lock()
 
@@ -655,7 +674,10 @@ class DiscoveryDebugService:
                 page_cache[url] = fetch_working_page(url, timeout=12.0)
             return page_cache[url]
 
-        with ResilientSearchSession(market, config=runtime, budget=budget) as session:
+        provider_chain = list(self._providers()) if self._providers is not None else None
+        with ResilientSearchSession(
+            market, provider_chain, config=runtime, budget=budget,
+        ) as session:
             outcome = discover_with_status(
                 brand, model, market=market, searcher=session.search_with_status,
                 early_official_stop=True,

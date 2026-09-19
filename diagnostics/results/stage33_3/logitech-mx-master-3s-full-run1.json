@@ -1,0 +1,598 @@
+{
+ "product_name": "Logitech MX Master 3S",
+ "brand": "Logitech",
+ "model": "MX Master 3S",
+ "market": "global",
+ "status": "PASS",
+ "exact_official_found": true,
+ "official": [
+  {
+   "url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+   "domain": "logitech.com",
+   "source_type": "manufacturer",
+   "title": "/en us/shop/p/mx master 3s",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "absent",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "dealers": [],
+ "secondary": [],
+ "rejected": [
+  {
+   "url": "https://logitech.com/en-us/shop/p/mx-master-3s-business-wireless-mouse",
+   "domain": "logitech.com",
+   "source_type": "manufacturer",
+   "title": "/en us/shop/p/mx master 3s business wireless mouse",
+   "model_match": "rejected",
+   "authority": "manufacturer",
+   "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+   "group": "rejected",
+   "sku_relation": "",
+   "sku_suffix": "",
+   "page_role": "product"
+  },
+  {
+   "url": "https://logitech.com/en-us/shop/p/mx-master-3s-mac-bluetooth-mouse",
+   "domain": "logitech.com",
+   "source_type": "manufacturer",
+   "title": "/en us/shop/p/mx master 3s mac bluetooth mouse",
+   "model_match": "rejected",
+   "authority": "manufacturer",
+   "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+   "group": "rejected",
+   "sku_relation": "",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "runtime_seconds": 10.026,
+ "search_status": "success",
+ "attempted_queries": [
+  "Logitech MX Master 3S",
+  "\"MX Master 3S\" manual site:logitech.com",
+  "Logitech \"MX Master 3S\" declaration of conformity"
+ ],
+ "providers": [
+  "direct_domain_probe",
+  "duckduckgo_html"
+ ],
+ "provider_failures": [],
+ "candidate_counts": {
+  "provider_raw": 22,
+  "collected": 3,
+  "normalized": 3,
+  "unique": 3,
+  "duplicates": 0,
+  "accepted": 1,
+  "rejected": 2,
+  "official": 1,
+  "dealer": 0,
+  "secondary": 0,
+  "documents": 0
+ },
+ "official_pages": [
+  {
+   "url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+   "domain": "logitech.com",
+   "source_type": "manufacturer",
+   "title": "/en us/shop/p/mx master 3s",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "absent",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "support_pages": [],
+ "documents": [],
+ "rejected_documents": [
+  {
+   "url": "https://manualslib.com/manual/3365016/Logitech-Mx-Master-3s.html",
+   "doc_type": "manual",
+   "title": "LOGITECH MX MASTER 3S USER MANUAL Pdf Download",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualslib.com/manual/3388601/Logitech-Mx-Master-3s.html",
+   "doc_type": "manual",
+   "title": "LOGITECH MX MASTER 3S MANUAL Pdf Download | ManualsLib",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manuals.plus/logitech/logitech-mx-master-3s-mouse-user-manual",
+   "doc_type": "manual",
+   "title": "MX Master 3S Mouse User Manual: Setup Instructions & Features ...",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manuals.plus/asin/B0C6YRL6GN",
+   "doc_type": "manual",
+   "title": "Logitech MX Master 3S Mouse & MX Keys S Keyboard User Manual",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://m.media-amazon.com/images/I/A1TGsaV1bUL.pdf",
+   "doc_type": "manual",
+   "title": "PDF Logitech MX Master 3S - Wireless Performance Mouse with User Manual of ...",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://hub.sync.logitech.com/mx-master-3s/post/mx-master-3s---data-sheet-aN1xygga6CxYBBx",
+   "doc_type": "datasheet",
+   "title": "MX Master 3S - Data sheet - hub.sync.logitech.com",
+   "reason": "names a different model identifier (aN1xygga6CxYBBx)",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualslib.com/manual/3388601/Logitech-Mx-Master-3s.html",
+   "doc_type": "manual",
+   "title": "LOGITECH MX MASTER 3S MANUAL Pdf Download | ManualsLib",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualslib.com/manual/3365016/Logitech-Mx-Master-3s.html",
+   "doc_type": "manual",
+   "title": "LOGITECH MX MASTER 3S USER MANUAL Pdf Download | ManualsLib",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  }
+ ],
+ "document_fields": {
+  "manual_url": [],
+  "quick_start_guide_url": [],
+  "datasheet_url": [],
+  "safety_document_url": [],
+  "declaration_url": [],
+  "certificate_url": []
+ },
+ "page_inspections": [
+  {
+   "url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+   "has_expandable_specs": true,
+   "has_hidden_spec_content": "false",
+   "requires_interaction": "unknown",
+   "spec_controls": [
+    "Discover more features"
+   ],
+   "signals": [
+    "spec control: 'Discover more features'",
+    "aria-expanded=false control",
+    "control targets in-page sections present in DOM: key-features, main-content, reviews"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0,
+   "js_shell": false,
+   "spec_location": "unknown"
+  }
+ ],
+ "discovery_metadata": {
+  "inspected_pages": 1,
+  "primary_page": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+  "has_expandable_specs": true,
+  "has_hidden_spec_content": "false",
+  "requires_interaction": "unknown",
+  "any_page_requires_interaction": "unknown",
+  "signals": [
+   "spec control: 'Discover more features'",
+   "aria-expanded=false control",
+   "control targets in-page sections present in DOM: key-features, main-content, reviews"
+  ],
+  "spec_controls": [
+   "Discover more features"
+  ]
+ },
+ "official_paths": [
+  {
+   "path": "direct_domain_probe:domain_resolution",
+   "requests": 14,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:page_verification",
+   "requests": 3,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:robots",
+   "requests": 2,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:site_search",
+   "requests": 4,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sitemap",
+   "requests": 3,
+   "queries": 1
+  },
+  {
+   "path": "serp_identity_queries",
+   "requests": 0,
+   "queries": 2
+  },
+  {
+   "path": "serp_domain_restricted_queries",
+   "requests": 0,
+   "queries": 1
+  },
+  {
+   "path": "serp_official_bootstrap",
+   "requests": 0,
+   "queries": 0
+  }
+ ],
+ "trace": {
+  "queries": [
+   "Logitech MX Master 3S",
+   "\"MX Master 3S\" manual site:logitech.com",
+   "Logitech \"MX Master 3S\" declaration of conformity"
+  ],
+  "provider_attempts": [
+   {
+    "provider": "direct_domain_probe",
+    "query": "Logitech MX Master 3S",
+    "status": "success",
+    "result_count": 3,
+    "message": null,
+    "is_fallback": false,
+    "duration_seconds": 6.029622,
+    "timeout_seconds": 36.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 22,
+    "parsed_result_count": 3,
+    "deduped_result_count": 3,
+    "transport": "http_direct",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Logitech MX Master 3S",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 74.999616,
+    "budget_after_seconds": 68.969719,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 1,
+    "rejected_candidate_count": 2,
+    "discovery_method": "sitemap",
+    "method_requests": [
+     [
+      "domain_resolution",
+      14
+     ],
+     [
+      "page_verification",
+      3
+     ],
+     [
+      "robots",
+      2
+     ],
+     [
+      "site_search",
+      4
+     ],
+     [
+      "sitemap",
+      3
+     ]
+    ],
+    "candidate_count": 5,
+    "exact_model_candidate_count": 3,
+    "accepted_official_url": "https://logitech.com/en-us/shop/p/mx-master-3s",
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_html",
+    "query": "\"MX Master 3S\" manual site:logitech.com",
+    "status": "success",
+    "result_count": 10,
+    "message": null,
+    "is_fallback": true,
+    "duration_seconds": 0.743522,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 10,
+    "parsed_result_count": 10,
+    "deduped_result_count": 10,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"MX Master 3S\" manual logitech.com",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 67.83084,
+    "budget_after_seconds": 67.086111,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_html",
+    "query": "Logitech \"MX Master 3S\" declaration of conformity",
+    "status": "success",
+    "result_count": 8,
+    "message": null,
+    "is_fallback": true,
+    "duration_seconds": 2.110006,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 8,
+    "parsed_result_count": 8,
+    "deduped_result_count": 8,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Logitech \"MX Master 3S\" declaration of conformity",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 67.085995,
+    "budget_after_seconds": 64.974039,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   }
+  ],
+  "raw_and_normalized": [
+   {
+    "raw_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+    "canonical_url": "https://logitech.com/en-us/shop/p/mx-master-3s",
+    "title": "/en us/shop/p/mx master 3s",
+    "provider": "direct_domain_probe",
+    "query": "Logitech MX Master 3S",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   },
+   {
+    "raw_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s-business-wireless-mouse",
+    "canonical_url": "https://logitech.com/en-us/shop/p/mx-master-3s-business-wireless-mouse",
+    "title": "/en us/shop/p/mx master 3s business wireless mouse",
+    "provider": "direct_domain_probe",
+    "query": "Logitech MX Master 3S",
+    "outcome": "rejected",
+    "reason": "Search result names a different commercial-model variant."
+   },
+   {
+    "raw_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s-mac-bluetooth-mouse",
+    "canonical_url": "https://logitech.com/en-us/shop/p/mx-master-3s-mac-bluetooth-mouse",
+    "title": "/en us/shop/p/mx master 3s mac bluetooth mouse",
+    "provider": "direct_domain_probe",
+    "query": "Logitech MX Master 3S",
+    "outcome": "rejected",
+    "reason": "Search result names a different commercial-model variant."
+   }
+  ],
+  "accepted": [
+   {
+    "url": "https://logitech.com/en-us/shop/p/mx-master-3s",
+    "domain": "logitech.com",
+    "source_type": "manufacturer",
+    "title": "/en us/shop/p/mx master 3s",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "absent",
+    "sku_suffix": "",
+    "page_role": "product"
+   }
+  ],
+  "rejected": [
+   {
+    "url": "https://logitech.com/en-us/shop/p/mx-master-3s-business-wireless-mouse",
+    "domain": "logitech.com",
+    "source_type": "manufacturer",
+    "title": "/en us/shop/p/mx master 3s business wireless mouse",
+    "model_match": "rejected",
+    "authority": "manufacturer",
+    "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+    "group": "rejected",
+    "sku_relation": "",
+    "sku_suffix": "",
+    "page_role": "product"
+   },
+   {
+    "url": "https://logitech.com/en-us/shop/p/mx-master-3s-mac-bluetooth-mouse",
+    "domain": "logitech.com",
+    "source_type": "manufacturer",
+    "title": "/en us/shop/p/mx master 3s mac bluetooth mouse",
+    "model_match": "rejected",
+    "authority": "manufacturer",
+    "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+    "group": "rejected",
+    "sku_relation": "",
+    "sku_suffix": "",
+    "page_role": "product"
+   }
+  ],
+  "documents": [],
+  "rejected_documents": [
+   {
+    "url": "https://manualslib.com/manual/3365016/Logitech-Mx-Master-3s.html",
+    "doc_type": "manual",
+    "title": "LOGITECH MX MASTER 3S USER MANUAL Pdf Download",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualslib.com/manual/3388601/Logitech-Mx-Master-3s.html",
+    "doc_type": "manual",
+    "title": "LOGITECH MX MASTER 3S MANUAL Pdf Download | ManualsLib",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manuals.plus/logitech/logitech-mx-master-3s-mouse-user-manual",
+    "doc_type": "manual",
+    "title": "MX Master 3S Mouse User Manual: Setup Instructions & Features ...",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manuals.plus/asin/B0C6YRL6GN",
+    "doc_type": "manual",
+    "title": "Logitech MX Master 3S Mouse & MX Keys S Keyboard User Manual",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://m.media-amazon.com/images/I/A1TGsaV1bUL.pdf",
+    "doc_type": "manual",
+    "title": "PDF Logitech MX Master 3S - Wireless Performance Mouse with User Manual of ...",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://hub.sync.logitech.com/mx-master-3s/post/mx-master-3s---data-sheet-aN1xygga6CxYBBx",
+    "doc_type": "datasheet",
+    "title": "MX Master 3S - Data sheet - hub.sync.logitech.com",
+    "reason": "names a different model identifier (aN1xygga6CxYBBx)",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualslib.com/manual/3388601/Logitech-Mx-Master-3s.html",
+    "doc_type": "manual",
+    "title": "LOGITECH MX MASTER 3S MANUAL Pdf Download | ManualsLib",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualslib.com/manual/3365016/Logitech-Mx-Master-3s.html",
+    "doc_type": "manual",
+    "title": "LOGITECH MX MASTER 3S USER MANUAL Pdf Download | ManualsLib",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   }
+  ],
+  "provider_errors": []
+ },
+ "page_metadata": [
+  {
+   "url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+   "domain": "logitech.com",
+   "locale_region": "en-US",
+   "model_match": "exact",
+   "expandable_specs": true,
+   "hidden_spec_content": "false",
+   "interaction_required": "unknown",
+   "spec_location": "unknown",
+   "spec_controls": [
+    "Discover more features"
+   ],
+   "signals": [
+    "spec control: 'Discover more features'",
+    "aria-expanded=false control",
+    "control targets in-page sections present in DOM: key-features, main-content, reviews"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0
+  }
+ ],
+ "sku_rejections": [],
+ "performance": {
+  "first_official_path": "direct_domain_probe:sitemap",
+  "probe_requests": 26,
+  "domain_probes": 14,
+  "probe_methods": {
+   "domain_resolution": 14,
+   "page_verification": 3,
+   "robots": 2,
+   "site_search": 4,
+   "sitemap": 3
+  },
+  "runtime_seconds": 10.0,
+  "slow": "",
+  "query_count": 3,
+  "provider_attempts": 3,
+  "raw_candidates": 22,
+  "unique_candidates": 3,
+  "accepted": 1,
+  "rejected": 2,
+  "blocked": 0,
+  "timeout": 0,
+  "circuit_open": 0,
+  "attempt_statuses": {
+   "success": 3
+  }
+ },
+ "run": 1,
+ "mode": "full",
+ "oracle": {
+  "page_ok": true,
+  "document_ok": null,
+  "oracle_ok": true
+ },
+ "bosch_target_found": false
+}

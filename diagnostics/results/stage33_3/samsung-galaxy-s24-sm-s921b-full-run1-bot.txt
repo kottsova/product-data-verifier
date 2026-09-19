@@ -1,0 +1,99 @@
+🔎 Samsung Galaxy S24 SM-S921B
+Статус: PARTIAL · exact official page: нет
+Время discovery: 77.0 с · search status: partial
+Providers: direct_domain_probe, browser_official_discovery, duckduckgo_html, naver, seznam, duckduckgo_lite, bing, google
+Trace: provider raw=626, collected=516, normalized=516, unique=118, accepted=62, rejected=59, duplicates=395
+
+Official product pages (4)
+1. https://www.samsung.com/de/smartphones/galaxy-s24/
+   probable — Search result contains only a probable base-model relation.; Domain verified from conservative brand official-search evidence.
+   samsung.com · global (.com)
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [unknown]
+2. https://www.samsung.com/it/smartphones/galaxy-s24/
+   probable — Search result contains only a probable base-model relation.; Domain verified from conservative brand official-search evidence.
+   samsung.com · global (.com)
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [unknown]
+3. https://www.samsung.com/it/smartphones/galaxy-s24-ultra/
+   probable — Search result contains only a probable base-model relation.; Domain verified from conservative brand official-search evidence.
+   samsung.com · global (.com)
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [unknown]
+4. https://www.samsung.com/sec/smartphones/galaxy-s24/specs/
+   probable — Search result contains only a probable base-model relation.; Domain verified from conservative brand official-search evidence.
+   samsung.com · global (.com)
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [unknown]
+
+Official support pages (11)
+1. https://www.samsung.com/ae/support/model/SM-S921BLGCPKD/
+2. https://www.samsung.com/ae/support/model/SM-S921BLBCMEA/
+3. https://www.samsung.com/ae/support/model/SM-S921BLGCMEA/
+4. https://samsung.com/de/support/mobile-devices/vergleich-galaxy-s24-ultra-galaxy-s24-plus-galaxy-s24
+5. https://samsung.com/uk/support/model/SM-S921BZADEUB
+6. https://samsung.com/cz/support/mimozarucni-opravy
+7. https://samsung.com/de/support/mobile-devices/welche-sperrbildschirmtypen-gibt-es-bei-meinem-galaxy-smartphone
+8. https://samsung.com/sec/support/model/SM-S921NZKEKOD
+9. https://samsung.com/sec/support/model/SM-S921NZVFKOD
+10. https://samsung.com/sec/support/model/SM-S921NZYEKOO
+11. https://samsung.com/sk/support/mimozarucne-opravy
+
+Official documents (0)
+— not found
+
+Secondary (46)
+1. https://sunsky-online.com/ko/p/SPA9163/Samsung-Galaxy-S24-SM-S921B-EU-%EB%B2%84%EC%A0%84%EC%9A%A9-%EA%B8%B0%EC%A1%B4-%EC%B6%A9%EC%A0%84-%ED%8F%AC%ED%8A%B8-%EB%B3%B4%EB%93%9C.htm
+   exact · secondary
+2. https://imobily.eu/samsung-galaxy-s24-sm-s921b-8gb-256gb-cobalt-violet-42167.html
+   exact · secondary
+3. https://sammobile.com/samsung/galaxy-s24/firmware/SM-S921B/CHO/download/S921BXXSBCYK2/1971501
+   exact · secondary
+4. https://sammobile.com/samsung/galaxy-s24/firmware/SM-S921B/XID/download/S921BXXSFDZF3/1995548
+   exact · secondary
+5. https://sunsky-online.com/ko/p/SPA4516/%EC%82%BC%EC%84%B1-%EA%B0%A4%EB%9F%AD%EC%8B%9C-S24-SM-S921B-%EC%A0%95%ED%92%88-%EC%B9%B4%EB%A9%94%EB%9D%BC-%EC%84%B8%ED%8A%B8-%EB%A7%9D%EC%9B%90-%EA%B4%91%EA%B0%81-%EB%A9%94%EC%9D%B8-%EC%B9%B4%EB%A9%94%EB%9D%BC-.htm
+   exact · secondary
+6. https://chooseyourmobile.com/samsung-galaxy-s24
+   weak · secondary
+7. https://getdroidtips.com/download-samsung-s24-plus-firmware-flash-file
+   weak · secondary
+8. https://gsmchoice.com/en/catalogue/samsung/galaxys24
+
+   weak · secondary
+… ещё 38 вторичных источников
+
+Discovery metadata
+• expandable specs: no
+• hidden spec content: no
+• interaction required: no
+
+Отклонённые соседние SKU/варианты (1)
+1. https://kream.co.kr/products/688258
+   найден: SM-S921N · запрошен: SM-S921B · Search result describes an accessory or replacement part, not the product.
+
+Performance: 77.0 с, queries=8, provider attempts=42, raw=626, unique=118, accepted=62, rejected=59, blocked=4, timeout=3, circuit_open=9, first official path=direct_domain_probe:sitemap, direct probe requests=53 (domain probes=20)
+
+Отклонённые кандидаты (5)
+1. https://samsung.com/sec/smartphones/galaxy-s24-s921-cpo/SM-S921NLBFKOO
+   Search result contains a conflicting model identifier.; Domain verified from conservative brand official-search evidence.
+2. https://zbozi.cz/hledej?q=%22samsung+galaxy+s24+sm-s921b%22
+   Search results are not an individual product or support page.
+3. https://allegro.cz/produkt/samsung-sm-s921b-galaxy-s24-clear-cover-gp-fps921saatw-transparant-82f848f7-bb43-4e22-9e7f-372642e6084a
+   Search result describes an accessory or replacement part, not the product.
+4. https://techinsights.com/blog/deep-dive-teardown-samsung-galaxy-s24-sm-s921bds-smartphone
+   obvious_non_product_or_blocked_url
+5. https://datart.cz/mobilni-telefony/samsung.html
+   Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.
+
+Ещё отклонённых: 53. Команда /discover_rejected покажет полный trace последнего запуска.
+
+Сбои/таймауты providers (22):
+• browser_official_discovery: empty — Provider returned no candidates.
+• bing: low_value — Provider results lacked query identity signal (2/3 required tokens matched).
+• google: timeout — Google provider deadline exhausted waiting for results.
+• browser_official_discovery: empty — Provider returned no candidates.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• duckduckgo_html: blocked — DuckDuckGo bot-check blocked the HTML search.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• duckduckgo_html: blocked — DuckDuckGo bot-check blocked the HTML search.
+• duckduckgo_lite: blocked — DuckDuckGo bot-check blocked the Lite search.
+… ещё 10

@@ -1,0 +1,53 @@
+🔎 Bosch HBG7741B1
+Статус: PASS · exact official page: да
+Время discovery: 28.3 с · search status: success
+Providers: direct_domain_probe, duckduckgo_html
+Trace: provider raw=105, collected=3, normalized=3, unique=3, accepted=3, rejected=0, duplicates=0
+
+Official product pages (3)
+1. https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   bosch-home.com · global (.com)
+   expandable_specs: yes · hidden_spec_content: yes · interaction_required: no [json_state]
+2. https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   bosch-home.com · global (.com)
+   expandable_specs: yes · hidden_spec_content: yes · interaction_required: no [json_state]
+3. https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   bosch-home.com · global (.com)
+   expandable_specs: no · hidden_spec_content: yes · interaction_required: no [json_state]
+
+Official support pages (0)
+— not found
+
+Official documents (1)
+1. Declaration — https://media3.bsh-group.com/Documents/21400895_EU_DoC_Bosch_HT6B60F0S.pdf
+   exact · official (linked from verified official page) · linked from the exact official product page; linked from official page
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: yes
+• hidden spec content: yes
+• interaction required: no
+
+Отклонённые соседние SKU/варианты (9)
+1. https://media3.bsh-group.com/Documents/energylabel/de-CH/HBG7741B1.pdf
+   найден: media3.bsh-group.com/Documents/energylabel/de-CH/HBG7741B1.pdf · запрошен: HBG7741B1 · document file whose type cannot be identified
+2. https://media3.bsh-group.com/Documents/eudatasheet/de-CH/HBG7741B1.pdf
+   найден: media3.bsh-group.com/Documents/eudatasheet/de-CH/HBG7741B1.pdf · запрошен: HBG7741B1 · names a different SKU variant (HBG7741B1.pdf) of the same base model
+3. https://media3.bsh-group.com/Documents/specsheet/de-CH/HBG7741B1.pdf
+   найден: media3.bsh-group.com/Documents/specsheet/de-CH/HBG7741B1.pdf · запрошен: HBG7741B1 · names a different SKU variant (HBG7741B1.pdf) of the same base model
+4. https://media3.bsh-group.com/Documents/energylabel/fr-CH/HBG7741B1.pdf
+   найден: media3.bsh-group.com/Documents/energylabel/fr-CH/HBG7741B1.pdf · запрошен: HBG7741B1 · document file whose type cannot be identified
+5. https://media3.bsh-group.com/Documents/eudatasheet/fr-CH/HBG7741B1.pdf
+   найден: media3.bsh-group.com/Documents/eudatasheet/fr-CH/HBG7741B1.pdf · запрошен: HBG7741B1 · names a different SKU variant (HBG7741B1.pdf) of the same base model
+6. https://media3.bsh-group.com/Documents/specsheet/fr-CH/HBG7741B1.pdf
+   найден: media3.bsh-group.com/Documents/specsheet/fr-CH/HBG7741B1.pdf · запрошен: HBG7741B1 · names a different SKU variant (HBG7741B1.pdf) of the same base model
+
+Performance: 28.3 с, queries=3, provider attempts=3, raw=105, unique=3, accepted=3, rejected=0, blocked=0, timeout=0, circuit_open=0, first official path=direct_domain_probe:sku_route_template, direct probe requests=114 (domain probes=19)
+
+
+Отклонённые кандидаты (0)
