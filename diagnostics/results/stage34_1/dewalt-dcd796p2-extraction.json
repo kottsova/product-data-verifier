@@ -1,0 +1,385 @@
+{
+ "product_name": "DEWALT DCD796P2",
+ "brand": "DEWALT",
+ "model": "DCD796P2",
+ "discovery_status": "PASS",
+ "runtime_seconds": 1.32,
+ "search_calls": 0,
+ "pages": [
+  {
+   "url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+   "final_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+   "source_type": "official_product_page",
+   "model_match": "exact",
+   "fetched": true,
+   "fetch_issue": "",
+   "document_type": "",
+   "spec_location": "json_state",
+   "requires_interaction": "false",
+   "js_shell": false,
+   "attributes": [
+    {
+     "raw_label": "name",
+     "raw_value": "18V XR® Brushless Hammer Drill Driver with (2) 5Ah Batteries",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "sku",
+     "raw_value": "DCD796P2-GB",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "category",
+     "raw_value": "Hammer Drills",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "brand",
+     "raw_value": "DW",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Product Type",
+     "raw_value": "Hammer Drill",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state",
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Voltage",
+     "raw_value": "18V",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state",
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Cordless or Corded",
+     "raw_value": "Cordless",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state",
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Power Source",
+     "raw_value": "Battery",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state",
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Motor Type",
+     "raw_value": "Brushless",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state",
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Tool Only",
+     "raw_value": "No",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Total Number of Batteries",
+     "raw_value": "2",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Battery Amp Hours",
+     "raw_value": "5.0Ah",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Charger Included",
+     "raw_value": "Yes",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Chuck Type",
+     "raw_value": "Keyless",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Maximum Speed",
+     "raw_value": "2000-rpm",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "No Load Speed",
+     "raw_value": "34000-bpm",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Number of Clutch Settings",
+     "raw_value": "14",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Piece Count",
+     "raw_value": "4",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Case Type",
+     "raw_value": "Hard",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Assembled Product Height",
+     "raw_value": "20.29-cm",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Assembled Product Length",
+     "raw_value": "19.0-cm",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Assembled Product Weight",
+     "raw_value": "1.2-kg",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    },
+    {
+     "raw_label": "Barcode",
+     "raw_value": "5035050000000",
+     "source_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "json_state"
+     ]
+    }
+   ],
+   "excluded": {
+    "neighbour_context_pair": 3
+   },
+   "stats": {
+    "json_state_blocks": 2,
+    "by_location": {
+     "json_ld": 23
+    },
+    "by_method": {
+     "json_ld_field": 4,
+     "json_ld_property": 19
+    },
+    "html_bytes": 725061
+   },
+   "issues": []
+  }
+ ],
+ "support_pages": [],
+ "documents": [],
+ "skipped": [],
+ "raw_attribute_count": 23
+}

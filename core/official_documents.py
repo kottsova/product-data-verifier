@@ -79,12 +79,13 @@ class OfficialDocument:
     canonical_field: str
     title: str
     authority: str
-    model_match: str  # exact | probable
+    model_match: str  # exact | probable | unverified (Stage 34.1: identity checked against the document text)
     reason: str
     source_page: str = ""
     found_on: tuple[str, ...] = ()
     file_type: str = "page"  # pdf | page
     locales: tuple[str, ...] = ()
+    identity_evidence: str = ""  # document_text | family_* | not_in_text | ... ("" = not checked)
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -481,6 +482,8 @@ def documents_by_canonical_field(
     """Structured canonical identifiers (manual_url, datasheet_url, ...)."""
     fields: dict[str, list[str]] = {name: [] for name in CANONICAL_DOCUMENT_FIELDS}
     for document in documents:
+        if document.model_match == "unverified":
+            continue  # identity not proven: never a canonical manual/datasheet URL
         urls = fields[document.canonical_field]
         if document.url not in urls:
             urls.append(document.url)

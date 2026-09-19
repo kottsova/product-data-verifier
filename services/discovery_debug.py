@@ -29,6 +29,7 @@ from core.discovery import (
     canonicalize_url,
     discover_with_status,
 )
+from core.document_identity import DocumentReader, read_pdf_text, verify_documents
 from core.official_documents import (
     CANONICAL_FIELD,
     OfficialDocument,
@@ -243,6 +244,26 @@ def _document_from_candidate(
     ), None
 
 
+def _verify_document_identity(
+    documents: list[OfficialDocument], brand: str, model: str, reader: DocumentReader,
+) -> list[OfficialDocument]:
+    """Stage 34.1: a link from an official page is context; ``exact`` needs identity in the document itself."""
+    verdicts = verify_documents(documents, model, brand, reader)
+    if not verdicts:
+        return documents
+    checked = []
+    for document in documents:
+        verdict = verdicts.get(document.url)
+        if verdict is None:
+            checked.append(document)
+            continue
+        checked.append(replace(
+            document, model_match=verdict.match, identity_evidence=verdict.evidence,
+            reason=f"{document.reason}; identity check: {verdict.reason}",
+        ))
+    return merge_documents(checked)
+
+
 def _metadata_from_inspections(
     inspections: list[tuple[DiscoverySource, PageInspection]],
 ) -> dict[str, object]:
@@ -285,6 +306,7 @@ def _result_from_outcome(
     *,
     fetch: Callable[[str], tuple[str, str] | None] | None = None,
     extra_results: Iterable[object] = (),
+    document_reader: DocumentReader | None = None,
 ) -> DiscoveryDebugResult:
     grouped: dict[DiscoveryGroup, list[DiscoverySource]] = {
         "official": [], "dealer": [], "secondary": [], "rejected": [],
@@ -393,6 +415,8 @@ def _result_from_outcome(
         ))
 
     merged_documents = merge_documents(documents)
+    if document_reader is not None:
+        merged_documents = _verify_document_identity(merged_documents, brand, model, document_reader)
     exact_official = any(item.model_match == "exact" for item in official_pages)
     if exact_official:
         status: Literal["PASS", "PARTIAL", "FAIL"] = "PASS"
@@ -647,12 +671,14 @@ class DiscoveryDebugService:
     def __init__(
         self, *, wall_clock_budget_seconds: float = 75.0,
         providers: Callable[[], Iterable[object]] | None = None,
+        document_reader: DocumentReader | None = None,
     ) -> None:
         if wall_clock_budget_seconds <= 0:
             raise ValueError("wall_clock_budget_seconds must be positive")
         self.wall_clock_budget_seconds = float(wall_clock_budget_seconds)
         # Diagnostics only: restrict the provider chain (e.g. official-only, no SERP).
         self._providers = providers
+        self._document_reader = document_reader or read_pdf_text
         self._last_by_chat: dict[int, DiscoveryDebugResult] = {}
         self._lock = threading.Lock()
 
@@ -668,11 +694,17 @@ class DiscoveryDebugService:
         budget = WallClockBudget(self.wall_clock_budget_seconds)
         runtime = DiscoveryRuntimeConfig()
         page_cache: dict[str, tuple[str, str] | None] = {}
+        document_cache: dict[str, object] = {}
 
         def fetch(url: str) -> tuple[str, str] | None:
             if url not in page_cache:
                 page_cache[url] = fetch_working_page(url, timeout=12.0)
             return page_cache[url]
+
+        def document_reader(url: str):
+            if url not in document_cache:
+                document_cache[url] = self._document_reader(url)
+            return document_cache[url]
 
         provider_chain = list(self._providers()) if self._providers is not None else None
         with ResilientSearchSession(
@@ -684,6 +716,7 @@ class DiscoveryDebugService:
             )
             result = _result_from_outcome(
                 name, brand, model, market, outcome, time.monotonic() - started, fetch=fetch,
+                document_reader=document_reader,
             )
             # Documents linked from the official pages are the cheap, reliable
             # source.  Search-engine document queries only run when they did
@@ -714,6 +747,7 @@ class DiscoveryDebugService:
                     result = _result_from_outcome(
                         name, brand, model, market, outcome, time.monotonic() - started,
                         fetch=fetch, extra_results=[_search_result_record(item) for item in extra],
+                        document_reader=document_reader,
                     )
         if chat_id is not None:
             with self._lock:

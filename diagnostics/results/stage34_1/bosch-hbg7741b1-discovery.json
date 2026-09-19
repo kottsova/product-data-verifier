@@ -1,0 +1,1568 @@
+{
+ "product_name": "Bosch HBG7741B1",
+ "brand": "Bosch",
+ "model": "HBG7741B1",
+ "market": "global",
+ "status": "PASS",
+ "exact_official_found": true,
+ "official": [
+  {
+   "url": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+   "domain": "bosch-home.com",
+   "source_type": "manufacturer",
+   "title": "HBG7741B1 Einbau-Backofen | Bosch CH",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+   "domain": "bosch-home.com",
+   "source_type": "manufacturer",
+   "title": "HBG7741B1 Four encastrable | Bosch CH",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1",
+   "domain": "bosch-home.com",
+   "source_type": "manufacturer",
+   "title": "HBG7741B1 Forno da incasso | Bosch CH",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "dealers": [],
+ "secondary": [],
+ "rejected": [],
+ "runtime_seconds": 40.649,
+ "search_status": "success",
+ "attempted_queries": [
+  "Bosch HBG7741B1",
+  "\"HBG7741B1\" manual site:bosch-home.com",
+  "Bosch \"HBG7741B1\" declaration of conformity"
+ ],
+ "providers": [
+  "direct_domain_probe",
+  "duckduckgo_html",
+  "naver",
+  "seznam",
+  "duckduckgo_lite",
+  "bing",
+  "google"
+ ],
+ "provider_failures": [
+  {
+   "provider": "duckduckgo_html",
+   "query": "\"HBG7741B1\" manual site:bosch-home.com",
+   "status": "blocked",
+   "message": "DuckDuckGo bot-check blocked the HTML search.",
+   "duration_seconds": 0.342472
+  },
+  {
+   "provider": "naver",
+   "query": "\"HBG7741B1\" manual site:bosch-home.com",
+   "status": "blocked",
+   "message": "Naver bot-check blocked the search.",
+   "duration_seconds": 2.165822
+  },
+  {
+   "provider": "duckduckgo_html",
+   "query": "Bosch \"HBG7741B1\" declaration of conformity",
+   "status": "circuit_open",
+   "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+   "duration_seconds": 0.0
+  },
+  {
+   "provider": "naver",
+   "query": "Bosch \"HBG7741B1\" declaration of conformity",
+   "status": "circuit_open",
+   "message": "Circuit open after blocked: Naver bot-check blocked the search.",
+   "duration_seconds": 0.0
+  },
+  {
+   "provider": "seznam",
+   "query": "Bosch \"HBG7741B1\" declaration of conformity",
+   "status": "low_value",
+   "message": "Provider results lacked query identity signal (2/3 required tokens matched).",
+   "duration_seconds": 0.83401
+  },
+  {
+   "provider": "duckduckgo_lite",
+   "query": "Bosch \"HBG7741B1\" declaration of conformity",
+   "status": "blocked",
+   "message": "DuckDuckGo bot-check blocked the Lite search.",
+   "duration_seconds": 0.328091
+  },
+  {
+   "provider": "bing",
+   "query": "Bosch \"HBG7741B1\" declaration of conformity",
+   "status": "low_value",
+   "message": "Provider results lacked query identity signal (0/3 required tokens matched).",
+   "duration_seconds": 0.497935
+  },
+  {
+   "provider": "google",
+   "query": "Bosch \"HBG7741B1\" declaration of conformity",
+   "status": "timeout",
+   "message": "Google provider deadline exhausted waiting for results.",
+   "duration_seconds": 8.012495
+  }
+ ],
+ "candidate_counts": {
+  "provider_raw": 105,
+  "collected": 3,
+  "normalized": 3,
+  "unique": 3,
+  "duplicates": 0,
+  "accepted": 3,
+  "rejected": 0,
+  "official": 3,
+  "dealer": 0,
+  "secondary": 0,
+  "documents": 1
+ },
+ "official_pages": [
+  {
+   "url": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+   "domain": "bosch-home.com",
+   "source_type": "manufacturer",
+   "title": "HBG7741B1 Einbau-Backofen | Bosch CH",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+   "domain": "bosch-home.com",
+   "source_type": "manufacturer",
+   "title": "HBG7741B1 Four encastrable | Bosch CH",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1",
+   "domain": "bosch-home.com",
+   "source_type": "manufacturer",
+   "title": "HBG7741B1 Forno da incasso | Bosch CH",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "support_pages": [],
+ "documents": [
+  {
+   "url": "https://media3.bsh-group.com/Documents/21400895_EU_DoC_Bosch_HT6B60F0S.pdf",
+   "doc_type": "declaration",
+   "canonical_field": "declaration_url",
+   "title": "bsh:category.declaration-of-conformity",
+   "authority": "official (linked from verified official page)",
+   "model_match": "unverified",
+   "reason": "linked from the exact official product page; linked from official page; identity check: the requested identifier does not appear in the text",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+   "found_on": [
+    "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+    "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+    "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   ],
+   "file_type": "pdf",
+   "locales": [
+    "de-CH"
+   ],
+   "identity_evidence": "not_in_text"
+  }
+ ],
+ "rejected_documents": [
+  {
+   "url": "https://www.bosch-home.com/ch/de/service/kontakt-und-information/kontakt-demontage-manual",
+   "doc_type": "manual",
+   "title": ".css-49oekm{position:relative;display:block;box-sizing:border-box;background:rgb(255, 255, 255);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;cursor:pointer;-webkit-filter:brightness(1) contrast(1);filter:brightness(1) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm{transition-property:background-color,border-color,opacity;}}.css-49oekm:hover{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:hover{transition-property:background-color,border-color,opacity;}}.css-49oekm:active{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.94) contrast(1);filter:brightness(0.94) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:active{transition-property:background-color,border-color,opacity;}}.css-49oekm:focus-visible{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:focus-visible{transition-property:background-color,border-color,opacity;}} .css-1rr2cma{gap:0.75rem;} .css-15oqo2h{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:normal;-ms-flex-pack:normal;-webkit-justify-content:normal;justify-content:normal;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;gap:0.75rem;} .css-46zp8a{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;color:rgb(0, 0, 0);font-family:\"Bosch Sans\",sans-serif;font-size:0.75rem;font-weight:bold;letter-spacing:0em;line-height:1rem;text-align:start;text-transform:None;} Information für Fachleute zur Demontage .css-15wgypy{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit;background-color:transparent;border-bottom-width:0;border-left-width:0;border-right-width:0;border-top-width:0;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;line-height:inherit;padding-bottom:0;padding-left:0;padding-right:0;padding-top:0;text-align:inherit;box-sizing:border-box;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:hover{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:active{background:rgb(209, 228, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(0.98);-moz-transform:scale(0.98);-ms-transform:scale(0.98);transform:scale(0.98);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:focus-visible{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgb(0, 73, 117);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgb(0, 73, 117);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy[disabled]{background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:not-allowed;height:2rem;opacity:0.4;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:none;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/de/metapages/impressum/eine-sicherheitslucke-melden#anc-9431461",
+   "doc_type": "safety_document",
+   "title": "Eine Sicherheitslücke melden",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/de/service/kontakt-und-information/produktsicherheitsregistrierung",
+   "doc_type": "safety_document",
+   "title": "Registrierung Produktsicherheit",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/energylabel/de-CH/HBG7741B1.pdf",
+   "doc_type": "unknown",
+   "title": "HBG7741B1.pdf",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/eudatasheet/de-CH/HBG7741B1.pdf",
+   "doc_type": "datasheet",
+   "title": "HBG7741B1.pdf",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001682187_K.pdf",
+   "doc_type": "unknown",
+   "title": "IU",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/specsheet/de-CH/HBG7741B1.pdf",
+   "doc_type": "spec_sheet",
+   "title": "bsh:category.specification-sheet",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/legalcollection_HBG7741B1_de-CH.pdf",
+   "doc_type": "unknown",
+   "title": "bsh:category.legal-collection",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001647009_B.pdf",
+   "doc_type": "unknown",
+   "title": "HC",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001641891_G.pdf",
+   "doc_type": "unknown",
+   "title": "FS",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/fr/service/contact-et-info/contact_form_disassembly_and_dismantling_manual",
+   "doc_type": "manual",
+   "title": ".css-49oekm{position:relative;display:block;box-sizing:border-box;background:rgb(255, 255, 255);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;cursor:pointer;-webkit-filter:brightness(1) contrast(1);filter:brightness(1) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm{transition-property:background-color,border-color,opacity;}}.css-49oekm:hover{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:hover{transition-property:background-color,border-color,opacity;}}.css-49oekm:active{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.94) contrast(1);filter:brightness(0.94) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:active{transition-property:background-color,border-color,opacity;}}.css-49oekm:focus-visible{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:focus-visible{transition-property:background-color,border-color,opacity;}} .css-1rr2cma{gap:0.75rem;} .css-15oqo2h{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:normal;-ms-flex-pack:normal;-webkit-justify-content:normal;justify-content:normal;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;gap:0.75rem;} .css-46zp8a{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;color:rgb(0, 0, 0);font-family:\"Bosch Sans\",sans-serif;font-size:0.75rem;font-weight:bold;letter-spacing:0em;line-height:1rem;text-align:start;text-transform:None;} Information pour les professionnels sur le démontage .css-15wgypy{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit;background-color:transparent;border-bottom-width:0;border-left-width:0;border-right-width:0;border-top-width:0;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;line-height:inherit;padding-bottom:0;padding-left:0;padding-right:0;padding-top:0;text-align:inherit;box-sizing:border-box;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:hover{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:active{background:rgb(209, 228, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(0.98);-moz-transform:scale(0.98);-ms-transform:scale(0.98);transform:scale(0.98);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:focus-visible{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgb(0, 73, 117);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgb(0, 73, 117);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy[disabled]{background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:not-allowed;height:2rem;opacity:0.4;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:none;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/fr/metapages/marque/signaler-une-faille-de-securite#anc-9431461",
+   "doc_type": "safety_document",
+   "title": "Signaler une faille de sécurité",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/fr/service/contact-et-info/enregistrement-securite-produit",
+   "doc_type": "safety_document",
+   "title": "Enregistrement Sécurité Produit",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/energylabel/fr-CH/HBG7741B1.pdf",
+   "doc_type": "unknown",
+   "title": "HBG7741B1.pdf",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/eudatasheet/fr-CH/HBG7741B1.pdf",
+   "doc_type": "datasheet",
+   "title": "HBG7741B1.pdf",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001682189_J.pdf",
+   "doc_type": "unknown",
+   "title": "IU",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/specsheet/fr-CH/HBG7741B1.pdf",
+   "doc_type": "spec_sheet",
+   "title": "bsh:category.specification-sheet",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/legalcollection_HBG7741B1_fr-CH.pdf",
+   "doc_type": "unknown",
+   "title": "bsh:category.legal-collection",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001647009_B.pdf",
+   "doc_type": "unknown",
+   "title": "HC",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001641891_G.pdf",
+   "doc_type": "unknown",
+   "title": "FS",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/it/assistenza/contatto-e-informazioni/contact_form_disassembly_and_dismantling_manual",
+   "doc_type": "manual",
+   "title": ".css-49oekm{position:relative;display:block;box-sizing:border-box;background:rgb(255, 255, 255);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;cursor:pointer;-webkit-filter:brightness(1) contrast(1);filter:brightness(1) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm{transition-property:background-color,border-color,opacity;}}.css-49oekm:hover{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:hover{transition-property:background-color,border-color,opacity;}}.css-49oekm:active{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.94) contrast(1);filter:brightness(0.94) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:active{transition-property:background-color,border-color,opacity;}}.css-49oekm:focus-visible{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:focus-visible{transition-property:background-color,border-color,opacity;}} .css-1rr2cma{gap:0.75rem;} .css-15oqo2h{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:normal;-ms-flex-pack:normal;-webkit-justify-content:normal;justify-content:normal;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;gap:0.75rem;} .css-46zp8a{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;color:rgb(0, 0, 0);font-family:\"Bosch Sans\",sans-serif;font-size:0.75rem;font-weight:bold;letter-spacing:0em;line-height:1rem;text-align:start;text-transform:None;} Informazioni per i professionisti sullo smontaggio .css-15wgypy{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit;background-color:transparent;border-bottom-width:0;border-left-width:0;border-right-width:0;border-top-width:0;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;line-height:inherit;padding-bottom:0;padding-left:0;padding-right:0;padding-top:0;text-align:inherit;box-sizing:border-box;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:hover{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:active{background:rgb(209, 228, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(0.98);-moz-transform:scale(0.98);-ms-transform:scale(0.98);transform:scale(0.98);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:focus-visible{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgb(0, 73, 117);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgb(0, 73, 117);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy[disabled]{background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:not-allowed;height:2rem;opacity:0.4;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:none;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/energylabel/it-CH/HBG7741B1.pdf",
+   "doc_type": "unknown",
+   "title": "HBG7741B1.pdf",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/eudatasheet/it-CH/HBG7741B1.pdf",
+   "doc_type": "datasheet",
+   "title": "HBG7741B1.pdf",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+   "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001682192_F.pdf",
+   "doc_type": "unknown",
+   "title": "IU",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/specsheet/it-CH/HBG7741B1.pdf",
+   "doc_type": "spec_sheet",
+   "title": "bsh:category.specification-sheet",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+   "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/legalcollection_HBG7741B1_it-CH.pdf",
+   "doc_type": "unknown",
+   "title": "bsh:category.legal-collection",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/9001641891_G.pdf",
+   "doc_type": "unknown",
+   "title": "FS",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+  }
+ ],
+ "document_fields": {
+  "manual_url": [],
+  "quick_start_guide_url": [],
+  "datasheet_url": [],
+  "safety_document_url": [],
+  "declaration_url": [],
+  "certificate_url": []
+ },
+ "page_inspections": [
+  {
+   "url": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+   "has_expandable_specs": true,
+   "has_hidden_spec_content": "true",
+   "requires_interaction": "false",
+   "spec_controls": [
+    "Technische Daten"
+   ],
+   "signals": [
+    "spec control: 'Technische Daten'",
+    "aria-expanded=false control",
+    "<template> on <template#B:0>",
+    "<template> on <template#B:1>",
+    "<template> on <template#B:2>",
+    "<template> on <template#B:3>",
+    "<template> on <template#B:4>",
+    "<template> on <template#B:5>",
+    "<template> on <template#B:6>",
+    "<template> on <template#B:7>",
+    "<template> on <template#B:8>",
+    "<template> on <template#B:9>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1,
+   "js_shell": false,
+   "spec_location": "json_state"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+   "has_expandable_specs": true,
+   "has_hidden_spec_content": "true",
+   "requires_interaction": "false",
+   "spec_controls": [
+    "Voir plus"
+   ],
+   "signals": [
+    "spec control: 'Voir plus'",
+    "aria-expanded=false control",
+    "<template> on <template#B:0>",
+    "<template> on <template#B:1>",
+    "<template> on <template#B:2>",
+    "<template> on <template#B:3>",
+    "<template> on <template#B:4>",
+    "<template> on <template#B:5>",
+    "<template> on <template#B:6>",
+    "<template> on <template#B:7>",
+    "<template> on <template#B:8>",
+    "<template> on <template#B:9>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1,
+   "js_shell": false,
+   "spec_location": "json_state"
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1",
+   "has_expandable_specs": false,
+   "has_hidden_spec_content": "true",
+   "requires_interaction": "false",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control",
+    "<template> on <template#B:0>",
+    "<template> on <template#B:1>",
+    "<template> on <template#B:2>",
+    "<template> on <template#B:3>",
+    "<template> on <template#B:4>",
+    "<template> on <template#B:5>",
+    "<template> on <template#B:6>",
+    "<template> on <template#B:7>",
+    "<template> on <template#B:8>",
+    "<template> on <template#B:9>",
+    "<template> on <template#B:a>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1,
+   "js_shell": false,
+   "spec_location": "json_state"
+  }
+ ],
+ "discovery_metadata": {
+  "inspected_pages": 3,
+  "primary_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+  "has_expandable_specs": true,
+  "has_hidden_spec_content": "true",
+  "requires_interaction": "false",
+  "any_page_requires_interaction": "false",
+  "signals": [
+   "spec control: 'Technische Daten'",
+   "aria-expanded=false control",
+   "<template> on <template#B:0>",
+   "<template> on <template#B:1>",
+   "<template> on <template#B:2>",
+   "<template> on <template#B:3>",
+   "<template> on <template#B:4>",
+   "<template> on <template#B:5>",
+   "<template> on <template#B:6>",
+   "<template> on <template#B:7>",
+   "<template> on <template#B:8>",
+   "<template> on <template#B:9>"
+  ],
+  "spec_controls": [
+   "Technische Daten"
+  ]
+ },
+ "official_paths": [
+  {
+   "path": "direct_domain_probe:bounded_crawl",
+   "requests": 8,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:domain_resolution",
+   "requests": 19,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:family_crawl",
+   "requests": 13,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:page_verification",
+   "requests": 3,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:robots",
+   "requests": 7,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:site_search",
+   "requests": 15,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sitemap",
+   "requests": 36,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sku_route_probe",
+   "requests": 13,
+   "queries": 1
+  },
+  {
+   "path": "serp_identity_queries",
+   "requests": 0,
+   "queries": 2
+  },
+  {
+   "path": "serp_domain_restricted_queries",
+   "requests": 0,
+   "queries": 1
+  },
+  {
+   "path": "serp_official_bootstrap",
+   "requests": 0,
+   "queries": 0
+  }
+ ],
+ "trace": {
+  "queries": [
+   "Bosch HBG7741B1",
+   "\"HBG7741B1\" manual site:bosch-home.com",
+   "Bosch \"HBG7741B1\" declaration of conformity"
+  ],
+  "provider_attempts": [
+   {
+    "provider": "direct_domain_probe",
+    "query": "Bosch HBG7741B1",
+    "status": "success",
+    "result_count": 3,
+    "message": null,
+    "is_fallback": false,
+    "duration_seconds": 25.329916,
+    "timeout_seconds": 36.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 105,
+    "parsed_result_count": 3,
+    "deduped_result_count": 3,
+    "transport": "http_direct",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Bosch HBG7741B1",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 74.999575,
+    "budget_after_seconds": 49.668449,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 3,
+    "rejected_candidate_count": 0,
+    "discovery_method": "sku_route_template",
+    "method_requests": [
+     [
+      "bounded_crawl",
+      8
+     ],
+     [
+      "domain_resolution",
+      19
+     ],
+     [
+      "family_crawl",
+      13
+     ],
+     [
+      "page_verification",
+      3
+     ],
+     [
+      "robots",
+      7
+     ],
+     [
+      "site_search",
+      15
+     ],
+     [
+      "sitemap",
+      36
+     ],
+     [
+      "sku_route_probe",
+      13
+     ]
+    ],
+    "candidate_count": 10,
+    "exact_model_candidate_count": 3,
+    "accepted_official_url": "https://bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_html",
+    "query": "\"HBG7741B1\" manual site:bosch-home.com",
+    "status": "blocked",
+    "result_count": 0,
+    "message": "DuckDuckGo bot-check blocked the HTML search.",
+    "is_fallback": true,
+    "duration_seconds": 0.342472,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": true,
+    "parse_failure": false,
+    "exception_class": "RuntimeError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "http",
+    "failure_class": "blocked",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"HBG7741B1\" manual bosch-home.com",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 47.293654,
+    "budget_after_seconds": 46.951145,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "naver",
+    "query": "\"HBG7741B1\" manual site:bosch-home.com",
+    "status": "blocked",
+    "result_count": 0,
+    "message": "Naver bot-check blocked the search.",
+    "is_fallback": true,
+    "duration_seconds": 2.165822,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": true,
+    "parse_failure": false,
+    "exception_class": "RuntimeError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "http",
+    "failure_class": "blocked",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "HBG7741B1 manual site:bosch-home.com",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 46.950253,
+    "budget_after_seconds": 44.784392,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "seznam",
+    "query": "\"HBG7741B1\" manual site:bosch-home.com",
+    "status": "success",
+    "result_count": 14,
+    "message": null,
+    "is_fallback": true,
+    "duration_seconds": 0.75628,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 22,
+    "parsed_result_count": 14,
+    "deduped_result_count": 14,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"HBG7741B1\" manual site:bosch-home.com",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 44.784301,
+    "budget_after_seconds": 44.027014,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_html",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "circuit_open",
+    "result_count": 0,
+    "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+    "is_fallback": true,
+    "duration_seconds": 0.0,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": true,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": null,
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 44.026965,
+    "budget_after_seconds": 44.026965,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "naver",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "circuit_open",
+    "result_count": 0,
+    "message": "Circuit open after blocked: Naver bot-check blocked the search.",
+    "is_fallback": true,
+    "duration_seconds": 0.0,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": true,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": null,
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Bosch HBG7741B1 declaration of conformity",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 44.026948,
+    "budget_after_seconds": 44.026948,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "seznam",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "low_value",
+    "result_count": 20,
+    "message": "Provider results lacked query identity signal (2/3 required tokens matched).",
+    "is_fallback": true,
+    "duration_seconds": 0.83401,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 36,
+    "parsed_result_count": 20,
+    "deduped_result_count": 20,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 44.026938,
+    "budget_after_seconds": 43.190269,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_lite",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "blocked",
+    "result_count": 0,
+    "message": "DuckDuckGo bot-check blocked the Lite search.",
+    "is_fallback": true,
+    "duration_seconds": 0.328091,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": true,
+    "parse_failure": false,
+    "exception_class": "RuntimeError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "http",
+    "failure_class": "blocked",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 43.190154,
+    "budget_after_seconds": 42.862029,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "bing",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "low_value",
+    "result_count": 5,
+    "message": "Provider results lacked query identity signal (0/3 required tokens matched).",
+    "is_fallback": true,
+    "duration_seconds": 0.497935,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 10,
+    "parsed_result_count": 5,
+    "deduped_result_count": 5,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 42.861984,
+    "budget_after_seconds": 42.363722,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "google",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "timeout",
+    "result_count": 0,
+    "message": "Google provider deadline exhausted waiting for results.",
+    "is_fallback": true,
+    "duration_seconds": 8.012495,
+    "timeout_seconds": 8.0,
+    "timed_out": true,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": "ProviderTimeoutError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "browser",
+    "failure_class": "timeout",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 42.363679,
+    "budget_after_seconds": 34.351155,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   }
+  ],
+  "raw_and_normalized": [
+   {
+    "raw_url": "https://www.bosch-home.com/ch/fr/product/HBG7741B1",
+    "canonical_url": "https://bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+    "title": "HBG7741B1 Four encastrable | Bosch CH",
+    "provider": "direct_domain_probe",
+    "query": "Bosch HBG7741B1",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   },
+   {
+    "raw_url": "https://www.bosch-home.com/ch/it/product/HBG7741B1",
+    "canonical_url": "https://bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1",
+    "title": "HBG7741B1 Forno da incasso | Bosch CH",
+    "provider": "direct_domain_probe",
+    "query": "Bosch HBG7741B1",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   },
+   {
+    "raw_url": "https://www.bosch-home.com/ch/de/product/HBG7741B1",
+    "canonical_url": "https://bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+    "title": "HBG7741B1 Einbau-Backofen | Bosch CH",
+    "provider": "direct_domain_probe",
+    "query": "Bosch HBG7741B1",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   }
+  ],
+  "accepted": [
+   {
+    "url": "https://bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+    "domain": "bosch-home.com",
+    "source_type": "manufacturer",
+    "title": "HBG7741B1 Einbau-Backofen | Bosch CH",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "",
+    "page_role": "product"
+   },
+   {
+    "url": "https://bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+    "domain": "bosch-home.com",
+    "source_type": "manufacturer",
+    "title": "HBG7741B1 Four encastrable | Bosch CH",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "",
+    "page_role": "product"
+   },
+   {
+    "url": "https://bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1",
+    "domain": "bosch-home.com",
+    "source_type": "manufacturer",
+    "title": "HBG7741B1 Forno da incasso | Bosch CH",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "",
+    "page_role": "product"
+   }
+  ],
+  "rejected": [],
+  "documents": [
+   {
+    "url": "https://media3.bsh-group.com/Documents/21400895_EU_DoC_Bosch_HT6B60F0S.pdf",
+    "doc_type": "declaration",
+    "canonical_field": "declaration_url",
+    "title": "bsh:category.declaration-of-conformity",
+    "authority": "official (linked from verified official page)",
+    "model_match": "unverified",
+    "reason": "linked from the exact official product page; linked from official page; identity check: the requested identifier does not appear in the text",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+    "found_on": [
+     "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+     "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+     "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+    ],
+    "file_type": "pdf",
+    "locales": [
+     "de-CH"
+    ],
+    "identity_evidence": "not_in_text"
+   }
+  ],
+  "rejected_documents": [
+   {
+    "url": "https://www.bosch-home.com/ch/de/service/kontakt-und-information/kontakt-demontage-manual",
+    "doc_type": "manual",
+    "title": ".css-49oekm{position:relative;display:block;box-sizing:border-box;background:rgb(255, 255, 255);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;cursor:pointer;-webkit-filter:brightness(1) contrast(1);filter:brightness(1) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm{transition-property:background-color,border-color,opacity;}}.css-49oekm:hover{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:hover{transition-property:background-color,border-color,opacity;}}.css-49oekm:active{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.94) contrast(1);filter:brightness(0.94) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:active{transition-property:background-color,border-color,opacity;}}.css-49oekm:focus-visible{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:focus-visible{transition-property:background-color,border-color,opacity;}} .css-1rr2cma{gap:0.75rem;} .css-15oqo2h{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:normal;-ms-flex-pack:normal;-webkit-justify-content:normal;justify-content:normal;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;gap:0.75rem;} .css-46zp8a{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;color:rgb(0, 0, 0);font-family:\"Bosch Sans\",sans-serif;font-size:0.75rem;font-weight:bold;letter-spacing:0em;line-height:1rem;text-align:start;text-transform:None;} Information für Fachleute zur Demontage .css-15wgypy{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit;background-color:transparent;border-bottom-width:0;border-left-width:0;border-right-width:0;border-top-width:0;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;line-height:inherit;padding-bottom:0;padding-left:0;padding-right:0;padding-top:0;text-align:inherit;box-sizing:border-box;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:hover{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:active{background:rgb(209, 228, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(0.98);-moz-transform:scale(0.98);-ms-transform:scale(0.98);transform:scale(0.98);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:focus-visible{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgb(0, 73, 117);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgb(0, 73, 117);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy[disabled]{background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:not-allowed;height:2rem;opacity:0.4;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:none;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://www.bosch-home.com/ch/de/metapages/impressum/eine-sicherheitslucke-melden#anc-9431461",
+    "doc_type": "safety_document",
+    "title": "Eine Sicherheitslücke melden",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://www.bosch-home.com/ch/de/service/kontakt-und-information/produktsicherheitsregistrierung",
+    "doc_type": "safety_document",
+    "title": "Registrierung Produktsicherheit",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/energylabel/de-CH/HBG7741B1.pdf",
+    "doc_type": "unknown",
+    "title": "HBG7741B1.pdf",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/eudatasheet/de-CH/HBG7741B1.pdf",
+    "doc_type": "datasheet",
+    "title": "HBG7741B1.pdf",
+    "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001682187_K.pdf",
+    "doc_type": "unknown",
+    "title": "IU",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/specsheet/de-CH/HBG7741B1.pdf",
+    "doc_type": "spec_sheet",
+    "title": "bsh:category.specification-sheet",
+    "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/legalcollection_HBG7741B1_de-CH.pdf",
+    "doc_type": "unknown",
+    "title": "bsh:category.legal-collection",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001647009_B.pdf",
+    "doc_type": "unknown",
+    "title": "HC",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001641891_G.pdf",
+    "doc_type": "unknown",
+    "title": "FS",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1"
+   },
+   {
+    "url": "https://www.bosch-home.com/ch/fr/service/contact-et-info/contact_form_disassembly_and_dismantling_manual",
+    "doc_type": "manual",
+    "title": ".css-49oekm{position:relative;display:block;box-sizing:border-box;background:rgb(255, 255, 255);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;cursor:pointer;-webkit-filter:brightness(1) contrast(1);filter:brightness(1) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm{transition-property:background-color,border-color,opacity;}}.css-49oekm:hover{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:hover{transition-property:background-color,border-color,opacity;}}.css-49oekm:active{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.94) contrast(1);filter:brightness(0.94) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:active{transition-property:background-color,border-color,opacity;}}.css-49oekm:focus-visible{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:focus-visible{transition-property:background-color,border-color,opacity;}} .css-1rr2cma{gap:0.75rem;} .css-15oqo2h{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:normal;-ms-flex-pack:normal;-webkit-justify-content:normal;justify-content:normal;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;gap:0.75rem;} .css-46zp8a{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;color:rgb(0, 0, 0);font-family:\"Bosch Sans\",sans-serif;font-size:0.75rem;font-weight:bold;letter-spacing:0em;line-height:1rem;text-align:start;text-transform:None;} Information pour les professionnels sur le démontage .css-15wgypy{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit;background-color:transparent;border-bottom-width:0;border-left-width:0;border-right-width:0;border-top-width:0;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;line-height:inherit;padding-bottom:0;padding-left:0;padding-right:0;padding-top:0;text-align:inherit;box-sizing:border-box;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:hover{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:active{background:rgb(209, 228, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(0.98);-moz-transform:scale(0.98);-ms-transform:scale(0.98);transform:scale(0.98);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:focus-visible{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgb(0, 73, 117);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgb(0, 73, 117);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy[disabled]{background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:not-allowed;height:2rem;opacity:0.4;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:none;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://www.bosch-home.com/ch/fr/metapages/marque/signaler-une-faille-de-securite#anc-9431461",
+    "doc_type": "safety_document",
+    "title": "Signaler une faille de sécurité",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://www.bosch-home.com/ch/fr/service/contact-et-info/enregistrement-securite-produit",
+    "doc_type": "safety_document",
+    "title": "Enregistrement Sécurité Produit",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/energylabel/fr-CH/HBG7741B1.pdf",
+    "doc_type": "unknown",
+    "title": "HBG7741B1.pdf",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/eudatasheet/fr-CH/HBG7741B1.pdf",
+    "doc_type": "datasheet",
+    "title": "HBG7741B1.pdf",
+    "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001682189_J.pdf",
+    "doc_type": "unknown",
+    "title": "IU",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/specsheet/fr-CH/HBG7741B1.pdf",
+    "doc_type": "spec_sheet",
+    "title": "bsh:category.specification-sheet",
+    "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/legalcollection_HBG7741B1_fr-CH.pdf",
+    "doc_type": "unknown",
+    "title": "bsh:category.legal-collection",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001647009_B.pdf",
+    "doc_type": "unknown",
+    "title": "HC",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001641891_G.pdf",
+    "doc_type": "unknown",
+    "title": "FS",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1"
+   },
+   {
+    "url": "https://www.bosch-home.com/ch/it/assistenza/contatto-e-informazioni/contact_form_disassembly_and_dismantling_manual",
+    "doc_type": "manual",
+    "title": ".css-49oekm{position:relative;display:block;box-sizing:border-box;background:rgb(255, 255, 255);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;cursor:pointer;-webkit-filter:brightness(1) contrast(1);filter:brightness(1) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm{transition-property:background-color,border-color,opacity;}}.css-49oekm:hover{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:hover{transition-property:background-color,border-color,opacity;}}.css-49oekm:active{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.94) contrast(1);filter:brightness(0.94) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:active{transition-property:background-color,border-color,opacity;}}.css-49oekm:focus-visible{background:rgb(239, 241, 242);border-block-end-width:0.0625rem;border-block-start-width:0.0625rem;border-color:rgba(224, 226, 229, 0.7);border-inline-end-width:0.0625rem;border-inline-start-width:0.0625rem;border-radius:0;border-style:solid;border-width:0.0625rem;-webkit-filter:brightness(0.96) contrast(1);filter:brightness(0.96) contrast(1);padding-block:1rem;-webkit-padding-end:0.75rem;padding-inline-end:0.75rem;-webkit-padding-start:1rem;padding-inline-start:1rem;transition-duration:600ms;transition-property:background-color,border-color,filter,opacity;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);}@-moz-document url-prefix(){.css-49oekm:focus-visible{transition-property:background-color,border-color,opacity;}} .css-1rr2cma{gap:0.75rem;} .css-15oqo2h{display:-webkit-box;display:-webkit-flex;display:-ms-flexbox;display:flex;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:normal;-ms-flex-pack:normal;-webkit-justify-content:normal;justify-content:normal;-webkit-flex-direction:row;-ms-flex-direction:row;flex-direction:row;gap:0.75rem;} .css-46zp8a{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;color:rgb(0, 0, 0);font-family:\"Bosch Sans\",sans-serif;font-size:0.75rem;font-weight:bold;letter-spacing:0em;line-height:1rem;text-align:start;text-transform:None;} Informazioni per i professionisti sullo smontaggio .css-15wgypy{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit;background-color:transparent;border-bottom-width:0;border-left-width:0;border-right-width:0;border-top-width:0;font-family:inherit;font-size:inherit;font-style:inherit;font-weight:inherit;line-height:inherit;padding-bottom:0;padding-left:0;padding-right:0;padding-top:0;text-align:inherit;box-sizing:border-box;-webkit-align-items:center;-webkit-box-align:center;-ms-flex-align:center;align-items:center;-webkit-box-pack:center;-ms-flex-pack:center;-webkit-justify-content:center;justify-content:center;display:-webkit-inline-box;display:-webkit-inline-flex;display:-ms-inline-flexbox;display:inline-flex;-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:hover{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:active{background:rgb(209, 228, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgba(0, 0, 0, 0);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(0.98);-moz-transform:scale(0.98);-ms-transform:scale(0.98);transform:scale(0.98);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy:focus-visible{background:rgb(232, 241, 255);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgb(0, 73, 117);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 1px rgb(0, 73, 117);cursor:pointer;height:2rem;opacity:1;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:color,background,border,box-shadow,filter,transform;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}.css-15wgypy[disabled]{background:rgba(0, 0, 0, 0);-webkit-background-position:none;background-position:none;-webkit-background-size:auto;background-size:auto;border-color:rgba(0, 0, 0, 0);border-radius:0;border-style:solid;border-width:0.0625rem;box-shadow:inset 0px 0px 0px 0px rgba(0, 0, 0, 0);cursor:not-allowed;height:2rem;opacity:0.4;-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);transform:scale(1);transition-duration:600ms;transition-property:none;transition-timing-function:cubic-bezier(0.25, 0.1, 0, 1);width:2rem;}",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/energylabel/it-CH/HBG7741B1.pdf",
+    "doc_type": "unknown",
+    "title": "HBG7741B1.pdf",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/eudatasheet/it-CH/HBG7741B1.pdf",
+    "doc_type": "datasheet",
+    "title": "HBG7741B1.pdf",
+    "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+    "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001682192_F.pdf",
+    "doc_type": "unknown",
+    "title": "IU",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/specsheet/it-CH/HBG7741B1.pdf",
+    "doc_type": "spec_sheet",
+    "title": "bsh:category.specification-sheet",
+    "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model",
+    "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/legalcollection_HBG7741B1_it-CH.pdf",
+    "doc_type": "unknown",
+    "title": "bsh:category.legal-collection",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   },
+   {
+    "url": "https://media3.bsh-group.com/Documents/9001641891_G.pdf",
+    "doc_type": "unknown",
+    "title": "FS",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1"
+   }
+  ],
+  "provider_errors": [
+   {
+    "provider": "duckduckgo_html",
+    "query": "\"HBG7741B1\" manual site:bosch-home.com",
+    "status": "blocked",
+    "message": "DuckDuckGo bot-check blocked the HTML search."
+   },
+   {
+    "provider": "naver",
+    "query": "\"HBG7741B1\" manual site:bosch-home.com",
+    "status": "blocked",
+    "message": "Naver bot-check blocked the search."
+   },
+   {
+    "provider": "duckduckgo_lite",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "blocked",
+    "message": "DuckDuckGo bot-check blocked the Lite search."
+   },
+   {
+    "provider": "google",
+    "query": "Bosch \"HBG7741B1\" declaration of conformity",
+    "status": "timeout",
+    "message": "Google provider deadline exhausted waiting for results."
+   }
+  ]
+ },
+ "page_metadata": [
+  {
+   "url": "https://www.bosch-home.com/ch/de/product/kochen-und-backen/backoefen-und-herde/einbau-backoefen/HBG7741B1",
+   "domain": "bosch-home.com",
+   "locale_region": "global (.com)",
+   "model_match": "exact",
+   "expandable_specs": true,
+   "hidden_spec_content": "true",
+   "interaction_required": "false",
+   "spec_location": "json_state",
+   "spec_controls": [
+    "Technische Daten"
+   ],
+   "signals": [
+    "spec control: 'Technische Daten'",
+    "aria-expanded=false control",
+    "<template> on <template#B:0>",
+    "<template> on <template#B:1>",
+    "<template> on <template#B:2>",
+    "<template> on <template#B:3>",
+    "<template> on <template#B:4>",
+    "<template> on <template#B:5>",
+    "<template> on <template#B:6>",
+    "<template> on <template#B:7>",
+    "<template> on <template#B:8>",
+    "<template> on <template#B:9>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/fr/product/cuisine-et-cuisson/fours-et-cuisinieres/fours-encastrables/HBG7741B1",
+   "domain": "bosch-home.com",
+   "locale_region": "global (.com)",
+   "model_match": "exact",
+   "expandable_specs": true,
+   "hidden_spec_content": "true",
+   "interaction_required": "false",
+   "spec_location": "json_state",
+   "spec_controls": [
+    "Voir plus"
+   ],
+   "signals": [
+    "spec control: 'Voir plus'",
+    "aria-expanded=false control",
+    "<template> on <template#B:0>",
+    "<template> on <template#B:1>",
+    "<template> on <template#B:2>",
+    "<template> on <template#B:3>",
+    "<template> on <template#B:4>",
+    "<template> on <template#B:5>",
+    "<template> on <template#B:6>",
+    "<template> on <template#B:7>",
+    "<template> on <template#B:8>",
+    "<template> on <template#B:9>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1
+  },
+  {
+   "url": "https://www.bosch-home.com/ch/it/product/cucina-e-forno/cucine-e-piani-cottura/forni-da-incasso/HBG7741B1",
+   "domain": "bosch-home.com",
+   "locale_region": "global (.com)",
+   "model_match": "exact",
+   "expandable_specs": false,
+   "hidden_spec_content": "true",
+   "interaction_required": "false",
+   "spec_location": "json_state",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control",
+    "<template> on <template#B:0>",
+    "<template> on <template#B:1>",
+    "<template> on <template#B:2>",
+    "<template> on <template#B:3>",
+    "<template> on <template#B:4>",
+    "<template> on <template#B:5>",
+    "<template> on <template#B:6>",
+    "<template> on <template#B:7>",
+    "<template> on <template#B:8>",
+    "<template> on <template#B:9>",
+    "<template> on <template#B:a>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1
+  }
+ ],
+ "sku_rejections": [
+  {
+   "url": "https://media3.bsh-group.com/Documents/energylabel/de-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/energylabel/de-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "document file whose type cannot be identified"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/eudatasheet/de-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/eudatasheet/de-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/specsheet/de-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/specsheet/de-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/energylabel/fr-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/energylabel/fr-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "document file whose type cannot be identified"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/eudatasheet/fr-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/eudatasheet/fr-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/specsheet/fr-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/specsheet/fr-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/energylabel/it-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/energylabel/it-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "document file whose type cannot be identified"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/eudatasheet/it-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/eudatasheet/it-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model"
+  },
+  {
+   "url": "https://media3.bsh-group.com/Documents/specsheet/it-CH/HBG7741B1.pdf",
+   "found_sku": "media3.bsh-group.com/Documents/specsheet/it-CH/HBG7741B1.pdf",
+   "requested_sku": "HBG7741B1",
+   "relation": "different_variant",
+   "reason": "names a different SKU variant (HBG7741B1.pdf) of the same base model"
+  }
+ ],
+ "performance": {
+  "first_official_path": "direct_domain_probe:sku_route_template",
+  "probe_requests": 114,
+  "domain_probes": 19,
+  "probe_methods": {
+   "bounded_crawl": 8,
+   "domain_resolution": 19,
+   "family_crawl": 13,
+   "page_verification": 3,
+   "robots": 7,
+   "site_search": 15,
+   "sitemap": 36,
+   "sku_route_probe": 13
+  },
+  "runtime_seconds": 40.6,
+  "slow": "over_30s",
+  "query_count": 3,
+  "provider_attempts": 10,
+  "raw_candidates": 105,
+  "unique_candidates": 3,
+  "accepted": 3,
+  "rejected": 0,
+  "blocked": 3,
+  "timeout": 1,
+  "circuit_open": 2,
+  "attempt_statuses": {
+   "success": 2,
+   "blocked": 3,
+   "circuit_open": 2,
+   "low_value": 2,
+   "timeout": 1
+  }
+ }
+}
