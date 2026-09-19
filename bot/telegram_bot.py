@@ -24,6 +24,8 @@ from telegram.ext import Application, CallbackQueryHandler, CommandHandler, Mess
 
 from bot.handlers import (
     build_cancel_command,
+    build_discovery_command,
+    build_discovery_text_handler,
     build_export_command,
     build_language_callback,
     build_photos_callback,
@@ -37,6 +39,7 @@ from bot.service_factory import build_product_verifier_service
 from config import AppConfig, ConfigurationError, TelegramConfig
 from observability import configure_logging, log_event, log_exception_event
 from services.product_verifier import ProductVerifierService
+from services.discovery_debug import DiscoveryDebugService
 
 
 SHUTDOWN_TIMEOUT_SECONDS = 30.0
@@ -56,7 +59,13 @@ def build_job_manager(service: ProductVerifierService, config: AppConfig) -> Job
     )
 
 
-def build_application(token: str, manager: JobManager) -> Application:
+def build_application(
+    token: str,
+    manager: JobManager | None,
+    discovery_service: DiscoveryDebugService | None = None,
+    *,
+    discovery_only: bool = False,
+) -> Application:
     """Wire the job manager into a python-telegram-bot Application.
 
     Only bot.jobs / services.product_verifier are used here -- no
@@ -69,22 +78,55 @@ def build_application(token: str, manager: JobManager) -> Application:
 
     async def _shutdown(_application: Application) -> None:
         try:
-            await manager.shutdown(timeout=SHUTDOWN_TIMEOUT_SECONDS)
+            if manager is not None:
+                await manager.shutdown(timeout=SHUTDOWN_TIMEOUT_SECONDS)
         finally:
             log_event(logger, logging.INFO, "bot_shutdown")
 
     application = (
         Application.builder().token(token).post_init(_started).post_shutdown(_shutdown).build()
     )
+    if discovery_only:
+        if discovery_service is None:
+            raise ValueError("discovery-only mode requires a discovery service")
+
+        async def discovery_intro(update, context) -> None:  # noqa: ANN001
+            await update.message.reply_text(
+                "Stage 33.0: отправьте название товара без URL. "
+                "/discover_rejected покажет все отклонённые ссылки последнего запроса."
+            )
+
+        application.add_handler(CommandHandler("start", discovery_intro))
+        application.add_handler(CommandHandler("help", discovery_intro))
+        application.add_handler(CommandHandler("discover", build_discovery_command(discovery_service)))
+        application.add_handler(CommandHandler(
+            "discover_rejected", build_discovery_command(discovery_service, include_all_rejected=True),
+        ))
+        application.add_handler(MessageHandler(
+            filters.TEXT & ~filters.COMMAND, build_discovery_text_handler(discovery_service),
+        ))
+        return application
+
+    if manager is None:
+        raise ValueError("verification mode requires a job manager")
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("status", build_status_command(manager)))
     application.add_handler(CommandHandler("cancel", build_cancel_command(manager)))
     application.add_handler(CommandHandler("export", build_export_command(manager)))
+    if discovery_service is not None:
+        application.add_handler(CommandHandler(
+            "discover", build_discovery_command(discovery_service),
+        ))
+        application.add_handler(CommandHandler(
+            "discover_rejected",
+            build_discovery_command(discovery_service, include_all_rejected=True),
+        ))
     application.add_handler(CallbackQueryHandler(build_language_callback(manager), pattern=r"^lang:"))
     application.add_handler(CallbackQueryHandler(build_photos_callback(manager), pattern=r"^photos:"))
     application.add_handler(MessageHandler(
-        filters.TEXT & ~filters.COMMAND, build_verify_command(manager),
+        filters.TEXT & ~filters.COMMAND,
+        build_verify_command(manager),
     ))
     return application
 
@@ -128,10 +170,18 @@ def main() -> None:
     configure_logging(app_config, secrets=(telegram_config.bot_token,))
 
     try:
-        service = build_product_verifier_service(app_config)
-        manager = build_job_manager(service, app_config)
-        validate_runtime_wiring(manager)
-        application = build_application(telegram_config.bot_token, manager)
+        if app_config.discovery_only:
+            application = build_application(
+                telegram_config.bot_token, None, DiscoveryDebugService(),
+                discovery_only=True,
+            )
+        else:
+            service = build_product_verifier_service(app_config)
+            manager = build_job_manager(service, app_config)
+            validate_runtime_wiring(manager)
+            application = build_application(
+                telegram_config.bot_token, manager, DiscoveryDebugService(),
+            )
     except Exception as error:  # noqa: BLE001 - production startup must fail cleanly
         log_exception_event(
             logger, "bot_startup_failure",

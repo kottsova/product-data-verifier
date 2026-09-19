@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 import re
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 import unicodedata
 
 MODEL_TOKEN_RE = re.compile(r"(?<!\w)[\w]+(?:[./_-][\w]+)*(?!\w)", re.UNICODE)
 NON_VARIANT_SUFFIXES = {"ASP", "ASPX", "HTM", "HTML", "PDF", "PHP"}
 MODEL_FAMILY_MODIFIERS = {
-    "FE", "LITE", "MAX", "MINI", "PLUS", "PRO", "SE", "ULTRA", "XL",
+    "ABSOLUTE", "BUSINESS", "FE", "FOLD", "LITE", "MAC", "MAX", "MINI",
+    "PLUS", "PRO", "SE", "ULTRA", "XL",
 }
 
 
@@ -24,7 +25,7 @@ def normalize_text(value: str | None) -> str:
 
 
 def _model_parts(value: str | None) -> list[str]:
-    return [normalize_model(part) for part in re.findall(r"[\w]+", value or "") if normalize_model(part)]
+    return [normalize_model(part) for part in re.findall(r"[^\W_]+", value or "") if normalize_model(part)]
 
 
 def compound_model_match(model: str | None, text: str | None) -> str | None:
@@ -43,7 +44,7 @@ def compound_model_match(model: str | None, text: str | None) -> str | None:
     parts = _model_parts(model)
     if len(parts) < 2:
         return None
-    actual = {normalize_model(token) for token in re.findall(r"[\w]+", text or "") if normalize_model(token)}
+    actual = {normalize_model(token) for token in re.findall(r"[^\W_]+", text or "") if normalize_model(token)}
     if not actual:
         return None
     if all(part in actual for part in parts):
@@ -90,6 +91,14 @@ def model_match(model: str | None, text: str | None) -> str:
     ):
         return "exact"
 
+    # A multi-token commercial model must be evaluated as a whole before the
+    # fuzzy single-token mismatch guard.  Otherwise the shared word in an
+    # exact phrase such as "Pixel 9" (the token "Pixel") looks like a nearly
+    # identical but shorter identifier and incorrectly wins as a mismatch.
+    compound = compound_model_match(model, text)
+    if compound:
+        return compound
+
     # A nearly identical identifier which disagrees is evidence of mismatch.
     for _, candidate in tokens:
         if len(candidate) < 4 or abs(len(candidate) - len(expected)) > 2:
@@ -101,9 +110,6 @@ def model_match(model: str | None, text: str | None) -> str:
             common += 1
         if common >= max(3, min(len(expected), len(candidate)) - 2):
             return "mismatch"
-    compound = compound_model_match(model, text)
-    if compound:
-        return compound
     return "unknown"
 
 
@@ -126,12 +132,47 @@ def candidate_model_match(model: str | None, title: str | None, url: str | None)
     # product page. A family page's title that lists the model *and* its
     # sibling ("Pixel 9 Pro and Pixel 9 Pro XL") must not veto it; a title that
     # only names the variant ("iPhone 15 Pro Max") still does.
-    last_segment = urlparse(url or "").path.rstrip("/").rsplit("/", 1)[-1]
+    decoded_path = unquote(urlparse(url or "").path)
+    last_segment = decoded_path.rstrip("/").rsplit("/", 1)[-1]
     segment_parts = _model_parts(last_segment)
     while segment_parts and segment_parts[-1].casefold() in PAGE_ROLE_WORDS and segment_parts != requested_parts:
         segment_parts = segment_parts[:-1]  # "<model>-specs" is still that model's page
     url_names_exact_model = bool(requested_parts) and segment_parts == requested_parts
-    for is_title, text in ((True, title or ""), (False, url or "")):
+    # An exact-sounding search title cannot override a URL that explicitly
+    # names another suffix of the same identifier (9a vs 9, HX9992/21 vs /12).
+    # Match adjoining identifier parts, not unrelated numbers elsewhere in a URL.
+    path_parts = _model_parts(decoded_path)
+    if expected and not url_names_exact_model and any(
+        part.startswith(expected)
+        and part != expected
+        and (
+            part[len(expected):] in MODEL_FAMILY_MODIFIERS
+            or (expected[-1].isdigit() and len(part) <= len(expected) + 2)
+        )
+        for part in path_parts
+    ):
+        return "different_variant"
+    for index, expected_part in enumerate(requested_parts):
+        if index and expected_part.isdigit() and len(requested_parts[index - 1]) >= 4:
+            preceding = requested_parts[index - 1]
+            if any(
+                path_parts[offset:offset + 1] == [preceding]
+                and path_parts[offset + 1] != expected_part
+                and path_parts[offset + 1].isdigit()
+                for offset in range(len(path_parts) - 1)
+            ):
+                return "different_variant"
+        if expected_part.isdigit() and len(expected_part) <= 2 and index:
+            prefix = requested_parts[:index]
+            if any(
+                path_parts[offset:offset + len(prefix)] == prefix
+                and path_parts[offset + len(prefix)].startswith(expected_part)
+                and path_parts[offset + len(prefix)] != expected_part
+                and len(path_parts[offset + len(prefix)]) <= len(expected_part) + 2
+                for offset in range(max(0, len(path_parts) - len(prefix)))
+            ):
+                return "different_variant"
+    for is_title, text in ((True, title or ""), (False, decoded_path)):
         tokens = _model_parts(text)
         width = len(requested_parts)
         plain = modified = False
@@ -156,7 +197,7 @@ def candidate_model_match(model: str | None, title: str | None, url: str | None)
         and any(character.isalpha() for character in part)
         and any(character.isdigit() for character in part)
     ]
-    url_parts = re.findall(r"[\w]+", url or "")
+    url_parts = re.findall(r"[^\W_]+", decoded_path)
     if any(
         model_match(identifier, part) == "mismatch"
         for identifier in expected_identifiers
@@ -164,6 +205,29 @@ def candidate_model_match(model: str | None, title: str | None, url: str | None)
     ):
         return "mismatch"
     title_result = model_match(model, title)
+    # The base product omits a requested family modifier altogether.  It is
+    # not a probable match for the Pro/Plus/Ultra/Max/XL SKU, even if the
+    # remaining words and model number coincide exactly.
+    variant_positions = [
+        index for index, part in enumerate(requested_parts)
+        if part in MODEL_FAMILY_MODIFIERS
+    ]
+    if variant_positions and title_result != "exact":
+        for text in (title or "", decoded_path):
+            tokens = _model_parts(text)
+            for index in variant_positions:
+                base_parts = requested_parts[:index]
+                if (
+                    base_parts
+                    and any(tokens[start:start + len(base_parts)] == base_parts
+                            for start in range(max(0, len(tokens) - len(base_parts) + 1)))
+                    and requested_parts[index] not in tokens
+                ):
+                    return "different_variant"
+    if title_result == "likely" and len(requested_parts) >= 2:
+        path_parts = set(_model_parts(decoded_path))
+        if all(part in path_parts for part in requested_parts):
+            return "exact"
     if title_result in {"exact", "likely_variant", "likely", "mismatch"}:
         return title_result
 
@@ -178,7 +242,7 @@ def candidate_model_match(model: str | None, title: str | None, url: str | None)
     )
     if explicit_other_model:
         return "unknown"
-    return model_match(model, url)
+    return model_match(model, decoded_path)
 
 
 def article_matches(article: str | None, text: str | None) -> bool:

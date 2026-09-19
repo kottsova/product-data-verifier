@@ -40,6 +40,7 @@ JOB_HISTORY_LIMIT_ENV_VAR = "PRODUCT_VERIFIER_JOB_HISTORY_LIMIT"
 CACHE_TTL_SECONDS_ENV_VAR = "PRODUCT_VERIFIER_CACHE_TTL_SECONDS"
 LOG_LEVEL_ENV_VAR = "PRODUCT_VERIFIER_LOG_LEVEL"
 LOG_FORMAT_ENV_VAR = "PRODUCT_VERIFIER_LOG_FORMAT"
+DISCOVERY_ONLY_ENV_VAR = "PRODUCT_VERIFIER_DISCOVERY_ONLY"
 
 DEFAULT_DB_PATH = str(Path(__file__).resolve().parent / ".cache" / "product_verifier.sqlite3")
 DEFAULT_MAX_CONCURRENT_JOBS = 2
@@ -119,6 +120,7 @@ class AppConfig:
     cache_ttl_seconds: float = DEFAULT_CACHE_TTL_SECONDS
     log_level: str = DEFAULT_LOG_LEVEL
     log_format: str = DEFAULT_LOG_FORMAT
+    discovery_only: bool = False
 
     def __post_init__(self) -> None:
         if not self.db_path.strip():
@@ -164,6 +166,8 @@ class AppConfig:
             log_format=_resolve_choice(
                 source, LOG_FORMAT_ENV_VAR, DEFAULT_LOG_FORMAT, valid=VALID_LOG_FORMATS, normalize=str.lower,
             ),
+            discovery_only=(source.get(DISCOVERY_ONLY_ENV_VAR, "").strip().casefold()
+                            in {"1", "true", "yes", "on"}),
         )
 
     def to_dict(self) -> dict[str, object]:
@@ -175,6 +179,7 @@ class AppConfig:
             "cache_ttl_seconds": self.cache_ttl_seconds,
             "log_level": self.log_level,
             "log_format": self.log_format,
+            "discovery_only": self.discovery_only,
         }
 
 

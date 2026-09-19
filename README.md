@@ -287,3 +287,18 @@ assessment and current live findings.
 ## Current stage
 
 Stage 20 — Telegram MVP Integration: **PASS**.
+
+# Stage 33.0: temporary discovery-only Telegram mode
+
+Set `PRODUCT_VERIFIER_DISCOVERY_ONLY=true` before `python -m bot.telegram_bot`.
+In this mode, a plain product name (for example `Google Pixel 9 Pro`) runs
+only source discovery and returns classified links, provenance and counts;
+verification, fetching and extraction are not started. `/discover <name>`
+also works in the regular bot, and `/discover_rejected` shows the complete
+rejected-candidate list from the most recent discovery in that chat. Unset
+the flag to restore regular verification for plain text. The name-only
+ten-product benchmark uses the same bot handler:
+
+```sh
+python -m diagnostics.stage33_discovery_benchmark --include-pixel-isolation
+```

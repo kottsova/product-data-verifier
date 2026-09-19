@@ -169,6 +169,31 @@ class DiscoveryIssue:
 
 
 @dataclass(frozen=True, slots=True)
+class DiscoveryTraceEntry:
+    """One provider result's explicit fate through discovery normalization."""
+
+    raw_url: str
+    canonical_url: str
+    title: str
+    provider: str
+    query: str
+    outcome: Literal["accepted", "rejected", "merged_duplicate"]
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class DiscoveryTrace:
+    provider_raw_result_count: int = 0
+    collected_result_count: int = 0
+    normalized_result_count: int = 0
+    unique_candidate_count: int = 0
+    duplicate_count: int = 0
+    accepted_candidate_count: int = 0
+    rejected_candidate_count: int = 0
+    entries: tuple[DiscoveryTraceEntry, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class DiscoveryOutcome:
     """Structured discovery result; degraded search is never an empty success."""
 
@@ -179,6 +204,7 @@ class DiscoveryOutcome:
     issues: list[DiscoveryIssue] = field(default_factory=list)
     provider_attempts: list[ProviderAttempt] = field(default_factory=list)
     rejected_candidates: list[Candidate] = field(default_factory=list)
+    trace: DiscoveryTrace = field(default_factory=DiscoveryTrace)
 
 
 class DiscoverySearchError(RuntimeError):
@@ -260,7 +286,8 @@ SUPPORT_PATH_HINTS = {
 WEAK_PATH_HINTS = {
     "compare", "comparison", "forum", "forums", "offersofproduct", "questions",
     "review", "reviews", "test", "testbericht", "tests", "threads",
-    "preisvergleich", "toplist",
+    "preisvergleich", "toplist", "promotion", "promotions", "cashback",
+    "coupon", "coupons", "rebate", "rebates", "terms", "conditions",
 }
 ACCESSORY_CONTEXT_TERMS = {
     "assembly", "case", "cover", "digitizer", "protector", "replacement",
@@ -282,7 +309,10 @@ NON_PRODUCT_CONTEXT_PATHS = {
     "athlete", "biography", "forum", "forums", "people", "person", "profile",
     "roster", "sports", "wiki",
 }
-TRACKING_PARAMETERS = {"fbclid", "gclid", "srsltid", "yclid"}
+TRACKING_PARAMETERS = {
+    "_ga", "_gl", "fbclid", "gad_source", "gclid", "igshid",
+    "mc_cid", "mc_eid", "ref_", "srsltid", "yclid",
+}
 
 SCORE_EXACT_MODEL = 60
 SCORE_LIKELY_MODEL = 30
@@ -342,6 +372,7 @@ def build_search_queries(brand: str, model: str, article: str | None = None) -> 
         f"{brand} {model}",
         f'"{brand} {model}"',
         f'"{model}" {brand}',
+        f'"{model}" {brand} specs',
         f'"{model}" {brand} specifications',
     ]
     if article and article.strip():
@@ -457,6 +488,8 @@ def is_obvious_non_product_url(url: str, model: str | None = None) -> bool:
         return True
     if any(host == blocked or host.endswith(f".{blocked}") for blocked in BLOCKED_DOMAINS):
         return True
+    if _is_user_content_host(host):
+        return True
     path = urlparse(url).path
     segments = {segment.lower() for segment in path.split("/") if segment}
     blocked = segments & BLOCKED_PATH_SEGMENTS
@@ -473,17 +506,37 @@ def _path_has_hint(segments: Iterable[str], hints: set[str]) -> bool:
     )
 
 
+def _is_user_content_host(host: str) -> bool:
+    """Shared hosting under a brand root is not a first-party product page."""
+    return url_belongs_to_domain(f"https://{host}/", "google.com") and bool(
+        set(host.lower().split(".")) & {"drive", "docs", "forms", "groups", "sites"}
+    )
+
+
+def _is_search_landing_url(url: str) -> bool:
+    parsed = urlparse(url)
+    segments = [part.lower() for part in parsed.path.split("/") if part]
+    if any(part in {"search", "suche", "recherche", "buscar"} for part in segments):
+        return True
+    search_keys = {"q", "query", "search", "searchterm", "keyword", "keywords"}
+    return bool(search_keys & set(parse_qs(parsed.query))) and not bool(
+        set(segments) & {"product", "products", "p", "sku"}
+    )
+
+
 def _page_kind(url: str) -> str:
     parsed = urlparse(url)
     segments = [segment.lower() for segment in parsed.path.split("/") if segment]
+    if _is_search_landing_url(url):
+        return "catalog"
     if not segments or (len(segments) == 1 and len(segments[0]) <= 3):
         return "homepage"
+    if _path_has_hint(segments, WEAK_PATH_HINTS):
+        return "weak"
     if _path_has_hint(segments, SUPPORT_PATH_HINTS) or parsed.path.lower().endswith(".pdf"):
         return "support"
     if segments[-1] in CATALOG_SEGMENTS or "search" in parse_qs(parsed.query):
         return "catalog"
-    if _path_has_hint(segments, WEAK_PATH_HINTS):
-        return "weak"
     if set(segments) & PRODUCT_HINTS:
         return "product"
     return "other"
@@ -538,6 +591,8 @@ def discover_global_official_domains(
             product
             for product in product_records
             if model
+            and not _is_search_landing_url(product.url)
+            and not _is_user_content_host(_host(product.url))
             and canonicalize_url(product.url) != evidence_url
             and url_belongs_to_domain(product.url, root_domain)
             and model_match(
@@ -550,25 +605,47 @@ def discover_global_official_domains(
     # Provider result sets sometimes omit the homepage/"official" result but
     # do return an exact product page on a mechanically exact brand root,
     # including regional public suffixes (brand.de, brand.co.uk, and so on).
-    # Exact registrable label equality + brand in title + exact model in
-    # title/URL is sufficient corroboration; snippets, fuzzy prefixes, and
-    # parent-company domains are not.
+    # Exact registrable label equality + brand in title + model in the
+    # product URL is sufficient corroboration, including regional SKUs that
+    # remain probable rather than exact matches.
+    regional_ecosystems: dict[str, set[str]] = {}
+    for product in product_records:
+        root = _registrable_domain(_host(product.url))
+        label = _registrable_domain_label(_host(product.url))
+        suffix = label.removeprefix(re.sub(r"[^a-z0-9]", "", brand_key))
+        if (
+            label.startswith(re.sub(r"[^a-z0-9]", "", brand_key))
+            and suffix
+            and suffix not in {"shop", "store", "outlet", "reseller", "dealer", "market", "mall"}
+            and not _is_search_landing_url(product.url)
+            and normalize_model(brand) in normalize_model(product.title)
+            and model
+            and candidate_model_match(model, product.title, urlparse(product.url).path) == "exact"
+        ):
+            regional_ecosystems.setdefault(label, set()).add(root)
     for position, product in enumerate(product_records):
         domain = _host(product.url)
         root_domain = _registrable_domain(domain)
         expected_label = re.sub(r"[^a-z0-9]", "", brand_key)
         suffix = root_domain.rsplit(".", 1)[-1]
+        matching_brand_root = _registrable_domain_label(domain) == expected_label
+        corroborated_regional = (
+            len(regional_ecosystems.get(_registrable_domain_label(domain), ())) >= 2
+            and root_domain in regional_ecosystems[_registrable_domain_label(domain)]
+        )
         if (
             suffix in {"example", "invalid", "localhost", "test"}
             or len(expected_label) < 2
-            or _registrable_domain_label(domain) != expected_label
+            or not (matching_brand_root or corroborated_regional)
         ):
             continue
-        title_url = f"{product.title} {product.url}"
         if (
             normalize_model(brand) in normalize_model(product.title)
             and model
-            and candidate_model_match(model, product.title, urlparse(product.url).path) == "exact"
+            and not _is_search_landing_url(product.url)
+            and not _is_user_content_host(domain)
+            and candidate_model_match(model, product.title, urlparse(product.url).path)
+            in ({"exact", "likely_variant"} if matching_brand_root else {"exact"})
         ):
             ranked.append((90 - position, root_domain, canonicalize_url(product.url)))
     ranked.sort(reverse=True)
@@ -714,6 +791,26 @@ def _has_accessory_context(url: str, title: str) -> bool:
     return bool(tokens & ACCESSORY_CONTEXT_TERMS)
 
 
+def _path_names_complete_model(url: str, brand: str, model: str) -> bool:
+    """Require the complete model in the destination, not just a SERP title."""
+    path = unquote(urlparse(url).path)
+    tokens = [normalize_model(part) for part in re.findall(r"[^\W_]+", path)]
+    expected = normalize_model(model)
+    requested = [normalize_model(part) for part in re.findall(r"[^\W_]+", model)]
+    brand_key = normalize_model(brand)
+    identifiers = [part for part in requested if len(part) >= 5
+                   and any(character.isdigit() for character in part)
+                   and any(character.isalpha() for character in part)]
+    sku_suffixes = [requested[index + 1] for index, part in enumerate(requested[:-1])
+                    if part in identifiers and requested[index + 1].isdigit()]
+    return bool(expected) and (
+        expected in tokens
+        or brand_key + expected in tokens
+        or (len(requested) >= 2 and all(part in tokens for part in requested))
+        or (bool(identifiers) and all(part in tokens for part in (*identifiers, *sku_suffixes)))
+    )
+
+
 def _model_component_relation(model: str, text: str) -> RelevanceRelation | None:
     """Match compound commercial-model/MPN input across punctuation and prose."""
     expected = [
@@ -770,22 +867,27 @@ def assess_candidate_relevance(
 
     if match == "different_variant":
         return "reject", ["Search result names a different commercial-model variant."]
-    if (
-        match == "mismatch"
-        and not exact_phrase
-        and not exact_article
-        and component_relation is None
-    ):
+    if _is_search_landing_url(url):
+        return "reject", ["Search results are not an individual product or support page."]
+    if match == "mismatch":
         return "reject", ["Search result contains a conflicting model identifier."]
     if _has_non_product_context(url, title):
         return "reject", ["Search result has person, sports, profile, wiki, or forum context."]
     if _has_accessory_context(url, title):
         return "reject", ["Search result describes an accessory or replacement part, not the product."]
+    if _page_kind(url) == "product":
+        path_key = normalize_model(unquote(urlparse(url).path))
+        meaningful_parts = [normalize_model(part) for part in re.findall(r"[^\W_]+", model)
+                            if len(normalize_model(part)) >= 3]
+        if meaningful_parts and not any(part in path_key for part in meaningful_parts):
+            return "reject", ["Product URL identifies another item, not the requested model."]
     if match == "likely_variant":
         return "likely_variant", ["Requested base model appears with an explicit variant suffix."]
     if match == "exact" or exact_phrase or component_relation == "exact":
         if _page_kind(url) in {"catalog", "homepage", "weak"}:
             return "weak", ["Exact model appears only on a generic catalog or weak page."]
+        if not _path_names_complete_model(url, brand, model):
+            return "weak", ["Title mentions the model but the URL does not identify the complete model."]
         return "exact", ["Requested exact model appears in the title/snippet or URL."]
     if exact_article:
         return "exact", ["Requested article/MPN appears in the title/snippet or URL."]
@@ -842,6 +944,80 @@ def _partition_relevance_candidates(
     accepted.sort(key=lambda item: (-item["score"], item["url"]))
     rejected.sort(key=lambda item: (-item["score"], item["url"]))
     return accepted, rejected
+
+
+def _build_discovery_trace(
+    raw_results: Iterable[SearchResultLike],
+    attempts: Iterable[ProviderAttempt],
+    candidates: Iterable[Candidate],
+    rejected_candidates: Iterable[Candidate],
+    model: str,
+) -> DiscoveryTrace:
+    """Account for every collected result, including pre-ranking drops."""
+    accepted_by_url = {item["url"]: item for item in candidates}
+    rejected_by_url = {item["url"]: item for item in rejected_candidates}
+    seen: set[str] = set()
+    entries: list[DiscoveryTraceEntry] = []
+    normalized = duplicates = 0
+    for item in raw_results:
+        record = _search_result_record(item)
+        canonical = canonicalize_url(record.url)
+        if not canonical:
+            entries.append(DiscoveryTraceEntry(
+                record.raw_url or record.url, "", record.title, record.provider,
+                record.query, "rejected", "invalid_or_non_http_url",
+            ))
+            continue
+        normalized += 1
+        if is_obvious_non_product_url(canonical, model):
+            entries.append(DiscoveryTraceEntry(
+                record.raw_url or record.url, canonical, record.title, record.provider,
+                record.query, "rejected", "obvious_non_product_or_blocked_url",
+            ))
+            continue
+        if canonical in seen:
+            duplicates += 1
+            entries.append(DiscoveryTraceEntry(
+                record.raw_url or record.url, canonical, record.title, record.provider,
+                record.query, "merged_duplicate", "same_canonical_url",
+            ))
+            continue
+        seen.add(canonical)
+        if canonical in accepted_by_url:
+            candidate = accepted_by_url[canonical]
+            entries.append(DiscoveryTraceEntry(
+                record.raw_url or record.url, canonical, record.title, record.provider,
+                record.query, "accepted", "; ".join(candidate["relevance_reasons"]),
+            ))
+        elif canonical in rejected_by_url:
+            candidate = rejected_by_url[canonical]
+            entries.append(DiscoveryTraceEntry(
+                record.raw_url or record.url, canonical, record.title, record.provider,
+                record.query, "rejected", "; ".join(candidate["relevance_reasons"]),
+            ))
+        else:
+            # Defensive invariant: if ranking rules gain another early filter,
+            # the result remains visible until that filter names its reason.
+            entries.append(DiscoveryTraceEntry(
+                record.raw_url or record.url, canonical, record.title, record.provider,
+                record.query, "rejected", "unclassified_pre_ranking_drop",
+            ))
+    attempt_list = list(attempts)
+    provider_raw = sum(
+        item.raw_result_count if item.raw_result_count else item.result_count
+        for item in attempt_list
+        if item.status == "success"
+    )
+    return DiscoveryTrace(
+        provider_raw_result_count=provider_raw,
+        collected_result_count=len(entries),
+        normalized_result_count=normalized,
+        unique_candidate_count=len(seen),
+        duplicate_count=duplicates,
+        accepted_candidate_count=len(accepted_by_url),
+        rejected_candidate_count=sum(item.outcome == "rejected" for item in entries),
+        entries=tuple(entries),
+    )
 
 
 def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
@@ -3761,10 +3937,14 @@ class ResilientSearchSession:
             self.health_store.record_success(shared_key)
             exact_model_hit = bool(
                 self._model and any(
-                    model_match(
-                        self._model,
-                        f"{item.title} {item.snippet} {item.url}",
+                    candidate_model_match(
+                        self._model, item.title, urlparse(item.url).path,
                     ) == "exact"
+                    and _path_names_complete_model(item.url, self._brand, self._model)
+                    and not _is_search_landing_url(item.url)
+                    and not _has_accessory_context(item.url, item.title)
+                    and not _has_non_product_context(item.url, item.title)
+                    and _page_kind(item.url) not in {"homepage", "catalog", "weak"}
                     for item in results
                 )
             )
@@ -3811,6 +3991,13 @@ class ResilientSearchSession:
                     not getattr(provider, "short_circuit_on_exact_model", False)
                     or exact_model_hit
                 )
+                and (not self._model or exact_model_hit or any(
+                    candidate_model_match(self._model, item.title, urlparse(item.url).path)
+                    == "likely_variant"
+                    and not _is_search_landing_url(item.url)
+                    and not _has_accessory_context(item.url, item.title)
+                    for item in results
+                ))
             ):
                 productive_provider_found = True
         return ProviderQueryOutcome(tuple(collected), tuple(attempts))
@@ -4027,7 +4214,10 @@ def discover_with_status(
         if hinted_site_query:
             queries.append(hinted_site_query)
         if cached is None:
-            queries.extend((f"{brand} official website", f"{brand} official {model}"))
+            queries.extend((
+                f'"{model}" {brand} official',
+                f"{brand} official website", f"{brand} official {model}",
+            ))
         budget_stopped = False
         for query in queries:
             attempted_queries.append(query)
@@ -4111,6 +4301,9 @@ def discover_with_status(
         provider_attempts = _annotate_attempt_candidate_counts(
             provider_attempts, candidates, rejected_candidates,
         )
+        trace = _build_discovery_trace(
+            raw_results, provider_attempts, candidates, rejected_candidates, model,
+        )
         if issues and raw_results:
             status: SearchStatus = "partial"
         elif issues:
@@ -4125,6 +4318,7 @@ def discover_with_status(
             issues=issues,
             provider_attempts=provider_attempts,
             rejected_candidates=rejected_candidates,
+            trace=trace,
         )
 
     if searcher is not None:

@@ -21,6 +21,7 @@ services.product_verifier.
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from urllib.parse import urlparse
@@ -29,6 +30,7 @@ from typing import Awaitable, Callable
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, LinkPreviewOptions
 
 from bot.export import export_result_csv
+from bot.discovery_formatters import format_discovery_result
 from bot.formatters import (
     DEFAULT_MAX_MESSAGE_LENGTH,
     chunk_lines,
@@ -53,6 +55,7 @@ from bot.jobs import Job, JobManager, JobManagerShuttingDownError
 from bot.parser import parse_product_query
 from observability import log_event, log_exception_event, scoped_id
 from services.product_verifier import VerifyProductRequest
+from services.discovery_debug import DiscoveryDebugResult, DiscoveryDebugService
 
 
 logger = logging.getLogger(__name__)
@@ -73,6 +76,75 @@ _PHOTOS_CALLBACK_PREFIX = "photos:"
 _MAX_MEDIA_GROUP = 10  # Telegram's per-album limit
 
 _EXPORT_FILENAME_SAFE_PATTERN = re.compile(r"[^0-9A-Za-zА-Яа-яЁё]+")
+
+
+async def handle_discovery_query(
+    product_name: str,
+    chat_id: int,
+    service: DiscoveryDebugService,
+    *,
+    reply: Reply,
+    include_all_rejected: bool = False,
+) -> DiscoveryDebugResult | None:
+    """Run the Stage 33.0 source-only flow; never starts verification."""
+    normalized = " ".join((product_name or "").split())
+    if not normalized:
+        previous = service.last_result(chat_id) if include_all_rejected else None
+        if previous is None:
+            await reply(
+                "Укажите название товара: /discover Google Pixel 9 Pro"
+            )
+            return None
+        result = previous
+    else:
+        await reply(f"🔎 Ищу страницы модели: {normalized}")
+        try:
+            result = await asyncio.to_thread(
+                service.discover_name, normalized, chat_id=chat_id,
+            )
+        except Exception as error:  # noqa: BLE001 - debug flow reports a bounded failure
+            log_exception_event(
+                logger, "discovery_debug_failure", chat=scoped_id(chat_id),
+                error_type=type(error).__name__,
+            )
+            await reply(f"Discovery завершился ошибкой: {type(error).__name__}: {error}")
+            return None
+    for chunk in format_discovery_result(result, include_all_rejected=include_all_rejected):
+        await reply(chunk)
+    return result
+
+
+def build_discovery_command(
+    service: DiscoveryDebugService, *, include_all_rejected: bool = False,
+):
+    async def discovery_command(update, context) -> None:  # noqa: ANN001
+        text = str(getattr(update.message, "text", "") or "")
+        product_name = text.split(maxsplit=1)[1] if len(text.split(maxsplit=1)) == 2 else ""
+
+        async def reply(chunk: str) -> None:
+            await _safe_reply(update.message, chunk)
+
+        await handle_discovery_query(
+            product_name, _chat_id(update), service, reply=reply,
+            include_all_rejected=include_all_rejected,
+        )
+
+    return discovery_command
+
+
+def build_discovery_text_handler(service: DiscoveryDebugService):
+    """Plain name-only messages in the opt-in Stage 33.0 bot mode."""
+
+    async def discovery_text(update, context) -> None:  # noqa: ANN001
+        async def reply(chunk: str) -> None:
+            await _safe_reply(update.message, chunk)
+
+        await handle_discovery_query(
+            str(getattr(update.message, "text", "") or ""),
+            _chat_id(update), service, reply=reply,
+        )
+
+    return discovery_text
 
 
 async def handle_product_query(
