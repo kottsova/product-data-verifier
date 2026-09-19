@@ -1,0 +1,233 @@
+[
+ {
+  "product": "Gressel GAF-1825",
+  "raw": "'Тип' = 'да'",
+  "normalized": "[product_spec] Тип = true",
+  "fixes": "measurable_value",
+  "evidence": "1"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": "'Integrierte Kochfeldsteuereinheiten' = 'Nein'",
+  "normalized": "[product_spec] Integrierte Kochfeldsteuereinheiten = false",
+  "fixes": "measurable_value",
+  "evidence": "1"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "raw": "'Voltage' = '18V'",
+  "normalized": "[product_spec] Voltage = 18 V",
+  "fixes": "measurable_value",
+  "evidence": "1"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "raw": "'Power supply' = '100-240 V'",
+  "normalized": "[product_spec] Power supply = 100–240 V",
+  "fixes": "range_dash",
+  "evidence": "1"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "raw": "'- Steel' = '13mm'",
+  "normalized": "[product_spec] Drilling capacity > Steel = 13 mm",
+  "fixes": "bullet_marker",
+  "evidence": "1"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "raw": "'Maximální výška šálku (mm)' = '120'",
+  "normalized": "[product_spec] Maximální výška šálku = 120 mm",
+  "fixes": "label_unit_moved",
+  "evidence": "1"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "raw": "'productID' = 'mx-master-3s'",
+  "normalized": "[identity_metadata] product ID = mx-master-3s",
+  "fixes": "json_ld_scalar",
+  "evidence": "1"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "raw": "'FSA Eligible' = 'No'",
+  "normalized": "[product_spec] FSA Eligible = false",
+  "fixes": "measurable_value",
+  "evidence": "1"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "raw": "'Длина сетевого шнура, см' = '70'",
+  "normalized": "[product_spec] Длина сетевого шнура = 70 см",
+  "fixes": "label_unit_moved",
+  "evidence": "1"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": "'Verfügbarer Temperaturbereich' = '30-300 °C'",
+  "normalized": "[product_spec] Verfügbarer Temperaturbereich = 30–300 °C",
+  "fixes": "range_dash",
+  "evidence": "6"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "raw": "'Maximum Speed' = '2000-rpm'",
+  "normalized": "[product_spec] Maximum Speed = 2000 rpm",
+  "fixes": "unit_separator",
+  "evidence": "1"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "raw": "'Plaque removal' = '20 x more effective*'",
+  "normalized": "[product_spec] Plaque removal = 20 x more effective",
+  "fixes": "structured_pair",
+  "evidence": "1"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "raw": "'Max fastening torque' = '60Nm'",
+  "normalized": "[product_spec] Max fastening torque = 60 Nm",
+  "fixes": "measurable_value",
+  "evidence": "1"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "raw": "'Jmenovitá frekvence' = '50-60 HzHz'",
+  "normalized": "[product_spec] Jmenovitá frekvence = 50–60 Hz",
+  "fixes": "duplicated_unit, range_dash",
+  "evidence": "1"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "raw": "'Gesture button' = 'Yes'",
+  "normalized": "[product_spec] Gesture button = true",
+  "fixes": "measurable_value",
+  "evidence": "1"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "raw": "'ph' = '5.00-6.50'",
+  "normalized": "[product_spec] Highlights > ph = 5.00–6.50",
+  "fixes": "range_dash",
+  "evidence": "1"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "raw": "'Терморегулятор' = '80-200'",
+  "normalized": "[product_spec] Терморегулятор = 80–200",
+  "fixes": "range_dash",
+  "evidence": "1"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": "'Sicherheitsvorrichtungen' = ','",
+  "normalized": "[unknown] Sicherheitsvorrichtungen = ",
+  "fixes": "punctuation",
+  "evidence": "1"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "raw": "'EN 55014-1' = '2017 + A11:2020, EN IEC 55014-1: 2021, EN 55014-2:2015, EN IEC 55014-2:2021,'",
+  "normalized": "[unknown] EN 55014-1 = 2017 + A11:2020, EN IEC 55014-1: 2021, EN 55014-2:2015, EN IEC 55014-2:2021",
+  "fixes": "punctuation",
+  "evidence": "2"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "raw": "'LXT battery compatibility' = '1.5Ah 2Ah 3Ah 4Ah 5Ah 6Ah 9Ah 12Ah'",
+  "normalized": "[product_spec] LXT battery compatibility = 1.5 Ah 2 Ah 3 Ah 4 Ah 5 Ah 6 Ah 9 Ah 12 Ah",
+  "fixes": "unit_spacing",
+  "evidence": "1"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "raw": "'Napětí' = '220-240v'",
+  "normalized": "[product_spec] Napětí = 220–240 V",
+  "fixes": "range_dash",
+  "evidence": "1"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "raw": "'Compatibility' = 'Requires Bluetooth Low Energy Technology Engineered for IntelÂ® Evoâ\\x84¢ Laptops Windows 1",
+  "normalized": "[product_spec] Compatibility = Requires Bluetooth Low Energy Technology Engineered for Intel® Evo™ Laptops Win",
+  "fixes": "mojibake",
+  "evidence": "1"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "raw": "'Niacinamida' = 'Este revolucionario activo es una forma en la que se presenta la vitamina B3, que se encuentr",
+  "normalized": "[unknown] Niacinamida = Este revolucionario activo es una forma en la que se presenta la vitamina B3, que se e",
+  "fixes": "value_is_heading",
+  "evidence": "1"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "raw": "'условиях' = 'домах, офисах, квартирах, гостиницах.'",
+  "normalized": "[product_spec] условиях = домах, офисах, квартирах, гостиницах",
+  "fixes": "punctuation",
+  "evidence": "1"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": "'Backofenassistent mit Sprachsteuerung: Ganz einfach das richtige Programm wählen.' = 'Bist du manchmal unsich",
+  "normalized": "[marketing_content] Backofenassistent mit Sprachsteuerung: Ganz einfach das richtige Programm wählen. = Bist d",
+  "fixes": "unicode_variant",
+  "evidence": "1"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "raw": "'The Notified Body' = 'performed:'",
+  "normalized": "[unknown] The Notified Body = performed",
+  "fixes": "value_is_heading",
+  "evidence": "1"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "raw": "'Rozměry výrobku' = '149×330×305'",
+  "normalized": "[product_spec] Rozměry výrobku = 149 × 330 × 305",
+  "fixes": "measurable_value",
+  "evidence": "1"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "raw": "'Zinc' = 'Es un mineral indispensable para nuestro organismo, ya que es como el “ mecánico 24h” de la piel pue",
+  "normalized": "[marketing_content] Zinc = Es un mineral indispensable para nuestro organismo, ya que es como el \" mecánico 24",
+  "fixes": "unicode_variant",
+  "evidence": "1"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": "'INSTALLATION_OVEN_BUILT_IN_COOKER' = 'Unterschrank, Hochschrank'",
+  "normalized": "[product_spec] Installation oven built in cooker = Unterschrank, Hochschrank",
+  "fixes": "structured_pair",
+  "evidence": "1"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "raw": "'Americano\\\\u002FLong Black function' = 'No'",
+  "normalized": "[product_spec] Americano/Long Black function = false",
+  "fixes": "html_entity",
+  "evidence": "1"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": "'HOBS_CONTROL_INTEGRATED' = 'specifications.translatedBoolean.no'",
+  "normalized": "[product_spec] Hobs control integrated = no",
+  "fixes": "i18n_boolean",
+  "evidence": "3"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "raw": "'Kompatibilní s kapslemi ESE*' = 'Yes'",
+  "normalized": "[product_spec] Kompatibilní s kapslemi ESE = true",
+  "fixes": "footnote_marker, punctuation",
+  "evidence": "1"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": "'Caractéristiques Home Connect' = 'en: iService Remote, en: Remote Monitoring and Control'",
+  "normalized": "[product_spec] Caractéristiques Home Connect = iService Remote, Remote Monitoring and Control",
+  "fixes": "locale_prefix",
+  "evidence": "4"
+ }
+]

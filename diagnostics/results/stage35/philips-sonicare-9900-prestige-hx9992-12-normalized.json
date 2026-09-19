@@ -1,0 +1,5253 @@
+{
+ "product_name": "Philips Sonicare 9900 Prestige HX9992/12",
+ "brand": "Philips",
+ "model": "Sonicare 9900 Prestige HX9992/12",
+ "raw_count": 107,
+ "raw_by_class": {
+  "identity_metadata": 12,
+  "product_spec": 77,
+  "marketing_content": 0,
+  "unknown": 18
+ },
+ "fixes": {
+  "range_dash": 1,
+  "punctuation": 7
+ },
+ "normalized_count": 98,
+ "network_calls": 0,
+ "identity_nodes": [
+  {
+   "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+   "role": "product",
+   "variant": "",
+   "fields": {
+    "name": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue",
+    "sku": "HX9992/12",
+    "mpn": "HX9992/12",
+    "category": "Electric toothbrushes",
+    "brand": "Sonicare"
+   },
+   "raw_indices": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+   "role": "product",
+   "variant": "",
+   "fields": {
+    "name": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau",
+    "sku": "HX9992/12",
+    "mpn": "HX9992/12",
+    "category": "Elektrische Zahnbürsten",
+    "brand": "Sonicare"
+   },
+   "raw_indices": [
+    42,
+    43,
+    44,
+    45,
+    46
+   ]
+  }
+ ],
+ "attributes": [
+  {
+   "id": "na0001",
+   "label": "name",
+   "label_key": "name",
+   "qualified_label": "name",
+   "group_path": [],
+   "value": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 0,
+     "raw_label": "name",
+     "raw_value": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0002",
+   "label": "sku",
+   "label_key": "sku",
+   "qualified_label": "sku",
+   "group_path": [],
+   "value": "HX9992/12",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 1,
+     "raw_label": "sku",
+     "raw_value": "HX9992/12",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 43,
+     "raw_label": "sku",
+     "raw_value": "HX9992/12",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "HX9992/12",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0003",
+   "label": "mpn",
+   "label_key": "mpn",
+   "qualified_label": "mpn",
+   "group_path": [],
+   "value": "HX9992/12",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 2,
+     "raw_label": "mpn",
+     "raw_value": "HX9992/12",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 44,
+     "raw_label": "mpn",
+     "raw_value": "HX9992/12",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "HX9992/12",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0004",
+   "label": "category",
+   "label_key": "category",
+   "qualified_label": "category",
+   "group_path": [],
+   "value": "Electric toothbrushes",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 3,
+     "raw_label": "category",
+     "raw_value": "Electric toothbrushes",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Electric toothbrushes",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0005",
+   "label": "brand",
+   "label_key": "brand",
+   "qualified_label": "brand",
+   "group_path": [],
+   "value": "Sonicare",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 4,
+     "raw_label": "brand",
+     "raw_value": "Sonicare",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 46,
+     "raw_label": "brand",
+     "raw_value": "Sonicare",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Sonicare",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0006",
+   "label": "High",
+   "label_key": "high",
+   "qualified_label": "High",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "To boost your clean",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 5,
+     "raw_label": "High",
+     "raw_value": "To boost your clean",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "To boost your clean",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0007",
+   "label": "Medium",
+   "label_key": "medium",
+   "qualified_label": "Medium",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "For an everyday clean",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 6,
+     "raw_label": "Medium",
+     "raw_value": "For an everyday clean",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "For an everyday clean",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0008",
+   "label": "Low",
+   "label_key": "low",
+   "qualified_label": "Low",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "For sensitive teeth and gums",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 7,
+     "raw_label": "Low",
+     "raw_value": "For sensitive teeth and gums",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "For sensitive teeth and gums",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0009",
+   "label": "Power supply",
+   "label_key": "power supply",
+   "qualified_label": "Power supply",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "100–240",
+   "value_kind": "range",
+   "unit": "V",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 8,
+     "raw_label": "Power supply",
+     "raw_value": "100-240 V",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "range_dash"
+     ]
+    }
+   ],
+   "display": "100–240 V",
+   "minimum": 100.0,
+   "maximum": 240.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "range_dash"
+   ],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0010",
+   "label": "Operating time (full to empty)",
+   "label_key": "operating time full to empty",
+   "qualified_label": "Operating time (full to empty)",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "14 days",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 9,
+     "raw_label": "Operating time (full to empty)",
+     "raw_value": "14 days",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "14 days",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0011",
+   "label": "Battery",
+   "label_key": "battery",
+   "qualified_label": "Battery",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Rechargeable",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 10,
+     "raw_label": "Battery",
+     "raw_value": "Rechargeable",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Rechargeable",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0012",
+   "label": "Battery type",
+   "label_key": "battery type",
+   "qualified_label": "Battery type",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Lithium ION",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 11,
+     "raw_label": "Battery type",
+     "raw_value": "Lithium ION",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Lithium ION",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0013",
+   "label": "Energy consumption",
+   "label_key": "energy consumption",
+   "qualified_label": "Energy consumption",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Standby without display <0.06 W",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 12,
+     "raw_label": "Energy consumption",
+     "raw_value": "Standby without display <0.06 W",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Standby without display <0.06 W",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0014",
+   "label": "Colour",
+   "label_key": "colour",
+   "qualified_label": "Colour",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Midnight Blue",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "identifier_label",
+   "evidence": [
+    {
+     "raw_index": 13,
+     "raw_label": "Colour",
+     "raw_value": "Midnight Blue",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Midnight Blue",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0015",
+   "label": "Warranty",
+   "label_key": "warranty",
+   "qualified_label": "Warranty",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "2 year limited warranty",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 14,
+     "raw_label": "Warranty",
+     "raw_value": "2 year limited warranty",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2 year limited warranty",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0016",
+   "label": "Software support",
+   "label_key": "software support",
+   "qualified_label": "Software support",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Philips offers relevant software updates for a period of 2 years after the date of purchase.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 15,
+     "raw_label": "Software support",
+     "raw_value": "Philips offers relevant software updates for a period of 2 years after the date of purchase.",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Philips offers relevant software updates for a period of 2 years after the date of purchase.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0017",
+   "label": "Android compatibility",
+   "label_key": "android compatibility",
+   "qualified_label": "Android compatibility",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Android phones with Bluetooth 4.0 and above",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 16,
+     "raw_label": "Android compatibility",
+     "raw_value": "Android phones with Bluetooth 4.0 and above",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Android phones with Bluetooth 4.0 and above",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0018",
+   "label": "Bluetooth wireless technology",
+   "label_key": "bluetooth wireless technology",
+   "qualified_label": "Bluetooth wireless technology",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Connected Sonicare app",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 17,
+     "raw_label": "Bluetooth wireless technology",
+     "raw_value": "Connected Sonicare app",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Connected Sonicare app",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0019",
+   "label": "iOS compatibility",
+   "label_key": "ios compatibility",
+   "qualified_label": "iOS compatibility",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "iPhone with Bluetooth 4.0 and above",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 18,
+     "raw_label": "iOS compatibility",
+     "raw_value": "iPhone with Bluetooth 4.0 and above",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "iPhone with Bluetooth 4.0 and above",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0020",
+   "label": "Handle",
+   "label_key": "handle",
+   "qualified_label": "Handle",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Sleek and compact design",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 19,
+     "raw_label": "Handle",
+     "raw_value": "Sleek and compact design",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Sleek and compact design",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0021",
+   "label": "Handle compatibility",
+   "label_key": "handle compatibility",
+   "qualified_label": "Handle compatibility",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Easy click-on brush heads",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 20,
+     "raw_label": "Handle compatibility",
+     "raw_value": "Easy click-on brush heads",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Easy click-on brush heads",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0022",
+   "label": "Battery indicator",
+   "label_key": "battery indicator",
+   "qualified_label": "Battery indicator",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Illuminated icon indicates battery life",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 21,
+     "raw_label": "Battery indicator",
+     "raw_value": "Illuminated icon indicates battery life",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Illuminated icon indicates battery life",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0023",
+   "label": "Timer",
+   "label_key": "timer",
+   "qualified_label": "Timer",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "BrushPacer and Smartimer",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 22,
+     "raw_label": "Timer",
+     "raw_value": "BrushPacer and Smartimer",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "BrushPacer and Smartimer",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0024",
+   "label": "Handle",
+   "label_key": "handle",
+   "qualified_label": "Handle",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 DiamondClean Prestige 9900",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 23,
+     "raw_label": "Handle",
+     "raw_value": "1 DiamondClean Prestige 9900",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 DiamondClean Prestige 9900",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0025",
+   "label": "Brush heads",
+   "label_key": "brush heads",
+   "qualified_label": "Brush heads",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 A3 All-in-One",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 24,
+     "raw_label": "Brush heads",
+     "raw_value": "1 A3 All-in-One",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 A3 All-in-One",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0026",
+   "label": "Travel case",
+   "label_key": "travel case",
+   "qualified_label": "Travel case",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 Prestige USB charging travel case",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 25,
+     "raw_label": "Travel case",
+     "raw_value": "1 Prestige USB charging travel case",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 Prestige USB charging travel case",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0027",
+   "label": "Charger",
+   "label_key": "charger",
+   "qualified_label": "Charger",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 Charging base and stand",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 26,
+     "raw_label": "Charger",
+     "raw_value": "1 Charging base and stand",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 Charging base and stand",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0028",
+   "label": "Plaque removal",
+   "label_key": "plaque removal",
+   "qualified_label": "Plaque removal",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "20 x more effective",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 27,
+     "raw_label": "Plaque removal",
+     "raw_value": "20 x more effective*",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "20 x more effective",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0029",
+   "label": "Gum Health",
+   "label_key": "gum health",
+   "qualified_label": "Gum Health",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Up to 15 x healthier gums***",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 28,
+     "raw_label": "Gum Health",
+     "raw_value": "Up to 15 x healthier gums***",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Up to 15 x healthier gums***",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0030",
+   "label": "Whitening",
+   "label_key": "whitening",
+   "qualified_label": "Whitening",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Up to 100% more stain removal***",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 29,
+     "raw_label": "Whitening",
+     "raw_value": "Up to 100% more stain removal***",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Up to 100% more stain removal***",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0031",
+   "label": "Speed",
+   "label_key": "speed",
+   "qualified_label": "Speed",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "62,000 brush movements/min",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 30,
+     "raw_label": "Speed",
+     "raw_value": "62,000 brush movements/min",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "62,000 brush movements/min",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0032",
+   "label": "Clean",
+   "label_key": "clean",
+   "qualified_label": "Clean",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "For an exceptional everyday clean",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 31,
+     "raw_label": "Clean",
+     "raw_value": "For an exceptional everyday clean",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "For an exceptional everyday clean",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0033",
+   "label": "Deep Clean",
+   "label_key": "deep clean",
+   "qualified_label": "Deep Clean",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "For an invigorating deep clean",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 32,
+     "raw_label": "Deep Clean",
+     "raw_value": "For an invigorating deep clean",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "For an invigorating deep clean",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0034",
+   "label": "Gum Health",
+   "label_key": "gum health",
+   "qualified_label": "Gum Health",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Gently massages your gums",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 33,
+     "raw_label": "Gum Health",
+     "raw_value": "Gently massages your gums",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Gently massages your gums",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0035",
+   "label": "Sensitive",
+   "label_key": "sensitive",
+   "qualified_label": "Sensitive",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "For sensitive teeth and gums",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 34,
+     "raw_label": "Sensitive",
+     "raw_value": "For sensitive teeth and gums",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "For sensitive teeth and gums",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0036",
+   "label": "White+",
+   "label_key": "white",
+   "qualified_label": "White+",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "To help remove surface stains",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 35,
+     "raw_label": "White+",
+     "raw_value": "To help remove surface stains",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 77,
+     "raw_label": "White+",
+     "raw_value": "To help remove surface stains",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "To help remove surface stains",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0037",
+   "label": "Pressure feedback",
+   "label_key": "pressure feedback",
+   "qualified_label": "Pressure feedback",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Ring lights up purple, Vibration and pulsing sound",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 36,
+     "raw_label": "Pressure feedback",
+     "raw_value": "Ring lights up purple, Vibration and pulsing sound",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Ring lights up purple, Vibration and pulsing sound",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0038",
+   "label": "Replacement Reminder",
+   "label_key": "replacement reminder",
+   "qualified_label": "Replacement Reminder",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Lets you know when to replace your brush head",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 37,
+     "raw_label": "Replacement Reminder",
+     "raw_value": "Lets you know when to replace your brush head",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Lets you know when to replace your brush head",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0039",
+   "label": "Sense IQ",
+   "label_key": "sense iq",
+   "qualified_label": "Sense IQ",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Automatically adjusts brushing based on pressure and motion",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 38,
+     "raw_label": "SenseIQ",
+     "raw_value": "Automatically adjusts brushing based on pressure and motion",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Automatically adjusts brushing based on pressure and motion",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0040",
+   "label": "Tracking and progress reports",
+   "label_key": "tracking and progress reports",
+   "qualified_label": "Tracking and progress reports",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Track your brushing habits and improvements over time with in-depth data and personalised insights.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 39,
+     "raw_label": "Tracking and progress reports",
+     "raw_value": "Track your brushing habits and improvements over time with in-depth data and personalised insights.",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Track your brushing habits and improvements over time with in-depth data and personalised insights.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0041",
+   "label": "Real-time coaching with SenseIQ",
+   "label_key": "real time coaching with senseiq",
+   "qualified_label": "Real-time coaching with SenseIQ",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Receive instant feedback on pressure, motion and coverage to improve your brushing technique as you go.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 40,
+     "raw_label": "Real-time coaching with SenseIQ",
+     "raw_value": "Receive instant feedback on pressure, motion and coverage to improve your brushing technique as you go.",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Receive instant feedback on pressure, motion and coverage to improve your brushing technique as you go.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0042",
+   "label": "Personalised guidance",
+   "label_key": "personalised guidance",
+   "qualified_label": "Personalised guidance",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Get customised brushing tips based on your brushing patterns and habits.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 41,
+     "raw_label": "Personalised guidance",
+     "raw_value": "Get customised brushing tips based on your brushing patterns and habits.",
+     "source_url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Get customised brushing tips based on your brushing patterns and habits.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0043",
+   "label": "name",
+   "label_key": "name",
+   "qualified_label": "name",
+   "group_path": [],
+   "value": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 42,
+     "raw_label": "name",
+     "raw_value": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0044",
+   "label": "category",
+   "label_key": "category",
+   "qualified_label": "category",
+   "group_path": [],
+   "value": "Elektrische Zahnbürsten",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 45,
+     "raw_label": "category",
+     "raw_value": "Elektrische Zahnbürsten",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Elektrische Zahnbürsten",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0045",
+   "label": "Hoch",
+   "label_key": "hoch",
+   "qualified_label": "Hoch",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Für eine noch bessere Reinigung",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 47,
+     "raw_label": "Hoch",
+     "raw_value": "Für eine noch bessere Reinigung",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Für eine noch bessere Reinigung",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0046",
+   "label": "Mittel",
+   "label_key": "mittel",
+   "qualified_label": "Mittel",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Für die tägliche Reinigung",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 48,
+     "raw_label": "Mittel",
+     "raw_value": "Für die tägliche Reinigung",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Für die tägliche Reinigung",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0047",
+   "label": "Niedrig",
+   "label_key": "niedrig",
+   "qualified_label": "Niedrig",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Für empfindliche Zähne und Zahnfleisch",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 49,
+     "raw_label": "Niedrig",
+     "raw_value": "Für empfindliche Zähne und Zahnfleisch",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Für empfindliche Zähne und Zahnfleisch",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0048",
+   "label": "Stromversorgung",
+   "label_key": "stromversorgung",
+   "qualified_label": "Stromversorgung",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "100 bis 240 V",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 50,
+     "raw_label": "Stromversorgung",
+     "raw_value": "100 bis 240 V",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "100 bis 240 V",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0049",
+   "label": "Betriebsdauer (voller bis leerer Akku)",
+   "label_key": "betriebsdauer voller bis leerer akku",
+   "qualified_label": "Betriebsdauer (voller bis leerer Akku)",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "14 Tage",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 51,
+     "raw_label": "Betriebsdauer (voller bis leerer Akku)",
+     "raw_value": "14 Tage",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "14 Tage",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0050",
+   "label": "Batterie",
+   "label_key": "batterie",
+   "qualified_label": "Batterie",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Wiederaufladbar",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 52,
+     "raw_label": "Batterie",
+     "raw_value": "Wiederaufladbar",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Wiederaufladbar",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0051",
+   "label": "Batterietyp",
+   "label_key": "batterietyp",
+   "qualified_label": "Batterietyp",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Lithium-Ionen",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 53,
+     "raw_label": "Batterietyp",
+     "raw_value": "Lithium-Ionen",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Lithium-Ionen",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0052",
+   "label": "Energieverbrauch",
+   "label_key": "energieverbrauch",
+   "qualified_label": "Energieverbrauch",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Standby ohne Anzeige <0,06 W",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 54,
+     "raw_label": "Energieverbrauch",
+     "raw_value": "Standby ohne Anzeige <0,06 W",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Standby ohne Anzeige <0,06 W",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0053",
+   "label": "Farbe",
+   "label_key": "farbe",
+   "qualified_label": "Farbe",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Mitternachtsblau",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "identifier_label",
+   "evidence": [
+    {
+     "raw_index": 55,
+     "raw_label": "Farbe",
+     "raw_value": "Mitternachtsblau",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Mitternachtsblau",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0054",
+   "label": "Garantie",
+   "label_key": "garantie",
+   "qualified_label": "Garantie",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "2 Jahre eingeschränkte Gewährleistung",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 56,
+     "raw_label": "Garantie",
+     "raw_value": "2 Jahre eingeschränkte Gewährleistung",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2 Jahre eingeschränkte Gewährleistung",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0055",
+   "label": "Software-Support",
+   "label_key": "software support",
+   "qualified_label": "Software-Support",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Philips bietet für 2 Jahre ab Kaufdatum entsprechende Softwareaktualisierungen an.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 57,
+     "raw_label": "Software-Support",
+     "raw_value": "Philips bietet für 2 Jahre ab Kaufdatum entsprechende Softwareaktualisierungen an.",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Philips bietet für 2 Jahre ab Kaufdatum entsprechende Softwareaktualisierungen an.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0056",
+   "label": "Android-Kompatibilität",
+   "label_key": "android kompatibilitat",
+   "qualified_label": "Android-Kompatibilität",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Android-Telefone mit Bluetooth 4.0 oder höher",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 58,
+     "raw_label": "Android-Kompatibilität",
+     "raw_value": "Android-Telefone mit Bluetooth 4.0 oder höher",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Android-Telefone mit Bluetooth 4.0 oder höher",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0057",
+   "label": "Kabellose Bluetooth-Technologie",
+   "label_key": "kabellose bluetooth technologie",
+   "qualified_label": "Kabellose Bluetooth-Technologie",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Verbundene Sonicare App",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 59,
+     "raw_label": "Kabellose Bluetooth-Technologie",
+     "raw_value": "Verbundene Sonicare App",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Verbundene Sonicare App",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0058",
+   "label": "i OS-Kompatibilität",
+   "label_key": "i os kompatibilitat",
+   "qualified_label": "i OS-Kompatibilität",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "iPhone mit Bluetooth 4.0 oder höher",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 60,
+     "raw_label": "iOS-Kompatibilität",
+     "raw_value": "iPhone mit Bluetooth 4.0 oder höher",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "iPhone mit Bluetooth 4.0 oder höher",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0059",
+   "label": "Akkuanzeige",
+   "label_key": "akkuanzeige",
+   "qualified_label": "Akkuanzeige",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Beleuchtetes Symbol zeigt Akkustand an",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 61,
+     "raw_label": "Akkuanzeige",
+     "raw_value": "Beleuchtetes Symbol zeigt Akkustand an",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Beleuchtetes Symbol zeigt Akkustand an",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0060",
+   "label": "Handstück",
+   "label_key": "handstuck",
+   "qualified_label": "Handstück",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Schlankes und kompaktes Design",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 62,
+     "raw_label": "Handstück",
+     "raw_value": "Schlankes und kompaktes Design",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Schlankes und kompaktes Design",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0061",
+   "label": "Handstück-Kompatibilität",
+   "label_key": "handstuck kompatibilitat",
+   "qualified_label": "Handstück-Kompatibilität",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Einfach aufsteckbare Bürstenköpfe",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 63,
+     "raw_label": "Handstück-Kompatibilität",
+     "raw_value": "Einfach aufsteckbare Bürstenköpfe",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Einfach aufsteckbare Bürstenköpfe",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0062",
+   "label": "Timer",
+   "label_key": "timer",
+   "qualified_label": "Timer",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "BrushPacer und SmartTimer",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 64,
+     "raw_label": "Timer",
+     "raw_value": "BrushPacer und SmartTimer",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "BrushPacer und SmartTimer",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0063",
+   "label": "Handstück",
+   "label_key": "handstuck",
+   "qualified_label": "Handstück",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 DiamondClean Prestige 9900",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 65,
+     "raw_label": "Handstück",
+     "raw_value": "1 DiamondClean Prestige 9900",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 DiamondClean Prestige 9900",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0064",
+   "label": "Bürstenköpfe",
+   "label_key": "burstenkopfe",
+   "qualified_label": "Bürstenköpfe",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 A3 All-in-One",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 66,
+     "raw_label": "Bürstenköpfe",
+     "raw_value": "1 A3 All-in-One",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 A3 All-in-One",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0065",
+   "label": "Reiseetui",
+   "label_key": "reiseetui",
+   "qualified_label": "Reiseetui",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 Prestige USB-Reiseladeetui",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 67,
+     "raw_label": "Reiseetui",
+     "raw_value": "1 Prestige USB-Reiseladeetui",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 Prestige USB-Reiseladeetui",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0066",
+   "label": "Ladegerät",
+   "label_key": "ladegerat",
+   "qualified_label": "Ladegerät",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "1 Ladebasis und -station",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 68,
+     "raw_label": "Ladegerät",
+     "raw_value": "1 Ladebasis und -station",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1 Ladebasis und -station",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0067",
+   "label": "Plaque-Entfernung",
+   "label_key": "plaque entfernung",
+   "qualified_label": "Plaque-Entfernung",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "20 x effektiver",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 69,
+     "raw_label": "Plaque-Entfernung",
+     "raw_value": "20 x effektiver*",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "20 x effektiver",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0068",
+   "label": "Gum Health",
+   "label_key": "gum health",
+   "qualified_label": "Gum Health",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Bis zu 15 x gesünderes Zahnfleisch***",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 70,
+     "raw_label": "Gum Health",
+     "raw_value": "Bis zu 15 x gesünderes Zahnfleisch***",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Bis zu 15 x gesünderes Zahnfleisch***",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0069",
+   "label": "Weiße Zähne",
+   "label_key": "weisse zahne",
+   "qualified_label": "Weiße Zähne",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Entfernt bis zu 100 % mehr Verfärbungen***",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 71,
+     "raw_label": "Weiße Zähne",
+     "raw_value": "Entfernt bis zu 100 % mehr Verfärbungen***",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Entfernt bis zu 100 % mehr Verfärbungen***",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0070",
+   "label": "Geschwindigkeit",
+   "label_key": "geschwindigkeit",
+   "qualified_label": "Geschwindigkeit",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "62.000 Bürstenkopfbewegungen/Min",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 72,
+     "raw_label": "Geschwindigkeit",
+     "raw_value": "62.000 Bürstenkopfbewegungen/Min.",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "62.000 Bürstenkopfbewegungen/Min",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0071",
+   "label": "Clean",
+   "label_key": "clean",
+   "qualified_label": "Clean",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Für eine außergewöhnliche Reinigung jeden Tag",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 73,
+     "raw_label": "Clean",
+     "raw_value": "Für eine außergewöhnliche Reinigung jeden Tag",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Für eine außergewöhnliche Reinigung jeden Tag",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0072",
+   "label": "Deep Clean",
+   "label_key": "deep clean",
+   "qualified_label": "Deep Clean",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Für eine besonders gründliche Reinigung",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 74,
+     "raw_label": "Deep Clean",
+     "raw_value": "Für eine besonders gründliche Reinigung",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Für eine besonders gründliche Reinigung",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0073",
+   "label": "Gum Health",
+   "label_key": "gum health",
+   "qualified_label": "Gum Health",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Massiert sanft das Zahnfleisch",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 75,
+     "raw_label": "Gum Health",
+     "raw_value": "Massiert sanft das Zahnfleisch",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Massiert sanft das Zahnfleisch",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0074",
+   "label": "Sensitive",
+   "label_key": "sensitive",
+   "qualified_label": "Sensitive",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Für empfindliche Zähne und Zahnfleisch",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 76,
+     "raw_label": "Sensitive",
+     "raw_value": "Für empfindliche Zähne und Zahnfleisch",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Für empfindliche Zähne und Zahnfleisch",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0075",
+   "label": "Druck-Feedback",
+   "label_key": "druck feedback",
+   "qualified_label": "Druck-Feedback",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Ring leuchtet violett, Vibration und pulsierendes Geräusch",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 78,
+     "raw_label": "Druck-Feedback",
+     "raw_value": "Ring leuchtet violett, Vibration und pulsierendes Geräusch",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Ring leuchtet violett, Vibration und pulsierendes Geräusch",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0076",
+   "label": "Erinnerungsfunktion",
+   "label_key": "erinnerungsfunktion",
+   "qualified_label": "Erinnerungsfunktion",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "informiert Sie, wenn der Bürstenkopf ausgewechselt werden sollte",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 79,
+     "raw_label": "Erinnerungsfunktion",
+     "raw_value": "informiert Sie, wenn der Bürstenkopf ausgewechselt werden sollte",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "informiert Sie, wenn der Bürstenkopf ausgewechselt werden sollte",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0077",
+   "label": "Sense IQ",
+   "label_key": "sense iq",
+   "qualified_label": "Sense IQ",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Automatische Anpassung des Putzvorgangs auf Basis von Druck und Bewegung",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 80,
+     "raw_label": "SenseIQ",
+     "raw_value": "Automatische Anpassung des Putzvorgangs auf Basis von Druck und Bewegung",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Automatische Anpassung des Putzvorgangs auf Basis von Druck und Bewegung",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0078",
+   "label": "Nachverfolgung und Fortschrittsberichte",
+   "label_key": "nachverfolgung und fortschrittsberichte",
+   "qualified_label": "Nachverfolgung und Fortschrittsberichte",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Verfolgen Sie Ihre Putzgewohnheiten und Verbesserungen im Laufe der Zeit mit detaillierten Daten und personalisierten Erkenntnissen.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 81,
+     "raw_label": "Nachverfolgung und Fortschrittsberichte",
+     "raw_value": "Verfolgen Sie Ihre Putzgewohnheiten und Verbesserungen im Laufe der Zeit mit detaillierten Daten und personalisierten Erkenntnissen.",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Verfolgen Sie Ihre Putzgewohnheiten und Verbesserungen im Laufe der Zeit mit detaillierten Daten und personalisierten Erkenntnissen.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0079",
+   "label": "Echtzeit-Coaching mit SenseIQ",
+   "label_key": "echtzeit coaching mit senseiq",
+   "qualified_label": "Echtzeit-Coaching mit SenseIQ",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Erhalten Sie direkt Feedback zu Druck, Bewegung und Putzfläche, um Ihre Putztechniken beim Putzen zu verbessern.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 82,
+     "raw_label": "Echtzeit-Coaching mit SenseIQ",
+     "raw_value": "Erhalten Sie direkt Feedback zu Druck, Bewegung und Putzfläche, um Ihre Putztechniken beim Putzen zu verbessern.",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Erhalten Sie direkt Feedback zu Druck, Bewegung und Putzfläche, um Ihre Putztechniken beim Putzen zu verbessern.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0080",
+   "label": "Personalisierte Gesundheitstipps",
+   "label_key": "personalisierte gesundheitstipps",
+   "qualified_label": "Personalisierte Gesundheitstipps",
+   "group_path": [
+    "cs Chapter",
+    "cs Item"
+   ],
+   "value": "Erhalten Sie Tipps zum Putzen basierend auf Ihren Putzmustern und -gewohnheiten.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 83,
+     "raw_label": "Personalisierte Gesundheitstipps",
+     "raw_value": "Erhalten Sie Tipps zum Putzen basierend auf Ihren Putzmustern und -gewohnheiten.",
+     "source_url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "csChapter > csItem",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Erhalten Sie Tipps zum Putzen basierend auf Ihren Putzmustern und -gewohnheiten.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0081",
+   "label": "EN 50563",
+   "label_key": "en 50563",
+   "qualified_label": "EN 50563",
+   "group_path": [],
+   "value": "2011 + A1: 2013, EN 50564:2011; EN55011: 2016 + A1: 2017 + A11: 2020",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 84,
+     "raw_label": "EN 50563",
+     "raw_value": "2011 + A1: 2013, EN 50564:2011; EN55011: 2016 + A1: 2017 + A11: 2020",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2011 + A1: 2013, EN 50564:2011; EN55011: 2016 + A1: 2017 + A11: 2020",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0082",
+   "label": "EN 55014-1",
+   "label_key": "en 55014 1",
+   "qualified_label": "EN 55014-1",
+   "group_path": [],
+   "value": "2017 + A11:2020, EN IEC 55014-1: 2021, EN 55014-2:2015, EN IEC 55014-2:2021",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 85,
+     "raw_label": "EN 55014-1",
+     "raw_value": "2017 + A11:2020, EN IEC 55014-1: 2021, EN 55014-2:2015, EN IEC 55014-2:2021,",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    },
+    {
+     "raw_index": 99,
+     "raw_label": "EN 55014-1",
+     "raw_value": "2017 + A11:2020, EN IEC 55014-1: 2021, EN 55014-2:2015, EN IEC 55014-2:2021,",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "2017 + A11:2020, EN IEC 55014-1: 2021, EN 55014-2:2015, EN IEC 55014-2:2021",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0083",
+   "label": "EN 61000-3-2",
+   "label_key": "en 61000 3 2",
+   "qualified_label": "EN 61000-3-2",
+   "group_path": [],
+   "value": "2014; EN 61000-3-3:2013; EN 61000-3-3:2013+A1:2019+A2:2021; EN IEC 61000-3-2:2019 + AMD1:2021",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 86,
+     "raw_label": "EN 61000-3-2",
+     "raw_value": "2014; EN 61000-3-3:2013; EN 61000-3-3:2013+A1:2019+A2:2021; EN IEC 61000-3-2:2019 + AMD1:2021",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 100,
+     "raw_label": "EN 61000-3-2",
+     "raw_value": "2014, EN 61000-3-3:2013, EN 61000-3-3:2013+A1:2019+A2:2021, EN IEC 61000-3-2:2019 + AMD1:2021,",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "2014; EN 61000-3-3:2013; EN 61000-3-3:2013+A1:2019+A2:2021; EN IEC 61000-3-2:2019 + AMD1:2021",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0084",
+   "label": "EN 60335-1",
+   "label_key": "en 60335 1",
+   "qualified_label": "EN 60335-1",
+   "group_path": [],
+   "value": "2012 + A11:2014 + A13:2017 + A1:2019 + A14:2019 + A2:2019 + A15:2021",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 87,
+     "raw_label": "EN 60335-1",
+     "raw_value": "2012 + A11:2014 + A13:2017 + A1:2019 + A14:2019 + A2:2019 + A15:2021",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 101,
+     "raw_label": "EN 60335-1",
+     "raw_value": "2012 + A11:2014 + A13:2017 + A1:2019 + A14:2019 + A2:2019 + A15:2021",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2012 + A11:2014 + A13:2017 + A1:2019 + A14:2019 + A2:2019 + A15:2021",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0085",
+   "label": "EN 60335-2-52",
+   "label_key": "en 60335 2 52",
+   "qualified_label": "EN 60335-2-52",
+   "group_path": [],
+   "value": "2003 + A1:2008 + A11:2010 + A12:2019; IEC 60335-1: 2020, IEC 60335-2-52: 2021",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 88,
+     "raw_label": "EN 60335-2-52",
+     "raw_value": "2003 + A1:2008 + A11:2010 + A12:2019; IEC 60335-1: 2020, IEC 60335-2-52: 2021",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2003 + A1:2008 + A11:2010 + A12:2019; IEC 60335-1: 2020, IEC 60335-2-52: 2021",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0086",
+   "label": "EN IEC 60335-2-29",
+   "label_key": "en iec 60335 2 29",
+   "qualified_label": "EN IEC 60335-2-29",
+   "group_path": [],
+   "value": "2021 + A1:2021; EN IEC 61558-1:2019; EN 61558-2-16-2009+ A1:2013",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 89,
+     "raw_label": "EN IEC 60335-2-29",
+     "raw_value": "2021 + A1:2021 ; EN IEC 61558-1 :2019 ; EN 61558-2-16-2009+ A1 :2013",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    },
+    {
+     "raw_index": 104,
+     "raw_label": "EN IEC 60335-2-29",
+     "raw_value": "2021 + A1:2021 ; EN IEC 61558-1 :2019 ; EN 61558-2-16-2009+ A1 :2013",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "2021 + A1:2021; EN IEC 61558-1:2019; EN 61558-2-16-2009+ A1:2013",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0087",
+   "label": "EN 62233",
+   "label_key": "en 62233",
+   "qualified_label": "EN 62233",
+   "group_path": [],
+   "value": "2008, EN IEC 63000: 2018",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 90,
+     "raw_label": "EN 62233",
+     "raw_value": "2008, EN IEC 63000: 2018",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 105,
+     "raw_label": "EN 62233",
+     "raw_value": "2008, EN IEC 63000: 2018",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2008, EN IEC 63000: 2018",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0088",
+   "label": "The Notified Body",
+   "label_key": "the notified body",
+   "qualified_label": "The Notified Body",
+   "group_path": [],
+   "value": "performed",
+   "value_kind": "heading",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "value_is_heading",
+   "evidence": [
+    {
+     "raw_index": 91,
+     "raw_label": "The Notified Body",
+     "raw_value": "performed:",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "performed",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0089",
+   "label": "SRN",
+   "label_key": "srn",
+   "qualified_label": "SRN",
+   "group_path": [],
+   "value": "NL-MF-000001693",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 92,
+     "raw_label": "SRN",
+     "raw_value": "NL-MF-000001693",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "NL-MF-000001693",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0090",
+   "label": "Basic UDI-DI",
+   "label_key": "basic udi di",
+   "qualified_label": "Basic UDI-DI",
+   "group_path": [],
+   "value": "Risk Class",
+   "value_kind": "heading",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "value_is_heading",
+   "evidence": [
+    {
+     "raw_index": 93,
+     "raw_label": "Basic UDI-DI",
+     "raw_value": "Risk Class:",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Risk Class",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0091",
+   "label": "Risk Class",
+   "label_key": "risk class",
+   "qualified_label": "Risk Class",
+   "group_path": [],
+   "value": "Basic UDI-DI",
+   "value_kind": "heading",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "value_is_heading",
+   "evidence": [
+    {
+     "raw_index": 94,
+     "raw_label": "Risk Class",
+     "raw_value": "Basic UDI-DI:",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "2",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Basic UDI-DI",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0092",
+   "label": "Европейского Союза о гармонизации технических нормативов",
+   "label_key": "европеиского союза о гармонизации технических нормативов",
+   "qualified_label": "Европейского Союза о гармонизации технических нормативов",
+   "group_path": [],
+   "value": ")",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 95,
+     "raw_label": "Европейского Союза о гармонизации технических нормативов",
+     "raw_value": ")",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "16",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": ")",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0093",
+   "label": "Съюза относно хармонизацията",
+   "label_key": "съюза относно хармонизацията",
+   "qualified_label": "Съюза относно хармонизацията",
+   "group_path": [],
+   "value": ")",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 96,
+     "raw_label": "Съюза относно хармонизацията",
+     "raw_value": ")",
+     "source_url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "22",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": ")",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0094",
+   "label": "EN 50563",
+   "label_key": "en 50563",
+   "qualified_label": "EN 50563",
+   "group_path": [],
+   "value": "2011 + A1: 2013, EN 50564:2011",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 97,
+     "raw_label": "EN 50563",
+     "raw_value": "2011 + A1: 2013, EN 50564:2011,",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "2011 + A1: 2013, EN 50564:2011",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0095",
+   "label": "En55011",
+   "label_key": "en55011",
+   "qualified_label": "En55011",
+   "group_path": [],
+   "value": "2016 + A1: 2017 + A11: 2020",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 98,
+     "raw_label": "EN55011",
+     "raw_value": "2016 + A1: 2017 + A11: 2020",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2016 + A1: 2017 + A11: 2020",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0096",
+   "label": "EN 60335-2-52",
+   "label_key": "en 60335 2 52",
+   "qualified_label": "EN 60335-2-52",
+   "group_path": [],
+   "value": "2003 + A1:2008 + A11:2010 + A12:2019",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 102,
+     "raw_label": "EN 60335-2-52",
+     "raw_value": "2003 + A1:2008 + A11:2010 + A12:2019",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2003 + A1:2008 + A11:2010 + A12:2019",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0097",
+   "label": "IEC 60335-1",
+   "label_key": "iec 60335 1",
+   "qualified_label": "IEC 60335-1",
+   "group_path": [],
+   "value": "2020, IEC 60335-2-52: 2021",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "standard_reference",
+   "evidence": [
+    {
+     "raw_index": 103,
+     "raw_label": "IEC 60335-1",
+     "raw_value": "2020, IEC 60335-2-52: 2021",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2020, IEC 60335-2-52: 2021",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0098",
+   "label": "Remarks",
+   "label_key": "remarks",
+   "qualified_label": "Remarks",
+   "group_path": [],
+   "value": "1) Product is in compliance with Schedule 1 of the Product Security",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 106,
+     "raw_label": "Remarks",
+     "raw_value": "1) Product is in compliance with Schedule 1 of the Product Security",
+     "source_url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "declaration",
+     "page_ref": "1",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1) Product is in compliance with Schedule 1 of the Product Security",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  }
+ ]
+}

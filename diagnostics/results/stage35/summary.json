@@ -1,0 +1,172 @@
+[
+ {
+  "product": "Gressel GAF-1825",
+  "raw": 39,
+  "product_specs": 33,
+  "metadata": 2,
+  "marketing_other": 4,
+  "normalized_specs": 32,
+  "normalized_total": 38,
+  "dedup": 0.03,
+  "issues": [],
+  "fixes": {
+   "label_unit_moved": 2,
+   "range_dash": 1,
+   "decimal_separator": 2,
+   "punctuation": 4
+  },
+  "class_reasons": {
+   "prose_value": 1,
+   "download_entry": 3
+  }
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "raw": 355,
+  "product_specs": 301,
+  "metadata": 14,
+  "marketing_other": 40,
+  "normalized_specs": 107,
+  "normalized_total": 150,
+  "dedup": 0.645,
+  "issues": [
+   "15 placeholder/template"
+  ],
+  "fixes": {
+   "range_dash": 18,
+   "punctuation": 10,
+   "unicode_variant": 4,
+   "i18n_boolean": 18,
+   "locale_prefix": 4
+  },
+  "class_reasons": {
+   "placeholder_value": 15,
+   "prose_value": 20,
+   "schema_artifact": 1
+  }
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "raw": 23,
+  "product_specs": 18,
+  "metadata": 5,
+  "marketing_other": 0,
+  "normalized_specs": 18,
+  "normalized_total": 23,
+  "dedup": 0.0,
+  "issues": [],
+  "fixes": {
+   "unit_separator": 5
+  },
+  "class_reasons": {}
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "raw": 107,
+  "product_specs": 77,
+  "metadata": 12,
+  "marketing_other": 18,
+  "normalized_specs": 76,
+  "normalized_total": 98,
+  "dedup": 0.013,
+  "issues": [
+   "3 multi-valued spec labels"
+  ],
+  "fixes": {
+   "range_dash": 1,
+   "punctuation": 7
+  },
+  "class_reasons": {
+   "standard_reference": 10,
+   "value_is_heading": 3
+  }
+ },
+ {
+  "product": "Makita DHP484Z",
+  "raw": 15,
+  "product_specs": 15,
+  "metadata": 0,
+  "marketing_other": 0,
+  "normalized_specs": 15,
+  "normalized_total": 15,
+  "dedup": 0.0,
+  "issues": [],
+  "fixes": {
+   "bullet_marker": 8,
+   "range_dash": 4,
+   "decimal_separator": 3,
+   "unit_spacing": 1
+  },
+  "class_reasons": {}
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "raw": 42,
+  "product_specs": 32,
+  "metadata": 5,
+  "marketing_other": 5,
+  "normalized_specs": 31,
+  "normalized_total": 41,
+  "dedup": 0.031,
+  "issues": [],
+  "fixes": {
+   "label_unit_moved": 3,
+   "duplicated_unit": 1,
+   "range_dash": 2,
+   "html_entity": 3,
+   "footnote_marker": 2,
+   "punctuation": 2
+  },
+  "class_reasons": {
+   "prose_value": 4,
+   "unstructured_pair": 1
+  }
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "raw": 36,
+  "product_specs": 23,
+  "metadata": 11,
+  "marketing_other": 2,
+  "normalized_specs": 23,
+  "normalized_total": 36,
+  "dedup": 0.0,
+  "issues": [
+   "4 multi-valued spec labels",
+   "2 variant nodes (kept apart)"
+  ],
+  "fixes": {
+   "mojibake": 1
+  },
+  "class_reasons": {
+   "content_label": 2
+  }
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "raw": 32,
+  "product_specs": 9,
+  "metadata": 8,
+  "marketing_other": 15,
+  "normalized_specs": 9,
+  "normalized_total": 31,
+  "dedup": 0.0,
+  "issues": [
+   "4 placeholder/template"
+  ],
+  "fixes": {
+   "range_dash": 1,
+   "unicode_variant": 1
+  },
+  "class_reasons": {
+   "label_is_value": 1,
+   "content_label": 3,
+   "content_section": 3,
+   "unstructured_pair": 2,
+   "template_block": 3,
+   "template_text": 1,
+   "value_is_heading": 1,
+   "prose_value": 1
+  }
+ }
+]

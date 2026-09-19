@@ -1,0 +1,2005 @@
+{
+ "product_name": "Gressel GAF-1825",
+ "brand": "Gressel",
+ "model": "GAF-1825",
+ "raw_count": 39,
+ "raw_by_class": {
+  "identity_metadata": 2,
+  "product_spec": 33,
+  "marketing_content": 4,
+  "unknown": 0
+ },
+ "fixes": {
+  "label_unit_moved": 2,
+  "range_dash": 1,
+  "decimal_separator": 2,
+  "punctuation": 4
+ },
+ "normalized_count": 38,
+ "network_calls": 0,
+ "identity_nodes": [],
+ "attributes": [
+  {
+   "id": "na0001",
+   "label": "Цвет",
+   "label_key": "цвет",
+   "qualified_label": "Цвет",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "Черный",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "identifier_label",
+   "evidence": [
+    {
+     "raw_index": 0,
+     "raw_label": "Цвет",
+     "raw_value": "Черный",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "visible_dom"
+     ],
+     "fixes": []
+    }
+   ],
+   "display": "Черный",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden",
+    "visible_dom"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0002",
+   "label": "Тип",
+   "label_key": "тип",
+   "qualified_label": "Тип",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 1,
+     "raw_label": "Тип",
+     "raw_value": "да",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "visible_dom"
+     ],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden",
+    "visible_dom"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0003",
+   "label": "Чаша",
+   "label_key": "чаша",
+   "qualified_label": "Чаша",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 2,
+     "raw_label": "Чаша",
+     "raw_value": "да",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "visible_dom"
+     ],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden",
+    "visible_dom"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0004",
+   "label": "Объем чаши",
+   "label_key": "объем чаши",
+   "qualified_label": "Объем чаши",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "4 + 4 (отдельно)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 3,
+     "raw_label": "Объем чаши",
+     "raw_value": "4 + 4 (отдельно)",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "visible_dom"
+     ],
+     "fixes": []
+    }
+   ],
+   "display": "4 + 4 (отдельно)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden",
+    "visible_dom"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0005",
+   "label": "Материал чаши",
+   "label_key": "материал чаши",
+   "qualified_label": "Материал чаши",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "металлическая с антипригарным покрытием",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 4,
+     "raw_label": "Материал чаши",
+     "raw_value": "металлическая с антипригарным покрытием",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "visible_dom"
+     ],
+     "fixes": []
+    }
+   ],
+   "display": "металлическая с антипригарным покрытием",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden",
+    "visible_dom"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0006",
+   "label": "Материал корпуса",
+   "label_key": "материал корпуса",
+   "qualified_label": "Материал корпуса",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "пластик",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 5,
+     "raw_label": "Материал корпуса",
+     "raw_value": "пластик",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "пластик",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0007",
+   "label": "Дисплей",
+   "label_key": "дисплеи",
+   "qualified_label": "Дисплей",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "2 чаши для одновременного приготовления разных блюд с разными программами приготовления. Можно готовить в любой из чаш отдельно, либо одновременно в обеих чашах. Функция синхронизация готовности: можно готовить разные по времени готовности блюда, при это",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 6,
+     "raw_label": "Дисплей",
+     "raw_value": "2 чаши для одновременного приготовления разных блюд с разными программами приготовления. Можно готовить в любой из чаш отдельно, либо одновременно в обеих чашах. Функция синхронизация готовности: можно готовить разные по времени готовности блюда, при это",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2 чаши для одновременного приготовления разных блюд с разными программами приготовления. Можно готовить в любой из чаш отдельно, либо одновременно в обеих чашах. Функция синхронизация готовности: можно готовить разные по времени готовности блюда, при это",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0008",
+   "label": "Напряжение питания",
+   "label_key": "напряжение питания",
+   "qualified_label": "Напряжение питания",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "от сети",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 7,
+     "raw_label": "Напряжение питания",
+     "raw_value": "от сети",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "от сети",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0009",
+   "label": "Штрихкод",
+   "label_key": "штрихкод",
+   "qualified_label": "Штрихкод",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "4650319702506",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 8,
+     "raw_label": "Штрихкод",
+     "raw_value": "4650319702506",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "4650319702506",
+   "minimum": 4650319702506.0,
+   "maximum": 4650319702506.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0010",
+   "label": "Страна производитель",
+   "label_key": "страна производитель",
+   "qualified_label": "Страна производитель",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "Китай",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 9,
+     "raw_label": "Страна производитель",
+     "raw_value": "Китай",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Китай",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0011",
+   "label": "Гарантия",
+   "label_key": "гарантия",
+   "qualified_label": "Гарантия",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "3",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 10,
+     "raw_label": "Гарантия",
+     "raw_value": "3",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "3",
+   "minimum": 3.0,
+   "maximum": 3.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0012",
+   "label": "Длина сетевого шнура",
+   "label_key": "длина сетевого шнура",
+   "qualified_label": "Длина сетевого шнура",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "70",
+   "value_kind": "number",
+   "unit": "см",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 11,
+     "raw_label": "Длина сетевого шнура, см",
+     "raw_value": "70",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "label_unit_moved"
+     ]
+    }
+   ],
+   "display": "70 см",
+   "minimum": 70.0,
+   "maximum": 70.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "label_unit_moved"
+   ],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0013",
+   "label": "Мощность",
+   "label_key": "мощность",
+   "qualified_label": "Мощность",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "2700",
+   "value_kind": "number",
+   "unit": "Вт",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 12,
+     "raw_label": "Мощность, Вт",
+     "raw_value": "2700",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "label_unit_moved"
+     ]
+    },
+    {
+     "raw_index": 28,
+     "raw_label": "Мощность",
+     "raw_value": "2700 Вт",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2700 Вт",
+   "minimum": 2700.0,
+   "maximum": 2700.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "label_unit_moved"
+   ],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_product_page",
+    "official_document"
+   ],
+   "locations": [
+    "dom_hidden",
+    "document"
+   ],
+   "methods": [
+    "table_row",
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0014",
+   "label": "Комплектация",
+   "label_key": "комплектация",
+   "qualified_label": "Комплектация",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "чаша, решетка",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 13,
+     "raw_label": "Комплектация",
+     "raw_value": "чаша, решетка",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "чаша, решетка",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0015",
+   "label": "Таймер",
+   "label_key": "таимер",
+   "qualified_label": "Таймер",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 14,
+     "raw_label": "Таймер",
+     "raw_value": "да",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0016",
+   "label": "Тип нагревательного элемента",
+   "label_key": "тип нагревательного элемента",
+   "qualified_label": "Тип нагревательного элемента",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "ТЭН",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 15,
+     "raw_label": "Тип нагревательного элемента",
+     "raw_value": "ТЭН",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "ТЭН",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0017",
+   "label": "Терморегулятор",
+   "label_key": "терморегулятор",
+   "qualified_label": "Терморегулятор",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "80–200",
+   "value_kind": "range",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 16,
+     "raw_label": "Терморегулятор",
+     "raw_value": "80-200",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "range_dash"
+     ]
+    }
+   ],
+   "display": "80–200",
+   "minimum": 80.0,
+   "maximum": 200.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "range_dash"
+   ],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0018",
+   "label": "Управление",
+   "label_key": "управление",
+   "qualified_label": "Управление",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "сенсорное",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 17,
+     "raw_label": "Управление",
+     "raw_value": "сенсорное",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "сенсорное",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0019",
+   "label": "Количество программ",
+   "label_key": "количество программ",
+   "qualified_label": "Количество программ",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "8",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 18,
+     "raw_label": "Количество программ",
+     "raw_value": "8",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "8",
+   "minimum": 8.0,
+   "maximum": 8.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0020",
+   "label": "Размер",
+   "label_key": "размер",
+   "qualified_label": "Размер",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "42.5х40.5х33",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 19,
+     "raw_label": "Размер",
+     "raw_value": "42.5х40.5х33",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "42.5х40.5х33",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0021",
+   "label": "Материал",
+   "label_key": "материал",
+   "qualified_label": "Материал",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "металлическая решетка с антипригарным покрытием",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 20,
+     "raw_label": "Материал",
+     "raw_value": "металлическая решетка с антипригарным покрытием",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "металлическая решетка с антипригарным покрытием",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "dom_hidden"
+   ],
+   "methods": [
+    "table_row"
+   ]
+  },
+  {
+   "id": "na0022",
+   "label": "Характеристики",
+   "label_key": "характеристики",
+   "qualified_label": "Характеристики",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "Цвет Черный Тип да Чаша да Объем чаши 4 + 4 (отдельно) Материал чаши металлическая с антипригарным покрытием Все характеристики",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "prose_value",
+   "evidence": [
+    {
+     "raw_index": 21,
+     "raw_label": "Характеристики",
+     "raw_value": "Цвет Черный Тип да Чаша да Объем чаши 4 + 4 (отдельно) Материал чаши металлическая с антипригарным покрытием Все характеристики",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Цвет Черный Тип да Чаша да Объем чаши 4 + 4 (отдельно) Материал чаши металлическая с антипригарным покрытием Все характеристики",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0023",
+   "label": "Книга рецептов 12,6 мб",
+   "label_key": "книга рецептов 12 6 мб",
+   "qualified_label": "Книга рецептов 12,6 мб",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "Инструкция GAF-1825 10,2 мб",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "download_entry",
+   "evidence": [
+    {
+     "raw_index": 22,
+     "raw_label": "Книга рецептов 12,6 мб",
+     "raw_value": "Инструкция GAF-1825 10,2 мб",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Инструкция GAF-1825 10,2 мб",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0024",
+   "label": "Книга рецептов",
+   "label_key": "книга рецептов",
+   "qualified_label": "Книга рецептов",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "12,6 мб",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "download_entry",
+   "evidence": [
+    {
+     "raw_index": 23,
+     "raw_label": "Книга рецептов",
+     "raw_value": "12,6 мб",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "decimal_separator"
+     ]
+    }
+   ],
+   "display": "12,6 мб",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "decimal_separator"
+   ],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0025",
+   "label": "Инструкция GAF-1825",
+   "label_key": "инструкция gaf 1825",
+   "qualified_label": "Инструкция GAF-1825",
+   "group_path": [
+    "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши"
+   ],
+   "value": "10,2 мб",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "download_entry",
+   "evidence": [
+    {
+     "raw_index": 24,
+     "raw_label": "Инструкция GAF-1825",
+     "raw_value": "10,2 мб",
+     "source_url": "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Аэрогриль Gressel GAF-1825, 9 программ, сенсорный дисплей, подсветка, 2 чаши",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "decimal_separator"
+     ]
+    }
+   ],
+   "display": "10,2 мб",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "decimal_separator"
+   ],
+   "source_urls": [
+    "https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0026",
+   "label": "условиях",
+   "label_key": "условиях",
+   "qualified_label": "условиях",
+   "group_path": [],
+   "value": "домах, офисах, квартирах, гостиницах",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 25,
+     "raw_label": "условиях",
+     "raw_value": "домах, офисах, квартирах, гостиницах.",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "4",
+     "sku_scope": "document_scope",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "домах, офисах, квартирах, гостиницах",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0027",
+   "label": "Срок службы",
+   "label_key": "срок службы",
+   "qualified_label": "Срок службы",
+   "group_path": [],
+   "value": "3 года",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 26,
+     "raw_label": "Срок службы",
+     "raw_value": "3 года.",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "3 года",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0028",
+   "label": "Срок гарантии",
+   "label_key": "срок гарантии",
+   "qualified_label": "Срок гарантии",
+   "group_path": [],
+   "value": "12 месяцев",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 27,
+     "raw_label": "Срок гарантии",
+     "raw_value": "12 месяцев.",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "12 месяцев",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0029",
+   "label": "Напряжение",
+   "label_key": "напряжение",
+   "qualified_label": "Напряжение",
+   "group_path": [],
+   "value": "220-240 В, 50/60 Гц",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 29,
+     "raw_label": "Напряжение",
+     "raw_value": "220-240 В, 50/60 Гц",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "220-240 В, 50/60 Гц",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0030",
+   "label": "Объем чаши 1",
+   "label_key": "объем чаши 1",
+   "qualified_label": "Объем чаши 1",
+   "group_path": [],
+   "value": "4 литра",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 30,
+     "raw_label": "Объем чаши 1",
+     "raw_value": "4 литра",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "4 литра",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0031",
+   "label": "Объем чаши 2",
+   "label_key": "объем чаши 2",
+   "qualified_label": "Объем чаши 2",
+   "group_path": [],
+   "value": "4 литра",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 31,
+     "raw_label": "Объем чаши 2",
+     "raw_value": "4 литра",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "4 литра",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0032",
+   "label": "Общий объем двух чаш",
+   "label_key": "общии объем двух чаш",
+   "qualified_label": "Общий объем двух чаш",
+   "group_path": [],
+   "value": "8 литров",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 32,
+     "raw_label": "Общий объем двух чаш",
+     "raw_value": "8 литров",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "8 литров",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0033",
+   "label": "Модель",
+   "label_key": "модель",
+   "qualified_label": "Модель",
+   "group_path": [],
+   "value": "GAF-1825",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "value_is_model_identifier",
+   "evidence": [
+    {
+     "raw_index": 33,
+     "raw_label": "Модель",
+     "raw_value": "GAF-1825",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "GAF-1825",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0034",
+   "label": "Класс защиты",
+   "label_key": "класс защиты",
+   "qualified_label": "Класс защиты",
+   "group_path": [],
+   "value": "I",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 34,
+     "raw_label": "Класс защиты",
+     "raw_value": "I",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_label_colon",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "25",
+     "sku_scope": "document_model_page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "I",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_label_colon"
+   ]
+  },
+  {
+   "id": "na0035",
+   "label": "Хуаю Илектрикэл Эпплаинс Групп Ко, ЛТД.",
+   "label_key": "хуаю илектрикэл эпплаинс групп ко лтд",
+   "qualified_label": "Хуаю Илектрикэл Эпплаинс Групп Ко, ЛТД.",
+   "group_path": [],
+   "value": "168 Хуаньчэн",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 35,
+     "raw_label": "Хуаю Илектрикэл Эпплаинс Групп Ко, ЛТД.",
+     "raw_value": "168 Хуаньчэн",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_tech_section_line",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "26",
+     "sku_scope": "document_scope",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "168 Хуаньчэн",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_tech_section_line"
+   ]
+  },
+  {
+   "id": "na0036",
+   "label": "ТОО «Foreign Trade company», БИН",
+   "label_key": "тоо foreign trade company бин",
+   "qualified_label": "ТОО «Foreign Trade company», БИН",
+   "group_path": [],
+   "value": "190940025588",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 36,
+     "raw_label": "ТОО «Foreign Trade company», БИН",
+     "raw_value": "190940025588.",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_tech_section_line",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "26",
+     "sku_scope": "document_scope",
+     "seen_in": [],
+     "fixes": [
+      "punctuation"
+     ]
+    }
+   ],
+   "display": "190940025588",
+   "minimum": 190940025588.0,
+   "maximum": 190940025588.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "punctuation"
+   ],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_tech_section_line"
+   ]
+  },
+  {
+   "id": "na0037",
+   "label": "дом",
+   "label_key": "дом",
+   "qualified_label": "дом",
+   "group_path": [],
+   "value": "65, каб. 519.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 37,
+     "raw_label": "дом",
+     "raw_value": "65, каб. 519.",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_tech_section_line",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "26",
+     "sku_scope": "document_scope",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "65, каб. 519.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_tech_section_line"
+   ]
+  },
+  {
+   "id": "na0038",
+   "label": "Настоящая гарантия действует в течение",
+   "label_key": "настоящая гарантия деиствует в течение",
+   "qualified_label": "Настоящая гарантия действует в течение",
+   "group_path": [],
+   "value": "12 месяцев с",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 38,
+     "raw_label": "Настоящая гарантия действует в течение",
+     "raw_value": "12 месяцев с",
+     "source_url": "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf",
+     "source_type": "official_document",
+     "location": "document",
+     "method": "pdf_tech_section_line",
+     "section": "",
+     "document_type": "instruction",
+     "page_ref": "27",
+     "sku_scope": "document_scope",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "12 месяцев с",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf"
+   ],
+   "source_types": [
+    "official_document"
+   ],
+   "locations": [
+    "document"
+   ],
+   "methods": [
+    "pdf_tech_section_line"
+   ]
+  }
+ ]
+}

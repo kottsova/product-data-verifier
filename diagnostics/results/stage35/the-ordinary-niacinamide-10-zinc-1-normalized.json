@@ -1,0 +1,1648 @@
+{
+ "product_name": "The Ordinary Niacinamide 10% + Zinc 1%",
+ "brand": "The Ordinary",
+ "model": "Niacinamide 10% + Zinc 1%",
+ "raw_count": 32,
+ "raw_by_class": {
+  "identity_metadata": 8,
+  "product_spec": 9,
+  "marketing_content": 7,
+  "unknown": 8
+ },
+ "fixes": {
+  "range_dash": 1,
+  "unicode_variant": 1
+ },
+ "normalized_count": 31,
+ "network_calls": 0,
+ "identity_nodes": [
+  {
+   "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+   "role": "product",
+   "variant": "",
+   "fields": {
+    "name": "Niacinamide 10% + Zinc 1%",
+    "sku": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+    "mpn": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+    "brand": "The Ordinary"
+   },
+   "raw_indices": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "source_url": "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/",
+   "role": "product",
+   "variant": "",
+   "fields": {
+    "name": "The Ordinary Niacinamide 10% + Zinc 1% (60 ml) | Sérum Vitamina B3",
+    "sku": "1454645",
+    "gtin8": "00769915194951",
+    "brand": "The Ordinary"
+   },
+   "raw_indices": [
+    26,
+    27,
+    28,
+    29
+   ]
+  }
+ ],
+ "attributes": [
+  {
+   "id": "na0001",
+   "label": "name",
+   "label_key": "name",
+   "qualified_label": "name",
+   "group_path": [],
+   "value": "Niacinamide 10% + Zinc 1%",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 0,
+     "raw_label": "name",
+     "raw_value": "Niacinamide 10% + Zinc 1%",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Niacinamide 10% + Zinc 1%",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0002",
+   "label": "sku",
+   "label_key": "sku",
+   "qualified_label": "sku",
+   "group_path": [],
+   "value": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 1,
+     "raw_label": "sku",
+     "raw_value": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0003",
+   "label": "mpn",
+   "label_key": "mpn",
+   "qualified_label": "mpn",
+   "group_path": [],
+   "value": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 2,
+     "raw_label": "mpn",
+     "raw_value": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "rdn-niacinamide-10pct-zinc-1pct-eu-30ml",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0004",
+   "label": "brand",
+   "label_key": "brand",
+   "qualified_label": "brand",
+   "group_path": [],
+   "value": "The Ordinary",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 3,
+     "raw_label": "brand",
+     "raw_value": "The Ordinary",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    },
+    {
+     "raw_index": 29,
+     "raw_label": "brand",
+     "raw_value": "The Ordinary",
+     "source_url": "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "The Ordinary",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+    "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0005",
+   "label": "FSA Eligible",
+   "label_key": "fsa eligible",
+   "qualified_label": "FSA Eligible",
+   "group_path": [],
+   "value": "false",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 4,
+     "raw_label": "FSA Eligible",
+     "raw_value": "No",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "false",
+   "minimum": null,
+   "maximum": null,
+   "boolean": false,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_property"
+   ]
+  },
+  {
+   "id": "na0006",
+   "label": "ph",
+   "label_key": "ph",
+   "qualified_label": "Highlights > ph",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "5.00–6.50",
+   "value_kind": "range",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 5,
+     "raw_label": "ph",
+     "raw_value": "5.00-6.50",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "range_dash"
+     ]
+    }
+   ],
+   "display": "5.00–6.50",
+   "minimum": 5.0,
+   "maximum": 6.5,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "range_dash"
+   ],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0007",
+   "label": "water-free",
+   "label_key": "water free",
+   "qualified_label": "water-free",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "false",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 6,
+     "raw_label": "water-free",
+     "raw_value": "No",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "false",
+   "minimum": null,
+   "maximum": null,
+   "boolean": false,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0008",
+   "label": "alcohol-free",
+   "label_key": "alcohol free",
+   "qualified_label": "alcohol-free",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 7,
+     "raw_label": "alcohol-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0009",
+   "label": "oil-free",
+   "label_key": "oil free",
+   "qualified_label": "oil-free",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 8,
+     "raw_label": "oil-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0010",
+   "label": "silicone-free",
+   "label_key": "silicone free",
+   "qualified_label": "silicone-free",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 9,
+     "raw_label": "silicone-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0011",
+   "label": "vegan",
+   "label_key": "vegan",
+   "qualified_label": "vegan",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 10,
+     "raw_label": "vegan",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0012",
+   "label": "gluten-free",
+   "label_key": "gluten free",
+   "qualified_label": "gluten-free",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 11,
+     "raw_label": "gluten-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0013",
+   "label": "cruelty-free",
+   "label_key": "cruelty free",
+   "qualified_label": "cruelty-free",
+   "group_path": [
+    "Highlights"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 12,
+     "raw_label": "cruelty-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "definition_list"
+   ]
+  },
+  {
+   "id": "na0014",
+   "label": "30ml",
+   "label_key": "30ml",
+   "qualified_label": "30ml",
+   "group_path": [
+    "Niacinamide 10% + Zinc 1%"
+   ],
+   "value": "60ml",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "label_is_value",
+   "evidence": [
+    {
+     "raw_index": 13,
+     "raw_label": "30ml",
+     "raw_value": "60ml",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Niacinamide 10% + Zinc 1%",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "60ml",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0015",
+   "label": "Free shipping on orders over 100 USD FAQs.",
+   "label_key": "free shipping on orders over 100 usd faqs",
+   "qualified_label": "Free shipping on orders over 100 USD FAQs.",
+   "group_path": [
+    "Is this product right for you?"
+   ],
+   "value": "365 day returns. Return Policy.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_label",
+   "evidence": [
+    {
+     "raw_index": 14,
+     "raw_label": "Free shipping on orders over 100 USD FAQs.",
+     "raw_value": "365 day returns. Return Policy.",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Is this product right for you?",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "365 day returns. Return Policy.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0016",
+   "label": "Before Recycling",
+   "label_key": "before recycling",
+   "qualified_label": "Before Recycling",
+   "group_path": [
+    "Recycling Instructions"
+   ],
+   "value": "Empty the contents of the container. Remove cap, lid, dropper, pump, and other components and rinse the bottle/jar with water.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_section",
+   "evidence": [
+    {
+     "raw_index": 15,
+     "raw_label": "Before Recycling",
+     "raw_value": "Empty the contents of the container. Remove cap, lid, dropper, pump, and other components and rinse the bottle/jar with water.",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Recycling Instructions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Empty the contents of the container. Remove cap, lid, dropper, pump, and other components and rinse the bottle/jar with water.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0017",
+   "label": "Packaging items with adhesive-based labels",
+   "label_key": "packaging items with adhesive based labels",
+   "qualified_label": "Packaging items with adhesive-based labels",
+   "group_path": [
+    "Before Recycling"
+   ],
+   "value": "Contact your local recycling facility to ensure recyclability via curbside recycling program. Otherwise, dispose via our in-store recycling program.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_section",
+   "evidence": [
+    {
+     "raw_index": 16,
+     "raw_label": "Packaging items with adhesive-based labels",
+     "raw_value": "Contact your local recycling facility to ensure recyclability via curbside recycling program. Otherwise, dispose via our in-store recycling program.",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Before Recycling:",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Contact your local recycling facility to ensure recyclability via curbside recycling program. Otherwise, dispose via our in-store recycling program.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0018",
+   "label": "Dropper Lids",
+   "label_key": "dropper lids",
+   "qualified_label": "Dropper Lids",
+   "group_path": [
+    "Serum/Oil, Shampoo, Conditioner, Shower Gel, Lotion, Hand Soap Bottles"
+   ],
+   "value": "Dispose of via our in-store recycling program.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "unstructured_pair",
+   "evidence": [
+    {
+     "raw_index": 17,
+     "raw_label": "Dropper Lids",
+     "raw_value": "Dispose of via our in-store recycling program.",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Serum/Oil, Shampoo, Conditioner, Shower Gel, Lotion, Hand Soap Bottles:",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Dispose of via our in-store recycling program.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0019",
+   "label": "Do not use with",
+   "label_key": "do not use with",
+   "qualified_label": "Do not use with",
+   "group_path": [
+    "Disclaimer"
+   ],
+   "value": "Direct Vitamin C Indirect Vitamin C",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_section",
+   "evidence": [
+    {
+     "raw_index": 18,
+     "raw_label": "Do not use with",
+     "raw_value": "Direct Vitamin C Indirect Vitamin C",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Disclaimer:",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Direct Vitamin C Indirect Vitamin C",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0020",
+   "label": "Current product",
+   "label_key": "current product",
+   "qualified_label": "Current product",
+   "group_path": [
+    "Formulation Compatibility Tool"
+   ],
+   "value": "Niacinamide 10% + Zinc 1%",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_label",
+   "evidence": [
+    {
+     "raw_index": 19,
+     "raw_label": "Current product",
+     "raw_value": "Niacinamide 10% + Zinc 1%",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Formulation Compatibility Tool",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Niacinamide 10% + Zinc 1%",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0021",
+   "label": "Price",
+   "label_key": "price",
+   "qualified_label": "Price",
+   "group_path": [
+    "The Ordinary"
+   ],
+   "value": "Free",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "template_block",
+   "evidence": [
+    {
+     "raw_index": 20,
+     "raw_label": "Price",
+     "raw_value": "Free",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "The Ordinary",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Free",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0022",
+   "label": "Client Name",
+   "label_key": "client name",
+   "qualified_label": "Client Name",
+   "group_path": [
+    "The Ordinary"
+   ],
+   "value": "Lorem Ipsum",
+   "value_kind": "template_text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "template_text",
+   "evidence": [
+    {
+     "raw_index": 21,
+     "raw_label": "Client Name",
+     "raw_value": "Lorem Ipsum",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "The Ordinary",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Lorem Ipsum",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0023",
+   "label": "Email",
+   "label_key": "email",
+   "qualified_label": "Email",
+   "group_path": [
+    "The Ordinary"
+   ],
+   "value": "loremipsum@email.com",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "template_block",
+   "evidence": [
+    {
+     "raw_index": 22,
+     "raw_label": "Email",
+     "raw_value": "loremipsum@email.com",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "The Ordinary",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "loremipsum@email.com",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0024",
+   "label": "Phone",
+   "label_key": "phone",
+   "qualified_label": "Phone",
+   "group_path": [
+    "The Ordinary"
+   ],
+   "value": "123 456 7890",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "template_block",
+   "evidence": [
+    {
+     "raw_index": 23,
+     "raw_label": "Phone",
+     "raw_value": "123 456 7890",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "The Ordinary",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "123 456 7890",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0025",
+   "label": "Step 2",
+   "label_key": "step 2",
+   "qualified_label": "Step 2",
+   "group_path": [
+    "10% Off Is On Its Way."
+   ],
+   "value": "Treat",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_label",
+   "evidence": [
+    {
+     "raw_index": 24,
+     "raw_label": "Step 2",
+     "raw_value": "Treat",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "label_colon",
+     "section": "10% Off Is On Its Way.",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ],
+     "fixes": []
+    }
+   ],
+   "display": "Treat",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom",
+    "dom_hidden"
+   ],
+   "methods": [
+    "label_colon"
+   ]
+  },
+  {
+   "id": "na0026",
+   "label": "Format Serum",
+   "label_key": "format serum",
+   "qualified_label": "Format Serum",
+   "group_path": [
+    "Is this product right for you?"
+   ],
+   "value": "Water-Based",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "unstructured_pair",
+   "evidence": [
+    {
+     "raw_index": 25,
+     "raw_label": "Format Serum",
+     "raw_value": "Water-Based",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "label_colon",
+     "section": "Is this product right for you?",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Water-Based",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "label_colon"
+   ]
+  },
+  {
+   "id": "na0027",
+   "label": "name",
+   "label_key": "name",
+   "qualified_label": "name",
+   "group_path": [],
+   "value": "The Ordinary Niacinamide 10% + Zinc 1% (60 ml) | Sérum Vitamina B3",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 26,
+     "raw_label": "name",
+     "raw_value": "The Ordinary Niacinamide 10% + Zinc 1% (60 ml) | Sérum Vitamina B3",
+     "source_url": "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "The Ordinary Niacinamide 10% + Zinc 1% (60 ml) | Sérum Vitamina B3",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0028",
+   "label": "sku",
+   "label_key": "sku",
+   "qualified_label": "sku",
+   "group_path": [],
+   "value": "1454645",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 27,
+     "raw_label": "sku",
+     "raw_value": "1454645",
+     "source_url": "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1454645",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0029",
+   "label": "gtin8",
+   "label_key": "gtin8",
+   "qualified_label": "gtin8",
+   "group_path": [],
+   "value": "00769915194951",
+   "value_kind": "number",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 28,
+     "raw_label": "gtin8",
+     "raw_value": "00769915194951",
+     "source_url": "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "00769915194951",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0030",
+   "label": "Niacinamida",
+   "label_key": "niacinamida",
+   "qualified_label": "Niacinamida",
+   "group_path": [
+    "Sus ingredientes mágicos"
+   ],
+   "value": "Este revolucionario activo es una forma en la que se presenta la vitamina B3, que se encuentra presente en numerosos alimentos como el pescado o los huevos. Desde hace unos años, se ha convertido en todo un MUST en la cosmética coreana debido a sus múltiples beneficios para la piel, como",
+   "value_kind": "heading",
+   "unit": "",
+   "cls": "unknown",
+   "class_reason": "value_is_heading",
+   "evidence": [
+    {
+     "raw_index": 30,
+     "raw_label": "Niacinamida",
+     "raw_value": "Este revolucionario activo es una forma en la que se presenta la vitamina B3, que se encuentra presente en numerosos alimentos como el pescado o los huevos. Desde hace unos años, se ha convertido en todo un MUST en la cosmética coreana debido a sus múltiples beneficios para la piel, como:",
+     "source_url": "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "label_colon",
+     "section": "Sus ingredientes mágicos",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Este revolucionario activo es una forma en la que se presenta la vitamina B3, que se encuentra presente en numerosos alimentos como el pescado o los huevos. Desde hace unos años, se ha convertido en todo un MUST en la cosmética coreana debido a sus múltiples beneficios para la piel, como",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "label_colon"
+   ]
+  },
+  {
+   "id": "na0031",
+   "label": "Zinc",
+   "label_key": "zinc",
+   "qualified_label": "Zinc",
+   "group_path": [
+    "Sus ingredientes mágicos"
+   ],
+   "value": "Es un mineral indispensable para nuestro organismo, ya que es como el \" mecánico 24h\" de la piel puesto que su función principal es la de reparar los tejidos dañados y curar heridas. De ahí su importancia para combatir el acné, ya que cicatriza los tejidos dañados por éste, así como los alivia y desinflama. Además, ayuda a regular la producción de sebo, reduciendo el exceso.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "prose_value",
+   "evidence": [
+    {
+     "raw_index": 31,
+     "raw_label": "Zinc",
+     "raw_value": "Es un mineral indispensable para nuestro organismo, ya que es como el “ mecánico 24h” de la piel puesto que su función principal es la de reparar los tejidos dañados y curar heridas. De ahí su importancia para combatir el acné, ya que cicatriza los tejidos dañados por éste, así como los alivia y desinflama. Además, ayuda a regular la producción de sebo, reduciendo el exceso.",
+     "source_url": "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "label_colon",
+     "section": "Sus ingredientes mágicos",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "unicode_variant"
+     ]
+    }
+   ],
+   "display": "Es un mineral indispensable para nuestro organismo, ya que es como el \" mecánico 24h\" de la piel puesto que su función principal es la de reparar los tejidos dañados y curar heridas. De ahí su importancia para combatir el acné, ya que cicatriza los tejidos dañados por éste, así como los alivia y desinflama. Además, ayuda a regular la producción de sebo, reduciendo el exceso.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "unicode_variant"
+   ],
+   "source_urls": [
+    "https://theordinary.es/comprar-theordinary/the-ordinary-niacinamide-10-zinc-1-60-ml-serum-vitamina-b3/"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "label_colon"
+   ]
+  }
+ ]
+}

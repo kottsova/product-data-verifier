@@ -1,0 +1,1927 @@
+{
+ "product_name": "Logitech MX Master 3S",
+ "brand": "Logitech",
+ "model": "MX Master 3S",
+ "raw_count": 36,
+ "raw_by_class": {
+  "identity_metadata": 11,
+  "product_spec": 23,
+  "marketing_content": 2,
+  "unknown": 0
+ },
+ "fixes": {
+  "mojibake": 1
+ },
+ "normalized_count": 36,
+ "network_calls": 0,
+ "identity_nodes": [
+  {
+   "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+   "role": "parent",
+   "variant": "",
+   "fields": {
+    "name": "MX Master 3S Bluetooth Edition",
+    "product id": "mx-master-3s",
+    "brand": "Logitech"
+   },
+   "raw_indices": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+   "role": "variant",
+   "variant": "Black",
+   "fields": {
+    "name": "MX Master 3S Bluetooth Edition - Black",
+    "sku": "910-007500",
+    "mpn": "910-007500",
+    "color": "Black"
+   },
+   "raw_indices": [
+    3,
+    4,
+    5,
+    6
+   ]
+  },
+  {
+   "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+   "role": "variant",
+   "variant": "Graphite",
+   "fields": {
+    "name": "MX Master 3S Bluetooth Edition - Graphite",
+    "sku": "910-007499",
+    "mpn": "910-007499",
+    "color": "Graphite"
+   },
+   "raw_indices": [
+    7,
+    8,
+    9,
+    10
+   ]
+  }
+ ],
+ "attributes": [
+  {
+   "id": "na0001",
+   "label": "name",
+   "label_key": "name",
+   "qualified_label": "name",
+   "group_path": [],
+   "value": "MX Master 3S Bluetooth Edition",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 0,
+     "raw_label": "name",
+     "raw_value": "MX Master 3S Bluetooth Edition",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "MX Master 3S Bluetooth Edition",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0002",
+   "label": "product ID",
+   "label_key": "product id",
+   "qualified_label": "product ID",
+   "group_path": [],
+   "value": "mx-master-3s",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 1,
+     "raw_label": "productID",
+     "raw_value": "mx-master-3s",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "mx-master-3s",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0003",
+   "label": "brand",
+   "label_key": "brand",
+   "qualified_label": "brand",
+   "group_path": [],
+   "value": "Logitech",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 2,
+     "raw_label": "brand",
+     "raw_value": "Logitech",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Logitech",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0004",
+   "label": "name",
+   "label_key": "name",
+   "qualified_label": "name",
+   "group_path": [],
+   "value": "MX Master 3S Bluetooth Edition - Black",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 3,
+     "raw_label": "name",
+     "raw_value": "MX Master 3S Bluetooth Edition - Black",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "MX Master 3S Bluetooth Edition - Black",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Black",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0005",
+   "label": "sku",
+   "label_key": "sku",
+   "qualified_label": "sku",
+   "group_path": [],
+   "value": "910-007500",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 4,
+     "raw_label": "sku",
+     "raw_value": "910-007500",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "910-007500",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Black",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0006",
+   "label": "mpn",
+   "label_key": "mpn",
+   "qualified_label": "mpn",
+   "group_path": [],
+   "value": "910-007500",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 5,
+     "raw_label": "mpn",
+     "raw_value": "910-007500",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "910-007500",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Black",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0007",
+   "label": "color",
+   "label_key": "color",
+   "qualified_label": "color",
+   "group_path": [],
+   "value": "Black",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 6,
+     "raw_label": "color",
+     "raw_value": "Black",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Black",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Black",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0008",
+   "label": "name",
+   "label_key": "name",
+   "qualified_label": "name",
+   "group_path": [],
+   "value": "MX Master 3S Bluetooth Edition - Graphite",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 7,
+     "raw_label": "name",
+     "raw_value": "MX Master 3S Bluetooth Edition - Graphite",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "MX Master 3S Bluetooth Edition - Graphite",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Graphite",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0009",
+   "label": "sku",
+   "label_key": "sku",
+   "qualified_label": "sku",
+   "group_path": [],
+   "value": "910-007499",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 8,
+     "raw_label": "sku",
+     "raw_value": "910-007499",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "910-007499",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Graphite",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0010",
+   "label": "mpn",
+   "label_key": "mpn",
+   "qualified_label": "mpn",
+   "group_path": [],
+   "value": "910-007499",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 9,
+     "raw_label": "mpn",
+     "raw_value": "910-007499",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "910-007499",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Graphite",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0011",
+   "label": "color",
+   "label_key": "color",
+   "qualified_label": "color",
+   "group_path": [],
+   "value": "Graphite",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "identity_metadata",
+   "class_reason": "json_ld_scalar",
+   "evidence": [
+    {
+     "raw_index": 10,
+     "raw_label": "color",
+     "raw_value": "Graphite",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Graphite",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "Graphite",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_ld"
+   ],
+   "methods": [
+    "json_ld_field"
+   ]
+  },
+  {
+   "id": "na0012",
+   "label": "Height",
+   "label_key": "height",
+   "qualified_label": "Height",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "4.92",
+   "value_kind": "number",
+   "unit": "in",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 11,
+     "raw_label": "Height",
+     "raw_value": "4.92 in (124.9 mm)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "4.92 in (124.9 mm)",
+   "minimum": 4.92,
+   "maximum": 4.92,
+   "boolean": null,
+   "alternates": [
+    "124.9 mm"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0013",
+   "label": "Width",
+   "label_key": "width",
+   "qualified_label": "Width",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "3.32",
+   "value_kind": "number",
+   "unit": "in",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 12,
+     "raw_label": "Width",
+     "raw_value": "3.32 in (84.3 mm)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "3.32 in (84.3 mm)",
+   "minimum": 3.32,
+   "maximum": 3.32,
+   "boolean": null,
+   "alternates": [
+    "84.3 mm"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0014",
+   "label": "Depth",
+   "label_key": "depth",
+   "qualified_label": "Depth",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "2.01",
+   "value_kind": "number",
+   "unit": "in",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 13,
+     "raw_label": "Depth",
+     "raw_value": "2.01 in (51 mm)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "2.01 in (51 mm)",
+   "minimum": 2.01,
+   "maximum": 2.01,
+   "boolean": null,
+   "alternates": [
+    "51 mm"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0015",
+   "label": "Weight",
+   "label_key": "weight",
+   "qualified_label": "Weight",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "4.97",
+   "value_kind": "number",
+   "unit": "oz",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 14,
+     "raw_label": "Weight",
+     "raw_value": "4.97 oz (141 g)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "4.97 oz (141 g)",
+   "minimum": 4.97,
+   "maximum": 4.97,
+   "boolean": null,
+   "alternates": [
+    "141 g"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0016",
+   "label": "Height",
+   "label_key": "height",
+   "qualified_label": "Height",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "0.24",
+   "value_kind": "number",
+   "unit": "in",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 15,
+     "raw_label": "Height",
+     "raw_value": "0.24 in (6.11 mm)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "0.24 in (6.11 mm)",
+   "minimum": 0.24,
+   "maximum": 0.24,
+   "boolean": null,
+   "alternates": [
+    "6.11 mm"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0017",
+   "label": "Width",
+   "label_key": "width",
+   "qualified_label": "Width",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "0.57",
+   "value_kind": "number",
+   "unit": "in",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 16,
+     "raw_label": "Width",
+     "raw_value": "0.57 in (14.4 mm)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "0.57 in (14.4 mm)",
+   "minimum": 0.57,
+   "maximum": 0.57,
+   "boolean": null,
+   "alternates": [
+    "14.4 mm"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0018",
+   "label": "Depth",
+   "label_key": "depth",
+   "qualified_label": "Depth",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "0.73",
+   "value_kind": "number",
+   "unit": "in",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 17,
+     "raw_label": "Depth",
+     "raw_value": "0.73 in (18.65 mm)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "0.73 in (18.65 mm)",
+   "minimum": 0.73,
+   "maximum": 0.73,
+   "boolean": null,
+   "alternates": [
+    "18.65 mm"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0019",
+   "label": "Weight",
+   "label_key": "weight",
+   "qualified_label": "Weight",
+   "group_path": [
+    "specs",
+    "spec"
+   ],
+   "value": "0.06",
+   "value_kind": "number",
+   "unit": "oz",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 18,
+     "raw_label": "Weight",
+     "raw_value": "0.06 oz (1.68 g)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "specs > spec",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "0.06 oz (1.68 g)",
+   "minimum": 0.06,
+   "maximum": 0.06,
+   "boolean": null,
+   "alternates": [
+    "1.68 g"
+   ],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0020",
+   "label": "Sensor Technology",
+   "label_key": "sensor technology",
+   "qualified_label": "Sensor Technology",
+   "group_path": [
+    "in River Tech Specs",
+    "sensortracking"
+   ],
+   "value": "Darkfield high precision",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 19,
+     "raw_label": "Sensor Technology",
+     "raw_value": "Darkfield high precision",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > sensortracking",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Darkfield high precision",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0021",
+   "label": "Nominal value",
+   "label_key": "nominal value",
+   "qualified_label": "Nominal value",
+   "group_path": [
+    "in River Tech Specs",
+    "sensortracking"
+   ],
+   "value": "1000",
+   "value_kind": "number",
+   "unit": "DPI",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 20,
+     "raw_label": "Nominal value",
+     "raw_value": "1000 DPI",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > sensortracking",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "1000 DPI",
+   "minimum": 1000.0,
+   "maximum": 1000.0,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0022",
+   "label": "DPI (Minimal and maximal value)",
+   "label_key": "dpi minimal and maximal value",
+   "qualified_label": "DPI (Minimal and maximal value)",
+   "group_path": [
+    "in River Tech Specs",
+    "sensortracking"
+   ],
+   "value": "200-8000 DPI (can be set in increments of 50 DPI)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 21,
+     "raw_label": "DPI (Minimal and maximal value)",
+     "raw_value": "200-8000 DPI (can be set in increments of 50 DPI)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > sensortracking",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "200-8000 DPI (can be set in increments of 50 DPI)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0023",
+   "label": "Number of Buttons",
+   "label_key": "number of buttons",
+   "qualified_label": "Number of Buttons",
+   "group_path": [
+    "in River Tech Specs",
+    "buttons"
+   ],
+   "value": "7 buttons (Left/Right-click, Back/Forward, App-Switch, Wheel mode-shift, Middle click)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 22,
+     "raw_label": "Number of Buttons",
+     "raw_value": "7 buttons (Left/Right-click, Back/Forward, App-Switch, Wheel mode-shift, Middle click)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > buttons",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "7 buttons (Left/Right-click, Back/Forward, App-Switch, Wheel mode-shift, Middle click)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0024",
+   "label": "Gesture button",
+   "label_key": "gesture button",
+   "qualified_label": "Gesture button",
+   "group_path": [
+    "in River Tech Specs",
+    "buttons"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 23,
+     "raw_label": "Gesture button",
+     "raw_value": "Yes",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > buttons",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0025",
+   "label": "Scroll Wheel",
+   "label_key": "scroll wheel",
+   "qualified_label": "Scroll Wheel",
+   "group_path": [
+    "in River Tech Specs",
+    "scrolltypes"
+   ],
+   "value": "Yes, with smart-shift",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 24,
+     "raw_label": "Scroll Wheel",
+     "raw_value": "Yes, with smart-shift",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > scrolltypes",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Yes, with smart-shift",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0026",
+   "label": "Thumb wheel",
+   "label_key": "thumb wheel",
+   "qualified_label": "Thumb wheel",
+   "group_path": [
+    "in River Tech Specs",
+    "scrolltypes"
+   ],
+   "value": "true",
+   "value_kind": "boolean",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "measurable_value",
+   "evidence": [
+    {
+     "raw_index": 25,
+     "raw_label": "Thumb wheel",
+     "raw_value": "Yes",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > scrolltypes",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "true",
+   "minimum": null,
+   "maximum": null,
+   "boolean": true,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0027",
+   "label": "Customization app",
+   "label_key": "customization app",
+   "qualified_label": "Customization app",
+   "group_path": [
+    "in River Tech Specs",
+    "features"
+   ],
+   "value": "Supported by Logi Options+ on Windows and macOS*. (*Available on Windows and macOS at logitech.com/optionsplus)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 26,
+     "raw_label": "Customization app",
+     "raw_value": "Supported by Logi Options+ on Windows and macOS*. (*Available on Windows and macOS at logitech.com/optionsplus)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Supported by Logi Options+ on Windows and macOS*. (*Available on Windows and macOS at logitech.com/optionsplus)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0028",
+   "label": "Battery type",
+   "label_key": "battery type",
+   "qualified_label": "Battery type",
+   "group_path": [
+    "in River Tech Specs",
+    "battery"
+   ],
+   "value": "Rechargeable Li-Po (500 mAh) battery",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 27,
+     "raw_label": "Battery type",
+     "raw_value": "Rechargeable Li-Po (500 mAh) battery",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > battery",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Rechargeable Li-Po (500 mAh) battery",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0029",
+   "label": "Battery life",
+   "label_key": "battery life",
+   "qualified_label": "Battery life",
+   "group_path": [
+    "in River Tech Specs",
+    "battery"
+   ],
+   "value": "Get three hours of use from a one-minute quick charge.* (*Battery life may vary based on user and computing conditions.)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 28,
+     "raw_label": "Battery life",
+     "raw_value": "Get three hours of use from a one-minute quick charge.* (*Battery life may vary based on user and computing conditions.)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > battery",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Get three hours of use from a one-minute quick charge.* (*Battery life may vary based on user and computing conditions.)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0030",
+   "label": "Wireless technology",
+   "label_key": "wireless technology",
+   "qualified_label": "Wireless technology",
+   "group_path": [
+    "in River Tech Specs",
+    "connectivity"
+   ],
+   "value": "Bluetooth Low Energy Technology",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 29,
+     "raw_label": "Wireless technology",
+     "raw_value": "Bluetooth Low Energy Technology",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > connectivity",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Bluetooth Low Energy Technology",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0031",
+   "label": "Wireless range",
+   "label_key": "wireless range",
+   "qualified_label": "Wireless range",
+   "group_path": [
+    "in River Tech Specs",
+    "connectivity"
+   ],
+   "value": "32.8 ft (10 m)*. (*Wireless range may vary depending on operating environment and computer setup.)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 30,
+     "raw_label": "Wireless range",
+     "raw_value": "32.8 ft (10 m)*. (*Wireless range may vary depending on operating environment and computer setup.)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > connectivity",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "32.8 ft (10 m)*. (*Wireless range may vary depending on operating environment and computer setup.)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0032",
+   "label": "Requirements",
+   "label_key": "requirements",
+   "qualified_label": "Requirements",
+   "group_path": [
+    "in River Tech Specs",
+    "systemrequirements"
+   ],
+   "value": "Internet access required to download optional customization app Logi Options+*. (*Available on Windows and macOS at logitech.com/optionsplus)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 31,
+     "raw_label": "Requirements",
+     "raw_value": "Internet access required to download optional customization app Logi Options+*. (*Available on Windows and macOS at logitech.com/optionsplus)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > systemrequirements",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Internet access required to download optional customization app Logi Options+*. (*Available on Windows and macOS at logitech.com/optionsplus)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0033",
+   "label": "Logi Bolt USB receiver",
+   "label_key": "logi bolt usb receiver",
+   "qualified_label": "Logi Bolt USB receiver",
+   "group_path": [
+    "in River Tech Specs",
+    "systemrequirements"
+   ],
+   "value": "Requires: Available USB-A port Windows 10, 11 or later macOS 10.15 or later Linux*, ChromeOS*. (*Device basic functions will be supported without software for other systems than Windows and macOS)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 32,
+     "raw_label": "Logi Bolt USB receiver",
+     "raw_value": "Requires: Available USB-A port Windows 10, 11 or later macOS 10.15 or later Linux*, ChromeOS*. (*Device basic functions will be supported without software for other systems than Windows and macOS)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > systemrequirements",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "Requires: Available USB-A port Windows 10, 11 or later macOS 10.15 or later Linux*, ChromeOS*. (*Device basic functions will be supported without software for other systems than Windows and macOS)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0034",
+   "label": "Compatibility",
+   "label_key": "compatibility",
+   "qualified_label": "Compatibility",
+   "group_path": [
+    "in River Tech Specs",
+    "systemrequirements"
+   ],
+   "value": "Requires Bluetooth Low Energy Technology Engineered for Intel® Evo™ Laptops Windows 10, 11 or later macOS 10.15 or later Linux*, ChromeOS™*, iPadOS* 14 or later Android™* 8.0 or later, Not compatible with Logitech Unifying USB Receiver technology. (*Device basic functions will be supported without software for other systems than Windows and macOS)",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "product_spec",
+   "class_reason": "structured_pair",
+   "evidence": [
+    {
+     "raw_index": 33,
+     "raw_label": "Compatibility",
+     "raw_value": "Requires Bluetooth Low Energy Technology Engineered for IntelÂ® Evoâ¢ Laptops Windows 10, 11 or later macOS 10.15 or later Linux*, ChromeOSâ¢*, iPadOS* 14 or later Androidâ¢* 8.0 or later, Not compatible with Logitech Unifying USB Receiver technology. (*Device basic functions will be supported without software for other systems than Windows and macOS)",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_pair",
+     "section": "inRiverTechSpecs > systemrequirements",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "mojibake"
+     ]
+    }
+   ],
+   "display": "Requires Bluetooth Low Energy Technology Engineered for Intel® Evo™ Laptops Windows 10, 11 or later macOS 10.15 or later Linux*, ChromeOS™*, iPadOS* 14 or later Android™* 8.0 or later, Not compatible with Logitech Unifying USB Receiver technology. (*Device basic functions will be supported without software for other systems than Windows and macOS)",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [
+    "mojibake"
+   ],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "json_state"
+   ],
+   "methods": [
+    "json_state_pair"
+   ]
+  },
+  {
+   "id": "na0035",
+   "label": "Special offers (2) View All",
+   "label_key": "special offers 2 view all",
+   "qualified_label": "Special offers (2) View All",
+   "group_path": [
+    "Color Black"
+   ],
+   "value": "FREE* Laptop Stand ($29.99 value) on orders over $225.",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_label",
+   "evidence": [
+    {
+     "raw_index": 34,
+     "raw_label": "Special offers (2) View All",
+     "raw_value": "FREE* Laptop Stand ($29.99 value) on orders over $225.",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Color Black",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "FREE* Laptop Stand ($29.99 value) on orders over $225.",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  },
+  {
+   "id": "na0036",
+   "label": "Special offers (2)",
+   "label_key": "special offers 2",
+   "qualified_label": "Special offers (2)",
+   "group_path": [
+    "Color Black"
+   ],
+   "value": "View All",
+   "value_kind": "text",
+   "unit": "",
+   "cls": "marketing_content",
+   "class_reason": "content_label",
+   "evidence": [
+    {
+     "raw_index": 35,
+     "raw_label": "Special offers (2)",
+     "raw_value": "View All",
+     "source_url": "https://www.logitech.com/en-us/shop/p/mx-master-3s",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Color Black",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "display": "View All",
+   "minimum": null,
+   "maximum": null,
+   "boolean": null,
+   "alternates": [],
+   "label_aliases": [],
+   "variant": "",
+   "fixes": [],
+   "source_urls": [
+    "https://www.logitech.com/en-us/shop/p/mx-master-3s"
+   ],
+   "source_types": [
+    "official_product_page"
+   ],
+   "locations": [
+    "visible_dom"
+   ],
+   "methods": [
+    "element_pair"
+   ]
+  }
+ ]
+}

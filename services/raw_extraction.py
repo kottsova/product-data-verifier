@@ -97,6 +97,10 @@ class ExtractionResult:
         }
 
 
+# Stage 35 reads this object; the alias names the contract ("raw extraction result") without a new type.
+RawExtractionResult = ExtractionResult
+
+
 def _default_bytes_fetch(url: str) -> tuple[str, bytes, str] | None:
     import requests
 
