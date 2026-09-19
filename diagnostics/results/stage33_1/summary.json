@@ -1,0 +1,74 @@
+{
+ "Gressel GAF-1825": {
+  "cells": [
+   "PASS ✓ (6s)",
+   "PASS ✓ (6s)",
+   "PASS ✓ (6s)"
+  ],
+  "statuses": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "oracle": [
+   true,
+   true,
+   true
+  ],
+  "stable": true
+ },
+ "Dreame G12 Pro HHR32A": {
+  "cells": [
+   "PARTIAL ✓ (74s)",
+   "PARTIAL ✓ (76s)",
+   "PARTIAL ✓ (68s)"
+  ],
+  "statuses": [
+   "PARTIAL",
+   "PARTIAL",
+   "PARTIAL"
+  ],
+  "oracle": [
+   true,
+   true,
+   true
+  ],
+  "stable": true
+ },
+ "DEWALT DCD796P2": {
+  "cells": [
+   "PASS ✓ (29s)",
+   "PASS ✓ (29s)",
+   "PASS ✓ (28s)"
+  ],
+  "statuses": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "oracle": [
+   true,
+   true,
+   true
+  ],
+  "stable": true
+ },
+ "Philips Sonicare 9900 Prestige HX9992/12": {
+  "cells": [
+   "PASS ✓ (5s)",
+   "PASS ✓ (5s)",
+   "PASS ✓ (4s)"
+  ],
+  "statuses": [
+   "PASS",
+   "PASS",
+   "PASS"
+  ],
+  "oracle": [
+   true,
+   true,
+   true
+  ],
+  "stable": true
+ }
+}

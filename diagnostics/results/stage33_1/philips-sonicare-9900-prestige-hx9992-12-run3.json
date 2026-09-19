@@ -1,0 +1,498 @@
+{
+ "product_name": "Philips Sonicare 9900 Prestige HX9992/12",
+ "brand": "Philips",
+ "model": "Sonicare 9900 Prestige HX9992/12",
+ "market": "global",
+ "status": "PASS",
+ "exact_official_found": true,
+ "official": [
+  {
+   "url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+   "domain": "philips.co.uk",
+   "source_type": "manufacturer",
+   "title": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue HX9992/12 | Philips",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "12",
+   "page_role": "product"
+  },
+  {
+   "url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+   "domain": "philips.de",
+   "source_type": "manufacturer",
+   "title": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau HX9992/12 | Philips",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "12",
+   "page_role": "product"
+  }
+ ],
+ "dealers": [],
+ "secondary": [],
+ "rejected": [],
+ "runtime_seconds": 4.033,
+ "search_status": "success",
+ "attempted_queries": [
+  "Philips Sonicare 9900 Prestige HX9992/12"
+ ],
+ "providers": [
+  "direct_domain_probe"
+ ],
+ "provider_failures": [],
+ "candidate_counts": {
+  "provider_raw": 49,
+  "collected": 2,
+  "normalized": 2,
+  "unique": 2,
+  "duplicates": 0,
+  "accepted": 2,
+  "rejected": 0,
+  "official": 2,
+  "dealer": 0,
+  "secondary": 0,
+  "documents": 3
+ },
+ "official_pages": [
+  {
+   "url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+   "domain": "philips.co.uk",
+   "source_type": "manufacturer",
+   "title": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue HX9992/12 | Philips",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "12",
+   "page_role": "product"
+  },
+  {
+   "url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+   "domain": "philips.de",
+   "source_type": "manufacturer",
+   "title": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau HX9992/12 | Philips",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "12",
+   "page_role": "product"
+  }
+ ],
+ "support_pages": [],
+ "documents": [
+  {
+   "url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+   "doc_type": "declaration",
+   "canonical_field": "declaration_url",
+   "title": "EU Declaration of conformity",
+   "authority": "official (linked from verified official page)",
+   "model_match": "exact",
+   "reason": "requested model identifier appears in the link text or file name; linked from official page",
+   "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+   "found_on": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "file_type": "pdf",
+   "locales": [
+    "AEN"
+   ]
+  },
+  {
+   "url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+   "doc_type": "declaration",
+   "canonical_field": "declaration_url",
+   "title": "UK Declaration of conformity",
+   "authority": "official (linked from verified official page)",
+   "model_match": "exact",
+   "reason": "requested model identifier appears in the link text or file name; linked from official page",
+   "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+   "found_on": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "file_type": "pdf",
+   "locales": [
+    "AEN"
+   ]
+  },
+  {
+   "url": "https://www.documents.philips.com/assets/20211007/43e2cf011fa64b81bd83adba00a8634e.pdf",
+   "doc_type": "manual",
+   "canonical_field": "manual_url",
+   "title": "User manual",
+   "authority": "official (linked from verified official page)",
+   "model_match": "exact",
+   "reason": "requested model identifier appears in the link text or file name; linked from official page; also published in 2 other locale(s)",
+   "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+   "found_on": [
+    "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   ],
+   "file_type": "pdf",
+   "locales": [
+    "AEN",
+    "KOR",
+    "AZE"
+   ]
+  }
+ ],
+ "rejected_documents": [
+  {
+   "url": "https://www.documents.philips.com/assets/20250911/0cf87407fe2448629b4eb35500907283.pdf",
+   "doc_type": "unknown",
+   "title": "Data Act Document",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+  },
+  {
+   "url": "https://www.home-appliances.philips/sg/en/u/home-safety?utm_source=philips.de&utm_medium=referral&utm_campaign=nav-menu",
+   "doc_type": "safety_document",
+   "title": "Haussicherheit",
+   "reason": "linked page is on a non-official host",
+   "source_page": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+  },
+  {
+   "url": "https://www.documents.philips.com/assets/20250911/0cf87407fe2448629b4eb35500907283.pdf",
+   "doc_type": "unknown",
+   "title": "Data Act Document",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+  }
+ ],
+ "document_fields": {
+  "manual_url": [
+   "https://www.documents.philips.com/assets/20211007/43e2cf011fa64b81bd83adba00a8634e.pdf"
+  ],
+  "quick_start_guide_url": [],
+  "datasheet_url": [],
+  "safety_document_url": [],
+  "declaration_url": [
+   "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+   "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf"
+  ],
+  "certificate_url": []
+ },
+ "page_inspections": [
+  {
+   "url": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+   "has_expandable_specs": false,
+   "has_hidden_spec_content": "false",
+   "requires_interaction": "false",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0,
+   "js_shell": false
+  },
+  {
+   "url": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+   "has_expandable_specs": false,
+   "has_hidden_spec_content": "false",
+   "requires_interaction": "false",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0,
+   "js_shell": false
+  }
+ ],
+ "discovery_metadata": {
+  "inspected_pages": 2,
+  "primary_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+  "has_expandable_specs": false,
+  "has_hidden_spec_content": "false",
+  "requires_interaction": "false",
+  "any_page_requires_interaction": "false",
+  "signals": [
+   "aria-expanded=false control"
+  ],
+  "spec_controls": []
+ },
+ "official_paths": [
+  {
+   "path": "direct_domain_probe:bounded_crawl",
+   "requests": 4,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:domain_resolution",
+   "requests": 12,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:page_verification",
+   "requests": 2,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:robots",
+   "requests": 4,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:site_search",
+   "requests": 16,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sitemap",
+   "requests": 9,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sku_path_probe",
+   "requests": 2,
+   "queries": 1
+  },
+  {
+   "path": "serp_identity_queries",
+   "requests": 0,
+   "queries": 1
+  },
+  {
+   "path": "serp_domain_restricted_queries",
+   "requests": 0,
+   "queries": 0
+  },
+  {
+   "path": "serp_official_bootstrap",
+   "requests": 0,
+   "queries": 0
+  }
+ ],
+ "trace": {
+  "queries": [
+   "Philips Sonicare 9900 Prestige HX9992/12"
+  ],
+  "provider_attempts": [
+   {
+    "provider": "direct_domain_probe",
+    "query": "Philips Sonicare 9900 Prestige HX9992/12",
+    "status": "success",
+    "result_count": 2,
+    "message": null,
+    "is_fallback": false,
+    "duration_seconds": 4.029086,
+    "timeout_seconds": 24.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 49,
+    "parsed_result_count": 2,
+    "deduped_result_count": 2,
+    "transport": "http_direct",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "Philips Sonicare 9900 Prestige HX9992/12",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 74.999652,
+    "budget_after_seconds": 70.969824,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 2,
+    "rejected_candidate_count": 0,
+    "discovery_method": "sku_path_template",
+    "method_requests": [
+     [
+      "bounded_crawl",
+      4
+     ],
+     [
+      "domain_resolution",
+      12
+     ],
+     [
+      "page_verification",
+      2
+     ],
+     [
+      "robots",
+      4
+     ],
+     [
+      "site_search",
+      16
+     ],
+     [
+      "sitemap",
+      9
+     ],
+     [
+      "sku_path_probe",
+      2
+     ]
+    ],
+    "candidate_count": 6,
+    "exact_model_candidate_count": 2,
+    "accepted_official_url": "https://philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   }
+  ],
+  "raw_and_normalized": [
+   {
+    "raw_url": "https://philips.co.uk/c-p/HX9992_12",
+    "canonical_url": "https://philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "title": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue HX9992/12 | Philips",
+    "provider": "direct_domain_probe",
+    "query": "Philips Sonicare 9900 Prestige HX9992/12",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   },
+   {
+    "raw_url": "https://philips.de/c-p/HX9992_12",
+    "canonical_url": "https://philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+    "title": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau HX9992/12 | Philips",
+    "provider": "direct_domain_probe",
+    "query": "Philips Sonicare 9900 Prestige HX9992/12",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   }
+  ],
+  "accepted": [
+   {
+    "url": "https://philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "domain": "philips.co.uk",
+    "source_type": "manufacturer",
+    "title": "Sonicare DiamondClean Prestige Sonic electric toothbrush with SenseIQ - Blue HX9992/12 | Philips",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "12",
+    "page_role": "product"
+   },
+   {
+    "url": "https://philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie",
+    "domain": "philips.de",
+    "source_type": "manufacturer",
+    "title": "Sonicare DiamondClean Prestige Elektrische Zahnbürste mit SenseIQ - Blau HX9992/12 | Philips",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "12",
+    "page_role": "product"
+   }
+  ],
+  "rejected": [],
+  "documents": [
+   {
+    "url": "https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf",
+    "doc_type": "declaration",
+    "canonical_field": "declaration_url",
+    "title": "EU Declaration of conformity",
+    "authority": "official (linked from verified official page)",
+    "model_match": "exact",
+    "reason": "requested model identifier appears in the link text or file name; linked from official page",
+    "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "found_on": [
+     "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+    ],
+    "file_type": "pdf",
+    "locales": [
+     "AEN"
+    ]
+   },
+   {
+    "url": "https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf",
+    "doc_type": "declaration",
+    "canonical_field": "declaration_url",
+    "title": "UK Declaration of conformity",
+    "authority": "official (linked from verified official page)",
+    "model_match": "exact",
+    "reason": "requested model identifier appears in the link text or file name; linked from official page",
+    "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "found_on": [
+     "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+    ],
+    "file_type": "pdf",
+    "locales": [
+     "AEN"
+    ]
+   },
+   {
+    "url": "https://www.documents.philips.com/assets/20211007/43e2cf011fa64b81bd83adba00a8634e.pdf",
+    "doc_type": "manual",
+    "canonical_field": "manual_url",
+    "title": "User manual",
+    "authority": "official (linked from verified official page)",
+    "model_match": "exact",
+    "reason": "requested model identifier appears in the link text or file name; linked from official page; also published in 2 other locale(s)",
+    "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+    "found_on": [
+     "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq",
+     "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+    ],
+    "file_type": "pdf",
+    "locales": [
+     "AEN",
+     "KOR",
+     "AZE"
+    ]
+   }
+  ],
+  "rejected_documents": [
+   {
+    "url": "https://www.documents.philips.com/assets/20250911/0cf87407fe2448629b4eb35500907283.pdf",
+    "doc_type": "unknown",
+    "title": "Data Act Document",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq"
+   },
+   {
+    "url": "https://www.home-appliances.philips/sg/en/u/home-safety?utm_source=philips.de&utm_medium=referral&utm_campaign=nav-menu",
+    "doc_type": "safety_document",
+    "title": "Haussicherheit",
+    "reason": "linked page is on a non-official host",
+    "source_page": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   },
+   {
+    "url": "https://www.documents.philips.com/assets/20250911/0cf87407fe2448629b4eb35500907283.pdf",
+    "doc_type": "unknown",
+    "title": "Data Act Document",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie"
+   }
+  ],
+  "provider_errors": []
+ },
+ "oracle": {
+  "page_ok": true,
+  "document_ok": null,
+  "oracle_ok": true
+ },
+ "run": 3,
+ "wall_seconds": 4.509
+}
