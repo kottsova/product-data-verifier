@@ -302,3 +302,21 @@ ten-product benchmark uses the same bot handler:
 ```sh
 python -m diagnostics.stage33_discovery_benchmark --include-pixel-isolation
 ```
+
+# Stage 33.1: stable official pages + official documents
+
+The same discovery-only mode now groups results as **Official product pages**,
+**Official support pages**, **Official documents** (manual, user guide,
+quick-start, datasheet, spec sheet, safety document, declaration,
+certificate), **Secondary** and **Discovery metadata** (expandable specs /
+hidden spec content / interaction required, diagnosed from the delivered HTML
+without clicking). Documents map to generic canonical identifiers
+(`manual_url`, `datasheet_url`, `quick_start_guide_url`, `safety_document_url`,
+`declaration_url`, `certificate_url`); they are not part of the CSV flow yet.
+
+Live stability check (name-only input, N independent runs, traces in
+`diagnostics/results/stage33_1/`):
+
+```sh
+python -m diagnostics.stage33_1_stability --runs 3
+```

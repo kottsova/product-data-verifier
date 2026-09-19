@@ -165,7 +165,7 @@ class ClassificationTests(unittest.TestCase):
         self.assertEqual(by_url["https://acme-home.co.uk/en/product/x100"]["authority_status"], "verified")
         self.assertNotEqual(by_url["https://acme-shop.co.uk/products/x100"]["authority_status"], "verified")
 
-    def test_regional_sku_is_official_but_not_an_exact_model(self):
+    def test_regional_sku_suffix_is_the_same_official_model(self):
         def searcher(query):
             if query == "Acme official website":
                 return []
@@ -174,7 +174,10 @@ class ClassificationTests(unittest.TestCase):
         result = discover_with_status("Acme", "X100", searcher=searcher)
         item = result.candidates[0]
         self.assertEqual(item["authority_status"], "verified")
-        self.assertEqual(item["relevance_relation"], "likely_variant")
+        # Stage 33.1: a market code on the exact base SKU is the same model.
+        self.assertEqual(item["relevance_relation"], "exact")
+        self.assertEqual(item["sku_relation"], "regional_suffix")
+        self.assertEqual(item["sku_suffix"], "GB")
 
     def test_family_page_title_alone_is_not_exact(self):
         def searcher(query):

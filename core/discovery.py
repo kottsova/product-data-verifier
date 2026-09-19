@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass, field, replace
 import gzip
 from html import unescape
@@ -13,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import tempfile
+import threading
 import time
 from typing import Callable, Iterable, Literal, Mapping, Protocol, TypedDict
 from urllib.parse import parse_qsl, parse_qs, quote_plus, unquote, urlencode, urljoin, urlparse, urlunparse
@@ -22,6 +24,7 @@ import requests
 
 from core.budget import WallClockBudget
 from core.fetch import _blocked_reason as _detect_blocked_reason
+from core.sku import requested_sku, sku_in_text_loosely, sku_relation, sku_search_terms
 from core.match import article_matches, candidate_model_match, model_match, normalize_model, normalize_text
 from core.identity import ProductIdentity, base_model_in_text, identity_verification_signals
 from core.provider_health import (
@@ -61,6 +64,8 @@ class Candidate(TypedDict):
     parse_status: str
     parse_confidence: str
     discovery_provenance: list[dict[str, object]]
+    sku_relation: str
+    sku_suffix: str
 
 
 SearchResult = tuple[str, str]
@@ -231,7 +236,7 @@ DEFAULT_PROVIDER_TIMEOUTS: dict[str, float] = {
     "duckduckgo_lite": 8.0,
     "naver": 8.0,
     "seznam": 8.0,
-    "direct_domain_probe": 12.0,
+    "direct_domain_probe": 24.0,
     "browser_official_discovery": 20.0,
 }
 
@@ -245,6 +250,11 @@ class DiscoveryRuntimeConfig:
     )
     circuit_breaker_failures: int = 1
     provider_time_share: float = 0.25
+    # A bot-check is usually query- or moment-specific, not a permanent
+    # outage: the circuit is half-opened after this cooldown so one later
+    # query may probe the provider again.  Timeouts stay open for the request.
+    blocked_cooldown_seconds: float = 6.0
+    max_blocked_reopens: int = 3
 
     def __post_init__(self) -> None:
         normalized = dict(DEFAULT_PROVIDER_TIMEOUTS)
@@ -398,6 +408,14 @@ def _registrable_domain(domain: str) -> str:
         return labels[0] if labels else ""
     suffix = ".".join(labels[-2:])
     if suffix in _COUNTRY_CODE_SECOND_LEVEL_DOMAINS and len(labels) >= 3:
+        return ".".join(labels[-3:])
+    # Generic pattern: <label>.<com|co|org|net|edu|gov|ac>.<2-letter ccTLD>
+    # (philips.com.ge, brand.co.za, ...) without enumerating every country.
+    if (
+        len(labels) >= 3
+        and len(labels[-1]) == 2
+        and labels[-2] in {"com", "co", "org", "net", "edu", "gov", "ac", "or", "ne"}
+    ):
         return ".".join(labels[-3:])
     return suffix
 
@@ -618,7 +636,7 @@ def discover_global_official_domains(
             and suffix
             and suffix not in {"shop", "store", "outlet", "reseller", "dealer", "market", "mall"}
             and not _is_search_landing_url(product.url)
-            and normalize_model(brand) in normalize_model(product.title)
+            and _brand_evidence(product, brand)
             and model
             and candidate_model_match(model, product.title, urlparse(product.url).path) == "exact"
         ):
@@ -640,7 +658,7 @@ def discover_global_official_domains(
         ):
             continue
         if (
-            normalize_model(brand) in normalize_model(product.title)
+            _brand_evidence(product, brand)
             and model
             and not _is_search_landing_url(product.url)
             and not _is_user_content_host(domain)
@@ -881,7 +899,18 @@ def assess_candidate_relevance(
                             if len(normalize_model(part)) >= 3]
         if meaningful_parts and not any(part in path_key for part in meaningful_parts):
             return "reject", ["Product URL identifies another item, not the requested model."]
+    sku = sku_relation(model, title, unquote(urlparse(url).path))
+    candidate["sku_relation"] = sku.kind
+    candidate["sku_suffix"] = sku.suffix
     if match == "likely_variant":
+        if sku.kind == "regional_suffix" and requested_sku(model) is not None:
+            # Base SKU agrees exactly and the tail is a market/bundle code
+            # (DCD796P2 -> DCD796P2-GB).  Real variants (DCD796P2T, DCD796D2)
+            # never reach this branch: they are variants/mismatches above.
+            return "exact", [
+                f"Requested base SKU matches; suffix '{sku.suffix}' is a regional/market "
+                "code, not a different product variant."
+            ]
         return "likely_variant", ["Requested base model appears with an explicit variant suffix."]
     if match == "exact" or exact_phrase or component_relation == "exact":
         if _page_kind(url) in {"catalog", "homepage", "weak"}:
@@ -1413,6 +1442,57 @@ def _http_google_search_for_market(
     return [(url, title) for url, title in parser.results if _is_external_result(url)], html
 
 
+class _SharedPlaywrightHandle:
+    """Refcounted view of the one sync Playwright driver a thread may own.
+
+    Playwright's sync API refuses a second ``sync_playwright().start()`` in a
+    thread that already owns a live driver, which silently disabled whichever
+    browser-backed provider started second (Google after the official-site
+    browser probe).  Providers therefore share one driver per thread; ``stop``
+    only shuts it down when the last holder releases it.
+    """
+
+    _lock = threading.Lock()
+    _drivers: dict[int, list] = {}
+
+    def __init__(self, thread_id: int, driver: object) -> None:
+        self._thread_id = thread_id
+        self._driver = driver
+        self._released = False
+
+    @classmethod
+    def acquire(cls) -> "_SharedPlaywrightHandle":
+        from playwright.sync_api import sync_playwright
+
+        thread_id = threading.get_ident()
+        with cls._lock:
+            entry = cls._drivers.get(thread_id)
+            if entry is None:
+                entry = [sync_playwright().start(), 0]
+                cls._drivers[thread_id] = entry
+            entry[1] += 1
+            return cls(thread_id, entry[0])
+
+    @property
+    def chromium(self):
+        return self._driver.chromium
+
+    def stop(self) -> None:
+        with self._lock:
+            if self._released:
+                return
+            self._released = True
+            entry = self._drivers.get(self._thread_id)
+            if entry is None:
+                return
+            entry[1] -= 1
+            if entry[1] > 0:
+                return
+            del self._drivers[self._thread_id]
+        entry[0].stop()
+
+
+
 class GoogleSearchSession:
     """HTTP-first Google search with one lazy Playwright browser per discovery."""
 
@@ -1480,13 +1560,12 @@ class GoogleSearchSession:
         if self._page is not None:
             return self._page
         try:
-            from playwright.sync_api import sync_playwright
+            self._playwright = _SharedPlaywrightHandle.acquire()
         except ImportError as error:
             raise RuntimeError(
                 "Google HTTP search did not return organic results. Install Playwright "
                 "with 'pip install -r requirements.txt' and 'playwright install chromium'."
             ) from error
-        self._playwright = sync_playwright().start()
         try:
             profile_dir = Path(tempfile.gettempdir()) / "product-data-verifier-google-profile"
             launch_timeout = (
@@ -2134,7 +2213,18 @@ _MARKET_ROOT_TLDS: dict[str, str] = {
 }
 
 
-def _brand_root_domains(brand: str, market: str) -> list[str]:
+# Country/regional public suffixes tried after the market TLD and ``.com``.
+# A brand's model page frequently lives only on a regional site (a Russian
+# brand on ``.ru``, a UK bundle on ``.co.uk``), and ``brand.com`` often geo-
+# redirects to an unrelated country site.  Every candidate is still verified
+# (brand-consistent root + brand signal in the page) before it is trusted.
+_REGIONAL_ROOT_TLDS: tuple[str, ...] = (
+    "co.uk", "de", "ru", "eu", "net", "org", "fr", "it", "pl", "cz", "es", "nl",
+    "ca", "com.au", "ch",
+)
+
+
+def _brand_root_domains(brand: str, market: str, *, limit: int = 12) -> list[str]:
     """Mechanically derive candidate root domains from a brand string.
 
     Shared by the HTTP and browser-backed official-discovery providers so
@@ -2148,7 +2238,8 @@ def _brand_root_domains(brand: str, market: str) -> list[str]:
     if market_tld:
         domains.append(f"{slug}.{market_tld}")
     domains.append(f"{slug}.com")
-    return list(dict.fromkeys(domains))
+    domains.extend(f"{slug}.{tld}" for tld in _REGIONAL_ROOT_TLDS)
+    return list(dict.fromkeys(domains))[:limit]
 
 
 def _model_token_in_text(model: str, text: str) -> bool:
@@ -2156,6 +2247,8 @@ def _model_token_in_text(model: str, text: str) -> bool:
     if not model or not text:
         return False
     if model_match(model, unquote(text)) == "exact":
+        return True
+    if sku_in_text_loosely(model, unquote(text)):
         return True
     compact_model = re.sub(r"[^a-z0-9]", "", model.casefold())
     compact_text = re.sub(r"[^a-z0-9]", "", unquote(text).casefold())
@@ -2291,6 +2384,17 @@ def _json_ld_links(
     return records
 
 
+_STATIC_ASSET_SUFFIXES = (
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".ico", ".css", ".js", ".mjs",
+    ".woff", ".woff2", ".ttf", ".eot", ".map", ".mp4", ".webm", ".json", ".xml",
+)
+
+
+def _is_static_asset_url(url: str) -> bool:
+    path = urlparse(url).path.lower()
+    return path.endswith(_STATIC_ASSET_SUFFIXES) or "/cdn/shop/" in path
+
+
 def _extract_domain_links(
     html: str,
     base_url: str,
@@ -2315,6 +2419,7 @@ def _extract_domain_links(
         url = canonicalize_url(urljoin(base_url, raw_url))
         if (
             not url
+            or _is_static_asset_url(url)
             or not url_belongs_to_domain(url, domain)
             or _page_kind(url) in {"homepage", "catalog"}
             or not _model_token_in_text(model, f"{title} {url}")
@@ -2361,6 +2466,7 @@ def _extract_domain_links(
         url = canonicalize_url(urljoin(base_url, raw_url))
         if (
             not url
+            or _is_static_asset_url(url)
             or not url_belongs_to_domain(url, domain)
             or _page_kind(url) in {"homepage", "catalog"}
             or not _model_token_in_text(model, f"{nearby} {url}")
@@ -2433,6 +2539,7 @@ class DirectDomainProbeProvider:
     short_circuit_on_exact_model = True
 
     _QUERY_PATTERN = re.compile(r"^(.+?) official website$")
+    _SITE_PATTERN = re.compile(r"(?<![-\w])site:(\S+)", re.IGNORECASE)
 
     def __init__(
         self,
@@ -2454,7 +2561,16 @@ class DirectDomainProbeProvider:
         self._model = ""
         self._records: tuple[SearchResultRecord, ...] | None = None
         self._request_count = 0
-        self.max_requests = 14
+        self._lock = threading.RLock()
+        self._local = threading.local()
+        self._stop = threading.Event()
+        self._stop_after = 0.0
+        self.sibling_grace_seconds = 4.0
+        self.max_requests = 60
+        self.domain_request_limit = 16
+        self.max_probe_domains = 4
+        self.max_workers = 12
+        self.max_domain_candidates = 12
         self.max_sitemaps = 8
         self.max_sitemap_depth = 2
         self.max_crawl_pages = 2
@@ -2474,6 +2590,7 @@ class DirectDomainProbeProvider:
         if (brand, model) != (self._brand, self._model):
             self._brand, self._model = brand, model
             self._records = None
+            self.__dict__.pop("_named_domain_records", None)
             self._request_count = 0
             self.last_method_requests = {}
             self.last_discovery_method = None
@@ -2499,19 +2616,34 @@ class DirectDomainProbeProvider:
         deadline: float,
         method: str,
     ) -> _FetchedOfficialSurface | None:
-        if self._request_count >= self.max_requests:
-            self._failures.append("global request limit reached")
-            return None
-        remaining = deadline - time.monotonic()
-        if remaining <= 0:
-            self._failures.append("official discovery deadline exhausted")
-            return None
-        self._request_count += 1
-        self.last_method_requests[method] = self.last_method_requests.get(method, 0) + 1
+        context = getattr(self._local, "context", None)
+        with self._lock:
+            if self._request_count >= self.max_requests:
+                self._failures.append("global request limit reached")
+                return None
+            if context is not None and context["requests"] >= self.domain_request_limit:
+                self._failures.append(f"{context['domain']}: per-domain request limit reached")
+                return None
+            if (
+                context is not None
+                and self._stop.is_set()
+                and time.monotonic() >= self._stop_after
+            ):
+                # Another official domain already produced an exact-model page
+                # and its grace window for sibling regional sites has elapsed.
+                return None
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                self._failures.append("official discovery deadline exhausted")
+                return None
+            self._request_count += 1
+            if context is not None:
+                context["requests"] += 1
+            self.last_method_requests[method] = self.last_method_requests.get(method, 0) + 1
         try:
             response = self._session.get(
                 url,
-                timeout=max(0.2, min(3.0, remaining)),
+                timeout=max(0.2, min(2.0 if method == "domain_resolution" else 3.0, remaining)),
                 allow_redirects=True,
                 stream=True,
                 headers={
@@ -2710,7 +2842,8 @@ class DirectDomainProbeProvider:
             ]
             queue.sort(key=lambda item: (priority(item[0]), item[1]))
             queue = queue[:max(0, self.max_sitemaps - len(visited))]
-            if len(records) >= 3:
+            if len(records) >= 3 or records:
+                # An exact-model URL is the goal; sibling sitemaps add nothing.
                 break
         return records
 
@@ -2778,27 +2911,36 @@ class DirectDomainProbeProvider:
         seen: set[str] = set()
         for endpoint, parameter in templates:
             if (
-                len(seen) >= 3
+                len(seen) >= 4
                 or self._request_count >= self.max_requests
                 or time.monotonic() >= deadline
             ):
                 break
-            query = urlencode({parameter: self._model})
-            separator = "&" if urlparse(endpoint).query else "?"
-            search_url = f"{endpoint}{separator}{query}"
-            canonical = canonicalize_url(search_url)
-            if not canonical or canonical in seen:
-                continue
-            seen.add(canonical)
-            response = self._get(search_url, deadline, "site_search")
-            if response is None:
-                continue
-            records.extend(self._matching_links(
-                response.text,
-                response.url,
-                domain,
-                method="site_search",
-            ))
+            for term in sku_search_terms(self._model)[:2]:
+                if (
+                    len(seen) >= 4
+                    or self._request_count >= self.max_requests
+                    or time.monotonic() >= deadline
+                ):
+                    break
+                query = urlencode({parameter: term})
+                separator = "&" if urlparse(endpoint).query else "?"
+                search_url = f"{endpoint}{separator}{query}"
+                canonical = canonicalize_url(search_url)
+                if not canonical or canonical in seen:
+                    continue
+                seen.add(canonical)
+                response = self._get(search_url, deadline, "site_search")
+                if response is None:
+                    continue
+                records.extend(self._matching_links(
+                    response.text,
+                    response.url,
+                    domain,
+                    method="site_search",
+                ))
+                if records:
+                    break
             if records:
                 break
         return records
@@ -2835,114 +2977,315 @@ class DirectDomainProbeProvider:
                 break
         return records
 
-    def _discover(self, brand: str, timeout_seconds: float) -> tuple[SearchResultRecord, ...]:
+    # -- multi-domain official discovery ---------------------------------------------
+    def _resolve_domain(
+        self, domain: str, brand: str, deadline: float,
+    ) -> tuple[SearchResultRecord, _FetchedOfficialSurface, str] | None:
+        """Resolve one brand-derived root and check it is brand-consistent."""
+        expected_label = _registrable_domain_label(domain)
+        response = None
+        url = f"https://www.{domain}/"
+        for candidate_url in (url, f"https://{domain}/"):
+            response = self._get(candidate_url, deadline, "domain_resolution")
+            if response is not None:
+                url = candidate_url
+                break
+        if response is None:
+            return None
+        final_url = canonicalize_url(response.url)
+        final_domain = _registrable_domain(_host(final_url))
+        final_label = _registrable_domain_label(final_domain)
+        if not final_domain or not (
+            final_label == expected_label
+            or (len(expected_label) >= 3 and final_label.startswith(expected_label))
+        ):
+            self._failures.append(
+                f"domain_resolution: redirect left brand-consistent domain ({final_domain})"
+            )
+            return None
+        title = _extract_page_title(response.text)
+        # Consistency check only, exactly as documented on
+        # discover_global_official_domains: a brand-named title on a
+        # mechanically exact brand-root domain is not itself proof of
+        # official status, only a plausible candidate for the existing
+        # corroboration logic to accept or reject. The literal word
+        # "official" is never injected here -- that would fabricate the
+        # one signal discover_global_official_domains treats as an
+        # explicit claim.
+        if normalize_model(brand) not in normalize_model(f"{title} {response.text[:100000]}"):
+            self._failures.append(f"domain_resolution: brand signal absent at {final_url}")
+            return None
+        record = SearchResultRecord(
+            url=final_url,
+            title=title or domain,
+            snippet="Directly resolved brand-consistent official-site root candidate.",
+            provider=self.name,
+            raw_url=url,
+            redirect_url=url if final_url != canonicalize_url(url) else None,
+            parse_confidence="high" if title else "medium",
+            discovery_method="domain_resolution",
+        )
+        return record, response, final_domain
+
+    def _learn_sku_prefixes(self, texts: Iterable[str], domain: str) -> list[str]:
+        """Learn ``/<prefix>/<SKU>/<slug>`` product-URL templates seen on the site.
+
+        Only alphabetic path prefixes qualify, and a prefix must be backed by
+        several distinct SKU-like segments, so asset/CDN paths never look like
+        a product template.
+        """
+        distinct: dict[str, set[str]] = {}
+        pattern = re.compile(
+            r"(/(?:[A-Za-z][A-Za-z_-]{0,14}/){1,3})"
+            r"([A-Za-z]{1,6}[0-9]{3,}[A-Za-z0-9]{0,4}(?:[_-][0-9A-Za-z]{1,3})?)/[A-Za-z0-9._%-]{3,}"
+        )
+        static_words = {"assets", "static", "media", "images", "image", "files", "cdn", "upload", "uploads", "fonts"}
+        for text in texts:
+            for match in pattern.finditer((text or "")[:1_500_000]):
+                prefix, token = match.group(1), match.group(2)
+                if any(part in static_words for part in prefix.strip("/").lower().split("/")):
+                    continue
+                distinct.setdefault(prefix, set()).add(token.upper())
+        ranked = sorted(distinct.items(), key=lambda item: -len(item[1]))
+        return [prefix for prefix, tokens in ranked if len(tokens) >= 2][:2]
+
+    def _sku_template_records(
+        self, prefixes: Iterable[str], origin: str, domain: str, deadline: float,
+    ) -> list[SearchResultRecord]:
+        """Probe learned product-path templates with the requested SKU."""
+        sku = requested_sku(self._model)
+        if sku is None:
+            return []
+        base = sku.base_display
+        variants = [f"{base}_{sku.suffix}", f"{base}-{sku.suffix}"] if sku.suffix else [base]
+        records: list[SearchResultRecord] = []
+        for prefix in prefixes:
+            for variant in variants:
+                if time.monotonic() >= deadline:
+                    return records
+                url = f"{origin}{prefix}{variant}"
+                response = self._get(url, deadline, "sku_path_probe")
+                if response is None:
+                    continue
+                title = _extract_page_title(response.text)
+                if not sku_in_text_loosely(self._model, f"{title} {response.url}"):
+                    continue
+                parser = _DirectLinkParser()
+                parser.feed(response.text[:400_000])
+                canonical = next((
+                    canonicalize_url(urljoin(response.url, raw))
+                    for raw in parser.canonical_links
+                    if url_belongs_to_domain(canonicalize_url(urljoin(response.url, raw)), domain)
+                ), "") or canonicalize_url(response.url)
+                records.append(SearchResultRecord(
+                    url=canonical,
+                    title=title,
+                    snippet="Exact SKU confirmed by a learned product-path template on the official site.",
+                    provider=self.name,
+                    raw_url=url,
+                    parse_confidence="high",
+                    discovery_method="sku_path_template",
+                ))
+                return records
+        return records
+
+    def _probe_domain(
+        self,
+        resolved: tuple[SearchResultRecord, _FetchedOfficialSurface, str],
+        deadline: float,
+    ) -> list[SearchResultRecord]:
+        record, response, final_domain = resolved
+        self._local.context = {"domain": final_domain, "requests": 1}
+        try:
+            results: list[SearchResultRecord] = [record]
+            final_url = record.url
+            results.extend(self._matching_links(
+                response.text, final_url, final_domain, method="homepage_links",
+            ))
+            structure = self._surface_structure(response, final_domain, deadline)
+
+            def exact_found() -> list[SearchResultRecord]:
+                return [
+                    item for item in results
+                    if self._model_in_text(self._model, f"{item.title} {item.url}")
+                    and _page_kind(item.url) not in {"homepage", "catalog"}
+                ]
+
+            if not exact_found():
+                results.extend(self._site_search_records(
+                    structure.search_templates, final_domain, deadline,
+                ))
+            if not exact_found():
+                origin = f"{urlparse(final_url).scheme}://{urlparse(final_url).netloc}"
+                prefixes = self._learn_sku_prefixes([response.text], final_domain)
+                results.extend(self._sku_template_records(prefixes, origin, final_domain, deadline))
+            if not exact_found():
+                results.extend(self._sitemap_records(structure.sitemap_urls, final_domain, deadline))
+            if not exact_found():
+                results.extend(self._crawl_records(structure.crawl_seeds, final_domain, deadline))
+            if exact_found():
+                with self._lock:
+                    if not self._stop.is_set():
+                        # Sibling regional sites get a short grace window so the
+                        # set of official pages does not depend on thread timing.
+                        self._stop_after = time.monotonic() + self.sibling_grace_seconds
+                        self._stop.set()
+            return results
+        finally:
+            self._local.context = None
+
+    def _verify_records(
+        self, records: list[SearchResultRecord], deadline: float,
+    ) -> list[SearchResultRecord]:
+        """Replace URL-derived titles with the page's own title and drop non-matches.
+
+        A sitemap or search hit only proves the URL text; fetching the page
+        lets the brand/model corroboration in ``discover_global_official_domains``
+        see the real title, and rejects pages whose content lacks the SKU.
+        """
+        exact = [
+            item for item in records
+            if _page_kind(item.url) not in {"homepage", "catalog"}
+            and self._model_in_text(self._model, f"{item.title} {item.url}")
+        ][:3]
+        if not exact:
+            return records
+        verified: dict[str, SearchResultRecord | None] = {}
+
+        def check(item: SearchResultRecord) -> tuple[str, SearchResultRecord | None]:
+            self._local.context = None  # verification is never cancelled by the stop event
+            response = self._get(item.url, deadline, "page_verification")
+            if response is None:
+                return item.url, item
+            title = _extract_page_title(response.text)
+            head = response.text[:600_000]
+            if not sku_in_text_loosely(self._model, f"{title} {head} {response.url}"):
+                # Keep the URL-derived record (JS-rendered pages may not carry
+                # the SKU in delivered HTML) but do not upgrade its title.
+                self._failures.append(f"page_verification: SKU absent from page content at {item.url}")
+                return item.url, item
+            final = canonicalize_url(response.url) or item.url
+            brand_seen = normalize_model(self._brand) in normalize_model(f"{title} {head[:200_000]}")
+            return item.url, SearchResultRecord(
+                url=final,
+                title=title or item.title,
+                snippet=(
+                    "Requested SKU confirmed in fetched official page content"
+                    + (f"; {BRAND_CONFIRMED_MARKER}." if brand_seen else ".")
+                ),
+                provider=item.provider,
+                raw_url=item.raw_url,
+                parse_confidence="high",
+                discovery_method=item.discovery_method,
+            )
+
+        with ThreadPoolExecutor(max_workers=min(3, len(exact))) as pool:
+            for url, replacement in pool.map(check, exact):
+                verified[url] = replacement
+        output: list[SearchResultRecord] = []
+        for item in records:
+            if item.url in verified:
+                replacement = verified[item.url]
+                if replacement is not None:
+                    output.append(replacement)
+            else:
+                output.append(item)
+        return output
+
+    def _probe_named_domain(
+        self, brand: str, domain: str, timeout_seconds: float,
+    ) -> list[SearchResultRecord]:
+        """Probe one explicitly named (already verified) official domain once."""
+        cache = self.__dict__.setdefault("_named_domain_records", {})
+        if domain in cache:
+            return cache[domain]
         deadline = time.monotonic() + max(0.1, timeout_seconds)
-        domains = self._candidate_domains(brand)
+        self._stop.clear()
+        self._stop_after = 0.0
+        self._local.context = {"domain": domain, "requests": 0}
+        try:
+            resolved = self._resolve_domain(domain, brand, deadline)
+        finally:
+            self._local.context = None
+        records: list[SearchResultRecord] = []
+        if resolved is not None:
+            records = self._verify_records(
+                list(dict.fromkeys(self._probe_domain(resolved, deadline))),
+                max(deadline, time.monotonic()) + 5.0,
+            )
+        cache[domain] = records
+        return records
+
+    def _discover(self, brand: str, timeout_seconds: float) -> tuple[SearchResultRecord, ...]:
+        self._stop.clear()
+        self._stop_after = 0.0
+        deadline = time.monotonic() + max(0.1, timeout_seconds)
+        domains = _brand_root_domains(brand, self.market, limit=self.max_domain_candidates)
         if not domains:
             self.last_failure_reason = "brand cannot be converted to a safe domain label"
             return ()
-        results: list[SearchResultRecord] = []
-        for domain in domains:
-            if time.monotonic() >= deadline or self._request_count >= self.max_requests:
+
+        def resolve(domain: str):
+            self._local.context = {"domain": domain, "requests": 0}
+            try:
+                return self._resolve_domain(domain, brand, deadline)
+            finally:
+                self._local.context = None
+
+        # Do not wait for dead/slow candidate roots: take whatever resolved
+        # inside the window (a live brand root answers in well under 2s).
+        pool = ThreadPoolExecutor(max_workers=self.max_workers)
+        futures = [pool.submit(resolve, domain) for domain in domains]
+        window_start = time.monotonic()
+        while True:
+            pending = [future for future in futures if not future.done()]
+            if not pending:
                 break
-            url = f"https://www.{domain}/"
-            response = self._get(url, deadline, "domain_resolution")
-            if response is None:
-                continue
-            final_url = canonicalize_url(response.url)
-            final_domain = _registrable_domain(_host(final_url))
-            expected_label = _registrable_domain_label(domain)
-            final_label = _registrable_domain_label(final_domain)
-            if (
-                not final_domain
-                or not (
-                    final_label == expected_label
-                    or (len(expected_label) >= 3 and final_label.startswith(expected_label))
-                )
-            ):
-                self._failures.append(
-                    f"domain_resolution: redirect left brand-consistent domain ({final_domain})"
-                )
-                continue
-            title = _extract_page_title(response.text)
-            # Consistency check only, exactly as documented on
-            # discover_global_official_domains: a brand-named title on a
-            # mechanically exact brand-root domain is not itself proof of
-            # official status, only a plausible candidate for the existing
-            # corroboration logic to accept or reject. The literal word
-            # "official" is never injected here -- that would fabricate the
-            # one signal discover_global_official_domains treats as an
-            # explicit claim.
-            if normalize_model(brand) not in normalize_model(
-                f"{title} {response.text[:100000]}"
-            ):
-                self._failures.append(
-                    f"domain_resolution: brand signal absent at {final_url}"
-                )
-                continue
-            results.append(SearchResultRecord(
-                url=final_url,
-                title=title or domain,
-                snippet="Directly resolved brand-consistent official-site root candidate.",
-                provider=self.name,
-                raw_url=url,
-                redirect_url=url if final_url != canonicalize_url(url) else None,
-                parse_confidence="high" if title else "medium",
-                discovery_method="domain_resolution",
-            ))
-            results.extend(self._matching_links(
-                response.text,
-                final_url,
-                final_domain,
-                method="homepage_links",
-            ))
-            structure = self._surface_structure(
-                response,
-                final_domain,
-                deadline,
+            elapsed = time.monotonic() - window_start
+            resolved_count = sum(
+                1 for future in futures
+                if future.done() and future.exception() is None and future.result() is not None
             )
-            exact_results = [
-                item for item in results
-                if self._model_in_text(self._model, f"{item.title} {item.url}")
-                and _page_kind(item.url) not in {"homepage", "catalog"}
-            ]
-            if not exact_results:
-                sitemap_records = self._sitemap_records(
-                    structure.sitemap_urls,
-                    final_domain,
-                    deadline,
-                )
-                results.extend(sitemap_records)
-                exact_results.extend(sitemap_records)
-            if not exact_results:
-                search_records = self._site_search_records(
-                    structure.search_templates,
-                    final_domain,
-                    deadline,
-                )
-                results.extend(search_records)
-                exact_results.extend(search_records)
-            if not exact_results:
-                crawl_records = self._crawl_records(
-                    structure.crawl_seeds,
-                    final_domain,
-                    deadline,
-                )
-                results.extend(crawl_records)
-                exact_results.extend(crawl_records)
-            if exact_results:
+            # Enough time to hear from a live root (3s), or a longer grace
+            # (6s) when nothing has answered yet; never past the deadline.
+            if time.monotonic() >= deadline or elapsed >= 6.0 or (elapsed >= 3.0 and resolved_count):
                 break
+            wait(pending, timeout=0.2)
+        pool.shutdown(wait=False, cancel_futures=True)
+        resolutions = [
+            future.result() if future.done() and future.exception() is None else None
+            for future in futures
+        ]
+        resolved: list[tuple[SearchResultRecord, _FetchedOfficialSurface, str]] = []
+        seen_roots: set[str] = set()
+        for item in resolutions:
+            if item is None or item[2] in seen_roots:
+                continue
+            seen_roots.add(item[2])
+            resolved.append(item)
+        resolved = resolved[:self.max_probe_domains]
+
+        results: list[SearchResultRecord] = [item[0] for item in resolved]
+        if resolved and self._model:
+            with ThreadPoolExecutor(max_workers=self.max_workers) as pool:
+                for domain_records in pool.map(
+                    lambda item: self._probe_domain(item, deadline), resolved,
+                ):
+                    results.extend(domain_records)
 
         unique: dict[str, SearchResultRecord] = {}
         for record in results:
             unique.setdefault(canonicalize_url(record.url), record)
-        records = tuple(record for url, record in unique.items() if url)
+        records = [record for url, record in unique.items() if url]
+        if self._model:
+            records = self._verify_records(records, max(deadline, time.monotonic()) + 5.0)
+        records_t = tuple(records)
         exact = tuple(
-            item for item in records
+            item for item in records_t
             if _page_kind(item.url) not in {"homepage", "catalog"}
             and self._model_in_text(self._model, f"{item.title} {item.url}")
         )
-        self.last_candidate_count = len(records)
+        self.last_candidate_count = len(records_t)
         self.last_exact_model_candidate_count = len(exact)
         if exact:
             self.last_discovery_method = exact[0].discovery_method
@@ -2955,7 +3298,7 @@ class DirectDomainProbeProvider:
             self.last_failure_reason = "; ".join(dict.fromkeys(self._failures[-5:])) or (
                 "official surfaces returned no exact-model candidate"
             )
-        return records
+        return records_t
 
     def search_with_timeout(
         self,
@@ -2973,6 +3316,21 @@ class DirectDomainProbeProvider:
         )
         if not (is_official_query or is_model_query):
             return []
+        site_domains = [
+            domain.strip("\"'").lower().removeprefix("www.")
+            for domain in self._SITE_PATTERN.findall(query)
+        ]
+        if site_domains and is_model_query and not is_official_query:
+            # A domain-restricted query names a domain that earlier discovery
+            # already verified as official; probe its own surfaces directly
+            # instead of relying on a search engine to honour ``site:``.
+            extra: list[SearchResultRecord] = []
+            for domain in site_domains[:2]:
+                extra.extend(self._probe_named_domain(brand, domain, timeout_seconds))
+            return [
+                record for record in extra
+                if self._model_in_text(self._model, f"{record.title} {record.url}")
+            ]
         if self._records is None:
             self._records = self._discover(brand, timeout_seconds)
         records = list(self._records)
@@ -3048,9 +3406,7 @@ class _PlaywrightRenderer:
     def _ensure_page(self):
         if self._page is not None:
             return self._page
-        from playwright.sync_api import sync_playwright
-
-        self._playwright = sync_playwright().start()
+        self._playwright = _SharedPlaywrightHandle.acquire()
         self._browser = self._playwright.chromium.launch(headless=browser_headless())
         self._context = self._browser.new_context()
         self._page = self._context.new_page()
@@ -3123,6 +3479,9 @@ class BrowserOfficialDiscoveryProvider:
     quality_gate = False
     always_run = False
     short_circuit_on_exact_model = True
+    # A rendered-page probe is expensive; two empty answers in a row for the
+    # same product mean the official surface has nothing more to give.
+    empty_circuit_after = 2
 
     _QUERY_PATTERN = re.compile(r"^(.+?) official website$")
 
@@ -3267,7 +3626,7 @@ class BrowserOfficialDiscoveryProvider:
 
     def _discover(self, brand: str, timeout_seconds: float) -> tuple[SearchResultRecord, ...]:
         deadline = time.monotonic() + max(0.1, timeout_seconds)
-        domains = _brand_root_domains(brand, self.market)
+        domains = _brand_root_domains(brand, self.market, limit=2)
         if not domains:
             self.last_browser_invoked = False
             self.last_browser_reason = "brand cannot be converted to a safe domain label"
@@ -3465,6 +3824,24 @@ class ProviderSearchError(RuntimeError):
         super().__init__(detail)
 
 
+OPERATOR_SENSITIVE_PROVIDERS = frozenset({"duckduckgo_html", "duckduckgo_lite"})
+_SITE_OPERATOR_RE = re.compile(r"(?P<neg>-?)site:(?P<domain>\S+)", re.IGNORECASE)
+
+
+def strip_search_operators(query: str) -> str:
+    """Turn ``site:`` operators into plain domain keywords for lenient engines.
+
+    Stage 33.1 live traces showed DuckDuckGo's HTML endpoints raise a bot
+    check specifically on operator queries while answering the same identity
+    query without them.  A bare domain keyword keeps the domain restriction
+    as a strong ranking hint; exclusions are dropped.
+    """
+    def replace(match: re.Match[str]) -> str:
+        return "" if match.group("neg") else match.group("domain")
+
+    return " ".join(_SITE_OPERATOR_RE.sub(replace, query).split())
+
+
 def build_provider_query(provider: str, query: str, brand: str, model: str) -> str:
     """Adapt syntax to a provider while preserving the caller's intent.
 
@@ -3474,6 +3851,8 @@ def build_provider_query(provider: str, query: str, brand: str, model: str) -> s
     This is product-agnostic and never adds a pre-known URL or domain.
     """
     query = " ".join((query or "").split())
+    if provider in OPERATOR_SENSITIVE_PROVIDERS:
+        query = strip_search_operators(query)
     if provider == "naver":
         return query.replace('"', "")
     if provider not in {"bing", "google"} or not model:
@@ -3617,6 +3996,9 @@ class ResilientSearchSession:
             if provider.name.casefold() not in disabled
         )
         self._open_providers: dict[int, str] = {}
+        self._reopen_at: dict[int, float] = {}
+        self._blocked_counts: dict[int, int] = {}
+        self._empty_streak: dict[int, int] = {}
         self._failure_counts: dict[int, int] = {}
         self._provider_elapsed: dict[int, float] = {}
         self._brand = ""
@@ -3659,11 +4041,21 @@ class ResilientSearchSession:
                 f"Search provider cleanup failed: {errors[0]}"
             ) from errors[0]
 
-    def search_with_status(self, query: str) -> ProviderQueryOutcome:
+    def search_with_status(
+        self, query: str, *, skip_providers: frozenset[str] = frozenset(),
+    ) -> ProviderQueryOutcome:
+        """Run one query through the provider chain.
+
+        ``skip_providers`` names providers that cannot answer this kind of
+        query (the official-site probes cannot answer a document search), so
+        their cached product hits neither short-circuit nor slow the chain.
+        """
         attempts: list[ProviderAttempt] = []
         collected: list[SearchResultLike] = []
         productive_provider_found = False
         for index, provider in enumerate(self.providers):
+            if provider.name in skip_providers:
+                continue
             # Once a productive SERP path has answered, avoid multiplying
             # third-party requests. Supplemental independent paths still run
             # and are merged deterministically in configured provider order.
@@ -3699,6 +4091,14 @@ class ResilientSearchSession:
                     ))
                     break
                 timeout_seconds = bounded_timeout
+            if (
+                index in self._open_providers
+                and index in self._reopen_at
+                and time.monotonic() >= self._reopen_at[index]
+            ):
+                # Half-open: a bot-check cooldown elapsed, allow one probe.
+                del self._open_providers[index]
+                del self._reopen_at[index]
             if index in self._open_providers:
                 attempts.append(ProviderAttempt(
                     provider=provider.name,
@@ -3833,6 +4233,14 @@ class ResilientSearchSession:
                         self._open_providers[index] = (
                             f"Circuit open after {status}: {str(error) or type(error).__name__}"
                         )
+                        if status == "blocked":
+                            self._blocked_counts[index] = self._blocked_counts.get(index, 0) + 1
+                            if self._blocked_counts[index] <= self.config.max_blocked_reopens:
+                                self._reopen_at[index] = (
+                                    time.monotonic() + self.config.blocked_cooldown_seconds
+                                )
+                        else:
+                            self._reopen_at.pop(index, None)
                     raw_results = None
                     break
             if raw_results is None:
@@ -3880,6 +4288,13 @@ class ResilientSearchSession:
                 self.health_store.record_failure(shared_key, FailureClass.TIMEOUT)
                 continue
             if not results:
+                streak = self._empty_streak.get(index, 0) + 1
+                self._empty_streak[index] = streak
+                empty_limit = getattr(provider, "empty_circuit_after", 0)
+                if empty_limit and streak >= empty_limit:
+                    self._open_providers[index] = (
+                        f"Circuit open after {streak} consecutive empty results"
+                    )
                 attempts.append(ProviderAttempt(
                     provider=provider.name,
                     query=query,
@@ -3934,12 +4349,11 @@ class ResilientSearchSession:
                 ))
                 continue
             self._failure_counts[index] = 0
+            self._empty_streak[index] = 0
             self.health_store.record_success(shared_key)
             exact_model_hit = bool(
                 self._model and any(
-                    candidate_model_match(
-                        self._model, item.title, urlparse(item.url).path,
-                    ) == "exact"
+                    _same_model_match(self._model, item.title, urlparse(item.url).path)
                     and _path_names_complete_model(item.url, self._brand, self._model)
                     and not _is_search_landing_url(item.url)
                     and not _has_accessory_context(item.url, item.title)
@@ -4172,14 +4586,80 @@ def _official_query_returned_results(attempts: Iterable[ProviderAttempt]) -> boo
     return any(item.status == "success" for item in attempts)
 
 
+# Written into the snippet of a direct-probe record whose *fetched page*
+# named the brand although its <title> did not (many stores title a product
+# page with the product name only).  Only first-party direct discovery emits it.
+BRAND_CONFIRMED_MARKER = "brand confirmed in fetched page"
+
+
+def _brand_evidence(record: SearchResultRecord, brand: str) -> bool:
+    if normalize_model(brand) in normalize_model(record.title):
+        return True
+    return (
+        record.provider == "direct_domain_probe"
+        and BRAND_CONFIRMED_MARKER in (record.snippet or "")
+    )
+
+
+def _same_model_match(model: str, title: str, path: str) -> bool:
+    """Exact model, or the exact base SKU carrying only a market code (dcd796p2-gb)."""
+    match = candidate_model_match(model, title, path)
+    if match == "exact":
+        return True
+    return match == "likely_variant" and sku_relation(
+        model, title, unquote(path),
+    ).kind == "regional_suffix"
+
+
+def _official_exact_page_reached(
+    results: Iterable[SearchResultLike], brand: str, model: str,
+) -> bool:
+    """True when a result is an exact-model page on a brand-rooted domain.
+
+    Domain equality with the brand label, the brand in the title and the
+    complete model in the URL together are the same corroboration
+    ``discover_global_official_domains`` demands, so stopping here cannot
+    promote a lookalike.
+    """
+    brand_key = re.sub(r"[^a-z0-9]", "", brand.casefold())
+    if len(brand_key) < 3 or not model:
+        return False
+    for item in results:
+        record = _search_result_record(item)
+        url = record.url
+        if not url or _is_search_landing_url(url):
+            continue
+        label = _registrable_domain_label(_host(url))
+        if not (label == brand_key or label.startswith(brand_key)):
+            continue
+        if not _brand_evidence(record, brand):
+            continue
+        if (
+            _same_model_match(model, record.title, urlparse(url).path)
+            and _path_names_complete_model(url, brand, model)
+            and _page_kind(url) not in {"homepage", "catalog", "weak", "support"}
+            and not _has_accessory_context(url, record.title)
+            and not _has_non_product_context(url, record.title)
+        ):
+            return True
+    return False
+
+
 def discover_with_status(
     brand: str,
     model: str,
     article: str | None = None,
     market: str = "global",
     searcher: Searcher | None = None,
+    *,
+    early_official_stop: bool = False,
 ) -> DiscoveryOutcome:
-    """Discover sources and retain blocked/error state as structured data."""
+    """Discover sources and retain blocked/error state as structured data.
+
+    ``early_official_stop`` ends the identity/bootstrap query plan as soon as a
+    first-party page naming the exact model has been collected.  It is opt-in
+    so callers that want every provider's aggregate keep the full plan.
+    """
     brand = " ".join((brand or "").split())
     model = " ".join((model or "").split())
     article = " ".join(article.split()) if article and article.strip() else None
@@ -4219,6 +4699,7 @@ def discover_with_status(
                 f"{brand} official website", f"{brand} official {model}",
             ))
         budget_stopped = False
+        official_page_reached = False
         for query in queries:
             attempted_queries.append(query)
             found, attempts, query_issues = _search_query(active_searcher, query)
@@ -4229,6 +4710,12 @@ def discover_with_status(
                 official_results.extend(found)
             if any(item.budget_exhausted for item in attempts):
                 budget_stopped = True
+                break
+            if early_official_stop and _official_exact_page_reached(found, brand, model):
+                # A first-party page that already names the exact model is the
+                # goal of every remaining identity/bootstrap query; keep the
+                # remaining provider capacity (and wall clock) for documents.
+                official_page_reached = True
                 break
         if cached is None:
             official_domains = dict(discover_global_official_domains(
@@ -4250,7 +4737,7 @@ def discover_with_status(
             )
         ]
         site_domains = relevant_domains or list(official_domains)[:1]
-        for domain in (() if budget_stopped else site_domains[:3]):
+        for domain in (() if budget_stopped or official_page_reached else site_domains[:3]):
             query = f'"{model}" site:{domain}'
             if query in queries:
                 continue
@@ -4270,7 +4757,7 @@ def discover_with_status(
         # crowded out. Re-ask the same domain once with the hosts already seen
         # excluded. Brand/model/domain all come from earlier discovery; no
         # host name is hardcoded.
-        for domain in (() if budget_stopped else site_domains[:2]):
+        for domain in (() if budget_stopped or official_page_reached else site_domains[:2]):
             seen_hosts = sorted({
                 host for item in raw_results
                 if (record := _search_result_record(item)).url
