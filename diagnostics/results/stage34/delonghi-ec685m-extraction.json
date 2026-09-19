@@ -1,0 +1,626 @@
+{
+ "product_name": "DeLonghi EC685M",
+ "brand": "DeLonghi",
+ "model": "EC685M",
+ "discovery_status": "PASS",
+ "runtime_seconds": 2.19,
+ "search_calls": 0,
+ "pages": [
+  {
+   "url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+   "final_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+   "source_type": "official_product_page",
+   "model_match": "exact",
+   "fetched": true,
+   "fetch_issue": "",
+   "document_type": "",
+   "spec_location": "unknown",
+   "requires_interaction": "false",
+   "js_shell": false,
+   "attributes": [
+    {
+     "raw_label": "name",
+     "raw_value": "Pákový kávovar Dedica Style EC685.M",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "brand",
+     "raw_value": "DeLonghi",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_field",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Maximální výška šálku (mm)",
+     "raw_value": "120",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Tlak čerpadla (bar)",
+     "raw_value": "15",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Kapacita nádržky na vodu",
+     "raw_value": "1.1",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Příkon (W)",
+     "raw_value": "1450",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Jmenovitá frekvence",
+     "raw_value": "50-60 HzHz",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Napětí",
+     "raw_value": "220-240v",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Sku",
+     "raw_value": "0132106266",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Rozměry výrobku",
+     "raw_value": "149×330×305",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Hmotnost",
+     "raw_value": "4.22",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_technicaldata",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Latte Macchiato",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Horké mléko",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Automatické cappuccino",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Latte function",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Flat white function",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Espresso function",
+     "raw_value": "Yes",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Coffee function",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Americano\\u002FLong Black function",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Hot water available\\u002Fdispencer",
+     "raw_value": "true",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Cold brew",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Espresso cool",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_functions",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Barva",
+     "raw_value": "Stříbrná",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_colourmaterialfinish",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Materiál",
+     "raw_value": "Metal",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_colourmaterialfinish",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Odkládací plocha na šálky",
+     "raw_value": "Yes",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Systém mléka",
+     "raw_value": "Adjustable Cappuccino System",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Systém vytápění",
+     "raw_value": "Thermoblock",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Odnímatelný odkapávací tácek",
+     "raw_value": "Yes",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Ukazatel hladiny vody",
+     "raw_value": "Yes",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Kompatibilní s kapslemi ESE*",
+     "raw_value": "Yes",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Počet filtrů*",
+     "raw_value": "3",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Dynamické předspaření",
+     "raw_value": "No",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_features",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Ovládání",
+     "raw_value": "Button",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_controlpanel",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Displej",
+     "raw_value": "No Display",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_controlpanel",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [
+      "dom_hidden"
+     ]
+    },
+    {
+     "raw_label": "Tamper\\u002Fpěchovadlo na kávu",
+     "raw_value": "Lžíce / pěchovadlo",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "json_state",
+     "method": "json_state_keyed_spec",
+     "section": "pump_espresso_coffee_machines_accessories",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Tamper/pěchovadlo na kávu",
+     "raw_value": "Lžíce / pěchovadlo",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "table_row",
+     "section": "Dedica Style",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Dedica Style",
+     "raw_value": "EC685.M EX:4",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "dom_hidden",
+     "method": "element_pair",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Rychlý a výkonný",
+     "raw_value": "Připravte si dokonalé espresso díky tlaku 15 barů a jedinečné technologii Thermoblock pro rychlý ohřev při přesné teplotě.",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Doušek italského designu",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Ruční pěnění mléka",
+     "raw_value": "Připravujte širokou škálu mléčných nápojů díky nastavitelnému Cappuccino systému, který vám umožní přepínat mezi napařovaným mlékem a krémovou pěnou pro cappuccino.",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Doušek italského designu",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Široká nabídka nápojů",
+     "raw_value": "Vychutnejte si své oblíbené nápoje v pohodlí domova díky Dedica Style, včetně jednoduchého nebo dvojitého espressa, krémového cappuccina a teplého mléka.",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Doušek italského designu",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Dvojitý odkapávací tácek",
+     "raw_value": "Vyjímatelný odkapávací tácek je možné nastavit a používat šálky a skleničky až do výšky 12 cm.",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Doušek italského designu",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Zaregistrujte svůj produkt",
+     "raw_value": "Tipy k produktům Novinky a speciální nabídky Rychlá podpora",
+     "source_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "element_pair",
+     "section": "Doušek italského designu",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    }
+   ],
+   "excluded": {
+    "neighbour_json_product": 2
+   },
+   "stats": {
+    "json_state_blocks": 54,
+    "by_location": {
+     "visible_dom": 5,
+     "dom_hidden": 2,
+     "json_ld": 2,
+     "json_state": 33
+    },
+    "by_method": {
+     "json_ld_field": 2,
+     "json_state_keyed_spec": 33,
+     "table_row": 1,
+     "element_pair": 6
+    },
+    "html_bytes": 1941563
+   },
+   "issues": []
+  }
+ ],
+ "support_pages": [],
+ "documents": [],
+ "skipped": [],
+ "raw_attribute_count": 42
+}

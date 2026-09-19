@@ -1,0 +1,131 @@
+[
+ {
+  "product": "Gressel GAF-1825",
+  "official_sources": 2,
+  "pages": 1,
+  "support": 0,
+  "documents": 1,
+  "fetched": 2,
+  "sources_with_attributes": 2,
+  "raw_attributes": 39,
+  "by_location": {
+   "dom_hidden": 21,
+   "visible_dom": 4,
+   "document": 14
+  },
+  "issues": []
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "official_sources": 4,
+  "pages": 3,
+  "support": 0,
+  "documents": 1,
+  "fetched": 4,
+  "sources_with_attributes": 3,
+  "raw_attributes": 355,
+  "by_location": {
+   "json_ld": 169,
+   "json_state": 186
+  },
+  "issues": [
+   "media3.bsh-group.com: document does not name the requested model: attributes withheld (discovery matched it by URL/title only)",
+   "media3.bsh-group.com: no raw attributes in document text"
+  ]
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "official_sources": 1,
+  "pages": 1,
+  "support": 0,
+  "documents": 0,
+  "fetched": 1,
+  "sources_with_attributes": 1,
+  "raw_attributes": 23,
+  "by_location": {
+   "json_ld": 23
+  },
+  "issues": []
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "official_sources": 5,
+  "pages": 2,
+  "support": 0,
+  "documents": 3,
+  "fetched": 5,
+  "sources_with_attributes": 4,
+  "raw_attributes": 107,
+  "by_location": {
+   "json_ld": 10,
+   "json_state": 74,
+   "document": 23
+  },
+  "issues": [
+   "www.documents.philips.com: document does not name the requested model: attributes withheld (discovery matched it by URL/title only)",
+   "www.documents.philips.com: no raw attributes in document text"
+  ]
+ },
+ {
+  "product": "Makita DHP484Z",
+  "official_sources": 1,
+  "pages": 1,
+  "support": 0,
+  "documents": 0,
+  "fetched": 1,
+  "sources_with_attributes": 1,
+  "raw_attributes": 15,
+  "by_location": {
+   "visible_dom": 15
+  },
+  "issues": []
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "official_sources": 1,
+  "pages": 1,
+  "support": 0,
+  "documents": 0,
+  "fetched": 1,
+  "sources_with_attributes": 1,
+  "raw_attributes": 42,
+  "by_location": {
+   "json_ld": 2,
+   "json_state": 33,
+   "dom_hidden": 2,
+   "visible_dom": 5
+  },
+  "issues": []
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "official_sources": 1,
+  "pages": 1,
+  "support": 0,
+  "documents": 0,
+  "fetched": 1,
+  "sources_with_attributes": 1,
+  "raw_attributes": 36,
+  "by_location": {
+   "json_ld": 11,
+   "json_state": 23,
+   "visible_dom": 2
+  },
+  "issues": []
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "official_sources": 2,
+  "pages": 2,
+  "support": 0,
+  "documents": 0,
+  "fetched": 2,
+  "sources_with_attributes": 2,
+  "raw_attributes": 32,
+  "by_location": {
+   "json_ld": 9,
+   "visible_dom": 23
+  },
+  "issues": []
+ }
+]

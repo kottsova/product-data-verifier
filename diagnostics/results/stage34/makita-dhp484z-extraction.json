@@ -1,0 +1,237 @@
+{
+ "product_name": "Makita DHP484Z",
+ "brand": "Makita",
+ "model": "DHP484Z",
+ "discovery_status": "PASS",
+ "runtime_seconds": 1.52,
+ "search_calls": 0,
+ "pages": [
+  {
+   "url": "https://www.makita.co.nz/products/model/DHP484Z",
+   "final_url": "https://www.makita.co.nz/products/model/DHP484Z",
+   "source_type": "official_product_page",
+   "model_match": "exact",
+   "fetched": true,
+   "fetch_issue": "",
+   "document_type": "",
+   "spec_location": "visible_dom",
+   "requires_interaction": "false",
+   "js_shell": false,
+   "attributes": [
+    {
+     "raw_label": "- Steel",
+     "raw_value": "13mm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > Drilling capacity",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "- Wood",
+     "raw_value": "38mm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > Drilling capacity",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "- Concrete",
+     "raw_value": "13mm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > Drilling capacity",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "- Holesaw",
+     "raw_value": "76mm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > Drilling capacity",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "- Hi",
+     "raw_value": "0-30,000ipm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > Impacts per minute",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "- Lo",
+     "raw_value": "0-7,500ipm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > Impacts per minute",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "- Hi",
+     "raw_value": "0-2,000rpm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > No load speed",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "- Lo",
+     "raw_value": "0-500rpm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications > No load speed",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Max fastening torque",
+     "raw_value": "60Nm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Overall dimensions",
+     "raw_value": "182mm",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Net weight (skin)",
+     "raw_value": "1.6kg",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Sound Level",
+     "raw_value": "99dB(A)",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Continuous rating input",
+     "raw_value": "450W",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "Voltage",
+     "raw_value": "18V",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    },
+    {
+     "raw_label": "LXT battery compatibility",
+     "raw_value": "1.5Ah 2Ah 3Ah 4Ah 5Ah 6Ah 9Ah 12Ah",
+     "source_url": "https://www.makita.co.nz/products/model/DHP484Z",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "table_row",
+     "section": "Specifications",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": []
+    }
+   ],
+   "excluded": {
+    "neighbour_context_pair": 3
+   },
+   "stats": {
+    "json_state_blocks": 0,
+    "by_location": {
+     "visible_dom": 15
+    },
+    "by_method": {
+     "table_row": 15
+    },
+    "html_bytes": 40112
+   },
+   "issues": []
+  }
+ ],
+ "support_pages": [],
+ "documents": [],
+ "skipped": [],
+ "raw_attribute_count": 15
+}
