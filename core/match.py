@@ -9,7 +9,7 @@ import unicodedata
 MODEL_TOKEN_RE = re.compile(r"(?<!\w)[\w]+(?:[./_-][\w]+)*(?!\w)", re.UNICODE)
 NON_VARIANT_SUFFIXES = {"ASP", "ASPX", "HTM", "HTML", "PDF", "PHP"}
 MODEL_FAMILY_MODIFIERS = {
-    "ABSOLUTE", "BUSINESS", "FE", "FOLD", "LITE", "MAC", "MAX", "MINI",
+    "ABSOLUTE", "BUSINESS", "EXTRA", "FE", "FOLD", "LITE", "MAC", "MAX", "MINI",
     "PLUS", "PRO", "SE", "ULTRA", "XL",
 }
 

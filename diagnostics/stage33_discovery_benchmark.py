@@ -73,9 +73,10 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("diagnostics/results/stage33-discovery-live.json"))
     parser.add_argument("--budget", type=float, default=60.0)
     parser.add_argument("--include-pixel-isolation", action="store_true")
+    parser.add_argument("--name", help="Run one name-only bot request instead of the ten-product suite")
     args = parser.parse_args()
-    names = benchmark_names(args.dataset)
-    if args.include_pixel_isolation:
+    names = [args.name] if args.name else benchmark_names(args.dataset)
+    if args.include_pixel_isolation and not args.name:
         names.extend(("Google Pixel 9", "Google Pixel 9 Pro"))
     report = asyncio.run(benchmark(DiscoveryDebugService(
         wall_clock_budget_seconds=args.budget,

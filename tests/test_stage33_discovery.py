@@ -65,6 +65,10 @@ class IdentityAndUrlTests(unittest.TestCase):
             "V15 Detect", "Dyson V15 Detect Pro specifications",
             "https://dyson.example/content/Dyson%20V15%20Detect%20Pro%20specs.pdf",
         ), "different_variant")
+        self.assertEqual(candidate_model_match(
+            "V15 Detect", "Dyson V15 Detect Extra",
+            "https://dyson.example/vacuum-cleaners/v15/detect-extra-nickel-blue",
+        ), "different_variant")
 
     def test_tracking_cleanup_preserves_product_page(self):
         self.assertEqual(

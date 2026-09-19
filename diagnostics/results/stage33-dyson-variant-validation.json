@@ -1,0 +1,2044 @@
+[
+  {
+    "input": "Dyson V15 Detect",
+    "result": {
+      "product_name": "Dyson V15 Detect",
+      "brand": "Dyson",
+      "model": "V15 Detect",
+      "market": "global",
+      "status": "PASS",
+      "exact_official_found": true,
+      "official": [
+        {
+          "url": "https://dyson.hk/zh-HK/products/cord-free/dyson-v15-detect/overview",
+          "domain": "dyson.hk",
+          "source_type": "manufacturer",
+          "title": "www.dyson.hk › cord-free › dyson-v15-detect 새 창 열림",
+          "model_match": "exact",
+          "authority": "manufacturer",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/vacuum-cleaners/cordless/v15-detect",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "dyson.com www.dyson.com › .. › Cordless vacuum cleaners › Dyson V15 Detect™ vacuum 새 창 열림",
+          "model_match": "exact",
+          "authority": "official support",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/discover/archive/2021/behind-the-laser-v15-detect",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson V15 Detect laser explained: how Dyson engineers made the…",
+          "model_match": "exact",
+          "authority": "manufacturer",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/discover/archive/2021/inside-the-tech-v15-detect",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson www.dyson.co.uk › inside-the-tech-v15-detect 새 창 열림",
+          "model_match": "exact",
+          "authority": "manufacturer",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v15/detect-yellow",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "dyson.com www.dyson.com › .. › Cordless vacuums › Dyson V15 Detect (Yellow/Iron) 새 창 열림",
+          "model_match": "exact",
+          "authority": "manufacturer",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/videos/vacuums/v15-detect-video",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "V15 Detect cordless vacuum video",
+          "model_match": "exact",
+          "authority": "manufacturer",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners/cordless/v15",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson V15™ Detect cordless vacuum cleaner - Overview | Dyson V15™ vacuums",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Title mentions the model but the URL does not identify the complete model.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners/cordless/v15/all",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Shop All Dyson V15 Detect | Dyson UK 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Title mentions the model but the URL does not identify the complete model.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners/cordless/v15/detect-yellow-nickel",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson www.dyson.co.uk › vacuum-cleaners › detect-yellow-nickel 새 창 열림",
+          "model_match": "exact",
+          "authority": "manufacturer",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/commercial/vacuums/dyson-v15-detect",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "dyson.com www.dyson.com › For business › Commercial Vacuum Cleaners 새 창 열림",
+          "model_match": "exact",
+          "authority": "manufacturer",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v15",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson V15 Detect™ vacuums",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Title mentions the model but the URL does not identify the complete model.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://support.kr.dyson.com/SupportHome/Vacuums/Cordless/v15-detect",
+          "domain": "support.kr.dyson.com",
+          "source_type": "official_document",
+          "title": "dyson.com support.kr.dyson.com › v15-detect 새 창 열림",
+          "model_match": "exact",
+          "authority": "official support",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://support.kr.dyson.com/supporthome.aspx/Vacuums/Cordless/v15-detect/369476-01/troubleshooting/unusual-smell",
+          "domain": "support.kr.dyson.com",
+          "source_type": "official_document",
+          "title": "dyson.com support.kr.dyson.com › v15-detect › unusual-smell 새 창 열림",
+          "model_match": "exact",
+          "authority": "official support",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://support.kr.dyson.com/supporthome.aspx/Vacuums/Cordless/v15-detect/479335-01",
+          "domain": "support.kr.dyson.com",
+          "source_type": "official_document",
+          "title": "dyson.com support.kr.dyson.com › v15-detect 새 창 열림",
+          "model_match": "exact",
+          "authority": "official support",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://support.kr.dyson.com/supporthome/Vacuums/Cordless/v15-detect/368369-01/troubleshooting/clear-the-bin-374206",
+          "domain": "support.kr.dyson.com",
+          "source_type": "official_document",
+          "title": "dyson.com support.kr.dyson.com › v15-detect 새 창 열림",
+          "model_match": "exact",
+          "authority": "official support",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://support.kr.dyson.com/SupportHome/Vacuums/Cordless/v15-detect/368369-01/how-to-use-your-machine/check-the-bin-inlet",
+          "domain": "support.kr.dyson.com",
+          "source_type": "official_document",
+          "title": "dyson.com support.kr.dyson.com › how-to-use-your-machine › check-the-bin-inlet 새 창 열림",
+          "model_match": "exact",
+          "authority": "official support",
+          "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.kr/products/cord-free/dyson-v15-vacuums/overview",
+          "domain": "dyson.co.kr",
+          "source_type": "manufacturer",
+          "title": "다이슨 www.dyson.co.kr › cord-free › dyson-v15-vacuums 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.kr/products/cord-free/dyson-v15-vacuums/shop-all",
+          "domain": "dyson.co.kr",
+          "source_type": "manufacturer",
+          "title": "다이슨 www.dyson.co.kr › cord-free › dyson-v15-vacuums › shop-all 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/support/journey/tools/972205-01",
+          "domain": "dyson.co.uk",
+          "source_type": "official_document",
+          "title": "Pet grooming kit | Dyson",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/commercial/specifications-and-documents",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Specs & Docs",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/967479-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Mini Motorized tool 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/967612-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Crevice tool 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/968923-02",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Dyson Cyclone V10 Dok™ 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/970938-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Battery 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/971431-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Up-top adaptor 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/971432-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Extension hose 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/971434-02",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Light pipe crevice tool 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/971435-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Low-reach adaptor 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/972141-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Awkward gap tool 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/972157-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Scratch-free dusting brush 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/support/journey/tools/972205-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Pet grooming kit 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.kr/dyson-maintenance",
+          "domain": "dyson.co.kr",
+          "source_type": "manufacturer",
+          "title": "다이슨 www.dyson.co.kr › dyson-maintenance 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/air-treatment",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Air treatment 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/commercial/overview/offices",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson technology for offices | Dyson",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/deals",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Explore our Dyson Deals | Shop exclusive offers at Dyson",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/discover/archive/2021/lean-engineering-optimisin-energy",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson.co.uk | Lean engineering: optimising energy for more…",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/floor-cleaners",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Wet cleaners 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/floorcare",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Floorcare 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/hair-care",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Hair care 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/oral-care",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Oral care 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson Vacuum Cleaners | Discover our cleaning solutions",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners/robot",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Robot 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners/wet-dry/v15s-detect-submarine/yellow-nickel",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson V 15 s Detect SubmarineTM cordless wet and dry vacuum",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.co.za/for-business/overview",
+          "domain": "dyson.co.za",
+          "source_type": "manufacturer",
+          "title": "For business 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com.au/for-business/overview",
+          "domain": "dyson.com.au",
+          "source_type": "manufacturer",
+          "title": "For business 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com.sg/demo-store/find-a-store",
+          "domain": "dyson.com.sg",
+          "source_type": "manufacturer",
+          "title": "Find a store 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com.sg/dyson-outlet",
+          "domain": "dyson.com.sg",
+          "source_type": "manufacturer",
+          "title": "Dyson Outlet 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com.sg/for-business/overview",
+          "domain": "dyson.com.sg",
+          "source_type": "manufacturer",
+          "title": "For business 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com.sg/product-registration",
+          "domain": "dyson.com.sg",
+          "source_type": "manufacturer",
+          "title": "Register machine 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/commercial/vacuums",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Commercial Vacuum Cleaners",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/discover/innovation/new-machines/james-dyson-launch",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "James Dyson unveils new cleaning technology",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/discover/insights/cleaning/tips/how-to-vacuum-attachments",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "How to use your vacuum cleaner accessories",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Vacuum Cleaners | Dyson Official Website",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/attachments/cordless",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "www.dyson.com › Shop › Vacuum cleaners › Vacuum accessories 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Cordless Vacuum Cleaners | Dyson Official Website",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/pencilvac/fluffycones",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson PencilVac Fluffycones 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v10/absolute-nickel-copper",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "www.dyson.com › vacuum-cleaners › absolute-nickel-copper 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v12/detect-slim-yellow",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson V12 Detect™ Slim 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v16-piston/black-copper",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson V16 Piston Animal cordless vacuum 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v16-piston/dok-bright-copper",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson V16 Piston Animal + Auto-Empty Dok™ 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v16-piston/floor-dok-black-copper",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson V16 Piston Animal cordless vacuum + FloorDok™ 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v16-piston/submarine-black-copper",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson V16 Piston Animal Submarine™ cordless wet and dry vacuum 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/robot/spot-scrub-ai/black",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson Spot+Scrub™ Ai 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/shop-all",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "dyson.com www.dyson.com › Shop › Vacuum cleaners 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://lb.dyson.com/en-LB/unveiled-2025.aspx",
+          "domain": "lb.dyson.com",
+          "source_type": "manufacturer",
+          "title": "www.lb.dyson.com › en-LB 새 창 열림",
+          "model_match": "weak",
+          "authority": "manufacturer",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://support.dyson.co.za/product-registration/registration.aspx",
+          "domain": "support.dyson.co.za",
+          "source_type": "official_document",
+          "title": "Register machine 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        },
+        {
+          "url": "https://support.dyson.com.au/product-registration/registration.aspx",
+          "domain": "support.dyson.com.au",
+          "source_type": "official_document",
+          "title": "Register machine 새 창 열림",
+          "model_match": "weak",
+          "authority": "official support",
+          "reason": "Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+          "group": "official"
+        }
+      ],
+      "dealers": [],
+      "secondary": [
+        {
+          "url": "https://bestbuy.com/product/dyson-v15-detect-cordless-vacuum-with-8-accessories-yellow-nickel/J3ZCSYCVPL",
+          "domain": "bestbuy.com",
+          "source_type": "retailer",
+          "title": "Dyson - V15 Detect Cordless Vacuum with 8 accessories - Yellow/Nickel",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://abt.com/Dyson-V15-Detect-Cordless-Vacuum-62641701/p/243963.html",
+          "domain": "abt.com",
+          "source_type": "other",
+          "title": "Dyson V15 Detect Cordless Vacuum - 626417-01 새 창 열림",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://bajajfinserv.in/bmall/dyson-v15-detect-240w-cordless-dry-vacuum-cleaner-yellow-and-nickel-447113-01/p/29185",
+          "domain": "bajajfinserv.in",
+          "source_type": "other",
+          "title": "Bajaj Finserv www.bajajfinserv.in › dyson-v15-detect-240w-cordless-dry-vacuum-cleaner-yellow-and-nickel-447113-01 새 창 열림",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://builtwith.com/ko/ecommerce/products/Dyson-V15-Detect-Cordless-Vacuum",
+          "domain": "builtwith.com",
+          "source_type": "other",
+          "title": "BuiltWith builtwith.com › Dyson-V15-Detect-Cordless-Vacuum 새 창 열림",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://costco.com/p/-/dyson-v15-detect-total-clean-extra-cordless-stick-vacuum/4000177472",
+          "domain": "costco.com",
+          "source_type": "other",
+          "title": "Dyson V15 Detect Total Clean Extra Cordless Stick Vacuum",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://beebom.com/dyson-v15-detect-cord-free-vacuum-cleaner-launched-india",
+          "domain": "beebom.com",
+          "source_type": "other",
+          "title": "Beebom beebom.com › dyson-v15-detect-cord-free-vacuum-cleaner-launched-india 새 창 열림",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://consumerreports.org/appliances/vacuum-cleaners/dyson-v15-detect/m403340",
+          "domain": "consumerreports.org",
+          "source_type": "other",
+          "title": "Consumer Reports www.consumerreports.org › .. › Vacuum Cleaners › Dyson V15 Detect 새 창 열림",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ko.ifixit.com/Device/Dyson_V15_Detect",
+          "domain": "ko.ifixit.com",
+          "source_type": "other",
+          "title": "Dyson V15 Detect 도움말: 스스로 수리하는 방법을 알아보세요. 새 창 열림",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://popularmechanics.com/home/tools/a71293377/dyson-v15-detect-stick-vacuum-green-laser",
+          "domain": "popularmechanics.com",
+          "source_type": "other",
+          "title": "Dyson V15 Detect: The Science Behind Its Laser Dust Detection",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://walmart.com/ip/Dyson-V15-Detect-Cordless-Vacuum-Yellow-Nickel-New-Newest-Gen/20037872945",
+          "domain": "walmart.com",
+          "source_type": "other",
+          "title": "Dyson V15 Detect™ Cordless Vacuum | Yellow/Nickel | New | Newest Gen",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ko.manuals.plus/asin/B0CCYM47NF",
+          "domain": "ko.manuals.plus",
+          "source_type": "specialized_reference",
+          "title": "2026.08.05. Comprehensive instruction manual for the Dyson V15 Detect Cordless Vacuum Cleaner, covering setup, operation, maintenance, troubleshooting, and specifications. 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://tilnote.io/pages/693595ebf8acfc38306411b4",
+          "domain": "tilnote.io",
+          "source_type": "other",
+          "title": "다이슨 V15 Detect 2025 배터리 정품 인증 시스템과 교체 방법 완전 분석 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://tilnote.io/pages/698a5cd5b1aad9ffec0f18aa",
+          "domain": "tilnote.io",
+          "source_type": "other",
+          "title": "여러분은 혹시 최고급 무선 청소기를 구매할 때 초기 비용만 생각하시나요? 사실, 다이슨 V15 디텍트( Dyson V15 Detect )와 같은 고성능 프리미엄 가전의 진정한 가치를 판단하려면 '총 소유 비용(TCO, Total Cost of Ownership)'을 반드시 분석해야만 합니다. 우리는 흔히 청소기를 구매한 순간 모든 지출이 끝났다고 착각하기 쉽지만, 실제로는 그렇지 않다는 것입니다 [1]. 왜냐하면 다이슨이 ...... 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://tilnote.io/pages/69a6310bffa6b606a16b4141",
+          "domain": "tilnote.io",
+          "source_type": "other",
+          "title": "다이슨 V15 Detect 2025 배터리 인증 시스템과 정품 교체 완벽 분석 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://gadgetreview.com/dyson-v15-detect-review",
+          "domain": "gadgetreview.com",
+          "source_type": "other",
+          "title": "Gadget Review www.gadgetreview.com › Vacuum Cleaners › Dyson V15 Detect Review 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Exact model appears only on a generic catalog or weak page.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://pcmag.com/reviews/dyson-v15-detect",
+          "domain": "pcmag.com",
+          "source_type": "other",
+          "title": "Dyson V15 Detect Review 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Exact model appears only on a generic catalog or weak page.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://rtings.com/vacuum/reviews/dyson/v15-detect",
+          "domain": "rtings.com",
+          "source_type": "other",
+          "title": "www.rtings.com › Reviews › Dyson › V15 Detect 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Exact model appears only on a generic catalog or weak page.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://amazon.com/Dyson-V15-Detect-Cordless-Vacuum/dp/B0GXX8KQY7",
+          "domain": "amazon.com",
+          "source_type": "marketplace",
+          "title": "Dyson V15 Detect Cordless Vacuum - amazon.com",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/b/Dyson-V15-Detect/20614/bn_7117725207",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 Detect 토탈 클린 엑스트라 | 노란색/니켈 ; 다이슨 V15 Detect 토탈 클린 엑스트라 | 옐로우/니켈 | 리퍼비시 ; 리퍼브 다이슨 V15 Detect 토탈 클린 엑스트라 - 노란색/니켈 새 창 열림",
+          "model_match": "exact",
+          "authority": "secondary",
+          "reason": "Requested exact model appears in the title/snippet or URL.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://techradar.com/reviews/dyson-gen5-detect-review",
+          "domain": "techradar.com",
+          "source_type": "other",
+          "title": "2023.02.09. The Dyson Gen5 detect is a powerful cordless vacuum that boasts some impressive specs and advanced features. It launched in Australia in October 2022 but didn't... Despite the new name, the Gen5 detect bears a strong resemblance to the most recent Dyson stick vacuums, and especially its direct predecessor, the Dyson V15 Detect ... 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Exact model appears only on a generic catalog or weak page.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://amazon.com/Dyson-DetectTM-Origin-Cordless-Vacuum/dp/B0GTC14BFW",
+          "domain": "amazon.com",
+          "source_type": "marketplace",
+          "title": "Dyson V15 Detect™ Origin Cordless Vacuum - amazon.com",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://amazon.com/dp/B0C2J8KJH9",
+          "domain": "amazon.com",
+          "source_type": "marketplace",
+          "title": "Dyson V15 Detect Cordless Vacuum Cleaner for $459.99 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/276582090868",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 Detect 토탈 클린 엑스트라 | 옐로우/니켈 | 리퍼비시 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/287536591051",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 Detect 무선 스틱형 진공 청소기 - 노란색/니켈 626417-01 새 제품!!!! 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/326731588945",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "리퍼브 다이슨 V15 Detect 토탈 클린 엑스트라 - 노란색/니켈 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/326731588945?_skw=Dyson&itmmeta=01KQGHFPJHWQPFHY3PD8NXHDVG&hash=item4c12b86551%3Ag%3Al7wAAeSw3zdpglpt&itmprp=enc%3AAQALAAAAwDKQclQvzFwZQpmMrsO4LurOQa3W6xLEsSqZfM0e529Vki9GJrqkB6UXUjRNcmzpgD4XHEinNOlX9H9UGwhcmOEfAw3YDtG7qB%2F1Jcg849Mm%2BVWNXWvYD4LzHZUVp5E3siqIOeTiXlMDFsla3uCFCLl8vWudoOqNheTKXBkuR7klHAOnc33uHsGT6sSdUgurVxzEGGIJszpPYxzrNiPrH%2FZwbxQfL92YckUvAz%2BBdR7%2BSdEb3vH5c8IMbdWTgx%2FAlg%3D%3D%7Ctkp%3ABk9SR87pvpG8Zw",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "리퍼브 다이슨 V15 Detect 토탈 클린 엑스트라 - 노란색/니켈 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/358295223319",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 Detect 토탈 클린 엑스트라 | 옐로우/니켈 상태 좋음 LN 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/377439920087",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 Detect 무선 진공 청소기 노란색/니켈 헤파 레이저 새품 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/397387354686",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 Detect 무선 스틱형 진공 청소기 - SV22- 노란색/니켈 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        },
+        {
+          "url": "https://ebay.com/itm/398292746221",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 Detect 무선 스틱형 진공 청소기 - 노란색/니켈 (368340-01) 새 창 열림",
+          "model_match": "weak",
+          "authority": "secondary",
+          "reason": "Title mentions the model but the URL does not identify the complete model.",
+          "group": "secondary"
+        }
+      ],
+      "rejected": [
+        {
+          "url": "https://dyson.com/outlet/refurbished-vacuum-cleaners/cordless/v15-detect-iron",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "/outlet/refurbished vacuum cleaners/cordless/v15 detect iron",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/spare-parts/vacuum-cleaners/cordless/v15-detect",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "dyson.com www.dyson.com › .. › Cordless vacuum cleaners › Dyson V15 Detect™ vacuum 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://kream.co.kr/products/92944",
+          "domain": "kream.co.kr",
+          "source_type": "other",
+          "title": "다이슨 V15 디텍트 컴플리트 골드 (국내 정식 발매 제품) Dyson V15 Detect Complete Gold (Korean Ver.) 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Product URL identifies another item, not the requested model.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://ebay.com/p/18050631893",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "Dyson V15 Detect - Cordless Stick Vacuum (Gold) for sale online 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Product URL identifies another item, not the requested model.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://ebay.com/itm/257633286229",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "Dyson V15 Detect Total Clean Extra Cordless Vacuum Cleaner SV47 Dyson V15 Detect Cordless Stick Vacuum Cleaner - Yellow/Nickel (447261-01) Refurbished Dyson V15 Detect Total Clean Extra Cordless Vacuum - Yellow/Nickel 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result describes an accessory or replacement part, not the product.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.za/products/air-treatment",
+          "domain": "dyson.co.za",
+          "source_type": "manufacturer",
+          "title": "Air treatment 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.za/products/hair-care",
+          "domain": "dyson.co.za",
+          "source_type": "manufacturer",
+          "title": "Hair care 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.za/products/vacuum-cleaners",
+          "domain": "dyson.co.za",
+          "source_type": "manufacturer",
+          "title": "Floorcare 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.au/products/hair-care",
+          "domain": "dyson.com.au",
+          "source_type": "manufacturer",
+          "title": "Hair care 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.au/products/headphones/ontrac",
+          "domain": "dyson.com.au",
+          "source_type": "manufacturer",
+          "title": "Headphones 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.au/products/lighting",
+          "domain": "dyson.com.au",
+          "source_type": "manufacturer",
+          "title": "Lighting 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.au/products/oral-care",
+          "domain": "dyson.com.au",
+          "source_type": "manufacturer",
+          "title": "Oral care 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.sg/products/hair-care",
+          "domain": "dyson.com.sg",
+          "source_type": "manufacturer",
+          "title": "Hair care 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.sg/products/oral-care",
+          "domain": "dyson.com.sg",
+          "source_type": "manufacturer",
+          "title": "Oral care 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Product URL identifies another item, not the requested model.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/replacement-parts/970013-02",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Filter 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/spare-details.969350-02",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Charger 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/spare-details.970011-02",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Docking station 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/spare-details.971634-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Laser Slim Fluffy™ brush bar 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/spare-details.972126-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "HEPA filter 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/spare-details.972214-03",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Floor Dok™ 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/spare-details.972522-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Fluffy Optic™ cleaner head 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/support/journey/spare-details.974714-01",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "Digital Motorbar cleaner head 새 창 열림",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.uk/spare-parts/vacuum-cleaners/cordless/filters",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Replacement cordless filters | Dyson",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/air-treatment/air-purifiers",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Air Purifiers | Dyson Official Website",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/robot/360-vis-nav",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson 360 Vis NavTM robot vacuum cleaner | Dyson",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.uk/",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson www.dyson.co.uk 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.uk/en",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson UK | Official Site",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.za/",
+          "domain": "dyson.co.za",
+          "source_type": "manufacturer",
+          "title": "dyson.co.za www.dyson.co.za 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.au/",
+          "domain": "dyson.com.au",
+          "source_type": "manufacturer",
+          "title": "dyson.com.au www.dyson.com.au 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.sg/",
+          "domain": "dyson.com.sg",
+          "source_type": "manufacturer",
+          "title": "dyson.com.sg www.dyson.com.sg 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Official Dyson® Website | Shop Dyson.com for Exclusive Savings",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/en",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Official Dyson Website | Shop Dyson.com for Exclusive Savings",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dysoncanada.ca/en",
+          "domain": "dysoncanada.ca",
+          "source_type": "manufacturer",
+          "title": "Official Dyson Canada Website | Shop Dysoncanada.ca for…",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://kream.co.kr/products/92946",
+          "domain": "kream.co.kr",
+          "source_type": "other",
+          "title": "KREAM kream.co.kr › products 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Product URL identifies another item, not the requested model.",
+          "group": "rejected"
+        },
+        {
+          "url": "http://onlineshop.cz/dum-zahrada",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "VÅ¡e na zahradu",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://kaufland.cz/elektronika",
+          "domain": "kaufland.cz",
+          "source_type": "retailer",
+          "title": "Elektronika",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://kaufland.cz/m/~49201",
+          "domain": "kaufland.cz",
+          "source_type": "retailer",
+          "title": "Dyson na Kaufland.cz - ObjednÃ¡vejte na Kaufland.cz",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://onlineshop.cz/doprava-zdarma",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "ZboÅ¾Ã­ s dopravou zdarma",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://onlineshop.cz/dyson",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "Dyson - VÃ½hodnÃ½ nÃ¡kup na OnlineShop.cz",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://onlineshop.cz/vyhodne-sety",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "VÃ½hodnÃ© sety",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://onlineshop.cz/vyprodej",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "VÃ½prodej - nejvÄtÅ¡Ã­ slevy",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://onlineshop.cz/vyprodej/electrolux",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "VÃ½prodej Electrolux",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://onlineshop.cz/vyprodej/tefal",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "VÃ½prodej Tefal",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://datart.cz/tycovy-vysavac-dyson-v15s-detect-submarine-2026-stribrny",
+          "domain": "datart.cz",
+          "source_type": "other",
+          "title": "TyÄovÃ½ vysavaÄ Dyson V15s - Na DATART.cz za 18 990 KÄ",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://device.report/dyson/v15",
+          "domain": "device.report",
+          "source_type": "other",
+          "title": "device.report › Dyson › V15 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.in/best-sellers",
+          "domain": "dyson.in",
+          "source_type": "other",
+          "title": "Best Sellers",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://o-seznam.cz/napoveda/prohlizece",
+          "domain": "o-seznam.cz",
+          "source_type": "other",
+          "title": "NajÃ­t jinÃ½ prohlÃ­Å¾eÄ",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://o-seznam.cz/napoveda/vyhledavani",
+          "domain": "o-seznam.cz",
+          "source_type": "other",
+          "title": "NÃ¡povÄda",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://zbozi.cz/obchod/1988",
+          "domain": "zbozi.cz",
+          "source_type": "other",
+          "title": "96% spokojenÃ½ch zÃ¡kaznÃ­kÅ¯ s e-shopem â ZboÅ¾Ã­.cz",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://zbozi.cz/obchod/7845",
+          "domain": "zbozi.cz",
+          "source_type": "other",
+          "title": "95% spokojenÃ½ch zÃ¡kaznÃ­kÅ¯ s e-shopem â ZboÅ¾Ã­.cz",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners/cordless/v15/detect-absolute-gold-iron",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson www.dyson.co.uk › .. › Dyson V15 Detect Absolute + (Gold) 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.uk/vacuum-cleaners/cordless/v15/detect-extra-nickel-blue",
+          "domain": "dyson.co.uk",
+          "source_type": "manufacturer",
+          "title": "Dyson www.dyson.co.uk › .. › Dyson V15 Detect Extra (Nickel/Blue) 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com.au/dyson-v15-detect-absolute-dok-626412-01",
+          "domain": "dyson.com.au",
+          "source_type": "manufacturer",
+          "title": "www.dyson.com.au › dyson-v15-detect-absolute-dok-626412-01 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/outlet/refurbished-vacuum-cleaners/cordless/v15-detect-absolute-gold",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "/outlet/refurbished vacuum cleaners/cordless/v15 detect absolute gold",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/outlet/refurbished-vacuum-cleaners/cordless/v15-detect-absolute-gold-iron",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "/outlet/refurbished vacuum cleaners/cordless/v15 detect absolute gold iron",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/content/dam/dyson/for-business/business-refresh/docs/us/vacuums/US%20Dyson%20V15%20Detect%20Pro%20tech%20spec.pdf",
+          "domain": "dyson.com",
+          "source_type": "official_document",
+          "title": "DYS_P231609_J0001_T01_VX-182176_GENE_GLOB_N248P_ V15 _ Detect …",
+          "model_match": "rejected",
+          "authority": "official support",
+          "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://ebay.com/itm/287540135318",
+          "domain": "ebay.com",
+          "source_type": "marketplace",
+          "title": "다이슨 V15 디텍트 프로 무선 진공 청소기 | 배터리 2개 | 보라색/은색 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Requested exact model/article is absent from the search result.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.com/vacuum-cleaners/cordless/v15/absolute-car-cleaning-kit",
+          "domain": "dyson.com",
+          "source_type": "manufacturer",
+          "title": "Dyson V15 Detect™ Absolute cordless vacuum + Car cleaning kit 새 창 열림",
+          "model_match": "rejected",
+          "authority": "manufacturer",
+          "reason": "Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://bestbuy.com/product/dyson-v15-detect-extra-cordless-vacuum-with-10-accessories-yellow-nickel/J3ZCSY279C",
+          "domain": "bestbuy.com",
+          "source_type": "retailer",
+          "title": "Dyson V15 Detect Extra Cordless Vacuum with 10 accessories Yellow ...",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://kaufland.cz/product/481386917",
+          "domain": "kaufland.cz",
+          "source_type": "retailer",
+          "title": "Dyson V15 Detect Absolute, TyÄovÃ½ vysavaÄ 2 v 1,",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://onlineshop.cz/tycove-akumulatorove-vysavace/tycovy-vysavac-dyson-v15-detect-absolute-2023-1209479P.html",
+          "domain": "onlineshop.cz",
+          "source_type": "retailer",
+          "title": "TyÄovÃ½ vysavaÄ Dyson V15 Detect Absolute (2023), lehce…",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://beebom.com/dyson-v15-detect-extra-launched-india",
+          "domain": "beebom.com",
+          "source_type": "other",
+          "title": "Beebom beebom.com › dyson-v15-detect-extra-launched-india 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://datart.cz/dyson-v15-detect-absolute-2021.html",
+          "domain": "datart.cz",
+          "source_type": "other",
+          "title": "Dyson V15 Detect Absolute (2021) | Datart",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://datart.cz/tycovy-vysavac-dyson-v15-detect-absolute-2023-stribrny",
+          "domain": "datart.cz",
+          "source_type": "other",
+          "title": "TyÄovÃ½ vysavaÄ Dyson V15 Detect Absolute 2023 stÅÃ­brnÃ½ | Datart",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dospiva.cz/dyson/akumulatorove-vysavace/361123-dyson-v15-detect-absolute-2023",
+          "domain": "dospiva.cz",
+          "source_type": "other",
+          "title": "Dyson V15 Detect Absolute 2023 | Dospiva Elektro.cz",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.sa/en-SA/dyson-v15-detect-absolute",
+          "domain": "dyson.sa",
+          "source_type": "other",
+          "title": "www.dyson.sa › dyson-v15-detect-absolute 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://esall.co.kr/shop/itm/Dyson-V15-Detect-Absolute-Cordless-Vacuum-Iron-Gold-Refurbished/277390297931",
+          "domain": "esall.co.kr",
+          "source_type": "other",
+          "title": "이베이쇼핑 www.esall.co.kr › Dyson-V15-Detect-Absolute-Cordless-Vacuum-Iron-Gold-Refurbished 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://esall.co.kr/shop/itm/Dyson-V15-Detect-Absolute-Gold-Refurbished/276777107858",
+          "domain": "esall.co.kr",
+          "source_type": "other",
+          "title": "이베이쇼핑 www.esall.co.kr › Dyson-V15-Detect-Absolute-Gold-Refurbished 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://robotworld.cz/dyson-v15-detect-absolute-2023",
+          "domain": "robotworld.cz",
+          "source_type": "other",
+          "title": "Dyson V15 Detect Absolute Gold - Dyson V15 Detect Absolute Gold",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://sellout.woot.com/offers/dyson-v15-detect-pro-11?ref=w_gw_zl_lc_3",
+          "domain": "sellout.woot.com",
+          "source_type": "other",
+          "title": "woot.com sellout.woot.com › dyson-v15-detect-pro-11 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://thegoodguys.com.au/dyson-v15-detect-absolute-cordless-vacuum-626408-01",
+          "domain": "thegoodguys.com.au",
+          "source_type": "other",
+          "title": "The Good Guys www.thegoodguys.com.au › dyson-v15-detect-absolute-cordless-vacuum-626408-01 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://zbozi.cz/vyrobek/dyson-v15-detect-absolute",
+          "domain": "zbozi.cz",
+          "source_type": "other",
+          "title": "Dyson V15 Detect Absolute od 15 159 KÄ - Zbozi.cz",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "Search result names a different commercial-model variant.",
+          "group": "rejected"
+        },
+        {
+          "url": "https://yahoo.com/news/dyson-v15-detect-review-100002840.html",
+          "domain": "yahoo.com",
+          "source_type": "other",
+          "title": "Yahoo www.yahoo.com › news 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "obvious_non_product_or_blocked_url",
+          "group": "rejected"
+        },
+        {
+          "url": "https://dyson.co.za/newsroom",
+          "domain": "dyson.co.za",
+          "source_type": "other",
+          "title": "Newsroom 새 창 열림",
+          "model_match": "rejected",
+          "authority": "secondary",
+          "reason": "obvious_non_product_or_blocked_url",
+          "group": "rejected"
+        }
+      ],
+      "runtime_seconds": 35.049,
+      "search_status": "partial",
+      "attempted_queries": [
+        "Dyson V15 Detect",
+        "\"Dyson V15 Detect\"",
+        "\"V15 Detect\" Dyson",
+        "\"V15 Detect\" Dyson specs",
+        "\"V15 Detect\" Dyson specifications",
+        "\"V15 Detect\" site:dyson.com",
+        "\"V15 Detect\" Dyson official",
+        "Dyson official website",
+        "Dyson official V15 Detect",
+        "\"V15 Detect\" site:dyson.co.uk",
+        "\"V15 Detect\" site:dyson.com.au",
+        "\"V15 Detect\" site:dyson.com -site:lb.dyson.com -site:support.kr.dyson.com"
+      ],
+      "providers": [
+        "direct_domain_probe",
+        "browser_official_discovery",
+        "duckduckgo_html",
+        "naver",
+        "seznam",
+        "duckduckgo_lite",
+        "bing",
+        "google"
+      ],
+      "provider_failures": [
+        {
+          "provider": "browser_official_discovery",
+          "query": "Dyson V15 Detect",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 4.567705
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"Dyson V15 Detect\"",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 5.2e-05
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" Dyson",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 2.5e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" Dyson",
+          "status": "blocked",
+          "message": "DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 1.513488
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" Dyson specs",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 3.2e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" Dyson specs",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" Dyson specifications",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 7.4e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" Dyson specifications",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" site:dyson.com",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 3.2e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" site:dyson.com",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" Dyson official",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 8.3e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" Dyson official",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "Dyson official website",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 4e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "Dyson official website",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "naver",
+          "query": "Dyson official website",
+          "status": "capped",
+          "message": "naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "duckduckgo_lite",
+          "query": "Dyson official website",
+          "status": "error",
+          "message": "DuckDuckGo Lite search failed: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+          "duration_seconds": 0.165792
+        },
+        {
+          "provider": "bing",
+          "query": "Dyson official website",
+          "status": "low_value",
+          "message": "Provider results lacked query identity signal (1/2 required tokens matched).",
+          "duration_seconds": 0.450471
+        },
+        {
+          "provider": "google",
+          "query": "Dyson official website",
+          "status": "error",
+          "message": "It looks like you are using Playwright Sync API inside the asyncio loop.\nPlease use the Async API instead.",
+          "duration_seconds": 0.593535
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "Dyson official V15 Detect",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 3.6e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "Dyson official V15 Detect",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "naver",
+          "query": "Dyson official V15 Detect",
+          "status": "capped",
+          "message": "naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "duckduckgo_lite",
+          "query": "Dyson official V15 Detect",
+          "status": "circuit_open",
+          "message": "Circuit open after error: DuckDuckGo Lite search failed: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "bing",
+          "query": "Dyson official V15 Detect",
+          "status": "low_value",
+          "message": "Provider results lacked query identity signal (1/2 required tokens matched).",
+          "duration_seconds": 0.433394
+        },
+        {
+          "provider": "google",
+          "query": "Dyson official V15 Detect",
+          "status": "circuit_open",
+          "message": "Circuit open after error: It looks like you are using Playwright Sync API inside the asyncio loop.\nPlease use the Async API instead.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" site:dyson.co.uk",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 3.3e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" site:dyson.co.uk",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "naver",
+          "query": "\"V15 Detect\" site:dyson.co.uk",
+          "status": "capped",
+          "message": "naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" site:dyson.com.au",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 3.4e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" site:dyson.com.au",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "naver",
+          "query": "\"V15 Detect\" site:dyson.com.au",
+          "status": "capped",
+          "message": "naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "seznam",
+          "query": "\"V15 Detect\" site:dyson.com.au",
+          "status": "low_value",
+          "message": "Provider results lacked query identity signal (0/2 required tokens matched).",
+          "duration_seconds": 0.68951
+        },
+        {
+          "provider": "duckduckgo_lite",
+          "query": "\"V15 Detect\" site:dyson.com.au",
+          "status": "circuit_open",
+          "message": "Circuit open after error: DuckDuckGo Lite search failed: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "bing",
+          "query": "\"V15 Detect\" site:dyson.com.au",
+          "status": "low_value",
+          "message": "Provider results lacked query identity signal (0/2 required tokens matched).",
+          "duration_seconds": 0.458711
+        },
+        {
+          "provider": "google",
+          "query": "\"V15 Detect\" site:dyson.com.au",
+          "status": "circuit_open",
+          "message": "Circuit open after error: It looks like you are using Playwright Sync API inside the asyncio loop.\nPlease use the Async API instead.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "browser_official_discovery",
+          "query": "\"V15 Detect\" site:dyson.com -site:lb.dyson.com -site:support.kr.dyson.com",
+          "status": "empty",
+          "message": "Provider returned no candidates.",
+          "duration_seconds": 6.6e-05
+        },
+        {
+          "provider": "duckduckgo_html",
+          "query": "\"V15 Detect\" site:dyson.com -site:lb.dyson.com -site:support.kr.dyson.com",
+          "status": "circuit_open",
+          "message": "Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.",
+          "duration_seconds": 0.0
+        },
+        {
+          "provider": "naver",
+          "query": "\"V15 Detect\" site:dyson.com -site:lb.dyson.com -site:support.kr.dyson.com",
+          "status": "capped",
+          "message": "naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.",
+          "duration_seconds": 0.0
+        }
+      ],
+      "candidate_counts": {
+        "provider_raw": 536,
+        "collected": 473,
+        "normalized": 473,
+        "unique": 169,
+        "duplicates": 300,
+        "accepted": 97,
+        "rejected": 76,
+        "official": 67,
+        "dealer": 0,
+        "secondary": 30
+      }
+    },
+    "bot_messages": [
+      "🔎 Ищу страницы модели: Dyson V15 Detect",
+      "🔎 Stage 33.0 — Dyson V15 Detect\nСтатус: PASS · exact official: да\nВремя discovery: 35.049 с · search status: partial\nProviders: direct_domain_probe, browser_official_discovery, duckduckgo_html, naver, seznam, duckduckgo_lite, bing, google\nTrace: provider raw=536, collected=473, normalized=473, unique=169, accepted=97, rejected=76, duplicates=300\n\nОфициальные источники (67)\n1. www.dyson.hk › cord-free › dyson-v15-detect 새 창 열림\nhttps://dyson.hk/zh-HK/products/cord-free/dyson-v15-detect/overview\nдомен: dyson.hk\nтип: manufacturer · match: exact · authority: manufacturer\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n2. dyson.com www.dyson.com › .. › Cordless vacuum cleaners › Dyson V15 Detect™ vacuum 새 창 열림\nhttps://dyson.com/support/vacuum-cleaners/cordless/v15-detect\nдомен: dyson.com\nтип: official_document · match: exact · authority: official support\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n3. Dyson V15 Detect laser explained: how Dyson engineers made the…\nhttps://dyson.co.uk/discover/archive/2021/behind-the-laser-v15-detect\nдомен: dyson.co.uk\nтип: manufacturer · match: exact · authority: manufacturer\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n4. Dyson www.dyson.co.uk › inside-the-tech-v15-detect 새 창 열림\nhttps://dyson.co.uk/discover/archive/2021/inside-the-tech-v15-detect\nдомен: dyson.co.uk\nтип: manufacturer · match: exact · authority: manufacturer\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n5. dyson.com www.dyson.com › .. › Cordless vacuums › Dyson V15 Detect (Yellow/Iron) 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/v15/detect-yellow\nдомен: dyson.com\nтип: manufacturer · match: exact · authority: manufacturer\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n6. V15 Detect cordless vacuum video\nhttps://dyson.com/videos/vacuums/v15-detect-video\nдомен: dyson.com\nтип: manufacturer · match: exact · authority: manufacturer\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n7. Dyson V15™ Detect cordless vacuum cleaner - Overview | Dyson V15™ vacuums\nhttps://dyson.co.uk/vacuum-cleaners/cordless/v15\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Title mentions the model but the URL does not identify the complete model.; Domain verified from conservative brand official-search evidence.\n8. Shop All Dyson V15 Detect | Dyson UK 새 창 열림\nhttps://dyson.co.uk/vacuum-cleaners/cordless/v15/all\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Title mentions the model but the URL does not identify the complete model.; Domain verified from conservative brand official-search evidence.\n9. Dyson www.dyson.co.uk › vacuum-cleaners › detect-yellow-nickel 새 창 열림\nhttps://dyson.co.uk/vacuum-cleaners/cordless/v15/detect-yellow-nickel\nдомен: dyson.co.uk\nтип: manufacturer · match: exact · authority: manufacturer\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+      "10. dyson.com www.dyson.com › For business › Commercial Vacuum Cleaners 새 창 열림\nhttps://dyson.com/commercial/vacuums/dyson-v15-detect\nдомен: dyson.com\nтип: manufacturer · match: exact · authority: manufacturer\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n11. Dyson V15 Detect™ vacuums\nhttps://dyson.com/vacuum-cleaners/cordless/v15\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Title mentions the model but the URL does not identify the complete model.; Domain verified from conservative brand official-search evidence.\n12. dyson.com support.kr.dyson.com › v15-detect 새 창 열림\nhttps://support.kr.dyson.com/SupportHome/Vacuums/Cordless/v15-detect\nдомен: support.kr.dyson.com\nтип: official_document · match: exact · authority: official support\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n13. dyson.com support.kr.dyson.com › v15-detect › unusual-smell 새 창 열림\nhttps://support.kr.dyson.com/supporthome.aspx/Vacuums/Cordless/v15-detect/369476-01/troubleshooting/unusual-smell\nдомен: support.kr.dyson.com\nтип: official_document · match: exact · authority: official support\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n14. dyson.com support.kr.dyson.com › v15-detect 새 창 열림\nhttps://support.kr.dyson.com/supporthome.aspx/Vacuums/Cordless/v15-detect/479335-01\nдомен: support.kr.dyson.com\nтип: official_document · match: exact · authority: official support\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n15. dyson.com support.kr.dyson.com › v15-detect 새 창 열림\nhttps://support.kr.dyson.com/supporthome/Vacuums/Cordless/v15-detect/368369-01/troubleshooting/clear-the-bin-374206\nдомен: support.kr.dyson.com\nтип: official_document · match: exact · authority: official support\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n16. dyson.com support.kr.dyson.com › how-to-use-your-machine › check-the-bin-inlet 새 창 열림\nhttps://support.kr.dyson.com/SupportHome/Vacuums/Cordless/v15-detect/368369-01/how-to-use-your-machine/check-the-bin-inlet\nдомен: support.kr.dyson.com\nтип: official_document · match: exact · authority: official support\nпринято: Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.\n17. 다이슨 www.dyson.co.kr › cord-free › dyson-v15-vacuums 새 창 열림\nhttps://dyson.co.kr/products/cord-free/dyson-v15-vacuums/overview\nдомен: dyson.co.kr\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n18. 다이슨 www.dyson.co.kr › cord-free › dyson-v15-vacuums › shop-all 새 창 열림\nhttps://dyson.co.kr/products/cord-free/dyson-v15-vacuums/shop-all\nдомен: dyson.co.kr\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n19. Pet grooming kit | Dyson\nhttps://dyson.co.uk/support/journey/tools/972205-01\nдомен: dyson.co.uk",
+      "тип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n20. Specs & Docs\nhttps://dyson.com/commercial/specifications-and-documents\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n21. Mini Motorized tool 새 창 열림\nhttps://dyson.com/support/journey/tools/967479-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n22. Crevice tool 새 창 열림\nhttps://dyson.com/support/journey/tools/967612-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n23. Dyson Cyclone V10 Dok™ 새 창 열림\nhttps://dyson.com/support/journey/tools/968923-02\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n24. Battery 새 창 열림\nhttps://dyson.com/support/journey/tools/970938-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n25. Up-top adaptor 새 창 열림\nhttps://dyson.com/support/journey/tools/971431-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n26. Extension hose 새 창 열림\nhttps://dyson.com/support/journey/tools/971432-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n27. Light pipe crevice tool 새 창 열림\nhttps://dyson.com/support/journey/tools/971434-02\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n28. Low-reach adaptor 새 창 열림\nhttps://dyson.com/support/journey/tools/971435-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n29. Awkward gap tool 새 창 열림\nhttps://dyson.com/support/journey/tools/972141-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n30. Scratch-free dusting brush 새 창 열림",
+      "https://dyson.com/support/journey/tools/972157-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n31. Pet grooming kit 새 창 열림\nhttps://dyson.com/support/journey/tools/972205-01\nдомен: dyson.com\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n32. 다이슨 www.dyson.co.kr › dyson-maintenance 새 창 열림\nhttps://dyson.co.kr/dyson-maintenance\nдомен: dyson.co.kr\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n33. Air treatment 새 창 열림\nhttps://dyson.co.uk/air-treatment\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n34. Dyson technology for offices | Dyson\nhttps://dyson.co.uk/commercial/overview/offices\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n35. Explore our Dyson Deals | Shop exclusive offers at Dyson\nhttps://dyson.co.uk/deals\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n36. Dyson.co.uk | Lean engineering: optimising energy for more…\nhttps://dyson.co.uk/discover/archive/2021/lean-engineering-optimisin-energy\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n37. Wet cleaners 새 창 열림\nhttps://dyson.co.uk/floor-cleaners\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n38. Floorcare 새 창 열림\nhttps://dyson.co.uk/floorcare\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n39. Hair care 새 창 열림\nhttps://dyson.co.uk/hair-care\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n40. Oral care 새 창 열림\nhttps://dyson.co.uk/oral-care\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n41. Dyson Vacuum Cleaners | Discover our cleaning solutions",
+      "https://dyson.co.uk/vacuum-cleaners\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n42. Robot 새 창 열림\nhttps://dyson.co.uk/vacuum-cleaners/robot\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n43. Dyson V 15 s Detect SubmarineTM cordless wet and dry vacuum\nhttps://dyson.co.uk/vacuum-cleaners/wet-dry/v15s-detect-submarine/yellow-nickel\nдомен: dyson.co.uk\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n44. For business 새 창 열림\nhttps://dyson.co.za/for-business/overview\nдомен: dyson.co.za\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n45. For business 새 창 열림\nhttps://dyson.com.au/for-business/overview\nдомен: dyson.com.au\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n46. Find a store 새 창 열림\nhttps://dyson.com.sg/demo-store/find-a-store\nдомен: dyson.com.sg\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n47. Dyson Outlet 새 창 열림\nhttps://dyson.com.sg/dyson-outlet\nдомен: dyson.com.sg\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n48. For business 새 창 열림\nhttps://dyson.com.sg/for-business/overview\nдомен: dyson.com.sg\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n49. Register machine 새 창 열림\nhttps://dyson.com.sg/product-registration\nдомен: dyson.com.sg\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n50. Commercial Vacuum Cleaners\nhttps://dyson.com/commercial/vacuums\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n51. James Dyson unveils new cleaning technology\nhttps://dyson.com/discover/innovation/new-machines/james-dyson-launch\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n52. How to use your vacuum cleaner accessories",
+      "https://dyson.com/discover/insights/cleaning/tips/how-to-vacuum-attachments\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n53. Vacuum Cleaners | Dyson Official Website\nhttps://dyson.com/vacuum-cleaners\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n54. www.dyson.com › Shop › Vacuum cleaners › Vacuum accessories 새 창 열림\nhttps://dyson.com/vacuum-cleaners/attachments/cordless\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n55. Cordless Vacuum Cleaners | Dyson Official Website\nhttps://dyson.com/vacuum-cleaners/cordless\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n56. Dyson PencilVac Fluffycones 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/pencilvac/fluffycones\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n57. www.dyson.com › vacuum-cleaners › absolute-nickel-copper 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/v10/absolute-nickel-copper\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n58. Dyson V12 Detect™ Slim 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/v12/detect-slim-yellow\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n59. Dyson V16 Piston Animal cordless vacuum 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/v16-piston/black-copper\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n60. Dyson V16 Piston Animal + Auto-Empty Dok™ 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/v16-piston/dok-bright-copper\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n61. Dyson V16 Piston Animal cordless vacuum + FloorDok™ 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/v16-piston/floor-dok-black-copper\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.",
+      "62. Dyson V16 Piston Animal Submarine™ cordless wet and dry vacuum 새 창 열림\nhttps://dyson.com/vacuum-cleaners/cordless/v16-piston/submarine-black-copper\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n63. Dyson Spot+Scrub™ Ai 새 창 열림\nhttps://dyson.com/vacuum-cleaners/robot/spot-scrub-ai/black\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n64. dyson.com www.dyson.com › Shop › Vacuum cleaners 새 창 열림\nhttps://dyson.com/vacuum-cleaners/shop-all\nдомен: dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n65. www.lb.dyson.com › en-LB 새 창 열림\nhttps://lb.dyson.com/en-LB/unveiled-2025.aspx\nдомен: lb.dyson.com\nтип: manufacturer · match: weak · authority: manufacturer\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n66. Register machine 새 창 열림\nhttps://support.dyson.co.za/product-registration/registration.aspx\nдомен: support.dyson.co.za\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n67. Register machine 새 창 열림\nhttps://support.dyson.com.au/product-registration/registration.aspx\nдомен: support.dyson.com.au\nтип: official_document · match: weak · authority: official support\nпринято: Verified first-party result from an exact-model query requires content verification.; Domain verified from conservative brand official-search evidence.\n\nАвторизованные / официальные дилеры (0)\n— не найдено\n\nВторичные источники (30)\n1. Dyson - V15 Detect Cordless Vacuum with 8 accessories - Yellow/Nickel\nhttps://bestbuy.com/product/dyson-v15-detect-cordless-vacuum-with-8-accessories-yellow-nickel/J3ZCSYCVPL\nдомен: bestbuy.com\nтип: retailer · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n2. Dyson V15 Detect Cordless Vacuum - 626417-01 새 창 열림\nhttps://abt.com/Dyson-V15-Detect-Cordless-Vacuum-62641701/p/243963.html\nдомен: abt.com\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n3. Bajaj Finserv www.bajajfinserv.in › dyson-v15-detect-240w-cordless-dry-vacuum-cleaner-yellow-and-nickel-447113-01 새 창 열림\nhttps://bajajfinserv.in/bmall/dyson-v15-detect-240w-cordless-dry-vacuum-cleaner-yellow-and-nickel-447113-01/p/29185\nдомен: bajajfinserv.in\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n4. BuiltWith builtwith.com › Dyson-V15-Detect-Cordless-Vacuum 새 창 열림\nhttps://builtwith.com/ko/ecommerce/products/Dyson-V15-Detect-Cordless-Vacuum\nдомен: builtwith.com\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n5. Dyson V15 Detect Total Clean Extra Cordless Stick Vacuum",
+      "https://costco.com/p/-/dyson-v15-detect-total-clean-extra-cordless-stick-vacuum/4000177472\nдомен: costco.com\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n6. Beebom beebom.com › dyson-v15-detect-cord-free-vacuum-cleaner-launched-india 새 창 열림\nhttps://beebom.com/dyson-v15-detect-cord-free-vacuum-cleaner-launched-india\nдомен: beebom.com\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n7. Consumer Reports www.consumerreports.org › .. › Vacuum Cleaners › Dyson V15 Detect 새 창 열림\nhttps://consumerreports.org/appliances/vacuum-cleaners/dyson-v15-detect/m403340\nдомен: consumerreports.org\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n8. Dyson V15 Detect 도움말: 스스로 수리하는 방법을 알아보세요. 새 창 열림\nhttps://ko.ifixit.com/Device/Dyson_V15_Detect\nдомен: ko.ifixit.com\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n9. Dyson V15 Detect: The Science Behind Its Laser Dust Detection\nhttps://popularmechanics.com/home/tools/a71293377/dyson-v15-detect-stick-vacuum-green-laser\nдомен: popularmechanics.com\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n10. Dyson V15 Detect™ Cordless Vacuum | Yellow/Nickel | New | Newest Gen\nhttps://walmart.com/ip/Dyson-V15-Detect-Cordless-Vacuum-Yellow-Nickel-New-Newest-Gen/20037872945\nдомен: walmart.com\nтип: other · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n11. 2026.08.05. Comprehensive instruction manual for the Dyson V15 Detect Cordless Vacuum Cleaner, covering setup, operation, maintenance, troubleshooting, and specifications. 새 창 열림\nhttps://ko.manuals.plus/asin/B0CCYM47NF\nдомен: ko.manuals.plus\nтип: specialized_reference · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n12. 다이슨 V15 Detect 2025 배터리 정품 인증 시스템과 교체 방법 완전 분석 새 창 열림\nhttps://tilnote.io/pages/693595ebf8acfc38306411b4\nдомен: tilnote.io\nтип: other · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n13. 여러분은 혹시 최고급 무선 청소기를 구매할 때 초기 비용만 생각하시나요? 사실, 다이슨 V15 디텍트( Dyson V15 Detect )와 같은 고성능 프리미엄 가전의 진정한 가치를 판단하려면 '총 소유 비용(TCO, Total Cost of Ownership)'을 반드시 분석해야만 합니다. 우리는 흔히 청소기를 구매한 순간 모든 지출이 끝났다고 착각하기 쉽지만, 실제로는 그렇지 않다는 것입니다 [1]. 왜냐하면 다이슨이 ...... 새 창 열림\nhttps://tilnote.io/pages/698a5cd5b1aad9ffec0f18aa\nдомен: tilnote.io\nтип: other · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n14. 다이슨 V15 Detect 2025 배터리 인증 시스템과 정품 교체 완벽 분석 새 창 열림\nhttps://tilnote.io/pages/69a6310bffa6b606a16b4141\nдомен: tilnote.io\nтип: other · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n15. Gadget Review www.gadgetreview.com › Vacuum Cleaners › Dyson V15 Detect Review 새 창 열림\nhttps://gadgetreview.com/dyson-v15-detect-review\nдомен: gadgetreview.com\nтип: other · match: weak · authority: secondary\nпринято: Exact model appears only on a generic catalog or weak page.\n16. Dyson V15 Detect Review 새 창 열림\nhttps://pcmag.com/reviews/dyson-v15-detect\nдомен: pcmag.com\nтип: other · match: weak · authority: secondary",
+      "принято: Exact model appears only on a generic catalog or weak page.\n17. www.rtings.com › Reviews › Dyson › V15 Detect 새 창 열림\nhttps://rtings.com/vacuum/reviews/dyson/v15-detect\nдомен: rtings.com\nтип: other · match: weak · authority: secondary\nпринято: Exact model appears only on a generic catalog or weak page.\n18. Dyson V15 Detect Cordless Vacuum - amazon.com\nhttps://amazon.com/Dyson-V15-Detect-Cordless-Vacuum/dp/B0GXX8KQY7\nдомен: amazon.com\nтип: marketplace · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n19. 다이슨 V15 Detect 토탈 클린 엑스트라 | 노란색/니켈 ; 다이슨 V15 Detect 토탈 클린 엑스트라 | 옐로우/니켈 | 리퍼비시 ; 리퍼브 다이슨 V15 Detect 토탈 클린 엑스트라 - 노란색/니켈 새 창 열림\nhttps://ebay.com/b/Dyson-V15-Detect/20614/bn_7117725207\nдомен: ebay.com\nтип: marketplace · match: exact · authority: secondary\nпринято: Requested exact model appears in the title/snippet or URL.\n20. 2023.02.09. The Dyson Gen5 detect is a powerful cordless vacuum that boasts some impressive specs and advanced features. It launched in Australia in October 2022 but didn't... Despite the new name, the Gen5 detect bears a strong resemblance to the most recent Dyson stick vacuums, and especially its direct predecessor, the Dyson V15 Detect ... 새 창 열림\nhttps://techradar.com/reviews/dyson-gen5-detect-review\nдомен: techradar.com\nтип: other · match: weak · authority: secondary\nпринято: Exact model appears only on a generic catalog or weak page.\n21. Dyson V15 Detect™ Origin Cordless Vacuum - amazon.com\nhttps://amazon.com/Dyson-DetectTM-Origin-Cordless-Vacuum/dp/B0GTC14BFW\nдомен: amazon.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n22. Dyson V15 Detect Cordless Vacuum Cleaner for $459.99 새 창 열림\nhttps://amazon.com/dp/B0C2J8KJH9\nдомен: amazon.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n23. 다이슨 V15 Detect 토탈 클린 엑스트라 | 옐로우/니켈 | 리퍼비시 새 창 열림\nhttps://ebay.com/itm/276582090868\nдомен: ebay.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n24. 다이슨 V15 Detect 무선 스틱형 진공 청소기 - 노란색/니켈 626417-01 새 제품!!!! 새 창 열림\nhttps://ebay.com/itm/287536591051\nдомен: ebay.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n25. 리퍼브 다이슨 V15 Detect 토탈 클린 엑스트라 - 노란색/니켈 새 창 열림\nhttps://ebay.com/itm/326731588945\nдомен: ebay.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n26. 리퍼브 다이슨 V15 Detect 토탈 클린 엑스트라 - 노란색/니켈 새 창 열림\nhttps://ebay.com/itm/326731588945?_skw=Dyson&itmmeta=01KQGHFPJHWQPFHY3PD8NXHDVG&hash=item4c12b86551%3Ag%3Al7wAAeSw3zdpglpt&itmprp=enc%3AAQALAAAAwDKQclQvzFwZQpmMrsO4LurOQa3W6xLEsSqZfM0e529Vki9GJrqkB6UXUjRNcmzpgD4XHEinNOlX9H9UGwhcmOEfAw3YDtG7qB%2F1Jcg849Mm%2BVWNXWvYD4LzHZUVp5E3siqIOeTiXlMDFsla3uCFCLl8vWudoOqNheTKXBkuR7klHAOnc33uHsGT6sSdUgurVxzEGGIJszpPYxzrNiPrH%2FZwbxQfL92YckUvAz%2BBdR7%2BSdEb3vH5c8IMbdWTgx%2FAlg%3D%3D%7Ctkp%3ABk9SR87pvpG8Zw\nдомен: ebay.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n27. 다이슨 V15 Detect 토탈 클린 엑스트라 | 옐로우/니켈 상태 좋음 LN 새 창 열림\nhttps://ebay.com/itm/358295223319\nдомен: ebay.com",
+      "тип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n28. 다이슨 V15 Detect 무선 진공 청소기 노란색/니켈 헤파 레이저 새품 새 창 열림\nhttps://ebay.com/itm/377439920087\nдомен: ebay.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n29. 다이슨 V15 Detect 무선 스틱형 진공 청소기 - SV22- 노란색/니켈 새 창 열림\nhttps://ebay.com/itm/397387354686\nдомен: ebay.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n30. 다이슨 V15 Detect 무선 스틱형 진공 청소기 - 노란색/니켈 (368340-01) 새 창 열림\nhttps://ebay.com/itm/398292746221\nдомен: ebay.com\nтип: marketplace · match: weak · authority: secondary\nпринято: Title mentions the model but the URL does not identify the complete model.\n\nОтклонённые кандидаты (5)\n1. Dyson www.dyson.co.uk › .. › Dyson V15 Detect Absolute + (Gold) 새 창 열림\nhttps://dyson.co.uk/vacuum-cleaners/cordless/v15/detect-absolute-gold-iron\nдомен: dyson.co.uk\nтип: manufacturer · match: rejected · authority: manufacturer\nпринято: Search result names a different commercial-model variant.; Domain verified from conservative brand official-search evidence.\n2. /outlet/refurbished vacuum cleaners/cordless/v15 detect iron\nhttps://dyson.com/outlet/refurbished-vacuum-cleaners/cordless/v15-detect-iron\nдомен: dyson.com\nтип: manufacturer · match: rejected · authority: manufacturer\nпринято: Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.\n3. Yahoo www.yahoo.com › news 새 창 열림\nhttps://yahoo.com/news/dyson-v15-detect-review-100002840.html\nдомен: yahoo.com\nтип: other · match: rejected · authority: secondary\nпринято: obvious_non_product_or_blocked_url\n4. Air Purifiers | Dyson Official Website\nhttps://dyson.com/air-treatment/air-purifiers\nдомен: dyson.com\nтип: manufacturer · match: rejected · authority: manufacturer\nпринято: Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.\n5. dyson.com www.dyson.com › .. › Cordless vacuum cleaners › Dyson V15 Detect™ vacuum 새 창 열림\nhttps://dyson.com/spare-parts/vacuum-cleaners/cordless/v15-detect\nдомен: dyson.com\nтип: manufacturer · match: rejected · authority: manufacturer\nпринято: Search result describes an accessory or replacement part, not the product.; Domain verified from conservative brand official-search evidence.\n\nЕщё отклонённых: 69. Команда /discover_rejected покажет полный trace последнего запуска.\n\nСбои/таймауты providers (37):\n• browser_official_discovery: empty — Provider returned no candidates.\n• browser_official_discovery: empty — Provider returned no candidates.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: blocked — DuckDuckGo bot-check blocked the HTML search.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• browser_official_discovery: empty — Provider returned no candidates.",
+      "• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• naver: capped — naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.\n• duckduckgo_lite: error — DuckDuckGo Lite search failed: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>\n• bing: low_value — Provider results lacked query identity signal (1/2 required tokens matched).\n• google: error — It looks like you are using Playwright Sync API inside the asyncio loop.\nPlease use the Async API instead.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• naver: capped — naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.\n• duckduckgo_lite: circuit_open — Circuit open after error: DuckDuckGo Lite search failed: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>\n• bing: low_value — Provider results lacked query identity signal (1/2 required tokens matched).\n• google: circuit_open — Circuit open after error: It looks like you are using Playwright Sync API inside the asyncio loop.\nPlease use the Async API instead.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• naver: capped — naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• naver: capped — naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers.\n• seznam: low_value — Provider results lacked query identity signal (0/2 required tokens matched).\n• duckduckgo_lite: circuit_open — Circuit open after error: DuckDuckGo Lite search failed: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>\n• bing: low_value — Provider results lacked query identity signal (0/2 required tokens matched).\n• google: circuit_open — Circuit open after error: It looks like you are using Playwright Sync API inside the asyncio loop.\nPlease use the Async API instead.\n• browser_official_discovery: empty — Provider returned no candidates.\n• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.\n• naver: capped — naver has used 12.6s, its 11.2s fair share of the workflow budget; yielding remaining queries to other providers."
+    ],
+    "wall_seconds": 35.056
+  }
+]
