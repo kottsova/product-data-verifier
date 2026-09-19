@@ -1,0 +1,34 @@
+🔎 DeLonghi EC685M
+Статус: PASS · exact official page: да
+Время discovery: 9.8 с · search status: success
+Providers: direct_domain_probe
+Trace: provider raw=22, collected=2, normalized=2, unique=2, accepted=2, rejected=0, duplicates=0
+
+Official product pages (2)
+1. https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   delonghi.com · cs-CZ
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [unknown]
+2. https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   delonghi.ru · .ru
+   expandable_specs: yes · hidden_spec_content: no · interaction_required: unknown [unknown]
+
+Official support pages (0)
+— not found
+
+Official documents (1)
+1. Instruction — https://delonghi.ru/upload/iblock/c74/hsoc5h4vasn5upqr1harjcsxqy8ma0wk/RU_57132C8997.pdf
+   exact · official (linked from verified official page) · linked from the exact official product page; linked from official page
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: no
+• hidden spec content: no
+• interaction required: no
+
+Performance: 9.8 с, queries=1, provider attempts=1, raw=22, unique=2, accepted=2, rejected=0, blocked=0, timeout=0, circuit_open=0
+
+Отклонённые кандидаты (0)

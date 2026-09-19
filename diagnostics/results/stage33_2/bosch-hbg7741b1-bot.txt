@@ -1,0 +1,70 @@
+🔎 Bosch HBG7741B1
+Статус: PARTIAL · exact official page: нет
+Время discovery: 58.4 с · search status: partial
+Providers: direct_domain_probe, browser_official_discovery, duckduckgo_html, naver, seznam, duckduckgo_lite, bing, google
+Trace: provider raw=486, collected=246, normalized=246, unique=126, accepted=21, rejected=105, duplicates=120
+
+Official product pages (0)
+— not found
+
+Official support pages (0)
+— not found
+
+Official documents (0)
+— not found
+
+Secondary (21)
+1. https://siko.cz/bosch-serie-8-vestavna-pecici-trouba-60-x-60-cm-cerna-hbg7741b1/p/HBG7741B1
+   exact · secondary
+2. https://spotrebice-kuchyne.cz/p/24362/bosch-hbg7741b1
+   exact · secondary
+3. https://onlineshop.cz/horkovzdusne-trouby/trouba-bosch-hbg7741b1-1173113P.html
+   exact · secondary
+4. https://allegro.cz/produkt/vestavna-elektricka-trouba-bosch-hbg7741b1-0ffa8e0d-5df4-4e79-975a-2ed61d631d3f
+   exact · secondary
+5. https://alza.cz/bosch-hbg7741b1-d7978653.htm
+   exact · secondary
+6. https://apollos.cz/produkt/bosch-hbg7741b1-4242005326563/503
+   exact · secondary
+7. https://datart.cz/bazar/trouba-bosch-serie-8-hbg7741b1-cerna-rozbaleno-24-mesicu-zaruka.html
+   exact · secondary
+8. https://datart.cz/bazar/trouba-bosch-serie-8-hbg7741b1-cerna-s-kosmetickou-vadou-12-mesicu-zaruka
+   exact · secondary
+… ещё 13 вторичных источников
+
+Discovery metadata
+• expandable specs: unknown (no official product page was inspected)
+• hidden spec content: unknown
+• interaction required: unknown
+
+Performance: 58.4 с, queries=11, provider attempts=60, raw=486, unique=126, accepted=21, rejected=105, blocked=7, timeout=1, circuit_open=22
+
+Отклонённые кандидаты (5)
+1. https://bosch-professional.com/ge/en/service/dealer
+   Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.
+2. https://kaufland.cz/product/478207780
+   Product URL identifies another item, not the requested model.
+3. https://coolblue.nl/en/product/954983/bosch-hba572bb3f.html
+   Product URL identifies another item, not the requested model.
+4. https://tradeinn.com/techinn/ko/bosch-hba514es4-%EB%8B%A4%EA%B8%B0%EB%8A%A5-%EC%98%A4%EB%B8%90/143102160/p
+   Product URL identifies another item, not the requested model.
+5. https://tradeinn.com/techinn/ko/bosch-serie-8-hbg7241b1-%EB%8B%A4%EA%B8%B0%EB%8A%A5-%EC%98%A4%EB%B8%90-71l/141529637/p
+   Product URL identifies another item, not the requested model.
+
+Ещё отклонённых: 100. Команда /discover_rejected покажет полный trace последнего запуска.
+
+Сбои/таймауты providers (48):
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: empty — Provider returned no candidates.
+• duckduckgo_html: blocked — DuckDuckGo HTML search failed: 403 Client Error: Forbidden for url: https://html.duckduckgo.com/html/?q=Bosch+HBG7741B1
+• naver: low_value — Provider results lacked query identity signal (1/2 required tokens matched).
+• duckduckgo_lite: blocked — DuckDuckGo Lite search failed: HTTP Error 403: Forbidden
+• bing: low_value — Provider results lacked query identity signal (0/2 required tokens matched).
+• google: timeout — Google provider deadline exhausted waiting for results.
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: empty — Provider returned no candidates.
+• duckduckgo_html: blocked — DuckDuckGo HTML search failed: 403 Client Error: Forbidden for url: https://html.duckduckgo.com/html/?q=%22Bosch+HBG7741B1%22
+
+• naver: low_value — Provider results lacked query identity signal (1/2 required tokens matched).
+• direct_domain_probe: empty — Provider returned no candidates.
+… ещё 36

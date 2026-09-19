@@ -1,0 +1,427 @@
+{
+ "product_name": "DeLonghi EC685M",
+ "brand": "DeLonghi",
+ "model": "EC685M",
+ "market": "global",
+ "status": "PASS",
+ "exact_official_found": true,
+ "official": [
+  {
+   "url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+   "domain": "delonghi.com",
+   "source_type": "manufacturer",
+   "title": "Dedica Style EC685.M EX:4 | De'Longhi CZ",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  },
+  {
+   "url": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/",
+   "domain": "delonghi.ru",
+   "source_type": "manufacturer",
+   "title": "Рожковая кофеварка De'Longhi EC685.M по цене 15990 в Москве, купить с доставкой по России. Описание, инструкция и отзывы на кухонную технику DeLonghi",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "dealers": [],
+ "secondary": [],
+ "rejected": [],
+ "runtime_seconds": 9.389,
+ "search_status": "success",
+ "attempted_queries": [
+  "DeLonghi EC685M"
+ ],
+ "providers": [
+  "direct_domain_probe"
+ ],
+ "provider_failures": [],
+ "candidate_counts": {
+  "provider_raw": 22,
+  "collected": 2,
+  "normalized": 2,
+  "unique": 2,
+  "duplicates": 0,
+  "accepted": 2,
+  "rejected": 0,
+  "official": 2,
+  "dealer": 0,
+  "secondary": 0,
+  "documents": 1
+ },
+ "official_pages": [
+  {
+   "url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+   "domain": "delonghi.com",
+   "source_type": "manufacturer",
+   "title": "Dedica Style EC685.M EX:4 | De'Longhi CZ",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  },
+  {
+   "url": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/",
+   "domain": "delonghi.ru",
+   "source_type": "manufacturer",
+   "title": "Рожковая кофеварка De'Longhi EC685.M по цене 15990 в Москве, купить с доставкой по России. Описание, инструкция и отзывы на кухонную технику DeLonghi",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "exact",
+   "sku_suffix": "",
+   "page_role": "product"
+  }
+ ],
+ "support_pages": [],
+ "documents": [
+  {
+   "url": "https://delonghi.ru/upload/iblock/c74/hsoc5h4vasn5upqr1harjcsxqy8ma0wk/RU_57132C8997.pdf",
+   "doc_type": "instruction",
+   "canonical_field": "manual_url",
+   "title": "Скачать инструкцию",
+   "authority": "official (linked from verified official page)",
+   "model_match": "exact",
+   "reason": "linked from the exact official product page; linked from official page",
+   "source_page": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/",
+   "found_on": [
+    "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/"
+   ],
+   "file_type": "pdf",
+   "locales": []
+  }
+ ],
+ "rejected_documents": [
+  {
+   "url": "https://www.delonghi.com/cs-cz/manuals",
+   "doc_type": "manual",
+   "title": "Pokyny Návody",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266"
+  }
+ ],
+ "document_fields": {
+  "manual_url": [
+   "https://delonghi.ru/upload/iblock/c74/hsoc5h4vasn5upqr1harjcsxqy8ma0wk/RU_57132C8997.pdf"
+  ],
+  "quick_start_guide_url": [],
+  "datasheet_url": [],
+  "safety_document_url": [],
+  "declaration_url": [],
+  "certificate_url": []
+ },
+ "page_inspections": [
+  {
+   "url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+   "has_expandable_specs": false,
+   "has_hidden_spec_content": "false",
+   "requires_interaction": "false",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0,
+   "js_shell": false,
+   "spec_location": "unknown"
+  },
+  {
+   "url": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/",
+   "has_expandable_specs": true,
+   "has_hidden_spec_content": "false",
+   "requires_interaction": "unknown",
+   "spec_controls": [
+    "Все характеристики"
+   ],
+   "signals": [
+    "spec control: 'Все характеристики'",
+    "control targets in-page sections present in DOM: preorder"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0,
+   "js_shell": false,
+   "spec_location": "unknown"
+  }
+ ],
+ "discovery_metadata": {
+  "inspected_pages": 2,
+  "primary_page": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+  "has_expandable_specs": false,
+  "has_hidden_spec_content": "false",
+  "requires_interaction": "false",
+  "any_page_requires_interaction": "unknown",
+  "signals": [
+   "aria-expanded=false control"
+  ],
+  "spec_controls": []
+ },
+ "official_paths": [
+  {
+   "path": "direct_domain_probe:domain_resolution",
+   "requests": 21,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:page_verification",
+   "requests": 2,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:robots",
+   "requests": 2,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:site_search",
+   "requests": 5,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sitemap",
+   "requests": 8,
+   "queries": 1
+  },
+  {
+   "path": "serp_identity_queries",
+   "requests": 0,
+   "queries": 1
+  },
+  {
+   "path": "serp_domain_restricted_queries",
+   "requests": 0,
+   "queries": 0
+  },
+  {
+   "path": "serp_official_bootstrap",
+   "requests": 0,
+   "queries": 0
+  }
+ ],
+ "trace": {
+  "queries": [
+   "DeLonghi EC685M"
+  ],
+  "provider_attempts": [
+   {
+    "provider": "direct_domain_probe",
+    "query": "DeLonghi EC685M",
+    "status": "success",
+    "result_count": 2,
+    "message": null,
+    "is_fallback": false,
+    "duration_seconds": 9.380765,
+    "timeout_seconds": 24.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 22,
+    "parsed_result_count": 2,
+    "deduped_result_count": 2,
+    "transport": "http_direct",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "DeLonghi EC685M",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 74.999526,
+    "budget_after_seconds": 65.617227,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 2,
+    "rejected_candidate_count": 0,
+    "discovery_method": "sitemap",
+    "method_requests": [
+     [
+      "domain_resolution",
+      21
+     ],
+     [
+      "page_verification",
+      2
+     ],
+     [
+      "robots",
+      2
+     ],
+     [
+      "site_search",
+      5
+     ],
+     [
+      "sitemap",
+      8
+     ]
+    ],
+    "candidate_count": 4,
+    "exact_model_candidate_count": 2,
+    "accepted_official_url": "https://delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   }
+  ],
+  "raw_and_normalized": [
+   {
+    "raw_url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX%3A4.html?pid=0132106266",
+    "canonical_url": "https://delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+    "title": "Dedica Style EC685.M EX:4 | De'Longhi CZ",
+    "provider": "direct_domain_probe",
+    "query": "DeLonghi EC685M",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   },
+   {
+    "raw_url": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/",
+    "canonical_url": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m",
+    "title": "Рожковая кофеварка De'Longhi EC685.M по цене 15990 в Москве, купить с доставкой по России. Описание, инструкция и отзывы на кухонную технику DeLonghi",
+    "provider": "direct_domain_probe",
+    "query": "DeLonghi EC685M",
+    "outcome": "accepted",
+    "reason": "Requested exact model appears in the title/snippet or URL."
+   }
+  ],
+  "accepted": [
+   {
+    "url": "https://delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+    "domain": "delonghi.com",
+    "source_type": "manufacturer",
+    "title": "Dedica Style EC685.M EX:4 | De'Longhi CZ",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "",
+    "page_role": "product"
+   },
+   {
+    "url": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m",
+    "domain": "delonghi.ru",
+    "source_type": "manufacturer",
+    "title": "Рожковая кофеварка De'Longhi EC685.M по цене 15990 в Москве, купить с доставкой по России. Описание, инструкция и отзывы на кухонную технику DeLonghi",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "exact",
+    "sku_suffix": "",
+    "page_role": "product"
+   }
+  ],
+  "rejected": [],
+  "documents": [
+   {
+    "url": "https://delonghi.ru/upload/iblock/c74/hsoc5h4vasn5upqr1harjcsxqy8ma0wk/RU_57132C8997.pdf",
+    "doc_type": "instruction",
+    "canonical_field": "manual_url",
+    "title": "Скачать инструкцию",
+    "authority": "official (linked from verified official page)",
+    "model_match": "exact",
+    "reason": "linked from the exact official product page; linked from official page",
+    "source_page": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/",
+    "found_on": [
+     "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/"
+    ],
+    "file_type": "pdf",
+    "locales": []
+   }
+  ],
+  "rejected_documents": [
+   {
+    "url": "https://www.delonghi.com/cs-cz/manuals",
+    "doc_type": "manual",
+    "title": "Pokyny Návody",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266"
+   }
+  ],
+  "provider_errors": []
+ },
+ "page_metadata": [
+  {
+   "url": "https://www.delonghi.com/cs-cz/p/pakove-kavovary-na-espresso-dedica-pakovy-kavovar-dedica-style-ec685.m/EC685.M+EX:4.html?pid=0132106266",
+   "domain": "delonghi.com",
+   "locale_region": "cs-CZ",
+   "model_match": "exact",
+   "expandable_specs": false,
+   "hidden_spec_content": "false",
+   "interaction_required": "false",
+   "spec_location": "unknown",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0
+  },
+  {
+   "url": "https://delonghi.ru/product/rozhkovaya-kofevarka-delonghi-ec685-m/",
+   "domain": "delonghi.ru",
+   "locale_region": ".ru",
+   "model_match": "exact",
+   "expandable_specs": true,
+   "hidden_spec_content": "false",
+   "interaction_required": "unknown",
+   "spec_location": "unknown",
+   "spec_controls": [
+    "Все характеристики"
+   ],
+   "signals": [
+    "spec control: 'Все характеристики'",
+    "control targets in-page sections present in DOM: preorder"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 0
+  }
+ ],
+ "sku_rejections": [],
+ "performance": {
+  "runtime_seconds": 9.4,
+  "slow": "",
+  "query_count": 1,
+  "provider_attempts": 1,
+  "raw_candidates": 22,
+  "unique_candidates": 2,
+  "accepted": 2,
+  "rejected": 0,
+  "blocked": 0,
+  "timeout": 0,
+  "circuit_open": 0,
+  "attempt_statuses": {
+   "success": 1
+  }
+ },
+ "run": 3,
+ "oracle": {
+  "page_ok": null,
+  "document_ok": null,
+  "oracle_ok": null
+ }
+}

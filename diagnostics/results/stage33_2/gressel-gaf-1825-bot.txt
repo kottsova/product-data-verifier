@@ -1,0 +1,30 @@
+🔎 Gressel GAF-1825
+Статус: PASS · exact official page: да
+Время discovery: 5.8 с · search status: success
+Providers: direct_domain_probe
+Trace: provider raw=11, collected=1, normalized=1, unique=1, accepted=1, rejected=0, duplicates=0
+
+Official product pages (1)
+1. https://gressel.ru/catalog/aerogril/aerogril_gressel_gaf_1825/
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   gressel.ru · .ru
+   expandable_specs: yes · hidden_spec_content: yes · interaction_required: no [dom_hidden]
+
+Official support pages (0)
+— not found
+
+Official documents (1)
+1. Instruction — https://gressel.ru/upload/iblock/ddc/o5357402t7kcm1lsczwd58pflvfmnncp.pdf
+   exact · official (linked from verified official page) · requested model identifier appears in the link text or file name; linked from official page
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: yes
+• hidden spec content: yes
+• interaction required: no
+
+Performance: 5.8 с, queries=1, provider attempts=1, raw=11, unique=1, accepted=1, rejected=0, blocked=0, timeout=0, circuit_open=0
+
+Отклонённые кандидаты (0)

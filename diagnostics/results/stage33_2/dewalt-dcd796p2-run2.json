@@ -1,0 +1,1056 @@
+{
+ "product_name": "DEWALT DCD796P2",
+ "brand": "DEWALT",
+ "model": "DCD796P2",
+ "market": "global",
+ "status": "PASS",
+ "exact_official_found": true,
+ "official": [
+  {
+   "url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+   "domain": "dewalt.co.uk",
+   "source_type": "manufacturer",
+   "title": "18V XR® Brushless Hammer Drill Driver with (2) 5Ah Batteries",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested base SKU matches; suffix 'GB' is a regional/market code, not a different product variant.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "regional_suffix",
+   "sku_suffix": "GB",
+   "page_role": "product"
+  }
+ ],
+ "dealers": [],
+ "secondary": [],
+ "rejected": [],
+ "runtime_seconds": 27.388,
+ "search_status": "success",
+ "attempted_queries": [
+  "DEWALT DCD796P2",
+  "\"DCD796P2\" manual site:dewalt.co.uk",
+  "DEWALT \"DCD796P2\" declaration of conformity"
+ ],
+ "providers": [
+  "direct_domain_probe",
+  "duckduckgo_html",
+  "naver",
+  "seznam",
+  "duckduckgo_lite",
+  "bing",
+  "google"
+ ],
+ "provider_failures": [
+  {
+   "provider": "duckduckgo_html",
+   "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+   "status": "blocked",
+   "message": "DuckDuckGo bot-check blocked the HTML search.",
+   "duration_seconds": 0.594862
+  },
+  {
+   "provider": "naver",
+   "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+   "status": "blocked",
+   "message": "Naver bot-check blocked the search.",
+   "duration_seconds": 2.004599
+  },
+  {
+   "provider": "seznam",
+   "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+   "status": "low_value",
+   "message": "Provider results lacked query identity signal (0/1 required tokens matched).",
+   "duration_seconds": 0.718068
+  },
+  {
+   "provider": "duckduckgo_lite",
+   "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+   "status": "blocked",
+   "message": "DuckDuckGo bot-check blocked the Lite search.",
+   "duration_seconds": 0.355436
+  },
+  {
+   "provider": "bing",
+   "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+   "status": "low_value",
+   "message": "Provider results lacked query identity signal (0/1 required tokens matched).",
+   "duration_seconds": 0.533735
+  },
+  {
+   "provider": "google",
+   "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+   "status": "timeout",
+   "message": "Google provider deadline exhausted waiting for results.",
+   "duration_seconds": 8.017186
+  },
+  {
+   "provider": "duckduckgo_html",
+   "query": "DEWALT \"DCD796P2\" declaration of conformity",
+   "status": "blocked",
+   "message": "DuckDuckGo bot-check blocked the HTML search.",
+   "duration_seconds": 0.328566
+  }
+ ],
+ "candidate_counts": {
+  "provider_raw": 47,
+  "collected": 1,
+  "normalized": 1,
+  "unique": 1,
+  "duplicates": 0,
+  "accepted": 1,
+  "rejected": 0,
+  "official": 1,
+  "dealer": 0,
+  "secondary": 0,
+  "documents": 0
+ },
+ "official_pages": [
+  {
+   "url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+   "domain": "dewalt.co.uk",
+   "source_type": "manufacturer",
+   "title": "18V XR® Brushless Hammer Drill Driver with (2) 5Ah Batteries",
+   "model_match": "exact",
+   "authority": "manufacturer",
+   "reason": "Requested base SKU matches; suffix 'GB' is a regional/market code, not a different product variant.; Domain verified from conservative brand official-search evidence.",
+   "group": "official",
+   "sku_relation": "regional_suffix",
+   "sku_suffix": "GB",
+   "page_role": "product"
+  }
+ ],
+ "support_pages": [],
+ "documents": [],
+ "rejected_documents": [
+  {
+   "url": "https://www.dewalt.co.uk/en-gb/support/safety-notices-and-recalls",
+   "doc_type": "safety_document",
+   "title": "Safety Notices and Recalls",
+   "reason": "requested model is not identified by this document link",
+   "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+  },
+  {
+   "url": "https://www.fastenersdop.com/",
+   "doc_type": "declaration",
+   "title": "Declaration of Performance (CE/UKCA DoP)",
+   "reason": "linked page is on a non-official host",
+   "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+  },
+  {
+   "url": "https://bynder.sbdinc.com/m/1473e91296629075/original/NB_GenderPayGap-LEGAL-WEB_DLE1.pdf",
+   "doc_type": "unknown",
+   "title": "Gender Pay Gap UK",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+  },
+  {
+   "url": "https://bynder.sbdinc.com/asset/53828540-11c3-4017-87a0-bbeb7b7cd02c/SBD_Consolidated-2025-AUS-CAN-UK-Moderns-Slavery-Statement-EN_DLE1.pdf",
+   "doc_type": "unknown",
+   "title": "Modern Slavery Act",
+   "reason": "document file whose type cannot be identified",
+   "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+  },
+  {
+   "url": "https://radians.com/doc",
+   "doc_type": "declaration",
+   "title": "radians.com www.radians.com 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://radians.com/doc",
+   "doc_type": "declaration",
+   "title": "새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://radians.com/doc",
+   "doc_type": "declaration",
+   "title": "Declarations  of Conformity  - Radians 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://radians.com/doc",
+   "doc_type": "declaration",
+   "title": "The links below house our product documentation for all  DEWALT  and Stanley PPE products that are manufactured by Radians and sold in the European Union or the United Kingdom. This documentation includes Declarations  of Conformity  (DOC) for both the EU and UK/CA and product sales sheets. 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+   "doc_type": "manual",
+   "title": "Manualzz manualzz.com › dewalt-dcd771-t-1-owner-manual 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+   "doc_type": "manual",
+   "title": "새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+   "doc_type": "manual",
+   "title": "DeWalt DCD 771 T 1 Owner Manual 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+   "doc_type": "manual",
+   "title": "The  DeWalt DCD 771 T 1 is a versatile and powerful tool that combines the functionality  of  a drill, driver, and hammer drill. With its compact design and lightweight construction, it is ideal for a wide range  of  tasks, from simple home repairs to demanding construction projects. The variable speed trigger provides precise control, while the two-speed gearbox allows for optimal torque and speed for different applications. 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+   "doc_type": "manual",
+   "title": "Manuals manuals.plus › dcd740-18v-xr-cordless-right-angle-drill-manual 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+   "doc_type": "manual",
+   "title": "새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+   "doc_type": "manual",
+   "title": "DEWALT DCD 740 18V XR Cordless Right Angle Drill Instruction Manual 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+   "doc_type": "manual",
+   "title": "2022.09.14. Home ›  Dewalt  ›  DEWALT DCD 740 18V XR Cordless Right Angle Drill Instruction Manual Your browser prefers Korean, but this page is in English. Open manual in 한국어 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://manualslib.com/manual/3788568/Dewalt-Dwk700.html",
+   "doc_type": "manual",
+   "title": "ManualsLib www.manualslib.com › manual 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://dfpsafety.com/declaration-of-conformity",
+   "doc_type": "declaration",
+   "title": "dfpsafety.com › Declaration of Conformity 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://dfpsafety.com/declaration-of-conformity",
+   "doc_type": "declaration",
+   "title": "DFP Safety  DEWALT  Global Licensee for Fall Protection 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  },
+  {
+   "url": "https://dfpsafety.com/declaration-of-conformity",
+   "doc_type": "declaration",
+   "title": "DROP PREVENTION · Tool Holders and Anchors · Tool Lanyards · Tool Attachments · Power Tool Lanyards · FALL PROTECTION · Fall Compliance Kits · Rooftop Safety Kits · 새 창 열림",
+   "reason": "document host is not a verified official domain",
+   "source_page": ""
+  }
+ ],
+ "document_fields": {
+  "manual_url": [],
+  "quick_start_guide_url": [],
+  "datasheet_url": [],
+  "safety_document_url": [],
+  "declaration_url": [],
+  "certificate_url": []
+ },
+ "page_inspections": [
+  {
+   "url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+   "has_expandable_specs": false,
+   "has_hidden_spec_content": "true",
+   "requires_interaction": "false",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control",
+    "<template> on <template>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1,
+   "js_shell": false,
+   "spec_location": "json_state"
+  }
+ ],
+ "discovery_metadata": {
+  "inspected_pages": 1,
+  "primary_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+  "has_expandable_specs": false,
+  "has_hidden_spec_content": "true",
+  "requires_interaction": "false",
+  "any_page_requires_interaction": "false",
+  "signals": [
+   "aria-expanded=false control",
+   "<template> on <template>"
+  ],
+  "spec_controls": []
+ },
+ "official_paths": [
+  {
+   "path": "direct_domain_probe:bounded_crawl",
+   "requests": 2,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:domain_resolution",
+   "requests": 13,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:page_verification",
+   "requests": 1,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:robots",
+   "requests": 4,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:site_search",
+   "requests": 8,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sitemap",
+   "requests": 19,
+   "queries": 1
+  },
+  {
+   "path": "direct_domain_probe:sku_path_probe",
+   "requests": 3,
+   "queries": 1
+  },
+  {
+   "path": "serp_identity_queries",
+   "requests": 0,
+   "queries": 2
+  },
+  {
+   "path": "serp_domain_restricted_queries",
+   "requests": 0,
+   "queries": 1
+  },
+  {
+   "path": "serp_official_bootstrap",
+   "requests": 0,
+   "queries": 0
+  }
+ ],
+ "trace": {
+  "queries": [
+   "DEWALT DCD796P2",
+   "\"DCD796P2\" manual site:dewalt.co.uk",
+   "DEWALT \"DCD796P2\" declaration of conformity"
+  ],
+  "provider_attempts": [
+   {
+    "provider": "direct_domain_probe",
+    "query": "DEWALT DCD796P2",
+    "status": "success",
+    "result_count": 1,
+    "message": null,
+    "is_fallback": false,
+    "duration_seconds": 11.878058,
+    "timeout_seconds": 24.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 47,
+    "parsed_result_count": 1,
+    "deduped_result_count": 1,
+    "transport": "http_direct",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "DEWALT DCD796P2",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 74.999662,
+    "budget_after_seconds": 63.120746,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 1,
+    "rejected_candidate_count": 0,
+    "discovery_method": "sitemap",
+    "method_requests": [
+     [
+      "bounded_crawl",
+      2
+     ],
+     [
+      "domain_resolution",
+      13
+     ],
+     [
+      "page_verification",
+      1
+     ],
+     [
+      "robots",
+      4
+     ],
+     [
+      "site_search",
+      8
+     ],
+     [
+      "sitemap",
+      19
+     ],
+     [
+      "sku_path_probe",
+      3
+     ]
+    ],
+    "candidate_count": 7,
+    "exact_model_candidate_count": 1,
+    "accepted_official_url": "https://dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_html",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "blocked",
+    "result_count": 0,
+    "message": "DuckDuckGo bot-check blocked the HTML search.",
+    "is_fallback": true,
+    "duration_seconds": 0.594862,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": true,
+    "parse_failure": false,
+    "exception_class": "RuntimeError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "http",
+    "failure_class": "blocked",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"DCD796P2\" manual dewalt.co.uk",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 62.461569,
+    "budget_after_seconds": 61.86669,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "naver",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "blocked",
+    "result_count": 0,
+    "message": "Naver bot-check blocked the search.",
+    "is_fallback": true,
+    "duration_seconds": 2.004599,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": true,
+    "parse_failure": false,
+    "exception_class": "RuntimeError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "http",
+    "failure_class": "blocked",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "DCD796P2 manual site:dewalt.co.uk",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 61.865965,
+    "budget_after_seconds": 59.861338,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "seznam",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "low_value",
+    "result_count": 3,
+    "message": "Provider results lacked query identity signal (0/1 required tokens matched).",
+    "is_fallback": true,
+    "duration_seconds": 0.718068,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 4,
+    "parsed_result_count": 3,
+    "deduped_result_count": 3,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 59.861272,
+    "budget_after_seconds": 59.142954,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_lite",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "blocked",
+    "result_count": 0,
+    "message": "DuckDuckGo bot-check blocked the Lite search.",
+    "is_fallback": true,
+    "duration_seconds": 0.355436,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": true,
+    "parse_failure": false,
+    "exception_class": "RuntimeError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "http",
+    "failure_class": "blocked",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"DCD796P2\" manual dewalt.co.uk",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 59.142904,
+    "budget_after_seconds": 58.787439,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "bing",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "low_value",
+    "result_count": 10,
+    "message": "Provider results lacked query identity signal (0/1 required tokens matched).",
+    "is_fallback": true,
+    "duration_seconds": 0.533735,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 10,
+    "parsed_result_count": 10,
+    "deduped_result_count": 10,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 58.787389,
+    "budget_after_seconds": 58.253288,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "google",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "timeout",
+    "result_count": 0,
+    "message": "Google provider deadline exhausted waiting for results.",
+    "is_fallback": true,
+    "duration_seconds": 8.017186,
+    "timeout_seconds": 8.0,
+    "timed_out": true,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": "ProviderTimeoutError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "browser",
+    "failure_class": "timeout",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 58.253254,
+    "budget_after_seconds": 50.236029,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "duckduckgo_html",
+    "query": "DEWALT \"DCD796P2\" declaration of conformity",
+    "status": "blocked",
+    "result_count": 0,
+    "message": "DuckDuckGo bot-check blocked the HTML search.",
+    "is_fallback": true,
+    "duration_seconds": 0.328566,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": true,
+    "parse_failure": false,
+    "exception_class": "RuntimeError",
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 0,
+    "parsed_result_count": 0,
+    "deduped_result_count": 0,
+    "transport": "http",
+    "failure_class": "blocked",
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "DEWALT \"DCD796P2\" declaration of conformity",
+    "exact_model_hit": false,
+    "official_domain_hit": false,
+    "budget_before_seconds": 50.235899,
+    "budget_after_seconds": 49.907296,
+    "independent_success_without_ddg": false,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   },
+   {
+    "provider": "naver",
+    "query": "DEWALT \"DCD796P2\" declaration of conformity",
+    "status": "success",
+    "result_count": 41,
+    "message": null,
+    "is_fallback": true,
+    "duration_seconds": 2.284939,
+    "timeout_seconds": 8.0,
+    "timed_out": false,
+    "blocked": false,
+    "parse_failure": false,
+    "exception_class": null,
+    "circuit_open": false,
+    "budget_exhausted": false,
+    "provider_time_capped": false,
+    "raw_result_count": 41,
+    "parsed_result_count": 41,
+    "deduped_result_count": 11,
+    "transport": "http",
+    "failure_class": null,
+    "shared_circuit_open": false,
+    "retried": false,
+    "effective_query": "DEWALT DCD796P2 declaration of conformity",
+    "exact_model_hit": true,
+    "official_domain_hit": false,
+    "budget_before_seconds": 49.90646,
+    "budget_after_seconds": 47.612049,
+    "independent_success_without_ddg": true,
+    "accepted_candidate_count": 0,
+    "rejected_candidate_count": 0,
+    "discovery_method": null,
+    "method_requests": [],
+    "candidate_count": 0,
+    "exact_model_candidate_count": 0,
+    "accepted_official_url": null,
+    "failure_reason": null,
+    "browser_invoked": false,
+    "browser_reason": null,
+    "browser_pages_opened": 0,
+    "browser_navigation_seconds": 0.0,
+    "browser_rendered_candidate_count": 0,
+    "browser_xhr_candidate_count": 0,
+    "browser_captcha_detected": false,
+    "browser_budget_used_seconds": 0.0
+   }
+  ],
+  "raw_and_normalized": [
+   {
+    "raw_url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+    "canonical_url": "https://dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+    "title": "18V XR® Brushless Hammer Drill Driver with (2) 5Ah Batteries",
+    "provider": "direct_domain_probe",
+    "query": "DEWALT DCD796P2",
+    "outcome": "accepted",
+    "reason": "Requested base SKU matches; suffix 'GB' is a regional/market code, not a different product variant."
+   }
+  ],
+  "accepted": [
+   {
+    "url": "https://dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+    "domain": "dewalt.co.uk",
+    "source_type": "manufacturer",
+    "title": "18V XR® Brushless Hammer Drill Driver with (2) 5Ah Batteries",
+    "model_match": "exact",
+    "authority": "manufacturer",
+    "reason": "Requested base SKU matches; suffix 'GB' is a regional/market code, not a different product variant.; Domain verified from conservative brand official-search evidence.",
+    "group": "official",
+    "sku_relation": "regional_suffix",
+    "sku_suffix": "GB",
+    "page_role": "product"
+   }
+  ],
+  "rejected": [],
+  "documents": [],
+  "rejected_documents": [
+   {
+    "url": "https://www.dewalt.co.uk/en-gb/support/safety-notices-and-recalls",
+    "doc_type": "safety_document",
+    "title": "Safety Notices and Recalls",
+    "reason": "requested model is not identified by this document link",
+    "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+   },
+   {
+    "url": "https://www.fastenersdop.com/",
+    "doc_type": "declaration",
+    "title": "Declaration of Performance (CE/UKCA DoP)",
+    "reason": "linked page is on a non-official host",
+    "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+   },
+   {
+    "url": "https://bynder.sbdinc.com/m/1473e91296629075/original/NB_GenderPayGap-LEGAL-WEB_DLE1.pdf",
+    "doc_type": "unknown",
+    "title": "Gender Pay Gap UK",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+   },
+   {
+    "url": "https://bynder.sbdinc.com/asset/53828540-11c3-4017-87a0-bbeb7b7cd02c/SBD_Consolidated-2025-AUS-CAN-UK-Moderns-Slavery-Statement-EN_DLE1.pdf",
+    "doc_type": "unknown",
+    "title": "Modern Slavery Act",
+    "reason": "document file whose type cannot be identified",
+    "source_page": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries"
+   },
+   {
+    "url": "https://radians.com/doc",
+    "doc_type": "declaration",
+    "title": "radians.com www.radians.com 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://radians.com/doc",
+    "doc_type": "declaration",
+    "title": "새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://radians.com/doc",
+    "doc_type": "declaration",
+    "title": "Declarations  of Conformity  - Radians 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://radians.com/doc",
+    "doc_type": "declaration",
+    "title": "The links below house our product documentation for all  DEWALT  and Stanley PPE products that are manufactured by Radians and sold in the European Union or the United Kingdom. This documentation includes Declarations  of Conformity  (DOC) for both the EU and UK/CA and product sales sheets. 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+    "doc_type": "manual",
+    "title": "Manualzz manualzz.com › dewalt-dcd771-t-1-owner-manual 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+    "doc_type": "manual",
+    "title": "새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+    "doc_type": "manual",
+    "title": "DeWalt DCD 771 T 1 Owner Manual 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualzz.com/doc/55042130/dewalt-dcd771-t-1-owner-manual",
+    "doc_type": "manual",
+    "title": "The  DeWalt DCD 771 T 1 is a versatile and powerful tool that combines the functionality  of  a drill, driver, and hammer drill. With its compact design and lightweight construction, it is ideal for a wide range  of  tasks, from simple home repairs to demanding construction projects. The variable speed trigger provides precise control, while the two-speed gearbox allows for optimal torque and speed for different applications. 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+    "doc_type": "manual",
+    "title": "Manuals manuals.plus › dcd740-18v-xr-cordless-right-angle-drill-manual 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+    "doc_type": "manual",
+    "title": "새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+    "doc_type": "manual",
+    "title": "DEWALT DCD 740 18V XR Cordless Right Angle Drill Instruction Manual 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manuals.plus/dewalt/dcd740-18v-xr-cordless-right-angle-drill-manual",
+    "doc_type": "manual",
+    "title": "2022.09.14. Home ›  Dewalt  ›  DEWALT DCD 740 18V XR Cordless Right Angle Drill Instruction Manual Your browser prefers Korean, but this page is in English. Open manual in 한국어 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://manualslib.com/manual/3788568/Dewalt-Dwk700.html",
+    "doc_type": "manual",
+    "title": "ManualsLib www.manualslib.com › manual 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://dfpsafety.com/declaration-of-conformity",
+    "doc_type": "declaration",
+    "title": "dfpsafety.com › Declaration of Conformity 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://dfpsafety.com/declaration-of-conformity",
+    "doc_type": "declaration",
+    "title": "DFP Safety  DEWALT  Global Licensee for Fall Protection 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   },
+   {
+    "url": "https://dfpsafety.com/declaration-of-conformity",
+    "doc_type": "declaration",
+    "title": "DROP PREVENTION · Tool Holders and Anchors · Tool Lanyards · Tool Attachments · Power Tool Lanyards · FALL PROTECTION · Fall Compliance Kits · Rooftop Safety Kits · 새 창 열림",
+    "reason": "document host is not a verified official domain",
+    "source_page": ""
+   }
+  ],
+  "provider_errors": [
+   {
+    "provider": "duckduckgo_html",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "blocked",
+    "message": "DuckDuckGo bot-check blocked the HTML search."
+   },
+   {
+    "provider": "naver",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "blocked",
+    "message": "Naver bot-check blocked the search."
+   },
+   {
+    "provider": "duckduckgo_lite",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "blocked",
+    "message": "DuckDuckGo bot-check blocked the Lite search."
+   },
+   {
+    "provider": "google",
+    "query": "\"DCD796P2\" manual site:dewalt.co.uk",
+    "status": "timeout",
+    "message": "Google provider deadline exhausted waiting for results."
+   },
+   {
+    "provider": "duckduckgo_html",
+    "query": "DEWALT \"DCD796P2\" declaration of conformity",
+    "status": "blocked",
+    "message": "DuckDuckGo bot-check blocked the HTML search."
+   }
+  ]
+ },
+ "page_metadata": [
+  {
+   "url": "https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries",
+   "domain": "dewalt.co.uk",
+   "locale_region": "en-GB",
+   "model_match": "exact",
+   "expandable_specs": false,
+   "hidden_spec_content": "true",
+   "interaction_required": "false",
+   "spec_location": "json_state",
+   "spec_controls": [],
+   "signals": [
+    "aria-expanded=false control",
+    "<template> on <template>"
+   ],
+   "spec_rows_visible": 0,
+   "spec_rows_hidden": 0,
+   "json_spec_blocks": 1
+  }
+ ],
+ "sku_rejections": [],
+ "performance": {
+  "runtime_seconds": 27.4,
+  "slow": "",
+  "query_count": 3,
+  "provider_attempts": 9,
+  "raw_candidates": 47,
+  "unique_candidates": 1,
+  "accepted": 1,
+  "rejected": 0,
+  "blocked": 4,
+  "timeout": 1,
+  "circuit_open": 0,
+  "attempt_statuses": {
+   "success": 2,
+   "blocked": 4,
+   "low_value": 2,
+   "timeout": 1
+  }
+ },
+ "run": 2,
+ "oracle": {
+  "page_ok": true,
+  "document_ok": null,
+  "oracle_ok": true
+ }
+}

@@ -1,0 +1,39 @@
+🔎 DEWALT DCD796P2
+Статус: PASS · exact official page: да
+Время discovery: 26.1 с · search status: success
+Providers: direct_domain_probe, duckduckgo_html, naver, seznam, duckduckgo_lite, bing, google
+Trace: provider raw=47, collected=1, normalized=1, unique=1, accepted=1, rejected=0, duplicates=0
+
+Official product pages (1)
+1. https://www.dewalt.co.uk/en-gb/product/dcd796p2-gb/18v-xr-brushless-hammer-drill-driver-2-5ah-batteries
+   exact — regional SKU suffix '-GB' on the requested base model; Requested base SKU matches; suffix 'GB' is a regional/market code, not a different product variant.; Domain verified from conservative brand official-search evidence.
+   dewalt.co.uk · en-GB
+   expandable_specs: no · hidden_spec_content: yes · interaction_required: no [json_state]
+
+Official support pages (0)
+— not found
+
+Official documents (0)
+— not found
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: no
+• hidden spec content: yes
+• interaction required: no
+
+Performance: 26.1 с, queries=3, provider attempts=10, raw=47, unique=1, accepted=1, rejected=0, blocked=3, timeout=1, circuit_open=2
+
+Отклонённые кандидаты (0)
+
+Сбои/таймауты providers (8):
+• duckduckgo_html: blocked — DuckDuckGo bot-check blocked the HTML search.
+• naver: blocked — Naver bot-check blocked the search.
+• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo bot-check blocked the HTML search.
+• naver: circuit_open — Circuit open after blocked: Naver bot-check blocked the search.
+• seznam: low_value — Provider results lacked query identity signal (2/3 required tokens matched).
+• duckduckgo_lite: blocked — DuckDuckGo bot-check blocked the Lite search.
+• bing: low_value — Provider results lacked query identity signal (1/3 required tokens matched).
+• google: timeout — Google provider deadline exhausted waiting for results.

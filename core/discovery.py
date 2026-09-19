@@ -25,7 +25,9 @@ import requests
 from core.budget import WallClockBudget
 from core.fetch import _blocked_reason as _detect_blocked_reason
 from core.sku import requested_sku, sku_in_text_loosely, sku_relation, sku_search_terms
-from core.match import article_matches, candidate_model_match, model_match, normalize_model, normalize_text
+from core.match import (
+    _parts_forming_identifier, article_matches, candidate_model_match, model_match, normalize_model, normalize_text,
+)
 from core.identity import ProductIdentity, base_model_in_text, identity_verification_signals
 from core.provider_health import (
     FailureClass,
@@ -823,6 +825,7 @@ def _path_names_complete_model(url: str, brand: str, model: str) -> bool:
                     if part in identifiers and requested[index + 1].isdigit()]
     return bool(expected) and (
         expected in tokens
+        or bool(_parts_forming_identifier(expected, re.findall(r"[^\W_]+", path)))
         or brand_key + expected in tokens
         or (len(requested) >= 2 and all(part in tokens for part in requested))
         or (bool(identifiers) and all(part in tokens for part in (*identifiers, *sku_suffixes)))
@@ -4594,6 +4597,17 @@ BRAND_CONFIRMED_MARKER = "brand confirmed in fetched page"
 
 def _brand_evidence(record: SearchResultRecord, brand: str) -> bool:
     if normalize_model(brand) in normalize_model(record.title):
+        return True
+    # Titles are sometimes empty or URL-derived.  The registrable label of a
+    # ``.com`` host that is exactly the brand (logitech.com) is mechanical
+    # brand evidence of the same strength as the brand-root probing itself.
+    brand_slug = re.sub(r"[^a-z0-9]", "", (brand or "").casefold())
+    host = _host(record.url)
+    if (
+        len(brand_slug) >= 5
+        and host.endswith(".com")
+        and _registrable_domain_label(host) == brand_slug
+    ):
         return True
     return (
         record.provider == "direct_domain_probe"

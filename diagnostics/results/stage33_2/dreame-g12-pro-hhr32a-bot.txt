@@ -1,0 +1,83 @@
+🔎 Dreame G12 Pro HHR32A
+Статус: PARTIAL · exact official page: нет
+Время discovery: 75.2 с · search status: partial
+Providers: direct_domain_probe, browser_official_discovery, duckduckgo_html, naver, seznam, duckduckgo_lite, bing, google
+Trace: provider raw=498, collected=383, normalized=383, unique=159, accepted=20, rejected=150, duplicates=213
+
+Official product pages (0)
+— not found
+
+Official support pages (0)
+— not found
+
+Official documents (2)
+1. Declaration — https://cdn.shopify.com/s/files/1/0302/5276/1220/files/DOC-W2545E_HHR32A.pdf?v=1767060049
+   exact · official (linked from verified official page) · requested model identifier appears in the link text or file name; linked from official page
+2. Manual — https://global.dreametech.com/pages/g12-pro
+   probable · manufacturer · model family/name words match, requested SKU not stated; found on verified official domain global.dreametech.com
+
+Secondary (18)
+1. https://adashop.ge/en/product/vacuum-cleaner-dreame-g12-pro-wet-and-dry-black-6a670c511f112e462a1c02ec
+   weak · secondary
+2. https://bscom.cz/tycovy-vysavac-dreame-g12-pro-hhr32a_d2590118
+   exact · secondary
+3. https://zbozi.cz/vyrobek/dreame-g12-pro-hhr32a
+   exact · secondary
+4. https://gtelectronics.am/en_us/product/productDetails/6488
+   weak · secondary
+5. https://alta.ge/en/mop-floor-cleaner/dreame-g12-pro-wet-and-dry-vacuum-hhr32a-eu-p50137
+   exact · secondary
+6. https://e-catalog.com/DREAME-G12-PRO.htm
+   weak · secondary
+7. https://zigzag.am/en/dreame-g12-pro-wet-and-dry-vacuum-hhr32a-eub.html
+   exact · secondary
+8. https://niky.ro/aspirator-dreame-hhr32a-g12-pro-pareri-review
+   weak · secondary
+… ещё 10 вторичных источников
+
+Discovery metadata
+• expandable specs: unknown (no official product page was inspected)
+• hidden spec content: unknown
+• interaction required: unknown
+
+Отклонённые соседние SKU/варианты (4)
+1. https://cdn.shopify.com/s/files/1/0302/5276/1220/files/DOC-W2517_HHR20A_933f7a05-865e-4d0f-a12a-264570c013c2.pdf?v=1776819935
+   найден: HHR20A · запрошен: HHR32A · names a different model identifier (HHR20A)
+2. https://cdn.shopify.com/s/files/1/0302/5276/1220/files/DOC-W2306_HHR31A_12f73f39-b392-41b4-90e1-a27abab9119f.pdf?v=1776819935
+   найден: HHR31A · запрошен: HHR32A · names a different model identifier (HHR31A)
+3. https://cdn.shopify.com/s/files/1/0302/5276/1220/files/DOC-W2210_HHR25A_943ddc45-d062-4e1e-a591-4431cded36b7.pdf?v=1776819935
+   найден: HHR25A · запрошен: HHR32A · names a different model identifier (HHR25A)
+4. https://cdn.shopify.com/s/files/1/0302/5276/1220/files/DoC-W2334_HHR21A.pdf?v=1748251968
+   найден: HHR21A · запрошен: HHR32A · names a different model identifier (HHR21A)
+
+Performance: 75.2 с, queries=10, provider attempts=54, raw=498, unique=159, accepted=20, rejected=150, blocked=2, timeout=3, circuit_open=10
+
+Отклонённые кандидаты (5)
+1. https://xn--vg1b14l6tk.xn--3e0b707e/dreame/g12/%EB%A7%A4%EB%89%B4%EC%96%BC
+   Search result names a different commercial-model variant.
+2. https://youtube.com/channel/UC1J4DKcJXENzC-FkyMU6dow
+   obvious_non_product_or_blocked_url
+3. https://dreamestore.co.uk/products/dreame-r20-cordless-stick-vacuum
+   Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.
+4. https://dreametech.com/products/dreame-x30-ultra
+
+   Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.
+5. https://dreametech.com/products/dreametech-x40-ultra-robot-vacuum
+   Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.; Domain verified from conservative brand official-search evidence.
+
+Ещё отклонённых: 140. Команда /discover_rejected покажет полный trace последнего запуска.
+
+Сбои/таймауты providers (40):
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: empty — Provider returned no candidates.
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: empty — Provider returned no candidates.
+• duckduckgo_html: empty — Provider returned no candidates.
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• duckduckgo_html: empty — Provider returned no candidates.
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+… ещё 28

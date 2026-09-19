@@ -113,6 +113,20 @@ def model_match(model: str | None, text: str | None) -> str:
     return "unknown"
 
 
+def _parts_forming_identifier(identifier: str, parts: list[str]) -> set[int]:
+    """Indices of adjacent URL parts that together spell ``identifier`` (``ec685.m`` == ``EC685M``)."""
+    used: set[int] = set()
+    for start in range(len(parts)):
+        joined = ""
+        for end in range(start, min(len(parts), start + 3)):
+            joined += normalize_model(parts[end])
+            if end > start and joined == identifier:
+                used.update(range(start, end + 1))
+            if len(joined) >= len(identifier):
+                break
+    return used
+
+
 # Words a product URL appends to the model to name a *page of* that product.
 PAGE_ROLE_WORDS = frozenset({
     "specs", "spec", "specifications", "specification", "tech", "technical",
@@ -201,7 +215,8 @@ def candidate_model_match(model: str | None, title: str | None, url: str | None)
     if any(
         model_match(identifier, part) == "mismatch"
         for identifier in expected_identifiers
-        for part in url_parts
+        for index, part in enumerate(url_parts)
+        if index not in _parts_forming_identifier(identifier, url_parts)
     ):
         return "mismatch"
     title_result = model_match(model, title)

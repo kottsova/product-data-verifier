@@ -1,0 +1,84 @@
+🔎 Makita DHP484Z
+Статус: PARTIAL · exact official page: нет
+Время discovery: 65.5 с · search status: partial
+Providers: direct_domain_probe, browser_official_discovery, duckduckgo_html, naver, seznam, duckduckgo_lite, bing, google
+Trace: provider raw=428, collected=373, normalized=373, unique=107, accepted=27, rejected=82, duplicates=264
+
+Official product pages (0)
+— not found
+
+Official support pages (0)
+— not found
+
+Official documents (0)
+— not found
+
+Secondary (27)
+1. https://makitapraha.cz/dhp484z
+   exact · secondary
+2. https://09plus.com/product/%EB%A7%88%EB%81%BC%EB%8B%A4-%EC%B6%A9%EC%A0%84-%ED%95%B4%EB%A8%B8-%EB%93%9C%EB%A6%B4-%EB%B2%A0%EC%96%B4%ED%88%B4-dhp484z-18v/3540
+   exact · secondary
+3. https://bigw.com.au/product/makita-18v-lxt-brushless-heavy-duty-compact-hammer-driver-drill-dhp484z-skin-only-cordless/p/9903647406
+   exact · secondary
+4. https://gong909.cafe24.com/product/%EB%A7%88%EB%81%BC%EB%8B%A4-%EB%A6%AC%ED%8A%AC%EC%9D%B4%EC%98%A8-%EC%B6%A9%EC%A0%84-%ED%95%A8%EB%A7%88%EB%93%9C%EB%A6%B4-dhp484z-18v-%EB%B2%A0%EC%96%B4%ED%88%B4/2875
+   exact · secondary
+5. https://akusroubovaky.heureka.cz/makita-dhp484z
+   exact · secondary
+6. https://allegro.cz/produkt/aku-vrtacka-makita-dhp484z-18v-li-ion-lxt-d490da57-2c99-4f18-a624-cdde3d642ddf
+   exact · secondary
+7. https://apollos.cz/produkt/makita-dhp484z
+   exact · secondary
+8. https://datart.cz/aku-vrtacka-makita-dhp484z-bez-baterie.html
+   exact · secondary
+… ещё 19 вторичных источников
+
+Discovery metadata
+• expandable specs: unknown (no official product page was inspected)
+• hidden spec content: unknown
+• interaction required: unknown
+
+Отклонённые соседние SKU/варианты (8)
+1. https://toolstoreuk.co.uk/makita-dhp458z-18v-lxt-combi-drill-body-only/p1843
+   найден: DHP458Z · запрошен: DHP484Z · Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.
+2. https://heureka.cz/?h%5Bfraze%5D=makita+dhp484&f=5
+   найден: dhp484 · запрошен: DHP484Z · Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.
+3. https://toolstoreuk.co.uk/makita-dhp482z-18v-lxt-combi-drill-body-only/p1244
+   найден: DHP482Z · запрошен: DHP484Z · Search result contains a conflicting model identifier.
+4. https://toolstoreuk.co.uk/makita-dhp489z-18v-lxt-brushless-combi-drill-body-only/p21801
+   найден: DHP489Z · запрошен: DHP484Z · Search result contains a conflicting model identifier.
+5. https://cltoolcentre.com.au/makita-dhp484rfe-18v-3-0ah-brushless-heavy-duty-hammer-driver-drill-kit-html
+   найден: DHP484RFE · запрошен: DHP484Z · Search result contains a conflicting model identifier.
+6. https://cltoolcentre.com.au/makita-dhp484rte-18v-5-0ah-cordless-brushless-heavy-duty-hammer-driver-drill-kit.html
+   найден: DHP484RTE · запрошен: DHP484Z · Search result contains a conflicting model identifier.
+
+Performance: 65.5 с, queries=9, provider attempts=43, raw=428, unique=107, accepted=27, rejected=82, blocked=7, timeout=1, circuit_open=11
+
+Отклонённые кандидаты (5)
+1. https://manualzz.com/doc/11382585/makita-dhp451-instruction-manual
+   Search result contains a conflicting model identifier.
+2. https://dd09.co.kr/product/%EB%A7%88%EB%81%BC%EB%8B%A4-dhp484z-18v-%EC%B6%A9%EC%A0%84%ED%95%A8%EB%A7%88%EB%93%9C%EB%A6%B4-%EB%B3%B8%EC%B2%B4%EC%BC%80%EC%9D%B4%EC%8A%A4-%EC%84%B8%ED%8A%B8/2140
+   Search result describes an accessory or replacement part, not the product.
+3. https://gigatools.ph/blogs/news
+
+   obvious_non_product_or_blocked_url
+4. https://manualslib.com/manual/3760489/Makita-Dhp484stx5.html
+   Requested exact model/article is absent from the search result. Brand-only evidence is insufficient.
+5. https://kaufland.cz/product/321353743
+   Product URL identifies another item, not the requested model.
+
+Ещё отклонённых: 76. Команда /discover_rejected покажет полный trace последнего запуска.
+
+Сбои/таймауты providers (33):
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: empty — Provider returned no candidates.
+• duckduckgo_html: blocked — DuckDuckGo HTML search failed: 403 Client Error: Forbidden for url: https://html.duckduckgo.com/html/?q=Makita+DHP484Z
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: empty — Provider returned no candidates.
+• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo HTML search failed: 403 Client Error: Forbidden for url: https://html.duckduckgo.com/html/?q=Makita+DHP484Z
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• duckduckgo_html: circuit_open — Circuit open after blocked: DuckDuckGo HTML search failed: 403 Client Error: Forbidden for url: https://html.duckduckgo.com/html/?q=Makita+DHP484Z
+• direct_domain_probe: empty — Provider returned no candidates.
+• browser_official_discovery: circuit_open — Circuit open after 2 consecutive empty results
+• duckduckgo_html: blocked — DuckDuckGo HTML search failed: 403 Client Error: Forbidden for url: https://html.duckduckgo.com/html/?q=%22DHP484Z%22+Makita+specs
+… ещё 21

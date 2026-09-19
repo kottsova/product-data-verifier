@@ -9,6 +9,7 @@ specifications.  It never extracts, validates, exports or localizes values.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from difflib import SequenceMatcher
 from dataclasses import asdict, dataclass, field, replace
 import re
 import threading
@@ -40,7 +41,7 @@ from core.official_documents import (
     merge_documents,
 )
 from core.page_inspection import PageInspection, fetch_working_page, inspect_product_page
-from core.sku import requested_sku
+from core.sku import requested_sku, sku_relation
 
 
 DiscoveryGroup = Literal["official", "dealer", "secondary", "rejected"]
@@ -97,6 +98,10 @@ class DiscoveryDebugResult:
     discovery_metadata: dict[str, object] = field(default_factory=dict)
     official_paths: tuple[dict[str, object], ...] = ()
     trace: dict[str, object] = field(default_factory=dict)
+    # ---- Stage 33.2 -------------------------------------------------------
+    page_metadata: tuple[dict[str, object], ...] = ()
+    sku_rejections: tuple[dict[str, str], ...] = ()
+    performance: dict[str, object] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, object]:
         data = asdict(self)
@@ -211,7 +216,12 @@ def _official_hosts(candidates: Iterable[Candidate]) -> list[str]:
 def _document_from_candidate(
     source: DiscoverySource, brand: str, model: str,
 ) -> tuple[OfficialDocument | None, RejectedDocument | None]:
-    doc_type = classify_document(source.url, source.title) or "manual"
+    doc_type = classify_document(source.url, source.title)
+    if doc_type is None:
+        # A PDF is not a document merely because it is a PDF.
+        return None, RejectedDocument(
+            source.url, "unknown", source.title, "document purpose is not identified (not a manual/datasheet/declaration/...)",
+        )
     match, reason = document_model_match(
         model, brand, source.url, source.title, linked_from_exact_page=False,
     )
@@ -316,7 +326,7 @@ def _result_from_outcome(
     if fetch is not None:
         targets: list[tuple[DiscoverySource, str]] = []
         rank = {"exact": 0, "probable": 1, "weak": 2}
-        for source in sorted(official_pages, key=lambda item: rank.get(item.model_match, 3))[:3]:
+        for source in sorted(official_pages, key=lambda item: rank.get(item.model_match, 3))[:6]:
             targets.append((source, "product"))
         for source in [*support_pages, *document_sources]:
             if len([t for t in targets if t[1] == "scan"]) >= 3:
@@ -440,7 +450,121 @@ def _result_from_outcome(
         discovery_metadata=_metadata_from_inspections(inspections),
         official_paths=_official_paths(outcome),
         trace=_trace_payload(outcome, grouped, merged_documents, rejected_documents),
+        page_metadata=tuple(_page_metadata(source, inspection) for source, inspection in inspections),
+        sku_rejections=_sku_rejections(model, grouped["rejected"], rejected_documents),
+        performance=_performance(outcome, counts, runtime_seconds),
     )
+
+
+_REGION_PATH = re.compile(r"/([a-z]{2})[-_]([a-z]{2})(?:/|$)", re.I)
+_LANG_PATH = re.compile(r"^/([a-z]{2})(?:/|$)", re.I)
+
+
+def locale_region(url: str) -> str:
+    """Best-effort locale/region label from the URL alone (path locale, else host TLD)."""
+    parsed = urlparse(url)
+    match = _REGION_PATH.search(parsed.path)
+    if match:
+        return f"{match.group(1).lower()}-{match.group(2).upper()}"
+    labels = (parsed.hostname or "").lower().split(".")
+    if len(labels) >= 2:
+        tld = labels[-1]
+        if len(tld) == 2:
+            return f".{tld}" + (f" ({_LANG_PATH.match(parsed.path).group(1).lower()})" if _LANG_PATH.match(parsed.path) else "")
+        if len(labels) >= 3 and labels[-2] in {"global", "eu", "cee", "asia"}:
+            return labels[-2]
+        return "global (.%s)" % tld
+    return "unknown"
+
+
+def _page_metadata(source: DiscoverySource, inspection: PageInspection) -> dict[str, object]:
+    return {
+        "url": inspection.url or source.url,
+        "domain": source.domain,
+        "locale_region": locale_region(inspection.url or source.url),
+        "model_match": source.model_match,
+        "expandable_specs": inspection.has_expandable_specs,
+        "hidden_spec_content": inspection.has_hidden_spec_content,
+        "interaction_required": inspection.requires_interaction,
+        "spec_location": inspection.spec_location,
+        "spec_controls": list(inspection.spec_controls),
+        "signals": list(inspection.signals),
+        "spec_rows_visible": inspection.spec_rows_visible,
+        "spec_rows_hidden": inspection.spec_rows_hidden,
+        "json_spec_blocks": inspection.json_spec_blocks,
+    }
+
+
+_ID_TOKEN = re.compile(r"[A-Za-z0-9]+(?:[-_/][A-Za-z0-9]+)*")
+
+
+def _neighbour_sku(base: str, text: str) -> str:
+    """An identifier in ``text`` that looks like a sibling of ``base`` (same shape, not equal)."""
+    wanted = base.upper()
+    for token in _ID_TOKEN.findall(text):
+        compact = re.sub(r"[^A-Za-z0-9]", "", token).upper()
+        if compact == wanted or len(compact) < 5 or abs(len(compact) - len(wanted)) > 2:
+            continue
+        if not (re.search(r"[A-Z]", compact) and re.search(r"\d", compact)):
+            continue
+        if SequenceMatcher(None, compact, wanted).ratio() >= 0.75:
+            return token
+    return ""
+
+
+def _sku_rejections(
+    model: str,
+    rejected: list[DiscoverySource],
+    rejected_documents: list[RejectedDocument],
+) -> tuple[dict[str, str], ...]:
+    """Near-miss candidates rejected because they carry a different SKU/variant."""
+    sku = requested_sku(model)
+    if sku is None:
+        return ()
+    requested = f"{sku.base_display}/{sku.suffix}" if sku.suffix else sku.base_display
+    found: list[dict[str, str]] = []
+    seen: set[str] = set()
+    items = [(item.url, item.title, item.reason) for item in rejected]
+    items += [(doc.url, doc.title, doc.reason) for doc in rejected_documents]
+    for url, title, reason in items:
+        if url in seen:
+            continue
+        relation = sku_relation(model, url, title)
+        if relation.kind in {"different_suffix", "different_variant", "base_only"}:
+            seen.add(url)
+            found.append({
+                "url": url, "found_sku": relation.evidence, "requested_sku": requested,
+                "relation": relation.kind, "reason": reason,
+            })
+            continue
+        neighbour = _neighbour_sku(sku.base, f"{unquote(url)} {title}")
+        if neighbour and relation.kind == "absent":
+            seen.add(url)
+            found.append({
+                "url": url, "found_sku": neighbour, "requested_sku": requested,
+                "relation": "neighbour_sku", "reason": reason,
+            })
+    return tuple(found[:30])
+
+
+def _performance(outcome: DiscoveryOutcome, counts: dict[str, int], runtime: float) -> dict[str, object]:
+    statuses: dict[str, int] = {}
+    for attempt in outcome.provider_attempts:
+        statuses[attempt.status] = statuses.get(attempt.status, 0) + 1
+    return {
+        "runtime_seconds": round(runtime, 1),
+        "slow": "over_60s" if runtime > 60 else "over_30s" if runtime > 30 else "",
+        "query_count": len(outcome.attempted_queries),
+        "provider_attempts": len(outcome.provider_attempts),
+        "raw_candidates": counts.get("provider_raw", 0),
+        "unique_candidates": counts.get("unique", 0),
+        "accepted": counts.get("accepted", 0),
+        "rejected": counts.get("rejected", 0),
+        "blocked": statuses.get("blocked", 0),
+        "timeout": statuses.get("timeout", 0),
+        "circuit_open": statuses.get("circuit_open", 0),
+        "attempt_statuses": statuses,
+    }
 
 
 def _official_paths(outcome: DiscoveryOutcome) -> tuple[dict[str, object], ...]:

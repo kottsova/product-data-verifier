@@ -1,0 +1,38 @@
+🔎 Philips Sonicare 9900 Prestige HX9992/12
+Статус: PASS · exact official page: да
+Время discovery: 5.2 с · search status: success
+Providers: direct_domain_probe
+Trace: provider raw=49, collected=2, normalized=2, unique=2, accepted=2, rejected=0, duplicates=0
+
+Official product pages (2)
+1. https://www.philips.co.uk/c-p/HX9992_12/sonicare-9900-prestige-power-toothbrush-with-senseiq
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   philips.co.uk · .uk
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [unknown]
+2. https://www.philips.de/c-p/HX9992_12/9900-prestige-leistungsstarke-zahnbuerste-mit-senseiq-technologie
+   exact — Requested exact model appears in the title/snippet or URL.; Domain verified from conservative brand official-search evidence.
+   philips.de · .de
+   expandable_specs: no · hidden_spec_content: no · interaction_required: no [unknown]
+
+Official support pages (0)
+— not found
+
+Official documents (3)
+1. Declaration — https://www.documents.philips.com/assets/EU%20Declaration%20of%20conformity/20250731/35e408fe96534782a90bb32b00dd6684.pdf
+   exact · official (linked from verified official page) · requested model identifier appears in the link text or file name; linked from official page
+2. Declaration — https://www.documents.philips.com/assets/UK%20Declaration%20of%20Conformity/20250731/83e53b8349dd46408828b32b00de05f1.pdf
+   exact · official (linked from verified official page) · requested model identifier appears in the link text or file name; linked from official page
+3. Manual — https://www.documents.philips.com/assets/20211007/43e2cf011fa64b81bd83adba00a8634e.pdf
+   exact · official (linked from verified official page) · requested model identifier appears in the link text or file name; linked from official page; also published in 2 other locale(s)
+
+Secondary (0)
+— not found
+
+Discovery metadata
+• expandable specs: no
+• hidden spec content: no
+• interaction required: no
+
+Performance: 5.2 с, queries=1, provider attempts=1, raw=49, unique=2, accepted=2, rejected=0, blocked=0, timeout=0, circuit_open=0
+
+Отклонённые кандидаты (0)

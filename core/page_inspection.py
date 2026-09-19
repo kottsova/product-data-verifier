@@ -69,6 +69,9 @@ class PageInspection:
     spec_rows_hidden: int = 0
     json_spec_blocks: int = 0
     js_shell: bool = False
+    # Where the specifications live: visible_dom | dom_hidden | json_state |
+    # js_required | unknown (the four cases the Stage 33.2 benchmark separates).
+    spec_location: str = "unknown"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -290,6 +293,18 @@ def inspect_product_page(html: str, url: str = "") -> PageInspection:
         interaction = "unknown"
     if interaction == "true":
         signals.append("spec content absent from delivered HTML; a click/XHR is required")
+    if shell:
+        location = "unknown"
+    elif interaction == "true":
+        location = "js_required"
+    elif scanner.rows_hidden > 0 or (hidden_dom and scanner.rows_visible == 0 and scanner.json_blocks == 0):
+        location = "dom_hidden"
+    elif scanner.json_blocks > 0:
+        location = "json_state"
+    elif scanner.rows_visible > 0:
+        location = "visible_dom"
+    else:
+        location = "unknown"
     return PageInspection(
         url=url,
         has_expandable_specs=has_expandable,
@@ -301,6 +316,7 @@ def inspect_product_page(html: str, url: str = "") -> PageInspection:
         spec_rows_hidden=scanner.rows_hidden,
         json_spec_blocks=scanner.json_blocks,
         js_shell=shell,
+        spec_location=location,
     )
 
 

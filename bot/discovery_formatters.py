@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from bot.formatters import DEFAULT_MAX_MESSAGE_LENGTH, chunk_lines
 from core.official_documents import OfficialDocument
-from services.discovery_debug import DiscoveryDebugResult, DiscoverySource
+from services.discovery_debug import DiscoveryDebugResult, DiscoverySource, locale_region
 
 _DOC_LABELS = {
     "manual": "Manual",
@@ -102,8 +102,20 @@ def format_discovery_result(
     lines.extend(_titled("Official product pages", len(pages)))
     if not pages:
         lines.append("— not found")
+    meta_by_url = {str(item.get("url")): item for item in result.page_metadata}
     for index, item in enumerate(pages, start=1):
         lines.extend(_page_lines(index, item))
+        lines.append(f"   {item.domain} · {locale_region(item.url)}")
+        page_meta = meta_by_url.get(item.url) or next(
+            (m for url, m in meta_by_url.items() if url.rstrip("/") == item.url.rstrip("/")), None,
+        )
+        if page_meta is not None:
+            lines.append(
+                f"   expandable_specs: {_flag(page_meta['expandable_specs'])} · "
+                f"hidden_spec_content: {_flag(page_meta['hidden_spec_content'])} · "
+                f"interaction_required: {_flag(page_meta['interaction_required'])} "
+                f"[{page_meta['spec_location']}]"
+            )
 
     lines.extend(_titled("Official support pages", len(support)))
     if not support:
@@ -139,6 +151,25 @@ def format_discovery_result(
             "• expandable specs: unknown (no official product page was inspected)",
             "• hidden spec content: unknown",
             "• interaction required: unknown",
+        ))
+
+    if result.sku_rejections:
+        lines.extend(("", f"Отклонённые соседние SKU/варианты ({len(result.sku_rejections)})"))
+        for index, item in enumerate(result.sku_rejections[:6], start=1):
+            lines.extend((
+                f"{index}. {item['url']}",
+                f"   найден: {item['found_sku']} · запрошен: {item['requested_sku']} · {item['reason']}",
+            ))
+    perf = result.performance or {}
+    if perf:
+        lines.extend((
+            "",
+            "Performance: "
+            f"{perf.get('runtime_seconds')} с, queries={perf.get('query_count')}, "
+            f"provider attempts={perf.get('provider_attempts')}, raw={perf.get('raw_candidates')}, "
+            f"unique={perf.get('unique_candidates')}, accepted={perf.get('accepted')}, "
+            f"rejected={perf.get('rejected')}, blocked={perf.get('blocked')}, "
+            f"timeout={perf.get('timeout')}, circuit_open={perf.get('circuit_open')}",
         ))
 
     rejected = result.rejected if include_all_rejected else _important_rejected(result.rejected)
