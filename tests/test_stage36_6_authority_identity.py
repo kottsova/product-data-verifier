@@ -9,6 +9,7 @@ from core.authority import TrustedSource, resolve_authority
 from core.authority_registry import find_seed
 from core.discovery import DiscoveryOutcome, assess_candidate_relevance, rank_candidates
 from core.identity import assess_product_page_identity
+from core.official_documents import OfficialDocument
 from core.workflow import ProductWorkflowRequest, run_product_workflow
 from services.discovery_debug import DiscoverySource, _candidate_view, _result_from_outcome
 from services.raw_extraction import RawExtractionService
@@ -159,6 +160,25 @@ class ProductIdentityTests(unittest.TestCase):
         )
         self.assertEqual(redirected.issues, ("authority_redirect_not_verified",))
         self.assertEqual(redirected.attributes, ())
+
+    def test_extraction_rechecks_support_and_html_document_identity(self):
+        url = "https://razer.com/support/deathadder-v3"
+        source = DiscoverySource(
+            url, "razer.com", "manufacturer", "Razer DeathAdder V3 support",
+            "exact", "manufacturer", "audited", "official", page_role="support",
+        )
+        wrong = "<h1>Razer DeathAdder V3 HyperSpeed</h1><table><tr><th>Weight</th><td>55 g</td></tr></table>"
+        service = RawExtractionService(fetch_html=lambda _: (url, wrong))
+        support = service._extract_page(source, "official_support_page", "DeathAdder V3", "Razer")
+        self.assertEqual(support.issues, ("product_identity_not_verified",))
+        self.assertEqual(support.attributes, ())
+        document = OfficialDocument(
+            url, "manual", "manual_url", "Razer DeathAdder V3 Manual",
+            "official", "exact", "fixture", file_type="page",
+        )
+        html_doc = service._extract_document(document, "DeathAdder V3", "Razer")
+        self.assertEqual(html_doc.issues, ("document_identity_not_verified",))
+        self.assertEqual(html_doc.attributes, ())
 
 
 class HeldoutCases(unittest.TestCase):

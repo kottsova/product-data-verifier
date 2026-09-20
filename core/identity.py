@@ -170,8 +170,10 @@ def assess_product_page_identity(model: str, html: str, final_url: str) -> PageI
             )
             # A market-looking suffix alone is insufficient to assert a
             # distinct commercial variant without an explicit product SKU.
-            if distinctive and follows_in_slug and not re.fullmatch(r"[A-Z]{2}", suffix):
-                return PageIdentityAssessment("different_variant", primary, "Main product and URL name an extra commercial variant")
+            if distinctive and not re.fullmatch(r"[A-Z]{2}", suffix):
+                if follows_in_slug:
+                    return PageIdentityAssessment("different_variant", primary, "Main product and URL name an extra commercial variant")
+                return PageIdentityAssessment("unknown", primary, "Main product names an extra variant absent from the URL")
 
     if occurrence and re.match(r"-([A-Z]{2})(?![A-Za-z0-9])", primary[occurrence.end():]):
         return PageIdentityAssessment("unknown", primary, "Regional-looking suffix needs an explicit commercial identifier")

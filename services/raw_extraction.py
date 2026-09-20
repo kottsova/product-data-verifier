@@ -197,7 +197,7 @@ class RawExtractionService:
                 authority_status="unknown", authority_evidence_kind="none",
             )
         inspection = inspect_product_page(html, final_url)
-        if source_type == "official_product_page":
+        if source_type in {"official_product_page", "official_support_page"}:
             decision = assess_product_page_identity(model, html, final_url)
             if decision.relation != "exact":
                 return SourceExtraction(
@@ -219,14 +219,14 @@ class RawExtractionService:
         return SourceExtraction(
             url=source.url, final_url=final_url, source_type=source_type, model_match=source.model_match,
             fetched=True, spec_location=inspection.spec_location, requires_interaction=inspection.requires_interaction,
-            identity_relation="exact" if source_type == "official_product_page" else "unknown",
-            identity_evidence=(decision.evidence if source_type == "official_product_page" else ""),
+            identity_relation="exact",
+            identity_evidence=decision.evidence,
             js_shell=inspection.js_shell, attributes=tuple(extraction.attributes), excluded=dict(extraction.excluded),
             stats=stats, issues=tuple(issues), **provenance,
         )
 
     # -- documents -------------------------------------------------------
-    def _extract_document(self, document: OfficialDocument, model: str) -> SourceExtraction:
+    def _extract_document(self, document: OfficialDocument, model: str, brand: str) -> SourceExtraction:
         is_pdf = document.file_type == "pdf" or urlparse(document.url).path.lower().endswith(".pdf")
         if not is_pdf:
             if urlparse(document.url).path.lower().endswith((".doc", ".docx")):
@@ -242,10 +242,28 @@ class RawExtractionService:
                     fetched=False, fetch_issue="document page could not be fetched", document_type=document.doc_type,
                     issues=("fetch_failed",),
                 )
+            final_host = (urlparse(page[0]).hostname or "").lower().removeprefix("www.")
+            original_host = (urlparse(document.url).hostname or "").lower().removeprefix("www.")
+            redirect_seed = find_seed(brand, final_host) if final_host != original_host else None
+            if final_host != original_host and not (redirect_seed and redirect_seed.first_party):
+                return SourceExtraction(
+                    url=document.url, final_url=page[0], source_type="official_document",
+                    model_match="rejected", fetched=True, document_type=document.doc_type,
+                    issues=("authority_redirect_not_verified",),
+                )
+            identity = assess_product_page_identity(model, page[1], page[0])
+            if identity.relation != "exact":
+                return SourceExtraction(
+                    url=document.url, final_url=page[0], source_type="official_document",
+                    model_match="rejected", fetched=True, document_type=document.doc_type,
+                    identity_relation=identity.relation, identity_evidence=identity.evidence,
+                    issues=("document_identity_not_verified",),
+                )
             extraction, stats = extract_html_attributes(page[1], page[0], model, "official_document", document.doc_type)
             return SourceExtraction(
                 url=document.url, final_url=page[0], source_type="official_document", model_match=document.model_match,
                 fetched=True, document_type=document.doc_type, attributes=tuple(extraction.attributes),
+                identity_relation="exact", identity_evidence=identity.evidence,
                 excluded=dict(extraction.excluded), stats=stats,
                 issues=() if extraction.attributes else ("no raw attributes in document page",),
             )
@@ -257,6 +275,15 @@ class RawExtractionService:
                 issues=("fetch_failed",),
             )
         final_url, body, _content_type = fetched
+        final_host = (urlparse(final_url).hostname or "").lower().removeprefix("www.")
+        original_host = (urlparse(document.url).hostname or "").lower().removeprefix("www.")
+        redirect_seed = find_seed(brand, final_host) if final_host != original_host else None
+        if final_host != original_host and not (redirect_seed and redirect_seed.first_party):
+            return SourceExtraction(
+                url=document.url, final_url=final_url, source_type="official_document",
+                model_match="rejected", fetched=True, document_type=document.doc_type,
+                issues=("authority_redirect_not_verified",),
+            )
         try:
             pages = _pdf_pages(body)
         except Exception as error:  # noqa: BLE001
@@ -317,7 +344,7 @@ class RawExtractionService:
         with ThreadPoolExecutor(max_workers=4) as pool:
             page_futures = [pool.submit(self._extract_page, s, "official_product_page", model, discovery.brand) for s in product]
             support_futures = [pool.submit(self._extract_page, s, "official_support_page", model, discovery.brand) for s in support]
-            doc_futures = [pool.submit(self._extract_document, d, model) for d in documents]
+            doc_futures = [pool.submit(self._extract_document, d, model, discovery.brand) for d in documents]
             pages = tuple(f.result() for f in page_futures)
             support_pages = tuple(f.result() for f in support_futures)
             docs = tuple(f.result() for f in doc_futures)
