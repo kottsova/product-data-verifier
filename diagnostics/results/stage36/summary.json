@@ -1,0 +1,126 @@
+[
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "category_confidence": "medium",
+  "normalized_specs": 32,
+  "mapped": 17,
+  "ambiguous": 6,
+  "unmapped": 2,
+  "not_a_spec": 7,
+  "eligible": 25,
+  "unique_canonical_fields": 17,
+  "coverage": 0.68,
+  "collisions": {
+   "same_value": 1
+  }
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "category_confidence": "high",
+  "normalized_specs": 107,
+  "mapped": 92,
+  "ambiguous": 1,
+  "unmapped": 5,
+  "not_a_spec": 9,
+  "eligible": 98,
+  "unique_canonical_fields": 46,
+  "coverage": 0.939,
+  "collisions": {
+   "different_values": 12,
+   "same_value": 19,
+   "equivalent_after_conversion": 1,
+   "list_field": 1
+  }
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "category_confidence": "high",
+  "normalized_specs": 18,
+  "mapped": 17,
+  "ambiguous": 0,
+  "unmapped": 0,
+  "not_a_spec": 1,
+  "eligible": 17,
+  "unique_canonical_fields": 17,
+  "coverage": 1.0,
+  "collisions": {}
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "category_confidence": "high",
+  "normalized_specs": 76,
+  "mapped": 30,
+  "ambiguous": 0,
+  "unmapped": 5,
+  "not_a_spec": 41,
+  "eligible": 35,
+  "unique_canonical_fields": 12,
+  "coverage": 0.857,
+  "collisions": {
+   "different_values": 7,
+   "equivalent_after_conversion": 2,
+   "same_value": 2,
+   "list_field": 1
+  }
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "category_confidence": "high",
+  "normalized_specs": 15,
+  "mapped": 14,
+  "ambiguous": 1,
+  "unmapped": 0,
+  "not_a_spec": 0,
+  "eligible": 15,
+  "unique_canonical_fields": 14,
+  "coverage": 0.933,
+  "collisions": {}
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "category_confidence": "high",
+  "normalized_specs": 31,
+  "mapped": 30,
+  "ambiguous": 0,
+  "unmapped": 1,
+  "not_a_spec": 0,
+  "eligible": 31,
+  "unique_canonical_fields": 30,
+  "coverage": 0.968,
+  "collisions": {}
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "category_confidence": "high",
+  "normalized_specs": 23,
+  "mapped": 20,
+  "ambiguous": 3,
+  "unmapped": 0,
+  "not_a_spec": 0,
+  "eligible": 23,
+  "unique_canonical_fields": 21,
+  "coverage": 0.87,
+  "collisions": {}
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "category_confidence": "high",
+  "normalized_specs": 9,
+  "mapped": 8,
+  "ambiguous": 0,
+  "unmapped": 0,
+  "not_a_spec": 1,
+  "eligible": 8,
+  "unique_canonical_fields": 8,
+  "coverage": 1.0,
+  "collisions": {}
+ }
+]

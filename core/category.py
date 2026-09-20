@@ -21,6 +21,12 @@ CATEGORY_NAMES = {
     "sewing_machine": ("Sewing machine", "sewing"),
     "air_fryer": ("Air fryer", "small_appliance"),
     "wet_dry_vacuum": ("Wet/dry vacuum", "home_cleaning"),
+    "oven": ("Built-in oven", "major_appliance"),
+    "power_tool": ("Power tool", "tools"),
+    "oral_care": ("Electric oral care", "personal_care"),
+    "coffee_machine": ("Coffee machine", "small_appliance"),
+    "computer_peripheral": ("Computer peripheral", "consumer_electronics"),
+    "skincare": ("Skincare", "cosmetics"),
 }
 
 
@@ -92,6 +98,38 @@ TEXT_SIGNALS: dict[str, tuple[_Signal, ...]] = {
                 7, "explicit wet/dry vacuum product phrase"),
         _Signal(_pattern("wet & dry", "wet and dry"), 4, "wet/dry product phrase"),
     ),
+    "oven": (
+        _Signal(_pattern("built-in oven", "built in oven", "wall oven", "backofen", "einbaubackofen",
+                         "four encastrable", "forno da incasso", "vestavná trouba", "духовой шкаф",
+                         "духовка"), 7, "explicit oven product phrase"),
+    ),
+    "power_tool": (
+        _Signal(_pattern("hammer drill", "drill driver", "cordless drill", "impact driver", "angle grinder",
+                         "circular saw", "jigsaw", "akkuschrauber", "bohrschrauber", "schlagbohrschrauber",
+                         "bohrhammer", "perceuse", "visseuse", "trapano", "aku vrtačka", "дрель", "шуруповерт",
+                         "перфоратор", "болгарка"), 7, "explicit power-tool product phrase"),
+    ),
+    "oral_care": (
+        _Signal(_pattern("electric toothbrush", "toothbrush", "sonic toothbrush", "zahnbürste",
+                         "brosse à dents", "spazzolino elettrico", "zubní kartáček", "зубная щетка",
+                         "зубная щётка"), 7, "explicit oral-care product phrase"),
+    ),
+    "coffee_machine": (
+        _Signal(_pattern("coffee machine", "coffee machines", "espresso machine", "coffee maker",
+                         "espresso coffee machines", "kaffeemaschine", "kaffeevollautomat",
+                         "machine à café", "macchina per caffè", "kávovar", "кофемашина", "кофеварка"),
+                7, "explicit coffee-machine product phrase"),
+    ),
+    "computer_peripheral": (
+        _Signal(_pattern("wireless mouse", "computer mouse", "gaming mouse", "keyboard", "webcam",
+                         "kabellose maus", "souris sans fil", "myš", "мышь", "клавиатура"),
+                7, "explicit computer-peripheral product phrase"),
+    ),
+    "skincare": (
+        _Signal(_pattern("serum", "moisturizer", "moisturiser", "sunscreen", "cleanser", "face cream",
+                         "niacinamide", "retinol", "hyaluronic acid", "salicylic acid", "gesichtscreme",
+                         "sérum", "сыворотка", "крем для лица"), 7, "explicit skincare product phrase"),
+    ),
 }
 
 
@@ -140,6 +178,40 @@ ATTRIBUTE_SIGNALS: dict[str, tuple[_Signal, ...]] = {
                          "სუფთა წყლის კონტეინერის მოცულობა",
                          "ჭუჭყიანი წყლის კონტეინერის მოცულობა"),
                 2, "wet/dry vacuum attribute"),
+    ),
+    "oven": (
+        _Signal(_pattern("pyrolytic", "pyrolytisch", "pyrolyse", "pyrolisis", "pirolisi", "cavity",
+                         "backblech", "niche height", "nischenhöhe", "nischenbreite", "nischentiefe",
+                         "hauteur minimum de la niche", "altezza minima della nicchia",
+                         "oven built in", "cooking method", "beheizungsarten", "baking tray",
+                         "door hinge", "türanschlag"), 2, "oven attribute"),
+    ),
+    "power_tool": (
+        _Signal(_pattern("chuck type", "clutch settings", "no load speed", "drilling capacity",
+                         "fastening torque", "impacts per minute", "brushless", "leerlaufdrehzahl",
+                         "bohrleistung", "tool only", "kickback", "холостой ход", "крутящий момент"),
+                2, "power-tool attribute"),
+    ),
+    "oral_care": (
+        _Signal(_pattern("brush head", "brush heads", "bürstenköpfe", "bürstenkopf", "têtes de brosse",
+                         "testine", "plaque removal", "plaque-entfernung", "gum health", "zahnfleisch",
+                         "brushing modes", "pressure feedback"), 2, "oral-care attribute"),
+    ),
+    "coffee_machine": (
+        _Signal(_pattern("pump pressure", "cup height", "milk system", "drip tray", "thermoblock",
+                         "portafilter", "milk frother", "tlak čerpadla", "systém mléka", "tassenhöhe",
+                         "kapacita nádržky na vodu", "water tank capacity", "brew group"),
+                2, "coffee-machine attribute"),
+    ),
+    "computer_peripheral": (
+        _Signal(_pattern("dpi", "scroll wheel", "thumb wheel", "number of buttons", "usb receiver",
+                         "sensor technology", "polling rate", "gesture button", "key switch",
+                         "wireless receiver"), 2, "computer-peripheral attribute"),
+    ),
+    "skincare": (
+        _Signal(_pattern("vegan", "cruelty-free", "cruelty free", "alcohol-free", "oil-free",
+                         "silicone-free", "fragrance-free", "paraben-free", "skin type", "ingredients",
+                         "spf", "dermatologist"), 2, "skincare attribute"),
     ),
 }
 

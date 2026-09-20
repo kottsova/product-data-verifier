@@ -1,0 +1,542 @@
+[
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Материал чаши = металлическая с антипригарным покрытием",
+  "canonical": "bowl_material = металлическая с антипригарным покрытием",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Integrierte Kochfeldsteuereinheiten = false",
+  "canonical": "hob_control_integrated = false",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Voltage = 18 V",
+  "canonical": "battery_voltage_v = 18 V",
+  "method": "label_pattern+value_test",
+  "confidence": "0.96",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "Power supply = 100–240 V",
+  "canonical": "voltage_v = 100–240 V",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "normalized": "Drilling capacity > Steel = 13 mm",
+  "canonical": "drilling_capacity_steel_mm = 13 mm",
+  "method": "label_pattern+group_context",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "normalized": "Maximální výška šálku = 120 mm",
+  "canonical": "max_cup_height_mm = 120 mm",
+  "method": "label_pattern",
+  "confidence": "0.96",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "normalized": "Height = 4.92 in (124.9 mm)",
+  "canonical": "height_mm = 124.9 mm",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "converted"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "normalized": "Highlights > ph = 5.00–6.50",
+  "canonical": "ph_range = 5–6.5",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "none"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Материал корпуса = пластик",
+  "canonical": "body_material = пластик",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Bedienkonzept = TFT Touchdisplay mit digitalem Kontrollring",
+  "canonical": "control_type = TFT Touchdisplay mit digitalem Kontrollring",
+  "method": "label_pattern",
+  "confidence": "0.92",
+  "unit_status": "-"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Cordless or Corded = Cordless",
+  "canonical": "corded_or_cordless = Cordless",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "Operating time (full to empty) = 14 days",
+  "canonical": "battery_runtime_h = 336 h",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "converted"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "normalized": "Drilling capacity > Wood = 38 mm",
+  "canonical": "drilling_capacity_wood_mm = 38 mm",
+  "method": "label_pattern+group_context",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "normalized": "Tlak čerpadla = 15 bar",
+  "canonical": "pump_pressure_bar = 15 bar",
+  "method": "label_pattern",
+  "confidence": "0.96",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "normalized": "Width = 3.32 in (84.3 mm)",
+  "canonical": "width_mm = 84.3 mm",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "converted"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "normalized": "water-free = false",
+  "canonical": "is_water_free = false",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Длина сетевого шнура = 70 см",
+  "canonical": "cord_length_m = 0.7 m",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "converted"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Anzahl Beheizungsarten = 14",
+  "canonical": "cooking_methods_count = 14",
+  "method": "label_pattern",
+  "confidence": "0.97",
+  "unit_status": "-"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Power Source = Battery",
+  "canonical": "power_source = Battery",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "Battery = Rechargeable",
+  "canonical": "battery_charging_type = Rechargeable",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "normalized": "Drilling capacity > Concrete = 13 mm",
+  "canonical": "drilling_capacity_concrete_mm = 13 mm",
+  "method": "label_pattern+group_context",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "normalized": "Kapacita nádržky na vodu = 1.1",
+  "canonical": "water_tank_capacity_l = 1.1 L",
+  "method": "label_pattern",
+  "confidence": "0.75",
+  "unit_status": "implied"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "normalized": "Depth = 2.01 in (51 mm)",
+  "canonical": "depth_mm = 51 mm",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "converted"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "normalized": "alcohol-free = true",
+  "canonical": "is_alcohol_free = true",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Мощность = 2700 Вт",
+  "canonical": "power_w = 2700 W",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Beheizungsarten = Auftauen, Air Fry, Großflächengrill, Heißluft sanft, Heißluft,",
+  "canonical": "cooking_methods = Auftauen, Air Fry, Großflächengrill, Heißluft sanft, Heißluft, Kleinflächengrill, Ober-/Unterhitze, Ober-/Unterhitze sanft, Pizzastufe, Sanftgaren, Unterhitze, Umluftgrill, Vorwärmen, Warmhalten",
+  "method": "label_pattern",
+  "confidence": "0.95",
+  "unit_status": "-"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Motor Type = Brushless",
+  "canonical": "motor_type = Brushless",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "Battery type = Lithium ION",
+  "canonical": "battery_type = Lithium ION",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "normalized": "Drilling capacity > Holesaw = 76 mm",
+  "canonical": "drilling_capacity_holesaw_mm = 76 mm",
+  "method": "label_pattern+group_context",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "normalized": "Příkon = 1450 W",
+  "canonical": "power_w = 1450 W",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "normalized": "Weight = 4.97 oz (141 g)",
+  "canonical": "weight_kg = 0.141 kg",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "converted"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "normalized": "oil-free = true",
+  "canonical": "is_oil_free = true",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Комплектация = чаша, решетка",
+  "canonical": "included_accessories = чаша, решетка",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Heizmethoden nur über Home Connect App = Ruhen lassen, Vorwärmen",
+  "canonical": "cooking_methods_app_only = Ruhen lassen, Vorwärmen",
+  "method": "label_pattern",
+  "confidence": "0.95",
+  "unit_status": "-"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Tool Only = false",
+  "canonical": "tool_only = false",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "Warranty = 2 year limited warranty",
+  "canonical": "warranty_months = 24 month",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "converted"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "normalized": "Impacts per minute > Hi = 0–30000 ipm",
+  "canonical": "impact_rate_high_ipm = 0–30000 ipm",
+  "method": "label_pattern+group_context",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "normalized": "Jmenovitá frekvence = 50–60 Hz",
+  "canonical": "frequency_hz = 50–60 Hz",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "normalized": "Height = 0.24 in (6.11 mm)",
+  "canonical": "secondary_component_height_mm = 6.11 mm",
+  "method": "repeated_block_context",
+  "confidence": "0.83",
+  "unit_status": "converted"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "normalized": "silicone-free = true",
+  "canonical": "is_silicone_free = true",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Таймер = true",
+  "canonical": "timer_available = true",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Verfügbarer Temperaturbereich = 30–300 °C",
+  "canonical": "temperature_range_c = 30–300 °C",
+  "method": "label_pattern",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Total Number of Batteries = 2",
+  "canonical": "battery_count = 2",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "Android compatibility = Android phones with Bluetooth 4.0 and above",
+  "canonical": "android_compatibility = Android phones with Bluetooth 4.0 and above",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "normalized": "Impacts per minute > Lo = 0–7500 ipm",
+  "canonical": "impact_rate_low_ipm = 0–7500 ipm",
+  "method": "label_pattern+group_context",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "normalized": "Napětí = 220–240 V",
+  "canonical": "voltage_v = 220–240 V",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "normalized": "Width = 0.57 in (14.4 mm)",
+  "canonical": "secondary_component_width_mm = 14.4 mm",
+  "method": "repeated_block_context",
+  "confidence": "0.83",
+  "unit_status": "converted"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "normalized": "vegan = true",
+  "canonical": "is_vegan = true",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Тип нагревательного элемента = ТЭН",
+  "canonical": "heating_element_type = ТЭН",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Integriertes Reinigungssystem = Pyrolytisch+Hydrolytisch",
+  "canonical": "cleaning_system = Pyrolytisch+Hydrolytisch",
+  "method": "label_pattern",
+  "confidence": "0.95",
+  "unit_status": "-"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Battery Amp Hours = 5.0 Ah",
+  "canonical": "battery_capacity_ah = 5 Ah",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "Bluetooth wireless technology = Connected Sonicare app",
+  "canonical": "wireless_technology = Connected Sonicare app",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ },
+ {
+  "product": "Makita DHP484Z",
+  "category": "power_tool",
+  "normalized": "No load speed > Hi = 0–2000 rpm",
+  "canonical": "no_load_speed_high_rpm = 0–2000 rpm",
+  "method": "label_pattern+group_context",
+  "confidence": "0.99",
+  "unit_status": "explicit"
+ },
+ {
+  "product": "DeLonghi EC685M",
+  "category": "coffee_machine",
+  "normalized": "Rozměry výrobku = 149 × 330 × 305",
+  "canonical": "dimensions_mm = 149 × 330 × 305 mm",
+  "method": "label_pattern",
+  "confidence": "0.75",
+  "unit_status": "implied"
+ },
+ {
+  "product": "Logitech MX Master 3S",
+  "category": "computer_peripheral",
+  "normalized": "Depth = 0.73 in (18.65 mm)",
+  "canonical": "secondary_component_depth_mm = 18.65 mm",
+  "method": "repeated_block_context",
+  "confidence": "0.83",
+  "unit_status": "converted"
+ },
+ {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "normalized": "gluten-free = true",
+  "canonical": "is_gluten_free = true",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Gressel GAF-1825",
+  "category": "air_fryer",
+  "normalized": "Терморегулятор = 80–200",
+  "canonical": "temperature_range_c = 80–200 °C",
+  "method": "label_pattern",
+  "confidence": "0.75",
+  "unit_status": "implied"
+ },
+ {
+  "product": "Bosch HBG7741B1",
+  "category": "oven",
+  "normalized": "Auszugssystem = Teleskopauszug nachrüstbar",
+  "canonical": "rack_system = Teleskopauszug nachrüstbar",
+  "method": "label_pattern",
+  "confidence": "0.95",
+  "unit_status": "-"
+ },
+ {
+  "product": "DEWALT DCD796P2",
+  "category": "power_tool",
+  "normalized": "Charger Included = true",
+  "canonical": "charger_included = true",
+  "method": "label_pattern",
+  "confidence": "0.93",
+  "unit_status": "-"
+ },
+ {
+  "product": "Philips Sonicare 9900 Prestige HX9992/12",
+  "category": "oral_care",
+  "normalized": "iOS compatibility = iPhone with Bluetooth 4.0 and above",
+  "canonical": "ios_compatibility = iPhone with Bluetooth 4.0 and above",
+  "method": "label_pattern",
+  "confidence": "0.90",
+  "unit_status": "-"
+ }
+]

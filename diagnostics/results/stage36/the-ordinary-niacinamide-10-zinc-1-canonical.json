@@ -1,0 +1,930 @@
+{
+ "product_name": "The Ordinary Niacinamide 10% + Zinc 1%",
+ "brand": "The Ordinary",
+ "model": "Niacinamide 10% + Zinc 1%",
+ "network_calls": 0,
+ "category": {
+  "category_id": "skincare",
+  "category_name": "Skincare",
+  "parent_category": "cosmetics",
+  "confidence": "high",
+  "source": "mixed",
+  "evidence": [
+   "Identity/title contains explicit skincare product phrase: 'Niacinamide'.",
+   "Extracted attributes contain skincare attribute: 'alcohol-free'.",
+   "Extracted attributes contain skincare attribute: 'oil-free'.",
+   "Extracted attributes contain skincare attribute: 'silicone-free'.",
+   "Extracted attributes contain skincare attribute: 'vegan'.",
+   "Extracted attributes contain skincare attribute: 'cruelty-free'."
+  ]
+ },
+ "summary": {
+  "product": "The Ordinary Niacinamide 10% + Zinc 1%",
+  "category": "skincare",
+  "category_confidence": "high",
+  "normalized_specs": 9,
+  "mapped": 8,
+  "ambiguous": 0,
+  "unmapped": 0,
+  "not_a_spec": 1,
+  "eligible": 8,
+  "unique_canonical_fields": 8,
+  "coverage": 1.0,
+  "collisions": {}
+ },
+ "fields": [
+  {
+   "status": "not_a_spec",
+   "category": "skincare",
+   "canonical_key": "",
+   "canonical_label": "",
+   "normalized_value": "",
+   "unit": "",
+   "value_type": "",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.0,
+   "mapping_method": "",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "source_record",
+     "raw_index": 4,
+     "raw_label": "FSA Eligible",
+     "raw_value": "No",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "json_ld",
+     "method": "json_ld_property",
+     "section": "",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [
+    "commercial_metadata"
+   ],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0005",
+   "attribute": {
+    "id": "na0005",
+    "label": "FSA Eligible",
+    "label_key": "fsa eligible",
+    "qualified_label": "FSA Eligible",
+    "group_path": [],
+    "value": "false",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 4,
+      "raw_label": "FSA Eligible",
+      "raw_value": "No",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "json_ld",
+      "method": "json_ld_property",
+      "section": "",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "false",
+    "minimum": null,
+    "maximum": null,
+    "boolean": false,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "json_ld"
+    ],
+    "methods": [
+     "json_ld_property"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "ph_range",
+   "canonical_label": "Ph range",
+   "normalized_value": "5–6.5",
+   "unit": "",
+   "value_type": "range",
+   "value_min": 5.0,
+   "value_max": 6.5,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "none",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'ph' ~ 'ph'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "unit",
+     "detail": "none: none",
+     "weight": 0
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 5,
+     "raw_label": "ph",
+     "raw_value": "5.00-6.50",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": [
+      "range_dash"
+     ]
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0006",
+   "attribute": {
+    "id": "na0006",
+    "label": "ph",
+    "label_key": "ph",
+    "qualified_label": "Highlights > ph",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "5.00–6.50",
+    "value_kind": "range",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 5,
+      "raw_label": "ph",
+      "raw_value": "5.00-6.50",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": [
+       "range_dash"
+      ]
+     }
+    ],
+    "display": "5.00–6.50",
+    "minimum": 5.0,
+    "maximum": 6.5,
+    "boolean": null,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [
+     "range_dash"
+    ],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "is_water_free",
+   "canonical_label": "Is water free",
+   "normalized_value": "false",
+   "unit": "",
+   "value_type": "boolean",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'water free' ~ 'water free'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 6,
+     "raw_label": "water-free",
+     "raw_value": "No",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0007",
+   "attribute": {
+    "id": "na0007",
+    "label": "water-free",
+    "label_key": "water free",
+    "qualified_label": "water-free",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "false",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 6,
+      "raw_label": "water-free",
+      "raw_value": "No",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "false",
+    "minimum": null,
+    "maximum": null,
+    "boolean": false,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "is_alcohol_free",
+   "canonical_label": "Is alcohol free",
+   "normalized_value": "true",
+   "unit": "",
+   "value_type": "boolean",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'alcohol free' ~ 'alcohol free'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 7,
+     "raw_label": "alcohol-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0008",
+   "attribute": {
+    "id": "na0008",
+    "label": "alcohol-free",
+    "label_key": "alcohol free",
+    "qualified_label": "alcohol-free",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "true",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 7,
+      "raw_label": "alcohol-free",
+      "raw_value": "Yes",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "true",
+    "minimum": null,
+    "maximum": null,
+    "boolean": true,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "is_oil_free",
+   "canonical_label": "Is oil free",
+   "normalized_value": "true",
+   "unit": "",
+   "value_type": "boolean",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'oil free' ~ 'oil free'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 8,
+     "raw_label": "oil-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0009",
+   "attribute": {
+    "id": "na0009",
+    "label": "oil-free",
+    "label_key": "oil free",
+    "qualified_label": "oil-free",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "true",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 8,
+      "raw_label": "oil-free",
+      "raw_value": "Yes",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "true",
+    "minimum": null,
+    "maximum": null,
+    "boolean": true,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "is_silicone_free",
+   "canonical_label": "Is silicone free",
+   "normalized_value": "true",
+   "unit": "",
+   "value_type": "boolean",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'silicone free' ~ 'silicone free'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 9,
+     "raw_label": "silicone-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0010",
+   "attribute": {
+    "id": "na0010",
+    "label": "silicone-free",
+    "label_key": "silicone free",
+    "qualified_label": "silicone-free",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "true",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 9,
+      "raw_label": "silicone-free",
+      "raw_value": "Yes",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "true",
+    "minimum": null,
+    "maximum": null,
+    "boolean": true,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "is_vegan",
+   "canonical_label": "Is vegan",
+   "normalized_value": "true",
+   "unit": "",
+   "value_type": "boolean",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'vegan' ~ 'vegan'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 10,
+     "raw_label": "vegan",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0011",
+   "attribute": {
+    "id": "na0011",
+    "label": "vegan",
+    "label_key": "vegan",
+    "qualified_label": "vegan",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "true",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 10,
+      "raw_label": "vegan",
+      "raw_value": "Yes",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "true",
+    "minimum": null,
+    "maximum": null,
+    "boolean": true,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "is_gluten_free",
+   "canonical_label": "Is gluten free",
+   "normalized_value": "true",
+   "unit": "",
+   "value_type": "boolean",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'gluten free' ~ 'gluten free'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 11,
+     "raw_label": "gluten-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0012",
+   "attribute": {
+    "id": "na0012",
+    "label": "gluten-free",
+    "label_key": "gluten free",
+    "qualified_label": "gluten-free",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "true",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 11,
+      "raw_label": "gluten-free",
+      "raw_value": "Yes",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "true",
+    "minimum": null,
+    "maximum": null,
+    "boolean": true,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  },
+  {
+   "status": "mapped",
+   "category": "skincare",
+   "canonical_key": "is_cruelty_free",
+   "canonical_label": "Is cruelty free",
+   "normalized_value": "true",
+   "unit": "",
+   "value_type": "boolean",
+   "value_min": null,
+   "value_max": null,
+   "confidence": 0.93,
+   "mapping_method": "label_pattern",
+   "unit_status": "",
+   "evidence": [
+    {
+     "kind": "label",
+     "detail": "'cruelty free' ~ 'cruelty free'",
+     "weight": 0.9
+    },
+    {
+     "kind": "category",
+     "detail": "skincare (high)",
+     "weight": 0.03
+    },
+    {
+     "kind": "source_record",
+     "raw_index": 12,
+     "raw_label": "cruelty-free",
+     "raw_value": "Yes",
+     "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+     "source_type": "official_product_page",
+     "location": "visible_dom",
+     "method": "definition_list",
+     "section": "Highlights",
+     "document_type": "",
+     "page_ref": "",
+     "sku_scope": "page",
+     "seen_in": [],
+     "fixes": []
+    }
+   ],
+   "reasons": [],
+   "conversion": null,
+   "context": {},
+   "derived_from": "",
+   "candidates": [],
+   "attribute_id": "na0013",
+   "attribute": {
+    "id": "na0013",
+    "label": "cruelty-free",
+    "label_key": "cruelty free",
+    "qualified_label": "cruelty-free",
+    "group_path": [
+     "Highlights"
+    ],
+    "value": "true",
+    "value_kind": "boolean",
+    "unit": "",
+    "cls": "product_spec",
+    "class_reason": "measurable_value",
+    "evidence": [
+     {
+      "raw_index": 12,
+      "raw_label": "cruelty-free",
+      "raw_value": "Yes",
+      "source_url": "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html",
+      "source_type": "official_product_page",
+      "location": "visible_dom",
+      "method": "definition_list",
+      "section": "Highlights",
+      "document_type": "",
+      "page_ref": "",
+      "sku_scope": "page",
+      "seen_in": [],
+      "fixes": []
+     }
+    ],
+    "display": "true",
+    "minimum": null,
+    "maximum": null,
+    "boolean": true,
+    "alternates": [],
+    "label_aliases": [],
+    "variant": "",
+    "fixes": [],
+    "source_urls": [
+     "https://theordinary.com/en-ge/niacinamide-10-zinc-1-serum-100436.html"
+    ],
+    "source_types": [
+     "official_product_page"
+    ],
+    "locations": [
+     "visible_dom"
+    ],
+    "methods": [
+     "definition_list"
+    ]
+   }
+  }
+ ],
+ "collisions": []
+}
