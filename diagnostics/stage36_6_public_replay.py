@@ -48,6 +48,7 @@ ACCEPTED_PRIMARY = {
 }
 
 NEGATIVES = (
+    (17, "https://www.tp-link.cz/cs/296056-tp-link-deco-be85-2ks", "TP-Link Deco BE85 2-pack"),
     (12, "https://us.roborock.com/products/s8-maxv-ultra-dust-bag", "Dust Bag for Roborock S8 MaxV Ultra"),
     (23, "https://www.razer.com/gaming-mice/razer-deathadder-v3-hyperspeed", "Razer DeathAdder V3 HyperSpeed"),
     (33, "https://www.corsair.com/us/en/p/psu/rm850x-shift", "Corsair RM850x SHIFT Power Supply"),

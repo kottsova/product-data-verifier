@@ -1,0 +1,51 @@
+[
+  {
+    "index": 17,
+    "url": "https://www.tp-link.cz/cs/296056-tp-link-deco-be85-2ks",
+    "status": "PARTIAL",
+    "exact_official_found": false,
+    "page_fetches": 1
+  },
+  {
+    "index": 12,
+    "url": "https://us.roborock.com/products/s8-maxv-ultra-dust-bag",
+    "status": "FAIL",
+    "exact_official_found": false,
+    "page_fetches": 1
+  },
+  {
+    "index": 23,
+    "url": "https://www.razer.com/gaming-mice/razer-deathadder-v3-hyperspeed",
+    "status": "PARTIAL",
+    "exact_official_found": false,
+    "page_fetches": 1
+  },
+  {
+    "index": 33,
+    "url": "https://www.corsair.com/us/en/p/psu/rm850x-shift",
+    "status": "PARTIAL",
+    "exact_official_found": false,
+    "page_fetches": 1
+  },
+  {
+    "index": 50,
+    "url": "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser-refill",
+    "status": "FAIL",
+    "exact_official_found": false,
+    "page_fetches": 1
+  },
+  {
+    "index": 49,
+    "url": "https://oralb.com/en-us/products/io-series-10-twin-pack",
+    "status": "FAIL",
+    "exact_official_found": false,
+    "page_fetches": 1
+  },
+  {
+    "index": 19,
+    "url": "https://community.netgear.com/t5/Smart-Plus-and-Smart-Pro/GS308EP/td-p/123",
+    "status": "PARTIAL",
+    "exact_official_found": false,
+    "page_fetches": 1
+  }
+]

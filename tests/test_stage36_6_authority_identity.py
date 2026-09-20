@@ -356,7 +356,8 @@ class HeldoutCases(unittest.TestCase):
     def test_public_name_only_negative_replay_never_grants_exact_official(self):
         for explicit in (False, True):
             outcomes = replay_negatives(explicit_category=explicit)
-            self.assertEqual(len(outcomes), 6)
+            self.assertEqual(len(outcomes), 7)
+            self.assertEqual({row["index"] for row in outcomes}, {12, 17, 19, 23, 33, 49, 50})
             self.assertTrue(all(not row["exact_official_found"] for row in outcomes), outcomes)
 
     def test_public_route_checks_product_scope_not_search_title(self):

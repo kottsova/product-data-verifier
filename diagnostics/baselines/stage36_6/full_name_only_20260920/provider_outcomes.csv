@@ -1,0 +1,9 @@
+﻿provider,attempts,seconds,statuses
+bing,89,79.639,"{""low_value"": 87, ""timeout"": 2}"
+browser_official_discovery,252,554.166,"{""timeout"": 11, ""circuit_open"": 170, ""empty"": 63, ""success"": 1, ""capped"": 7}"
+direct_domain_probe,293,1512.454,"{""timeout"": 16, ""circuit_open"": 19, ""empty"": 85, ""capped"": 124, ""success"": 49}"
+duckduckgo_html,265,202.672,"{""blocked"": 109, ""circuit_open"": 88, ""success"": 63, ""timeout"": 2, ""empty"": 3}"
+duckduckgo_lite,96,31.221,"{""blocked"": 59, ""circuit_open"": 25, ""timeout"": 5, ""success"": 3, ""error"": 1, ""empty"": 3}"
+google,89,509.667,"{""timeout"": 36, ""circuit_open"": 52, ""error"": 1}"
+naver,203,366.291,"{""success"": 79, ""low_value"": 5, ""timeout"": 9, ""blocked"": 58, ""circuit_open"": 44, ""capped"": 8}"
+seznam,137,193.098,"{""low_value"": 38, ""success"": 90, ""timeout"": 9}"

@@ -534,3 +534,7 @@ interruptible 75-second deadline remains unresolved. A full 50-item rerun
 would mix those unresolved conditions into aggregate figures, so Stage 36.6
 remains **PARTIAL**, PR #1 remains draft, and Stage 37 and retailer fallback
 remain deferred.
+
+## Complete 50-row name-only measurement
+
+The full rerun now supersedes the preceding deferral. Results, evidence, limits and verdict are in [the complete Stage 36.6 measurement](STAGE36_6_FULL_NAME_ONLY_20260920.md). The 11 historical transition causes remain unknown; PR #1 remains draft.

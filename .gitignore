@@ -17,3 +17,4 @@ reference/
 data/
 regression/results/
 diagnostics/results/
+diagnostics/runs/

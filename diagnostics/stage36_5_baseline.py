@@ -13,6 +13,7 @@ run: choose a new output directory for every run.
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 import time
 from pathlib import Path
@@ -135,7 +136,9 @@ def live(
             row = {"error": repr(exc)}
         row.update(index=i, input=name, category=category, identity_level=level,
                    input_mode="structured" if structured_inputs else "historical",
-                   category_argument="explicit" if explicit_category else "omitted")
+                   category_argument="explicit" if explicit_category else "omitted",
+                   harness_elapsed_seconds=round(time.monotonic() - started, 3),
+                   completed_at_utc=datetime.now(timezone.utc).isoformat())
         (output / f"{i:02d}.json").write_text(json.dumps(row, ensure_ascii=False, indent=1), encoding="utf-8")
         print(i, row["input"], row.get("status", row.get("error")), round(time.monotonic() - started, 1), flush=True)
         time.sleep(2)
