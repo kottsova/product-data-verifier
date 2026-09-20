@@ -28,6 +28,7 @@ def reconcile(rows: list[dict]) -> tuple[list[dict], list[dict], dict]:
     products: list[dict] = []
     candidates: list[dict] = []
     for index, old in enumerate(rows, 1):
+        candidate_start = len(candidates)
         requested_brand, requested_model, category, level = PRODUCTS[index - 1]
         brand, model = old.get("brand", ""), old.get("model", "")
         inspections = {item.get("url") for item in old.get("page_inspections", ())}
@@ -90,6 +91,14 @@ def reconcile(rows: list[dict]) -> tuple[list[dict], list[dict], dict]:
                     "review_screen": screen,
                     "historical_manual_verdict": "not_reconstructible",
                 })
+        current_rows = candidates[candidate_start:]
+        if "official_source_not_found_within_search" in issues:
+            if any(item["group"] == "secondary" and item["current_title_url_relation"] in {"exact", "weak"} for item in current_rows):
+                issues.add("possible_authority_or_ranking")
+            else:
+                issues.add("discovery_no_viable_saved_candidate")
+        if old.get("official_pages") and not inspections:
+            issues.add("official_page_not_inspected_or_fetch_blocked")
         products.append({
             "index": index, "input": old.get("input", ""), "parsed_brand": brand,
             "parsed_model": model, "structured_brand": requested_brand,

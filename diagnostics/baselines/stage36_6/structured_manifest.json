@@ -1,0 +1,14 @@
+{
+  "code_commit": "12c58ef",
+  "input_mode": "structured",
+  "indices": [
+    11,
+    48
+  ],
+  "same_sequential_provider_conditions_as_full_run": false,
+  "original_files_sha256": {
+    "11.json": "fa24671ade20615ff4425d48b56ef2b264da6c5429262134fbaca603dc08d52b",
+    "48.json": "1d538b00875f1f5d64d7214a83ca794485b68b7bec7d64b81cc3705bb3aeb48b"
+  },
+  "archive_sha256": "834f26165f274c58b137b59ed8087c4481f50530ef9da1e65e89f5483760159f"
+}

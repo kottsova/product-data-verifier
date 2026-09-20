@@ -106,7 +106,10 @@ def manifest_rows(rows: list[dict]) -> list[dict]:
     } for row in rows]
 
 
-def live(output: Path, *, structured_inputs: bool = False, max_items: int = 50) -> None:
+def live(
+    output: Path, *, structured_inputs: bool = False,
+    max_items: int = 50, selected_indices: set[int] | None = None,
+) -> None:
     if output.exists():
         raise SystemExit(f"Output directory already exists: {output}")
     output.mkdir(parents=True)
@@ -114,6 +117,8 @@ def live(output: Path, *, structured_inputs: bool = False, max_items: int = 50) 
     for i, (brand, model, category, level) in enumerate(PRODUCTS, 1):
         if i > max_items:
             break
+        if selected_indices is not None and i not in selected_indices:
+            continue
         clear_official_domain_cache()
         name = f"{brand} | {model}" if structured_inputs else historical[i - 1]["input"]
         started = time.monotonic()
@@ -138,13 +143,23 @@ def main() -> None:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--structured-inputs", action="store_true")
     parser.add_argument("--max-items", type=int, default=50)
+    parser.add_argument("--indices", help="Comma-separated row numbers for a separate diagnostic run")
     args = parser.parse_args()
     if args.live:
         if args.output is None:
             parser.error("--live requires --output")
         if not 1 <= args.max_items <= 50:
             parser.error("--max-items must be between 1 and 50")
-        live(args.output, structured_inputs=args.structured_inputs, max_items=args.max_items)
+        selected = None
+        if args.indices:
+            try:
+                selected = {int(part) for part in args.indices.split(",")}
+            except ValueError:
+                parser.error("--indices must be comma-separated integers")
+            if not selected or any(index < 1 or index > args.max_items for index in selected):
+                parser.error("--indices must be within 1..max-items")
+        live(args.output, structured_inputs=args.structured_inputs, max_items=args.max_items,
+             selected_indices=selected)
     elif args.archive:
         rows = load_archive(args.archive)
         print(json.dumps(manifest_rows(rows) if args.rows else summary(rows), ensure_ascii=False, indent=2))

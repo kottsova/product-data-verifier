@@ -16,13 +16,14 @@ directory and refuses to overwrite any existing result.
 ## Conditions and limitations
 
 - The old `bench365.py` called `DiscoveryDebugService().discover_name(name)`
-  once per input, cleared only the in-memory official-domain cache between
+  once per input, called `clear_official_domain_cache()` between
   inputs, waited two seconds after each, and saved each result separately.
   `market` was `global`; the service's default wall-clock budget was 75 s.
   Search-provider health/circuit state and other caches were not explicitly
   reset. The archived results include individual provider outcomes and times.
 - The word **cold** in earlier notes can only mean the explicit
-  `clear_official_domain_cache()` action. It does not establish a completely
+  `clear_official_domain_cache()` action, which cleared both the process-local
+  official-domain and official-surface caches at `bd9238e`. It does not establish a completely
   cold provider or network environment. Recorded run times sum to 2234.6 s;
   the log has an EPIPE after all 50 JSON files were written.
 - The archive stores candidate lists, titles, URLs, discovery trace, provider
