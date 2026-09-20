@@ -29,6 +29,7 @@ class AuthoritySeed:
     checked_on: date
     evidence_excerpt: str = ""
     rules_version: int = RULES_VERSION
+    categories: tuple[str, ...] = ()
 
     @property
     def first_party(self) -> bool:
@@ -53,8 +54,21 @@ SEEDS = (
     AuthoritySeed("Roborock", "us.roborock.com", "brand_operator", "robot vacuums", "https://us.roborock.com/products/roborock-s8-maxv-ultra", date(2026, 9, 20)),
     AuthoritySeed("CeraVe", "cerave.com", "brand_operator", "skin care", "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser", date(2026, 9, 20)),
     AuthoritySeed("Oral-B", "oralb.com", "brand_operator", "oral care", "https://oralb.com/en-us/products/", date(2026, 9, 20)),
-    AuthoritySeed("Frostbite", "fishfrostbite.com", "brand_operator", "fishing tackle", "https://fishfrostbite.com/products/drench-39ml", date(2026, 9, 20)),
-    AuthoritySeed("Nautilus", "nautilusreels.com", "brand_operator", "fishing reels", "https://www.nautilusreels.com/products/x-series-xl-max", date(2026, 9, 20)),
+    AuthoritySeed("Frostbite", "fishfrostbite.com", "operator_unknown", "fishing tackle", "https://fishfrostbite.com/pages/contact", date(2026, 9, 20)),
+    AuthoritySeed("Nautilus", "nautilusreels.com", "operator_unknown", "fishing reels", "https://www.nautilusreels.com/pages/about", date(2026, 9, 20)),
+    AuthoritySeed("Bosch", "bosch-home.co.uk", "licensed_brand_operator", "UK home appliances", "https://media3.bsh-group.com/Documents/9001351957_A.pdf", date(2026, 9, 20)),
+    AuthoritySeed("Electrolux", "electrolux.bg", "brand_operator", "Bulgarian home appliances", "https://www.electrolux.bg/overlays/terms-and-conditions/", date(2026, 9, 20)),
+    AuthoritySeed("AEG", "aeg.fr", "licensed_brand_operator", "French home appliances", "https://www.aeg.fr/overlays/shop-terms-and-conditions/", date(2026, 9, 20)),
+    AuthoritySeed("Miele", "miele.co.uk", "brand_operator", "UK home appliances", "https://www.miele.com/de/com/2185.htm", date(2026, 9, 20)),
+    AuthoritySeed("ASUS", "asus.com", "brand_operator", "networking and PC components", "https://www.asus.com/terms_of_use_notice_privacy_policy/official-site/", date(2026, 9, 20)),
+    AuthoritySeed("Logitech", "logitech.com", "brand_operator", "computer peripherals", "https://www.logitech.com/en-us/legal/services-privacy-statement", date(2026, 9, 20)),
+    AuthoritySeed("Canon", "usa.canon.com", "brand_operator", "US scanners", "https://global.canon/ja/news/2017/20170427-2.html", date(2026, 9, 20)),
+    AuthoritySeed("Epson", "epson.eu", "brand_operator", "European printers and scanners", "https://www.epson.eu/en_EU/terms-of-use", date(2026, 9, 20)),
+    AuthoritySeed("Makita", "makita.co.nz", "brand_operator", "New Zealand power tools", "https://www.makita.co.nz/about/", date(2026, 9, 20)),
+    AuthoritySeed("adidas", "adidas.ae", "brand_operator", "UAE apparel and footwear", "https://www.adidas.ae/en/terms.html", date(2026, 9, 20)),
+    AuthoritySeed("Nike", "nike.com", "brand_operator", "Nike apparel and footwear", "https://www.nike.com/be/help/a/bedrijfsgegevens/nike-contact-lijst", date(2026, 9, 20)),
+    AuthoritySeed("Samsung", "samsung.com", "brand_operator", "Samsung major appliances and displays", "https://news.samsung.com/global/terms", date(2026, 9, 20)),
+    AuthoritySeed("DEWALT", "dewalt.co.uk", "licensed_brand_operator", "UK power tools", "https://www.dewalt.co.uk/en-gb/terms-use", date(2026, 9, 20)),
 )
 
 # Short source fragments or tightly scoped paraphrases retained with each
@@ -76,11 +90,60 @@ _EVIDENCE_EXCERPTS = {
     "oralb.com": "Oral-B product site for oral care",
     "fishfrostbite.com": "Fish Frostbite company page describes its fishing brand",
     "nautilusreels.com": "Nautilus company page describes design and manufacture of its reels",
+    "bosch-home.co.uk": "BSH appliance documentation identifies BSH Home Appliances Ltd and bosch-home.co.uk",
+    "electrolux.bg": "Site terms identify AB Electrolux as publisher of the Bulgarian appliance site",
+    "aeg.fr": "Electrolux France sales terms explicitly identify aeg.fr as its AEG site",
+    "miele.co.uk": "Miele corporate locations identify Miele UK and miele.co.uk",
+    "asus.com": "ASUSTeK legal terms identify ASUS as operator of this product site",
+    "logitech.com": "Logitech privacy statement identifies Logitech International and its web sites",
+    "usa.canon.com": "Canon global names Canon U.S.A. and its usa.canon.com site",
+    "epson.eu": "Epson Europe B.V. site terms identify the regional site operator",
+    "makita.co.nz": "Makita NZ names itself a subsidiary; corporate history confirms the subsidiary",
+    "adidas.ae": "Site terms identify adidas AG as retailer and brand-content owner; Global-e facilitates checkout",
+    "nike.com": "Nike company details identify Nike Retail B.V. as nike.com operator",
+    "samsung.com": "Samsung Electronics newsroom terms identify Samsung Electronics as samsung.com operator",
+    "dewalt.co.uk": "DEWALT terms identify DEWALT Industrial Power Tool Company Limited as site operator",
 }
 SEEDS = tuple(replace(seed, evidence_excerpt=_EVIDENCE_EXCERPTS[seed.host]) for seed in SEEDS)
 
+# The request category is an input contract, not a category inferred from a
+# search snippet.  A seed is usable only within its reviewed product area.
+_SEED_CATEGORIES = {
+    "siemens-home.bsh-group.com": ("major appliances",),
+    "haier-europe.com": ("major appliances",),
+    "home-appliances.philips": ("small appliances",),
+    "braunhousehold.com": ("small appliances",),
+    "kenwoodworld.com": ("small appliances",),
+    "bosch-professional.com": ("power tools",),
+    "tp-link.com": ("networking",),
+    "tp-link.cz": ("networking",),
+    "netgear.com": ("networking",),
+    "razer.com": ("computer/peripherals",),
+    "corsair.com": ("PC components",),
+    "us.roborock.com": ("small appliances",),
+    "cerave.com": ("personal care/skincare",),
+    "oralb.com": ("personal care/skincare",),
+    "fishfrostbite.com": ("fishing",),
+    "nautilusreels.com": ("fishing",),
+    "bosch-home.co.uk": ("major appliances",),
+    "electrolux.bg": ("major appliances",),
+    "aeg.fr": ("major appliances",),
+    "miele.co.uk": ("major appliances",),
+    "asus.com": ("networking", "PC components"),
+    "logitech.com": ("computer/peripherals",),
+    "usa.canon.com": ("computer/peripherals",),
+    "epson.eu": ("computer/peripherals",),
+    "makita.co.nz": ("power tools",),
+    "adidas.ae": ("apparel/footwear",),
+    "nike.com": ("apparel/footwear",),
+    "samsung.com": ("major appliances", "TV/display"),
+    "dewalt.co.uk": ("power tools",),
+}
+SEEDS = tuple(replace(seed, categories=_SEED_CATEGORIES[seed.host]) for seed in SEEDS)
 
-def find_seed(brand: str, host: str, *, today: date | None = None) -> AuthoritySeed | None:
+
+def find_seed(brand: str, host: str, *, today: date | None = None,
+              category: str = "unknown") -> AuthoritySeed | None:
     now = today or date.today()
     brand_key = normalize_model(brand)
     host = host.lower().removeprefix("www.").rstrip(".")
@@ -90,4 +153,5 @@ def find_seed(brand: str, host: str, *, today: date | None = None) -> AuthorityS
         and seed.host == host
         and seed.rules_version == RULES_VERSION
         and timedelta(0) <= now - seed.checked_on <= MAX_AGE
+        and category.casefold() in {item.casefold() for item in seed.categories}
     ), None)

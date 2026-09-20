@@ -10,7 +10,9 @@ from core.authority_registry import find_seed
 from core.discovery import DiscoveryOutcome, assess_candidate_relevance, rank_candidates
 from core.identity import assess_product_page_identity
 from core.official_documents import OfficialDocument
-from core.workflow import ProductWorkflowRequest, run_product_workflow
+from core.workflow import ProductWorkflowRequest, _resolve_authority_roles, run_product_workflow
+from diagnostics.stage36_5_baseline import PRODUCTS
+from diagnostics.stage36_6_saved_replay import replay as replay_saved_losses
 from services.discovery_debug import DiscoverySource, _candidate_view, _result_from_outcome
 from services.raw_extraction import RawExtractionService
 from tests.test_workflow import FixtureServices, candidate
@@ -18,11 +20,11 @@ from tests.test_workflow import FixtureServices, candidate
 
 class AuthorityContractTests(unittest.TestCase):
     def test_seed_is_brand_host_and_time_scoped(self):
-        self.assertIsNotNone(find_seed("Razer", "www.razer.com", today=date(2026, 9, 20)))
-        self.assertIsNone(find_seed("Razer", "community.razer.com", today=date(2026, 9, 20)))
-        self.assertIsNone(find_seed("Another", "razer.com", today=date(2026, 9, 20)))
-        self.assertIsNone(find_seed("Razer", "razer.com", today=date(2028, 9, 20)))
-        distributor = find_seed("TP-Link", "tp-link.cz", today=date(2026, 9, 20))
+        self.assertIsNotNone(find_seed("Razer", "www.razer.com", today=date(2026, 9, 20), category="computer/peripherals"))
+        self.assertIsNone(find_seed("Razer", "community.razer.com", today=date(2026, 9, 20), category="computer/peripherals"))
+        self.assertIsNone(find_seed("Another", "razer.com", today=date(2026, 9, 20), category="computer/peripherals"))
+        self.assertIsNone(find_seed("Razer", "razer.com", today=date(2028, 9, 20), category="computer/peripherals"))
+        distributor = find_seed("TP-Link", "tp-link.cz", today=date(2026, 9, 20), category="networking")
         self.assertEqual(distributor.operator_relation, "independent_distributor")
         self.assertFalse(distributor.first_party)
         self.assertTrue(distributor.evidence_excerpt)
@@ -38,11 +40,53 @@ class AuthorityContractTests(unittest.TestCase):
     def test_audited_distributor_does_not_become_first_party(self):
         page = rank_candidates(
             [("https://www.tp-link.cz/cs/296056-tp-link-deco-be85-2ks", "TP-Link Deco BE85 2-pack")],
-            "TP-Link", "Deco BE85",
+            "TP-Link", "Deco BE85", product_category="networking",
         )[0]
         self.assertEqual(page["source_type"], "distributor")
         self.assertEqual(page["authority_status"], "verified")
         self.assertEqual(_candidate_view(page).group, "dealer")
+
+    def test_reviewed_scope_is_a_decision_gate(self):
+        self.assertIsNone(find_seed("Bosch", "bosch-professional.com"))
+        self.assertIsNone(find_seed("Bosch", "bosch-professional.com", category="major appliances"))
+        self.assertIsNone(find_seed("Philips", "home-appliances.philips", category="personal care/skincare"))
+        self.assertIsNone(find_seed("TP-Link", "tp-link.cz", category="power tools"))
+        self.assertIsNone(find_seed("Bosch", "bosch-home.co.uk", category="power tools"))
+        page = rank_candidates(
+            [("https://www.bosch-professional.com/product/WAN28254GB", "Bosch WAN28254GB washing machine")],
+            "Bosch", "WAN28254GB", product_category="major appliances",
+        )[0]
+        self.assertNotEqual(page["authority_status"], "verified")
+
+    def test_unconfirmed_operator_seed_never_grants_first_party(self):
+        for brand, host, model, category in (
+            ("Frostbite", "fishfrostbite.com", "Drench 39ML", "fishing"),
+            ("Nautilus", "nautilusreels.com", "X Series XL MAX", "fishing"),
+        ):
+            with self.subTest(brand=brand):
+                seed = find_seed(brand, host, category=category)
+                self.assertFalse(seed.first_party)
+                page = rank_candidates(
+                    [(f"https://{host}/products/{model.replace(' ', '-').lower()}", f"{brand} {model}")],
+                    brand, model, product_category=category,
+                )[0]
+                self.assertNotEqual(page["authority_status"], "verified")
+
+    def test_workflow_rechecks_scope_after_fetch(self):
+        def fetched():
+            return {
+                "source_url": "https://www.bosch-professional.com/product/WAN28254GB",
+                "final_url": "https://www.bosch-professional.com/product/WAN28254GB",
+                "status": "success", "document_type": "html", "source_type": "manufacturer",
+                "authority_status": "verified", "authority_evidence_kind": "audited_registry",
+                "html": "<h1>Bosch WAN28254GB washing machine</h1>", "text": "Bosch washing machine",
+            }
+        wrong = fetched()
+        _resolve_authority_roles([wrong], "Bosch", "major appliances")
+        self.assertEqual(wrong["authority_status"], "unknown")
+        allowed = fetched()
+        _resolve_authority_roles([allowed], "Bosch", "power tools")
+        self.assertEqual(allowed["authority_status"], "verified")
 
     def test_generic_link_does_not_establish_ownership_or_dealer_role(self):
         source = TrustedSource("acme.example", '<a href="https://acme-shop.example/">Where to buy</a>')
@@ -75,6 +119,8 @@ class ProductIdentityTests(unittest.TestCase):
         self.check_page("RM850x", "RM850x SHIFT Fully Modular", "https://corsair.com/p/rm850x-shift", "different_variant")
         self.check_page("Hydrating Facial Cleanser", "Hydrating Facial Cleanser Refill", "https://cerave.com/hydrating-facial-cleanser-refill", "different_variant")
         self.check_page("iO Series 10", "iO Series 10 Twin Pack", "https://oralb.com/io-series-10-twin-pack", "different_variant")
+        self.check_page("MX Keys S", "MX Keys S Combo", "https://logitech.com/en-us/shop/p/mx-keys-s-combo", "different_variant")
+        self.check_page("MX Keys S", "MX Keys S", "https://logitech.com/en-us/shop/p/mx-keys-s-combo", "different_variant")
 
     def test_content_can_prove_numeric_url(self):
         self.check_page("SN23EI03ME", "Siemens SN23EI03ME", "https://siemens-home.bsh-group.com/product/12345", "exact")
@@ -83,6 +129,33 @@ class ProductIdentityTests(unittest.TestCase):
         url = "https://braunhousehold.com/en/p/multiquick-9-hand-blender-mq-9187xli/HB901-MQ9187XLI.html"
         self.check_page("MultiQuick 9 MQ9187XLI", "MultiQuick 9 Hand blender MQ 9187XLI", url, "exact")
         self.check_page("MultiQuick 9 MQ9187XLI", "MultiQuick 9 Hand blender MQ 9187XLII", url, "unknown")
+
+    def test_unique_product_code_can_complete_descriptive_heading(self):
+        html = ('<h1>Multifunction oven</h1><script type="application/ld+json">'
+                '{"@type":"Product","name":"Multifunction oven", "sku":"EOD6P77WX"}'
+                '</script>')
+        url = "https://electrolux.bg/kitchen/cooking/ovens/oven/eod6p77wx"
+        self.assertEqual(assess_product_page_identity("EOD6P77WX", html, url).relation, "exact")
+        self.assertEqual(assess_product_page_identity("EOD6P77WY", html, url).relation, "different_variant")
+        accessory = html.replace("Multifunction oven", "Dust bag for EOD6P77WX")
+        self.assertEqual(assess_product_page_identity("EOD6P77WX", accessory, url).relation, "related_item")
+
+    def test_review_score_after_sku_is_not_variant(self):
+        url = "https://bosch-home.co.uk/en/product/WAN28254GB"
+        self.check_page("WAN28254GB", "Series 4 Washing machine WAN28254GB 4.7 (265) Questions & answers", url, "exact")
+        self.check_page("WAN28254GB", "Series 4 Washing machine WAN28254GB 16GB", url, "unknown")
+        self.check_page("GA023GZ", "GA023GZ 40Vmax XGT Brushless Angle Grinder", "https://makita.co.nz/products/model/GA023GZ", "exact")
+
+    def test_single_labelled_style_can_complete_family_heading(self):
+        html = "<main><h1>Nike AeroSwift</h1><p>Style: FN4231-010</p></main>"
+        url = "https://nike.com/dk/en/t/aeroswift/FN4231-010"
+        self.assertEqual(assess_product_page_identity("AeroSwift FN4231-010", html, url).relation, "exact")
+        self.assertNotEqual(assess_product_page_identity(
+            "AeroSwift FN4231-010", html.replace("FN4231-010", "FN4231-011"), url,
+        ).relation, "exact")
+        self.assertNotEqual(assess_product_page_identity(
+            "AeroSwift FN4231-010", html.replace("</main>", "<p>Style: FN4231-011</p></main>"), url,
+        ).relation, "exact")
 
     def test_regional_suffix_requires_commercial_evidence(self):
         self.check_page("X100P2", "Acme X100P2-GB", "https://acme.example/x100p2-gb", "unknown")
@@ -100,11 +173,12 @@ class ProductIdentityTests(unittest.TestCase):
 
     def test_js_shell_keeps_known_operator_but_not_exact_identity(self):
         url = "https://www.razer.com/gaming-mice/razer-deathadder-v3"
-        items = rank_candidates([(url, "Razer DeathAdder V3")], "Razer", "DeathAdder V3")
+        items = rank_candidates([(url, "Razer DeathAdder V3")], "Razer", "DeathAdder V3", product_category="computer/peripherals")
         outcome = DiscoveryOutcome(items, "success", [], [], [])
         result = _result_from_outcome(
             "Razer DeathAdder V3", "Razer", "DeathAdder V3", "global", outcome, 0.1,
             fetch=lambda page_url: (page_url, "<html><title>App</title></html>"),
+            product_category="computer/peripherals",
         )
         self.assertFalse(result.exact_official_found)
         self.assertEqual(result.status, "PARTIAL")
@@ -182,6 +256,44 @@ class ProductIdentityTests(unittest.TestCase):
 
 
 class HeldoutCases(unittest.TestCase):
+    def test_confirmed_loss_candidate_replay(self):
+        outcomes = replay_saved_losses()
+        self.assertEqual(len(outcomes), 11)
+        self.assertTrue(all(item["authority"] == "verified" for item in outcomes))
+        self.assertTrue(all(item["status"] == "PASS" for item in outcomes))
+
+    def test_all_ten_accepted_urls_remain_separately_reviewed(self):
+        headings = {
+            2: "Siemens SN23EI03ME", 7: "Haier HCR5919EHMB", 12: "Roborock S8 MaxV Ultra",
+            14: "MultiQuick 9 Hand blender MQ 9187XLI", 19: "NETGEAR GS308EP",
+            23: "Razer DeathAdder V3", 33: "RM850x Fully Modular Power Supply",
+            43: "Frostbite Drench 39ML", 44: "Nautilus X Series XL MAX",
+            50: "CeraVe Hydrating Facial Cleanser",
+        }
+        path = Path(__file__).resolve().parents[1] / "diagnostics/baselines/stage36_6/manual_exact_audit.csv"
+        import csv
+        with path.open(newline="", encoding="utf-8") as handle:
+            reviewed = list(csv.DictReader(handle))
+        self.assertEqual(len(reviewed), 10)
+        for record in reviewed:
+            index = int(record["index"])
+            brand, model, category, level = PRODUCTS[index - 1]
+            url = record["product_url"]
+            candidate = rank_candidates([(url, headings[index])], brand, model, product_category=category)[0]
+            html = f"<h1>{headings[index]}</h1>"
+            if index == 19:
+                html = ('<h1>8-Port Gigabit Ethernet PoE+ Easy Smart Essentials Switch (62W)</h1>'
+                        '<script type="application/ld+json">{"@type":"Product",'
+                        '"name":"8-Port Gigabit Ethernet PoE+ Easy Smart Essentials Switch (62W)",'
+                        '"sku":"GS308EP-100NAS","model":"GS308EP"}</script>')
+            decision = assess_product_page_identity(model, html, url)
+            with self.subTest(index=index, level=level):
+                self.assertEqual(decision.relation, "unknown" if index == 19 else "exact")
+                if index in {43, 44}:
+                    self.assertNotEqual(candidate["authority_status"], "verified")
+                else:
+                    self.assertEqual(candidate["authority_status"], "verified")
+
     def test_registered_cases(self):
         path = Path(__file__).resolve().parents[1] / "diagnostics/heldout/stage36_6_cases.json"
         cases = json.loads(path.read_text(encoding="utf-8"))

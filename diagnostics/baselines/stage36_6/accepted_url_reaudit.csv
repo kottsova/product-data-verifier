@@ -1,0 +1,11 @@
+index,identity_level,product_url,current_main_product,current_operator,current_decision,notes
+2,sku,https://www.siemens-home.bsh-group.com/uk/en/mkt-product/SN23EI03ME,exact,confirmed,eligible,Full requested identifier on primary page
+7,sku,https://www.haier-europe.com/en_GB/products/34005047-hcr5919ehmb-uk,exact,confirmed,eligible,Full requested identifier on primary page
+12,model,https://us.roborock.com/products/roborock-s8-maxv-ultra,exact,confirmed,eligible,Main robot vacuum rather than accessories
+14,sku,https://www.braunhousehold.com/en/p/multiquick-9-multiquick-9-hand-blender-mq-9187xli/HB901-MQ9187XLI.html,exact,confirmed,eligible,Complete code is spaced in primary heading and compact in URL
+19,sku,https://www.netgear.com/business/wired/switches/easy-smart/gs308ep,unknown,confirmed,withheld,Current unique Product object names GS308EP-100NAS while request names GS308EP; commercial suffix unresolved
+23,model,https://www.razer.com/gaming-mice/razer-deathadder-v3,exact,confirmed,eligible,HyperSpeed remains a different model variant
+33,family,https://www.corsair.com/br/pt/p/psu/cp-9020270-ww/rmx-series-rm850x-fully-modular-power-supply-ww-cp-9020270-ww,exact_family,confirmed,eligible_family,Selected WW commercial variant is a member of RM850x family and is not an exact requested SKU
+43,model,https://fishfrostbite.com/products/drench-39ml,exact,unknown,withheld,Independent brand-operator corroboration unavailable
+44,model,https://www.nautilusreels.com/products/x-series-xl-max,exact,unknown,withheld,Independent brand-operator corroboration unavailable
+50,family,https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser,exact_family,confirmed,eligible_family,Base cleanser page identifies requested family; refill is separate

@@ -1,0 +1,120 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "archive_sha256": "691c10005b0ddb9e4fdd5d718c69cbcf75ff12814ae90652b22ff944605265f0",
+  "raw_sha256": {
+    "12.json": "d095881f516df708830bec8a33f9aad78f41e7185c73e21818cd2bcfb1a5f4e4",
+    "19.json": "6f8246e8712522f1f4ad58696f1f5e3281977c20a990c57463c896b6f36fc305",
+    "23.json": "9bc42741119e91981fb3d2bc89ad47d76896e11f7ac1ced8c188309e44e5dc67",
+    "33.json": "43b0afbd28876ea4ba3c9ed6903c212a13053dc5c986896661a9af5f90574004",
+    "50.json": "2a379b342d58e30c390be99119df555a1b8dfdb79a35d0da42c3c3afcda92172"
+  },
+  "rows": [
+    {
+      "index": 12,
+      "input": "Roborock S8 MaxV Ultra",
+      "identity_level": "model",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 12.093,
+      "seconds": 22.385,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://us.roborock.com/products/roborock-s8-maxv-ultra?_pos=17%5Cu0026_sid%3D74b5d2093%5Cu0026_ss%3Dr"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 3
+      }
+    },
+    {
+      "index": 19,
+      "input": "NETGEAR GS308EP",
+      "identity_level": "sku",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 16.792,
+      "seconds": 15.598,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 6
+      }
+    },
+    {
+      "index": 23,
+      "input": "Razer DeathAdder V3",
+      "identity_level": "model",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 13.538,
+      "seconds": 11.006,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.razer.com/gaming-mice/razer-deathadder-v3"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 2
+      }
+    },
+    {
+      "index": 33,
+      "input": "Corsair RM850x",
+      "identity_level": "family",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 21.43,
+      "seconds": 20.045,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na",
+        "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na?position=4&queryID=f4115c2b8694d01e181116ff8665a26f"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 50,
+      "input": "CeraVe Hydrating Facial Cleanser",
+      "identity_level": "family",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 30.014,
+      "seconds": 14.172,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 1,
+      "pass": 0
+    },
+    "model": {
+      "rows": 2,
+      "pass": 2
+    },
+    "family": {
+      "rows": 2,
+      "pass": 2
+    }
+  },
+  "prior_queries": 15,
+  "queries": 15,
+  "prior_seconds": 93.9,
+  "seconds": 83.2
+}

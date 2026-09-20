@@ -124,7 +124,7 @@ def live(
         started = time.monotonic()
         try:
             # A fresh service per row matches the archived harness.
-            result = DiscoveryDebugService().discover_name(name)
+            result = DiscoveryDebugService().discover_name(name, product_category=category)
             row = result.to_dict()
         except Exception as exc:  # preserve each failed attempt
             row = {"error": repr(exc)}

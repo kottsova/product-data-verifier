@@ -136,6 +136,35 @@ def assess_product_page_identity(model: str, html: str, final_url: str) -> PageI
     if not primary:
         return PageIdentityAssessment("unknown", "", "No primary product heading or unique Product object")
 
+    # Some manufacturer templates put the descriptive name in <h1> and the
+    # commercial code in their one Product object.  Keep the heading as the
+    # main-object guard; use only a unique Product object whose identifier and
+    # destination URL both carry the complete requested SKU.
+    requested = requested_sku(model)
+    if requested is not None and len(structured) == 1:
+        product = structured[0]
+        product_code = " ".join(str(product.get(key) or "") for key in ("sku", "mpn", "model"))
+        product_name = str(product.get("name") or "").strip()
+        path_code = normalized_identity(unquote(urlparse(final_url).path))
+        if (sku_relation(model, product_code).kind == "exact"
+                and requested.full.casefold() in path_code
+                and not re.search(r"\b(?:accessory|dust\s+bag|brush|filter|refill|twin[ -]?pack)\b", primary, re.I)):
+            primary = f"{primary} {product_name} {product_code}".strip()
+    if requested is not None and sku_relation(model, primary).kind == "absent":
+        # Apparel sites often put a style/product code in a labelled detail
+        # next to a family-level heading.  Require one unambiguous code, the
+        # family name in that heading, and the same complete code in the URL.
+        labelled = re.findall(
+            r"\b(?:Style|Product\s+Code)\s*:\s*([A-Z0-9][A-Z0-9._/-]{4,})\b",
+            soup.get_text(" ", strip=True), flags=re.I,
+        )
+        labelled_relations = {sku_relation(model, value).kind for value in labelled}
+        family_words = re.findall(r"[A-Za-z]+", model.replace(requested.raw, ""))
+        if (labelled and labelled_relations == {"exact"}
+                and requested.full.casefold() in normalized_identity(unquote(urlparse(final_url).path))
+                and (not family_words or family_words[0].casefold() in primary.casefold())):
+            primary = f"{primary} {requested.raw}"
+
     # A title of the form "brush for Model X" explicitly names a different
     # main object, regardless of how often Model X appears in the page.
     compatibility = re.search(r"\b(?:for|compatible\s+with|fits|replacement\s+for)\b", primary, re.I)
@@ -143,8 +172,10 @@ def assess_product_page_identity(model: str, html: str, final_url: str) -> PageI
     if compatibility and not document_heading and base_model_in_text(model, primary[compatibility.end():]):
         return PageIdentityAssessment("related_item", primary, "Main object is for/compatible with requested model")
 
-    configuration = re.compile(r"\b(?:refill|twin[ -]?pack|bundle|kit)\b", re.I)
-    if configuration.search(primary) and not configuration.search(model):
+    configuration = re.compile(r"\b(?:refill|twin[ -]?pack|bundle|combo|kit|for[ -]mac)\b", re.I)
+    product_path = unquote(urlparse(final_url).path).replace("-", " ").replace("_", " ")
+    if (configuration.search(f"{primary} {product_path}")
+            and not configuration.search(model)):
         return PageIdentityAssessment("different_variant", primary, "Main object names a different package or refill")
 
     # Unknown future variant names need not be enumerated. A distinctive
@@ -156,7 +187,12 @@ def assess_product_page_identity(model: str, html: str, final_url: str) -> PageI
     phrase = re.compile(r"(?<!\w)" + r"[\s_-]*".join(map(re.escape, model_parts)) + r"(?!\w)", re.I) if model_parts else None
     occurrence = phrase.search(primary) if phrase else None
     if occurrence:
-        following = re.match(r"[\s:–-]+([A-Za-z0-9]+)", primary[occurrence.end():])
+        tail = primary[occurrence.end():]
+        # Product header containers sometimes include a review score after
+        # the SKU. A score such as "4.7 (265)" is page chrome.
+        rating_tail = bool(re.match(r"\s+[0-5][.,]\d\s*\(\d+\)", tail))
+        voltage_tail = bool(re.match(r"\s+\d{1,3}\s?V(?:max)?\b", tail, re.I))
+        following = None if rating_tail or voltage_tail else re.match(r"[\s:–-]+([A-Za-z0-9]+)", tail)
         if following:
             suffix = following.group(1)
             distinctive = suffix.isupper() or suffix.isdigit() or any(ch.isupper() for ch in suffix[1:])

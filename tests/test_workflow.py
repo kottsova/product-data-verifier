@@ -52,7 +52,7 @@ def candidate(
     }
 
 
-def fixture_authority_seed(brand, host):
+def fixture_authority_seed(brand, host, *, category=None):
     """Test-only audited hosts for synthetic workflow fixtures."""
     if not host.endswith(".example"):
         return None

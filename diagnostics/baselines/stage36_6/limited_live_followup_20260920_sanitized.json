@@ -1,0 +1,138 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "archive_sha256": "c78941d0308f77d0136a7830bf1dc5342675cde75e4d729841e3f11b1810b89f",
+  "raw_sha256": {
+    "01.json": "96d22af8b0c8d180f34e33dd28fd20e174c5c976fb19db0ad1c6495fb04a9ab0",
+    "16.json": "5e5a02d821e0fef69c10378ca7a30c712f2eda4b3ce83279153be4fc91a1cf1c",
+    "22.json": "22cc8743ea1aaf507d059fc0e7a2e9cdd1bf76fde0412587157d0cdab9ae367a",
+    "37.json": "47fb5c9956e7f2ab999c8690e4880088065e5ee76bb6363f5975caa9a3e32b40",
+    "46.json": "b409b1cbdc1ade0e147d14ccf368f22588fe8387f7d941e5fdbb23dfb057efc0",
+    "47.json": "23d56da50fbb6863ea7afdc378840b812d4864e4a6aeb719708f2d0737ddf908"
+  },
+  "rows": [
+    {
+      "index": 1,
+      "input": "Bosch WAN28254GB",
+      "identity_level": "sku",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 7,
+      "queries": 3,
+      "prior_seconds": 75.435,
+      "seconds": 70.818,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.bosch-home.co.uk/en/product/laundry/washing-machines/front-load-washing-machine/WAN28254GB"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 16,
+      "input": "ASUS RT-BE88U",
+      "identity_level": "sku",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 10,
+      "queries": 3,
+      "prior_seconds": 75.642,
+      "seconds": 61.617,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.asus.com/us/networking-iot-servers/wifi-routers/asus-gaming-routers/rt-be88u/"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 3
+      }
+    },
+    {
+      "index": 22,
+      "input": "Logitech MX Keys S",
+      "identity_level": "model",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 11,
+      "queries": 3,
+      "prior_seconds": 31.872,
+      "seconds": 11.639,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.logitech.com/en-us/shop/p/mx-keys-s"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 3
+      }
+    },
+    {
+      "index": 37,
+      "input": "Makita GA023GZ",
+      "identity_level": "sku",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 8,
+      "queries": 3,
+      "prior_seconds": 76.003,
+      "seconds": 38.294,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.makita.co.nz/products/model/GA023GZ"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 1
+      }
+    },
+    {
+      "index": 46,
+      "input": "adidas Ultraboost 5 JH9073",
+      "identity_level": "sku",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 11,
+      "queries": 3,
+      "prior_seconds": 60.45,
+      "seconds": 37.796,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 3
+      }
+    },
+    {
+      "index": 47,
+      "input": "Nike AeroSwift FN4231-010",
+      "identity_level": "sku",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 9,
+      "queries": 2,
+      "prior_seconds": 82.86,
+      "seconds": 76.829,
+      "budget_overrun_seconds": 1.829,
+      "verified_exact_urls": [
+        "https://www.nike.com/gb/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 2
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 5,
+      "pass": 4
+    },
+    "model": {
+      "rows": 1,
+      "pass": 1
+    },
+    "family": {
+      "rows": 0,
+      "pass": 0
+    }
+  },
+  "prior_queries": 56,
+  "queries": 17,
+  "prior_seconds": 402.3,
+  "seconds": 297.0
+}

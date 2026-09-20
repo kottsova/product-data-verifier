@@ -81,6 +81,7 @@ class DiscoverySource:
     authority_rules_version: int = 0
     operator_relation: str = "unknown"
     authority_scope: str = "unknown"
+    product_category: str = "unknown"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -118,6 +119,7 @@ class DiscoveryDebugResult:
     page_metadata: tuple[dict[str, object], ...] = ()
     sku_rejections: tuple[dict[str, str], ...] = ()
     performance: dict[str, object] = field(default_factory=dict)
+    page_fetches: tuple[dict[str, object], ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         data = asdict(self)
@@ -230,6 +232,7 @@ def _candidate_view(candidate: Candidate, *, rejected: bool = False) -> Discover
         authority_rules_version=int(candidate.get("authority_rules_version") or 0),
         operator_relation=str(candidate.get("operator_relation") or "unknown"),
         authority_scope=str(candidate.get("authority_scope") or "unknown"),
+        product_category=str(candidate.get("product_category") or "unknown"),
     )
 
 
@@ -245,8 +248,8 @@ def _official_hosts(candidates: Iterable[Candidate]) -> list[str]:
     return hosts
 
 
-def _first_party_seed(brand: str, url: str) -> bool:
-    seed = find_seed(brand, urlparse(url).hostname or "")
+def _first_party_seed(brand: str, url: str, product_category: str = "unknown") -> bool:
+    seed = find_seed(brand, urlparse(url).hostname or "", category=product_category)
     return bool(seed and seed.first_party)
 
 
@@ -343,6 +346,7 @@ def _result_from_outcome(
     fetch: Callable[[str], tuple[str, str] | None] | None = None,
     extra_results: Iterable[object] = (),
     document_reader: DocumentReader | None = None,
+    product_category: str = "unknown",
 ) -> DiscoveryDebugResult:
     grouped: dict[DiscoveryGroup, list[DiscoverySource]] = {
         "official": [], "dealer": [], "secondary": [], "rejected": [],
@@ -414,7 +418,7 @@ def _result_from_outcome(
             if page is None:
                 continue
             final_url, html = page
-            if kind in {"product", "scan"} and not _first_party_seed(brand, final_url):
+            if kind in {"product", "scan"} and not _first_party_seed(brand, final_url, product_category):
                 # A redirect can leave the audited host. The destination is
                 # a fresh authority decision, never inherited from the URL.
                 continue
@@ -453,7 +457,7 @@ def _result_from_outcome(
         reviewed_pages: list[DiscoverySource] = []
         for item in official_pages:
             final_url = working.get(item.url, item.url)
-            if final_url != item.url and not _first_party_seed(brand, final_url):
+            if final_url != item.url and not _first_party_seed(brand, final_url, product_category):
                 grouped["secondary"].append(replace(
                     item, url=final_url, group="secondary", authority="unknown",
                     authority_status="unknown", authority_evidence_kind="none",
@@ -487,7 +491,7 @@ def _result_from_outcome(
         reviewed_support: list[DiscoverySource] = []
         for item in support_pages:
             final_url = working.get(item.url, item.url)
-            if final_url != item.url and not _first_party_seed(brand, final_url):
+            if final_url != item.url and not _first_party_seed(brand, final_url, product_category):
                 grouped["secondary"].append(replace(
                     item, url=final_url, group="secondary", authority="unknown",
                     authority_status="unknown", authority_evidence_kind="none",
@@ -514,7 +518,7 @@ def _result_from_outcome(
             for (source, _kind), page in fetched
             if page and source.authority_status == "verified"
             and source.source_type == "manufacturer"
-            and _first_party_seed(brand, page[0])
+            and _first_party_seed(brand, page[0], product_category)
         )
         for (source, kind), page in fetched:
             if kind != "authority" or page is None:
@@ -865,6 +869,7 @@ class DiscoveryDebugService:
 
     def discover_name(
         self, product_name: str, *, market: str = "global", chat_id: int | None = None,
+        product_category: str = "unknown",
     ) -> DiscoveryDebugResult:
         identity = parse_discovery_product_name(product_name)
         if identity is None:
@@ -875,16 +880,29 @@ class DiscoveryDebugService:
         budget = WallClockBudget(self.wall_clock_budget_seconds)
         runtime = DiscoveryRuntimeConfig()
         page_cache: dict[str, tuple[str, str] | None] = {}
+        page_fetches: list[dict[str, object]] = []
         document_cache: dict[str, object] = {}
 
         def fetch(url: str) -> tuple[str, str] | None:
             if url not in page_cache:
-                page_cache[url] = fetch_working_page(url, timeout=12.0)
+                remaining = budget.remaining_seconds
+                if remaining < 8.0:
+                    page_cache[url] = None
+                    page_fetches.append({"url": url, "status": "budget_exhausted", "duration_seconds": 0.0})
+                else:
+                    fetch_started = time.monotonic()
+                    page_cache[url] = fetch_working_page(url, timeout=min(12.0, remaining))
+                    page_fetches.append({
+                        "url": url,
+                        "status": "loaded" if page_cache[url] else "unavailable",
+                        "duration_seconds": round(time.monotonic() - fetch_started, 3),
+                        "final_url": page_cache[url][0] if page_cache[url] else "",
+                    })
             return page_cache[url]
 
         def document_reader(url: str):
             if url not in document_cache:
-                document_cache[url] = self._document_reader(url)
+                document_cache[url] = self._document_reader(url) if budget.remaining_seconds >= 5.0 else None
             return document_cache[url]
 
         provider_chain = list(self._providers()) if self._providers is not None else None
@@ -893,20 +911,24 @@ class DiscoveryDebugService:
         ) as session:
             outcome = discover_with_status(
                 brand, model, market=market, searcher=session.search_with_status,
-                early_official_stop=True,
+                early_official_stop=True, product_category=product_category,
             )
             result = _result_from_outcome(
                 name, brand, model, market, outcome, time.monotonic() - started, fetch=fetch,
-                document_reader=document_reader,
+                document_reader=document_reader, product_category=product_category,
             )
             # Documents linked from the official pages are the cheap, reliable
             # source.  Search-engine document queries only run when they did
             # not already produce a manual-type document.
-            if not any(doc.doc_type in _MANUAL_TYPES for doc in result.documents):
+            verified_hosts = list(dict.fromkeys([
+                *_official_hosts(outcome.candidates),
+                *(page.domain for page in result.official_pages if page.authority_status == "verified"),
+            ]))
+            if verified_hosts and not any(doc.doc_type in _MANUAL_TYPES for doc in result.documents):
                 extra: list[object] = []
                 attempted = list(outcome.attempted_queries)
                 attempts = list(outcome.provider_attempts)
-                for query in document_queries(brand, model, _official_hosts(outcome.candidates)):
+                for query in document_queries(brand, model, verified_hosts):
                     if budget.remaining_seconds < 8:
                         break
                     attempted.append(query)
@@ -928,8 +950,13 @@ class DiscoveryDebugService:
                     result = _result_from_outcome(
                         name, brand, model, market, outcome, time.monotonic() - started,
                         fetch=fetch, extra_results=[_search_result_record(item) for item in extra],
-                        document_reader=document_reader,
+                        document_reader=document_reader, product_category=product_category,
                     )
+        elapsed = round(time.monotonic() - started, 3)
+        result = replace(result, runtime_seconds=elapsed, page_fetches=tuple(page_fetches),
+                         performance={**result.performance, "runtime_seconds": elapsed,
+                                      "budget_overrun_seconds": round(max(0.0, elapsed - self.wall_clock_budget_seconds), 3),
+                                      "timeout_can_interrupt_active_requests": False})
         if chat_id is not None:
             with self._lock:
                 self._last_by_chat[chat_id] = result

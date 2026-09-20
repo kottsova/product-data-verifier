@@ -188,7 +188,7 @@ class RawExtractionService:
         final_url, html = page
         source_host = source.domain.lower().removeprefix("www.")
         final_host = (urlparse(final_url).hostname or "").lower().removeprefix("www.")
-        redirect_seed = find_seed(brand, final_host) if source_host != final_host else None
+        redirect_seed = find_seed(brand, final_host, category=source.product_category) if source_host != final_host else None
         if source_host != final_host and not (redirect_seed and redirect_seed.first_party):
             return SourceExtraction(
                 url=source.url, final_url=final_url, source_type=source_type,
@@ -244,7 +244,7 @@ class RawExtractionService:
                 )
             final_host = (urlparse(page[0]).hostname or "").lower().removeprefix("www.")
             original_host = (urlparse(document.url).hostname or "").lower().removeprefix("www.")
-            redirect_seed = find_seed(brand, final_host) if final_host != original_host else None
+            redirect_seed = find_seed(brand, final_host, category="unknown") if final_host != original_host else None
             if final_host != original_host and not (redirect_seed and redirect_seed.first_party):
                 return SourceExtraction(
                     url=document.url, final_url=page[0], source_type="official_document",
@@ -277,7 +277,7 @@ class RawExtractionService:
         final_url, body, _content_type = fetched
         final_host = (urlparse(final_url).hostname or "").lower().removeprefix("www.")
         original_host = (urlparse(document.url).hostname or "").lower().removeprefix("www.")
-        redirect_seed = find_seed(brand, final_host) if final_host != original_host else None
+        redirect_seed = find_seed(brand, final_host, category="unknown") if final_host != original_host else None
         if final_host != original_host and not (redirect_seed and redirect_seed.first_party):
             return SourceExtraction(
                 url=document.url, final_url=final_url, source_type="official_document",

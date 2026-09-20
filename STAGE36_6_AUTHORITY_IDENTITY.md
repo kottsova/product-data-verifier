@@ -96,14 +96,13 @@ to the named brand and category. Relevant audited examples:
 | Braun | [De’Longhi Braun brand page](https://www.delonghigroup.com/en/brand/braun) | Licensed Braun household appliances. |
 | Kenwood | [De’Longhi Kenwood brand page](https://www.delonghigroup.com/en/brand/kenwood) | Kenwood household appliances. |
 | Bosch Professional | [Bosch corporate power-tools brochure](https://assets.bosch.com/media/global/products_and_solutions/market_specific_solutions/solutions_for_the_automotive_industry/brochure.pdf) | Bosch professional tools, not every Bosch product host. |
-| Frostbite | [Company/about page](https://fishfrostbite.com/pages/contact), [Drench page](https://fishfrostbite.com/products/drench-39ml) | Manually reviewed fishing brand/site; independent operator corroboration remains limited. |
-| Nautilus | [Company/about page](https://www.nautilusreels.com/pages/about), [company profile linking the site](https://www.linkedin.com/company/nautilusreels) | Manually reviewed reel maker/site. |
+| Frostbite | [Company/about page](https://fishfrostbite.com/pages/contact), [Drench page](https://fishfrostbite.com/products/drench-39ml) | Operator remains unknown; this seed cannot grant first-party. |
+| Nautilus | [Company/about page](https://www.nautilusreels.com/pages/about), [company profile linking the site](https://www.linkedin.com/company/nautilusreels) | Operator remains unknown; this seed cannot grant first-party. |
 | TP-Link Czech shop | [Store terms naming 100Mega Distribution](https://www.tp-link.cz/cs/static/page/5) | Independent distributor; never first-party TP-Link manufacturer content. |
 
 The limited external corroboration for the smaller Frostbite and Nautilus
-operators remains a seed-review risk. Their primary pages are evidence of
-product identity and business claims, but the registry still depends on a
-human review of that relationship. The registry must be rechecked at expiry.
+operators leaves their operator relationship unknown. Their primary pages
+support product identity, but cannot establish first-party status.
 
 ## B. Product identity and final source gate
 
@@ -216,3 +215,129 @@ necessary first-party coverage and Epson/Canon support cases are still
 unresolved. One live row exceeded the nominal 75 s service budget because
 the outer request did not interrupt all downstream waits; this is another
 runtime limit to address. **Stage 36.6 is PARTIAL**; the PR remains draft.
+
+## Follow-up iteration: transition causes and bounded recovery
+
+The [26-row transition ledger](diagnostics/baselines/stage36_6/transition_causes.csv)
+records every old exact URL, whether it occurred in the new raw results and
+candidate set, whether it reached the bounded page-check set, the saved
+operator and main-object decisions, observed page loads, JavaScript shells,
+provider blocks/timeouts and budget overrun. Its generator is
+`python -m diagnostics.stage36_6_transition_audit`. The archive contains no
+per-page fetch outcome for unpromoted provisional sources: `not_recorded`
+means exactly that, not a proven block. An old exact URL reappeared in 25/26
+new raw/candidate sets; 18/26 had one in the bounded fetch-selection set.
+Only Oral-B has a recorded loaded page among matched old exact URLs. All 26
+rows include some provider block, and 23 include a provider timeout; neither
+count establishes that the relevant manufacturer's page was blocked.
+
+Eleven transitions are **confirmed current false refusals**: rows 1 Bosch,
+4 Electrolux, 5 AEG, 6 Miele, 16 ASUS, 22 Logitech, 29 Epson, 30 Canon,
+37 Makita, 46 adidas and 47 Nike. The reviewed primary product page and
+brand-operator evidence for each are in the ledger. Evidence examples:
+[BSH's Bosch UK listing](https://media3.bsh-group.com/Documents/9001351957_A.pdf)
+and [WAN28254GB](https://www.bosch-home.co.uk/en/product/laundry/washing-machines/front-load-washing-machine/WAN28254GB);
+[Electrolux BG terms](https://www.electrolux.bg/overlays/terms-and-conditions/)
+and [EOD6P77WX](https://www.electrolux.bg/kitchen/cooking/ovens/oven/eod6p77wx/);
+[AEG France terms](https://www.aeg.fr/overlays/shop-terms-and-conditions/)
+and [IKE64441FB](https://www.aeg.fr/kitchen/cooking/hobs/induction-hob/ike64441fb/);
+[Miele UK corporate listing](https://www.miele.com/de/com/2185.htm)
+and [TWD260WP](https://www.miele.co.uk/product/11871790/t1-heat-pump-dryer-twd260wp-8kg-lotus-white);
+[ASUS legal terms](https://www.asus.com/terms_of_use_notice_privacy_policy/official-site/)
+and [RT-BE88U](https://www.asus.com/us/networking-iot-servers/wifi-routers/asus-gaming-routers/rt-be88u/);
+[Logitech's operator statement](https://www.logitech.com/en-us/legal/services-privacy-statement)
+and [MX Keys S](https://www.logitech.com/en-us/shop/p/mx-keys-s);
+[Epson Europe terms](https://www.epson.eu/en_EU/terms-of-use)
+and [L6270](https://www.epson.eu/en_EU/products/printers/inkjet/consumer/ecotank-l6270-multifunction-wi-fi-ink-tank-a4-printer%2C-with-up-to-3-years-of-ink-included/p/30259);
+[Canon U.S.A. corporate relation](https://global.canon/ja/news/2017/20170427-2.html)
+and [LiDE 400](https://www.usa.canon.com/shop/p/canoscan-lide-400);
+[Makita NZ subsidiary statement](https://www.makita.co.nz/about/)
+and [GA023GZ](https://www.makita.co.nz/products/model/GA023GZ);
+[adidas UAE terms](https://www.adidas.ae/en/terms.html)
+and [JH9073](https://www.adidas.ae/en/ultraboost-5-shoes/JH9073.html);
+[Nike operator details](https://www.nike.com/be/help/a/bedrijfsgegevens/nike-contact-lijst)
+and [FN4231-010](https://www.nike.com/dk/en/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010).
+This is a current-page adjudication; it cannot reconstruct the 36.6 network
+response. The old exact claims in rows 17 (TP-Link Czech distributor) and 49
+(Oral-B twin packs) were invalid. The other 13 losses remain unknown. Samsung's
+`/EF` suffix and DEWALT's `-GB` suffix are examples requiring commercial SKU
+evidence, not automatic exact matches. LG C4 and similar family inputs cannot
+be described as a particular SKU.
+
+The registry now keeps Frostbite and Nautilus `operator_unknown`, and the
+decision paths check the seed's product category. Wrong-category cases for
+Bosch Professional, Bosch Home, Philips domestic appliances and TP-Link Czech
+retail remain unverified. New exact-host seeds have documented operator
+evidence; none were copied from an old PASS alone. Source selection remains
+host exact and product identity still requires primary-object content.
+
+The [saved-candidate replay](diagnostics/stage36_6_saved_replay.py) passed
+all 11 confirmed loss URLs with short, manually transcribed primary-object
+fixtures. This checks the authority and identity decision path, not network
+availability. The [accepted-URL re-audit](diagnostics/baselines/stage36_6/accepted_url_reaudit.csv)
+checks all ten previously accepted URLs. It found no contradicted operator
+or main product, but now withholds Frostbite and Nautilus for operator
+uncertainty and NETGEAR GS308EP at SKU level: the fetched unique Product
+object identifies commercial code `GS308EP-100NAS`. Corsair RM850x and CeraVe
+cleanser are family requests; their accepted pages do not establish an exact
+SKU for the family.
+
+| Selected like-for-like indices | Prior 36.6 queries | New queries | Prior seconds | New seconds | New PASS |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1, 5, 17, 22, 30, 49 | 51 | 22 | 312.8 | 222.0 | 1/6 |
+| 1, 16, 22, 37, 46, 47 | 56 | 17 | 402.3 | 297.0 | 5/6 |
+| 12, 19, 23, 33, 50 | 15 | 15 | 93.9 | 83.2 | 4/5 |
+
+For the 15 distinct selected inputs, using the latest run for repeated Bosch
+and Logitech rows, results by input level are:
+
+| Input level | Rows | PASS | Prior queries | New queries | Prior seconds | New seconds |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| SKU | 7 | 4 | 58 | 20 | 452.5 | 355.5 |
+| Model | 6 | 3 | 40 | 22 | 197.7 | 134.2 |
+| Family | 2 | 2 | 6 | 6 | 51.4 | 34.2 |
+
+The family results mean an exact main-product family page, not an exact
+commercial SKU. Among the 11 confirmed false refusals, all 11 pass the saved
+decision replay; five (Bosch, ASUS, Logitech, Makita and Nike) also recovered
+in selected live runs. Three selected confirmed losses (AEG, Canon, adidas)
+remained PARTIAL because the page fetch was unavailable, and three
+(Electrolux, Miele, Epson) were not selected for a live rerun.
+
+The selected raw runs were sanitized into separate [first](diagnostics/baselines/stage36_6/limited_live_20260920_sanitized.zip),
+[follow-up](diagnostics/baselines/stage36_6/limited_live_followup_20260920_sanitized.zip)
+and [negative](diagnostics/baselines/stage36_6/limited_live_negative_20260920_sanitized.zip)
+archives with hash manifests in adjacent JSON files. Bosch, ASUS, Logitech,
+Makita and Nike passed live. AEG, Canon and adidas remained PARTIAL because
+their pages were unavailable to the fetcher in these selected runs. The
+negative run rejected Roborock accessories, Razer HyperSpeed, Corsair SHIFT,
+and CeraVe refill; Oral-B twin packs and NETGEAR forums were also excluded.
+The Logitech run exposed two `Combo` false exact records; a subsequent run
+accepted only the base MX Keys S page. The Bosch run exposed a review score
+after the SKU misread as a variant; the subsequent run passed. NETGEAR's
+commercial suffix caused a deliberate downgrade, as above.
+
+The query increase from 252 to 429 in the original complete repeats was
+mostly a change in early stopping: an unverified operator could not stop the
+identity query plan. The old/new query mix was identity 85/124, official
+36/100, site-restricted 17/72, specs 16/37, specifications 14/37 and
+documents 84/59. No row repeated an identical query string, but candidate
+duplicates rose from 2,248 to 5,902 across the saved run, showing repeated
+retrieval of the same leads. The plan also included near-duplicate `specs` /
+`specifications` searches plus document queries without an official host.
+The latter two requests were removed; document queries now require a verified
+host. The selected comparisons above measure the improvement without
+extrapolating to all 50. Page fetch outcomes and actual elapsed time are now
+recorded. The synchronous external fetch/Playwright stack cannot forcibly
+interrupt active work at precisely 75 seconds; results explicitly expose
+`timeout_can_interrupt_active_requests=false` and
+`budget_overrun_seconds`. One selected Nike run took 76.9 seconds. A late
+fetch now needs eight seconds of remaining budget, but a hard deadline would
+require a separately managed worker process and a new comparable benchmark.
+
+The complete suite passed **1,141 tests** and `git diff --check` passed after
+this iteration. The 429-query / 2,821.7-second full-run figures remain the
+last complete 50-item comparison. A fresh full 50 was not run: 13 transition
+causes remain unverified from the saved evidence, some confirmed pages are
+still inaccessible to the fetcher, and a strict interruptible 75-second
+deadline remains open. **Stage 36.6 remains PARTIAL and PR #1 remains draft.**

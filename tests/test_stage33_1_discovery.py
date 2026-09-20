@@ -559,10 +559,10 @@ class BotOutputTests(unittest.TestCase):
             "Acme", "acme.com", "brand_operator", "fixtures",
             "https://independent.example/acme", date.today(),
         )
-        patcher = patch("core.discovery.find_seed", side_effect=lambda brand, host: seed if brand == "Acme" and host == "acme.com" else None)
+        patcher = patch("core.discovery.find_seed", side_effect=lambda brand, host, **kwargs: seed if brand == "Acme" and host == "acme.com" else None)
         patcher.start()
         self.addCleanup(patcher.stop)
-        service_patcher = patch("services.discovery_debug.find_seed", side_effect=lambda brand, host: seed if brand == "Acme" and host == "acme.com" else None)
+        service_patcher = patch("services.discovery_debug.find_seed", side_effect=lambda brand, host, **kwargs: seed if brand == "Acme" and host == "acme.com" else None)
         service_patcher.start()
         self.addCleanup(service_patcher.stop)
 

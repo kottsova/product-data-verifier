@@ -314,7 +314,7 @@ ACCESSORY_CONTEXT_TERMS = {
     "refurbished", "renewed", "spare", "wallet", "hülle", "кейс", "чехол", "케이스",
 }
 _COMPATIBILITY_LEAD = re.compile(r"\b(?:for|compatible\s+with|fits|replacement\s+for)\b", re.I)
-_DISTINCT_CONFIGURATION = re.compile(r"\b(?:refill|twin[ -]?pack|bundle|kit)\b", re.I)
+_DISTINCT_CONFIGURATION = re.compile(r"\b(?:refill|twin[ -]?pack|bundle|combo|kit|for[ -]mac)\b", re.I)
 SPECIALIZED_REFERENCE_DOMAINS = {
     "gsmarena.com", "manua.ls", "manuals.co.uk", "manualslib.com",
     "manuals.plus", "manymanuals.com", "nanoreview.net",
@@ -434,7 +434,6 @@ def build_search_queries(brand: str, model: str, article: str | None = None) -> 
         f'"{brand} {model}"',
         f'"{model}" {brand}',
         f'"{model}" {brand} specs',
-        f'"{model}" {brand} specifications',
     ]
     if article and article.strip():
         article = " ".join(article.split())
@@ -1139,7 +1138,8 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
                     article: str | None = None, official_domain: str | None = None,
                     authority_evidence_url: str | None = None,
                     market: str = "global",
-                    official_domains: dict[str, str] | None = None) -> list[Candidate]:
+                    official_domains: dict[str, str] | None = None,
+                    product_category: str = "unknown") -> list[Candidate]:
     candidates: dict[str, Candidate] = {}
     for item in results:
         record = _search_result_record(item)
@@ -1163,8 +1163,8 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
         operator_relation = "unknown"
         authority_scope = "unknown"
         candidate_evidence = (official_domains or {}).get(matched_official_domain or "", authority_evidence_url)
-        seed = find_seed(brand, domain)
-        if seed and source_type != "marketplace":
+        seed = find_seed(brand, domain, category=product_category)
+        if seed and seed.operator_relation != "operator_unknown" and source_type != "marketplace":
             source_type = "manufacturer" if seed.first_party else "distributor"
             authority_status = "verified"
             evidence_url = seed.evidence_url
@@ -1204,6 +1204,7 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
             "authority_checked_on": seed.checked_on.isoformat() if seed else "",
             "authority_rules_version": RULES_VERSION,
             "operator_relation": operator_relation, "authority_scope": authority_scope,
+            "product_category": product_category,
             "product_match_evidence": product_match_evidence,
             "market_scope": "unknown",
             "model_match": match,
@@ -5118,6 +5119,7 @@ def _same_model_match(model: str, title: str, path: str) -> bool:
 
 def _official_exact_page_reached(
     results: Iterable[SearchResultLike], brand: str, model: str,
+    product_category: str = "unknown",
 ) -> bool:
     """True when a result is an exact-model page on a brand-rooted domain.
 
@@ -5130,7 +5132,7 @@ def _official_exact_page_reached(
         url = record.url
         if not url or _is_search_landing_url(url):
             continue
-        seed = find_seed(brand, _host(url))
+        seed = find_seed(brand, _host(url), category=product_category)
         if seed is None or not seed.first_party:
             continue
         if (
@@ -5139,6 +5141,8 @@ def _official_exact_page_reached(
             and _page_kind(url) not in {"homepage", "catalog", "weak", "support"}
             and not _has_accessory_context(url, record.title)
             and not _has_non_product_context(url, record.title)
+            and not (_DISTINCT_CONFIGURATION.search(f"{record.title} {unquote(urlparse(url).path).replace('-', ' ')}")
+                     and not _DISTINCT_CONFIGURATION.search(model))
         ):
             return True
     return False
@@ -5152,6 +5156,7 @@ def discover_with_status(
     searcher: Searcher | None = None,
     *,
     early_official_stop: bool = False,
+    product_category: str = "unknown",
 ) -> DiscoveryOutcome:
     """Discover sources and retain blocked/error state as structured data.
 
@@ -5210,7 +5215,7 @@ def discover_with_status(
             if any(item.budget_exhausted for item in attempts):
                 budget_stopped = True
                 break
-            if early_official_stop and _official_exact_page_reached(found, brand, model):
+            if early_official_stop and _official_exact_page_reached(found, brand, model, product_category):
                 # A first-party page that already names the exact model is the
                 # goal of every remaining identity/bootstrap query; keep the
                 # remaining provider capacity (and wall clock) for documents.
@@ -5279,7 +5284,7 @@ def discover_with_status(
                 break
         ranked_candidates = rank_candidates(
             raw_results, brand, model, article, market=market,
-            official_domains=official_domains,
+            official_domains=official_domains, product_category=product_category,
         )
         candidates, rejected_candidates = _partition_relevance_candidates(
             ranked_candidates, brand, model, article,

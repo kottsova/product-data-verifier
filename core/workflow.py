@@ -163,6 +163,7 @@ class ProductWorkflowRequest:
     brand: str | None = None
     identity_evidence: tuple[IdentityEvidence | Mapping[str, str], ...] = ()
     market: str = "global"
+    product_category: str = "unknown"
     max_initial_sources: int = 5
     minimum_search_priority: Priority = "medium"
     targeted_search_enabled: bool = True
@@ -522,7 +523,8 @@ def _role_source_type(role: str) -> str:
     return role
 
 
-def _resolve_authority_roles(sources: list[FetchResult], brand: str) -> None:
+def _resolve_authority_roles(sources: list[FetchResult], brand: str,
+                             product_category: str = "unknown") -> None:
     """Post-pass: recover a generic, evidence-based authority role for every
     successfully fetched HTML page still "unknown" after discovery, using
     the full set of pages fetched in this run (see core.authority).
@@ -548,8 +550,11 @@ def _resolve_authority_roles(sources: list[FetchResult], brand: str) -> None:
             and old_role in {"manufacturer", "official_document", "distributor"}
         ):
             continue
-        seed = find_seed(brand, _fetch_domain(source)) if old_role in {"manufacturer", "official_document", "distributor"} else None
         metadata = dict(source.get("discovery_metadata") or {})
+        request_category = product_category if product_category != "unknown" else str(metadata.get("product_category") or "unknown")
+        seed = find_seed(brand, _fetch_domain(source), category=request_category) if old_role in {"manufacturer", "official_document", "distributor"} else None
+        if seed is not None and seed.operator_relation == "operator_unknown":
+            seed = None
         if seed is None:
             source["authority_status"] = "unknown"
             source["source_type"] = "other"
@@ -953,6 +958,14 @@ def _run_product_workflow_with_services(
             budget=budget,
         )
 
+    category_to_scope = {
+        "cooktop": "major appliances", "oven": "major appliances",
+        "air_fryer": "small appliances", "coffee_machine": "small appliances",
+        "wet_dry_vacuum": "small appliances", "power_tool": "power tools",
+        "computer_peripheral": "computer/peripherals", "laptop": "computer/peripherals",
+        "oral_care": "personal care/skincare", "skincare": "personal care/skincare",
+    }
+    authority_category = request.product_category if request.product_category != "unknown" else category_to_scope.get(category.category_id, "unknown")
     _resolve_authority_roles(
         [
             *fetched,
@@ -964,6 +977,7 @@ def _run_product_workflow_with_services(
             ),
         ],
         identity.brand,
+        authority_category,
     )
 
     validated = validate_product_profile(

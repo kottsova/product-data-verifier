@@ -971,7 +971,7 @@ class SearchFallbackTests(unittest.TestCase):
         outcome = discover_with_status("Acme", "X100", searcher=searcher)
 
         self.assertIn("Acme X100", calls)
-        self.assertIn('"X100" Acme specifications', calls)
+        self.assertIn('"X100" Acme specs', calls)
         self.assertTrue(outcome.candidates)
         self.assertEqual(outcome.search_status, "partial")
         self.assertEqual(outcome.issues[0].query, "Acme official website")

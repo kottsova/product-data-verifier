@@ -46,7 +46,7 @@ def reconcile(rows: list[dict]) -> tuple[list[dict], list[dict], dict]:
                 title = str(item.get("title") or "")
                 role = _page_role(url, title)
                 host = (urlparse(url).hostname or "").lower().removeprefix("www.")
-                seed = find_seed(brand, host)
+                seed = find_seed(brand, host, category=category)
                 candidate = {
                     "url": url, "title": title,
                     "model_match": candidate_model_match(model, title, urlparse(url).path),
