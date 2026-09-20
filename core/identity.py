@@ -192,6 +192,20 @@ def assess_product_page_identity(model: str, html: str, final_url: str) -> PageI
         relation = sku_relation(model, *parts)
         if relation.kind in {"different_suffix", "different_variant"}:
             return PageIdentityAssessment("different_variant", primary, f"Product SKU relation: {relation.kind}")
+        if relation.kind == "absent":
+            # Product headings sometimes typeset one identifier with spaces
+            # ("MQ 9187XLI") while the request and product URL use the
+            # compact SKU ("MQ9187XLI"). Require the *whole* code in the
+            # main heading and URL, with alphanumeric boundaries, before
+            # accepting this formatting difference.
+            spaced_code = re.compile(
+                r"(?<![A-Za-z0-9])" + r"[\s_-]*".join(map(re.escape, sku.full))
+                + r"(?![A-Za-z0-9])", re.I,
+            )
+            family_words = re.findall(r"[A-Za-z]+", model.replace(sku.raw, ""))
+            family_present = not family_words or family_words[0].casefold() in primary.casefold()
+            if spaced_code.search(primary) and sku.full.casefold() in normalized_identity(path) and family_present:
+                return PageIdentityAssessment("exact", primary, "Main product and URL give the same complete SKU with spacing variation")
         if relation.kind != "exact":
             return PageIdentityAssessment("unknown", primary, f"Product SKU relation: {relation.kind}")
 

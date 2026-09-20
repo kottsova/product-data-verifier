@@ -78,6 +78,11 @@ class ProductIdentityTests(unittest.TestCase):
     def test_content_can_prove_numeric_url(self):
         self.check_page("SN23EI03ME", "Siemens SN23EI03ME", "https://siemens-home.bsh-group.com/product/12345", "exact")
 
+    def test_spaced_complete_sku_in_primary_heading_and_url(self):
+        url = "https://braunhousehold.com/en/p/multiquick-9-hand-blender-mq-9187xli/HB901-MQ9187XLI.html"
+        self.check_page("MultiQuick 9 MQ9187XLI", "MultiQuick 9 Hand blender MQ 9187XLI", url, "exact")
+        self.check_page("MultiQuick 9 MQ9187XLI", "MultiQuick 9 Hand blender MQ 9187XLII", url, "unknown")
+
     def test_regional_suffix_requires_commercial_evidence(self):
         self.check_page("X100P2", "Acme X100P2-GB", "https://acme.example/x100p2-gb", "unknown")
 
