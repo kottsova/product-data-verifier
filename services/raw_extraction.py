@@ -16,6 +16,8 @@ from typing import Callable
 from urllib.parse import urlparse
 
 from core.official_documents import OfficialDocument
+from core.authority_registry import find_seed
+from core.identity import assess_product_page_identity
 from core.page_inspection import fetch_working_page, inspect_product_page
 from core.raw_extraction import (
     RawAttribute,
@@ -49,6 +51,16 @@ class SourceExtraction:
     fetched: bool
     fetch_issue: str = ""
     document_type: str = ""
+    identity_relation: str = "unknown"
+    identity_evidence: str = ""
+    authority_status: str = "unknown"
+    authority_evidence_url: str = ""
+    authority_evidence_kind: str = "none"
+    authority_evidence_excerpt: str = ""
+    authority_checked_on: str = ""
+    authority_rules_version: int = 0
+    operator_relation: str = "unknown"
+    authority_scope: str = "unknown"
     spec_location: str = ""     # inspection of delivered HTML (pages only)
     requires_interaction: str = ""
     js_shell: bool = False
@@ -155,16 +167,45 @@ class RawExtractionService:
         return wrapped
 
     # -- pages -----------------------------------------------------------
-    def _extract_page(self, source: DiscoverySource, source_type: str, model: str) -> SourceExtraction:
+    def _extract_page(self, source: DiscoverySource, source_type: str, model: str, brand: str) -> SourceExtraction:
+        provenance = dict(
+            authority_status=source.authority_status,
+            authority_evidence_url=source.authority_evidence_url,
+            authority_evidence_kind=source.authority_evidence_kind,
+            authority_evidence_excerpt=source.authority_evidence_excerpt,
+            authority_checked_on=source.authority_checked_on,
+            authority_rules_version=source.authority_rules_version,
+            operator_relation=source.operator_relation,
+            authority_scope=source.authority_scope,
+        )
         page = self._fetch_html(source.url)
         if page is None:
             return SourceExtraction(
                 url=source.url, final_url="", source_type=source_type, model_match=source.model_match,
                 fetched=False, fetch_issue="page could not be fetched (HTTP error, block or timeout)",
-                issues=("fetch_failed",),
+                issues=("fetch_failed",), **provenance,
             )
         final_url, html = page
+        source_host = source.domain.lower().removeprefix("www.")
+        final_host = (urlparse(final_url).hostname or "").lower().removeprefix("www.")
+        redirect_seed = find_seed(brand, final_host) if source_host != final_host else None
+        if source_host != final_host and not (redirect_seed and redirect_seed.first_party):
+            return SourceExtraction(
+                url=source.url, final_url=final_url, source_type=source_type,
+                model_match="rejected", fetched=True,
+                issues=("authority_redirect_not_verified",),
+                authority_status="unknown", authority_evidence_kind="none",
+            )
         inspection = inspect_product_page(html, final_url)
+        if source_type == "official_product_page":
+            decision = assess_product_page_identity(model, html, final_url)
+            if decision.relation != "exact":
+                return SourceExtraction(
+                    url=source.url, final_url=final_url, source_type=source_type,
+                    model_match="rejected", fetched=True, identity_relation=decision.relation,
+                    identity_evidence=decision.evidence,
+                    issues=("product_identity_not_verified",), **provenance,
+                )
         extraction, stats = extract_html_attributes(html, final_url, model, source_type)
         issues: list[str] = []
         if not extraction.attributes:
@@ -178,8 +219,10 @@ class RawExtractionService:
         return SourceExtraction(
             url=source.url, final_url=final_url, source_type=source_type, model_match=source.model_match,
             fetched=True, spec_location=inspection.spec_location, requires_interaction=inspection.requires_interaction,
+            identity_relation="exact" if source_type == "official_product_page" else "unknown",
+            identity_evidence=(decision.evidence if source_type == "official_product_page" else ""),
             js_shell=inspection.js_shell, attributes=tuple(extraction.attributes), excluded=dict(extraction.excluded),
-            stats=stats, issues=tuple(issues),
+            stats=stats, issues=tuple(issues), **provenance,
         )
 
     # -- documents -------------------------------------------------------
@@ -272,8 +315,8 @@ class RawExtractionService:
                 skipped.append({"url": doc.url, "kind": "document", "reason": f"model_match={doc.model_match}"})
 
         with ThreadPoolExecutor(max_workers=4) as pool:
-            page_futures = [pool.submit(self._extract_page, s, "official_product_page", model) for s in product]
-            support_futures = [pool.submit(self._extract_page, s, "official_support_page", model) for s in support]
+            page_futures = [pool.submit(self._extract_page, s, "official_product_page", model, discovery.brand) for s in product]
+            support_futures = [pool.submit(self._extract_page, s, "official_support_page", model, discovery.brand) for s in support]
             doc_futures = [pool.submit(self._extract_document, d, model) for d in documents]
             pages = tuple(f.result() for f in page_futures)
             support_pages = tuple(f.result() for f in support_futures)

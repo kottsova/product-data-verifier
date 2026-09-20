@@ -14,6 +14,7 @@ from io import StringIO
 from pathlib import Path
 import re
 import unittest
+from unittest.mock import patch
 
 from bot.export import build_wide_export_row, export_result_csv
 from bot.formatters import (
@@ -39,7 +40,17 @@ from core.official_spec_table import completeness_diff, extract_official_section
 from core.schema import get_attribute_schema
 from core.workflow import ProductWorkflowRequest, WorkflowServices, run_product_workflow
 from services.product_verifier import VerifyProductRequest, _to_result
-from tests.test_workflow import candidate, fetch_result
+from tests.test_workflow import candidate, fetch_result, fixture_authority_seed
+
+
+def setUpModule():
+    global _registry_patch
+    _registry_patch = patch("core.workflow.find_seed", side_effect=fixture_authority_seed)
+    _registry_patch.start()
+
+
+def tearDownModule():
+    _registry_patch.stop()
 
 SPECS_URL = "https://fi.acme.example/about/phones/acme-phone-5-specs"
 SECONDARY_URL = "https://www.gsm.example/acme_phone_5-1.php"
@@ -153,7 +164,7 @@ def specs_html(columns=("Acme Phone 5", "Acme Phone 5 Max"), sections=SECTIONS) 
 
 
 GSM_HTML = (
-    '<html><body><a href="acme_phone_5-review-1.php">Review</a>'
+    '<html><body><h1>Acme Phone 5</h1><a href="acme_phone_5-review-1.php">Review</a>'
     '<a href="acme_phone_5-reviews-1.php">Opinions</a><a href="compare.php3?id=1">Compare</a>'
     '<a href="acme_phone_5-pictures-1.php">Pictures</a><a href="acme_phone_5-price-1.php">Prices</a>'
     '<a href="related.php3?id=1">Related devices</a>'
@@ -187,10 +198,11 @@ def run_page(pages, initial, model="Acme Phone 5"):
         lambda identity, query, market: DiscoveryOutcome([], "success", [query], [query], []),
         fetch, extract_attributes,
     )
-    return run_product_workflow(
-        ProductWorkflowRequest(f"Acme {model.removeprefix('Acme ')}", brand="Acme", targeted_search_enabled=False),
-        services=services,
-    )
+    with patch("core.workflow.find_seed", side_effect=fixture_authority_seed):
+        return run_product_workflow(
+            ProductWorkflowRequest(f"Acme {model.removeprefix('Acme ')}", brand="Acme", targeted_search_enabled=False),
+            services=services,
+        )
 
 
 def spec_source(html=None):

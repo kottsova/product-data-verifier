@@ -1,9 +1,11 @@
 """Deterministic Stage 8 orchestration tests with no live network access."""
 
 import unittest
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 from core.budget import BudgetExhaustedError
+from core.authority_registry import AuthoritySeed
 from core.discovery import DiscoveryOutcome, ProviderAttempt
 from core.export import profile_rows, profile_to_dict
 from core.extract import RawAttribute
@@ -50,6 +52,13 @@ def candidate(
     }
 
 
+def fixture_authority_seed(brand, host):
+    """Test-only audited hosts for synthetic workflow fixtures."""
+    if not host.endswith(".example"):
+        return None
+    return AuthoritySeed(brand, host, "brand_operator", "fixture", f"https://{host}/audit", date.today())
+
+
 def fetch_result(item, *, status="success"):
     url = item["url"]
     return {
@@ -60,8 +69,8 @@ def fetch_result(item, *, status="success"):
         "fetch_method": "requests",
         "content_type": "text/html",
         "document_type": "html",
-        "html": "<html><body>fixture</body></html>",
-        "text": "fixture",
+        "html": f"<html><body><h1>{item['title']}</h1></body></html>",
+        "text": item["title"],
         "content": b"fixture",
         "pdf_text": "",
         "text_status": "available",
@@ -132,6 +141,11 @@ class FixtureServices:
 
 
 class ProductWorkflowTests(unittest.TestCase):
+    def setUp(self):
+        registry = patch("core.workflow.find_seed", side_effect=fixture_authority_seed)
+        registry.start()
+        self.addCleanup(registry.stop)
+
     def test_selection_reserves_verified_exact_official_document(self):
         broad = [
             candidate(
@@ -277,7 +291,7 @@ class ProductWorkflowTests(unittest.TestCase):
 
         self.assertEqual(fetch_calls, [urls[0]])
         self.assertEqual(extract_calls, [urls[0]])
-        self.assertEqual([item.name for item in result.raw_attributes], ["Power"])
+        self.assertEqual([item.name for item in result.raw_attributes], ["Power", "Brand", "Model"])
 
     def test_relevance_gate_may_select_fewer_sources_and_never_fetches_rejected(self):
         accepted_url = "https://shop.example/product/X100"
@@ -349,7 +363,7 @@ class ProductWorkflowTests(unittest.TestCase):
         def fetch(candidate_item):
             result = fetch_result(candidate_item)
             result["text"] = "Official technical specifications for Acme X100."
-            result["html"] = "<html><body>Official technical specifications for Acme X100.</body></html>"
+            result["html"] = "<html><body><h1>Official technical specifications for Acme X100.</h1></body></html>"
             return result
 
         fixtures.fetch = fetch
@@ -409,7 +423,7 @@ class ProductWorkflowTests(unittest.TestCase):
         def fetch(candidate_item):
             result = fetch_result(candidate_item)
             result["text"] = "Official technical specifications for Acme X100."
-            result["html"] = "<html><body>Official technical specifications for Acme X100.</body></html>"
+            result["html"] = "<html><body><h1>Official technical specifications for Acme X100.</h1></body></html>"
             return result
 
         fixtures.fetch = fetch
@@ -830,7 +844,7 @@ class ProductWorkflowTests(unittest.TestCase):
 
         source = result.fetched_sources[0]
         self.assertEqual(source["authority_status"], "unknown")
-        self.assertEqual(source["authority_role"], "retailer")
+        self.assertEqual(source["authority_role"], "unknown")
         net_weight = result.final_profile.by_name.get("net_weight")
         self.assertIsNotNone(net_weight)
         self.assertEqual(net_weight.status, "Unresolved")
@@ -848,8 +862,8 @@ class ProductWorkflowTests(unittest.TestCase):
             [anchor_item, dealer_item],
             {dealer_url: [raw("Net weight", "4 kg", dealer_url)]},
         )
-        anchor_html = '<html><body><a href="https://acme-shop.example/">Find a store</a></body></html>'
-        dealer_html = "<html><body><footer>© 2024 Acme. All rights reserved.</footer></body></html>"
+        anchor_html = '<html><body><a href="https://acme-shop.example/">Official regional site</a></body></html>'
+        dealer_html = "<html><body><h1>Acme X100</h1><footer>© 2024 Acme. All rights reserved.</footer></body></html>"
 
         def fetch(candidate_item):
             fixtures.fetch_calls.append(candidate_item["url"])
@@ -890,7 +904,7 @@ class ProductWorkflowTests(unittest.TestCase):
             [anchor_item, dealer_item],
             {dealer_url: [raw("Net weight", "4 kg", dealer_url)]},
         )
-        anchor_html = '<html><body><a href="https://acme-shop.example/">Find a store</a></body></html>'
+        anchor_html = '<html><body><a href="https://acme-shop.example/">Authorized dealer</a></body></html>'
         dealer_html = "<html><body><p>Acme Shop is an authorized dealer of Acme.</p></body></html>"
 
         def fetch(candidate_item):

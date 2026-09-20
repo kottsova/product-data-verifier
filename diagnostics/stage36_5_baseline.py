@@ -1,6 +1,7 @@
 """Stage 36.5 discovery benchmark and archived-result inspection.
 
 Live: python -m diagnostics.stage36_5_baseline --live --output DIR
+Corrected inputs: add --structured-inputs (reported separately)
 Replay: python -m diagnostics.stage36_5_baseline --archive diagnostics/stage36_5/raw.zip
 
 The live run uses structured brand/model inputs. It never silently resumes an
@@ -105,23 +106,28 @@ def manifest_rows(rows: list[dict]) -> list[dict]:
     } for row in rows]
 
 
-def live(output: Path) -> None:
+def live(output: Path, *, structured_inputs: bool = False, max_items: int = 50) -> None:
     if output.exists():
         raise SystemExit(f"Output directory already exists: {output}")
     output.mkdir(parents=True)
-    service = DiscoveryDebugService()
+    historical = load_archive(Path("diagnostics/baselines/stage36_5/raw.zip"))
     for i, (brand, model, category, level) in enumerate(PRODUCTS, 1):
+        if i > max_items:
+            break
         clear_official_domain_cache()
+        name = f"{brand} | {model}" if structured_inputs else historical[i - 1]["input"]
         started = time.monotonic()
         try:
-            # Structured input prevents multiword brands being split again.
-            result = service.discover_name(f"{brand} | {model}")
+            # A fresh service per row matches the archived harness.
+            result = DiscoveryDebugService().discover_name(name)
             row = result.to_dict()
         except Exception as exc:  # preserve each failed attempt
             row = {"error": repr(exc)}
-        row.update(index=i, input=f"{brand} {model}", category=category, identity_level=level)
+        row.update(index=i, input=name, category=category, identity_level=level,
+                   input_mode="structured" if structured_inputs else "historical")
         (output / f"{i:02d}.json").write_text(json.dumps(row, ensure_ascii=False, indent=1), encoding="utf-8")
         print(i, row["input"], row.get("status", row.get("error")), round(time.monotonic() - started, 1), flush=True)
+        time.sleep(2)
 
 
 def main() -> None:
@@ -130,11 +136,15 @@ def main() -> None:
     parser.add_argument("--rows", action="store_true")
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--structured-inputs", action="store_true")
+    parser.add_argument("--max-items", type=int, default=50)
     args = parser.parse_args()
     if args.live:
         if args.output is None:
             parser.error("--live requires --output")
-        live(args.output)
+        if not 1 <= args.max_items <= 50:
+            parser.error("--max-items must be between 1 and 50")
+        live(args.output, structured_inputs=args.structured_inputs, max_items=args.max_items)
     elif args.archive:
         rows = load_archive(args.archive)
         print(json.dumps(manifest_rows(rows) if args.rows else summary(rows), ensure_ascii=False, indent=2))

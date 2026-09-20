@@ -14,6 +14,7 @@ import csv
 from dataclasses import replace
 from io import StringIO
 import unittest
+from unittest.mock import patch
 
 from bot.export import build_wide_export_row, export_result_csv
 from bot.formatters import (
@@ -49,7 +50,17 @@ from tests.test_bot import (
     _tap_language_button,
     make_result,
 )
-from tests.test_workflow import candidate, fetch_result
+from tests.test_workflow import candidate, fetch_result, fixture_authority_seed
+
+
+def setUpModule():
+    global _registry_patch
+    _registry_patch = patch("core.workflow.find_seed", side_effect=fixture_authority_seed)
+    _registry_patch.start()
+
+
+def tearDownModule():
+    _registry_patch.stop()
 
 SPECS_URL = "https://fi.google.example/about/phones/pixel-9-pro-specs"
 PRODUCT_URL = "https://fi.google.example/about/phones/pixel-9-pro"
@@ -148,7 +159,7 @@ PRODUCT_HTML = (
 )
 
 GSM_HTML = (
-    '<html><head><meta property="og:image" content="https://fdn.gsm.example/bigpic/pixel.jpg"></head><body>'
+    '<html><head><meta property="og:image" content="https://fdn.gsm.example/bigpic/pixel.jpg"></head><body><h1>Google Pixel 9 Pro</h1>'
     '<a href="google_pixel_9_pro-review-2745.php">Review</a>'
     '<a href="google_pixel_9_pro-pictures-13218.php">Pictures</a>'
     '<a href="google_pixel_9_pro-reviews-13218.php">Opinions</a>'
@@ -195,12 +206,13 @@ def run_pixel(pages, initial, model="Pixel 9 Pro"):
         fetch,
         extract_attributes,
     )
-    return run_product_workflow(
-        ProductWorkflowRequest(
-            f"Google {model}", brand="Google", targeted_search_enabled=False,
-        ),
-        services=services,
-    )
+    with patch("core.workflow.find_seed", side_effect=fixture_authority_seed):
+        return run_product_workflow(
+            ProductWorkflowRequest(
+                f"Google {model}", brand="Google", targeted_search_enabled=False,
+            ),
+            services=services,
+        )
 
 
 def identity_for(model: str):
@@ -230,7 +242,7 @@ class SpecPageAcceptanceTests(unittest.TestCase):
         self.assertEqual(len(ranked), 1)
         self.assertEqual(ranked[0]["url"], SPECS_URL)
         self.assertEqual(ranked[0]["source_type"], "manufacturer")
-        self.assertEqual(ranked[0]["authority_status"], "verified")
+        self.assertEqual(ranked[0]["authority_status"], "provisional")
         self.assertEqual(ranked[0]["model_match"], "exact")
 
     def test_specs_page_is_reached_from_the_product_page_tech_specs_link(self):

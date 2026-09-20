@@ -8,13 +8,13 @@ network access.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date
 import time
 from typing import Callable, Mapping, cast
 from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
-
 from core.authority import ELEVATED_ROLES, TrustedSource, resolve_authority
+from core.authority_registry import RULES_VERSION, find_seed
 from core.budget import BudgetExhaustedError, WallClockBudget
 from core.category import CategoryResult, detect_category
 from core.discovery import (
@@ -36,6 +36,7 @@ from core.provider_health import ProviderHealthStore
 from core.identity import (
     IdentityEvidence,
     ProductIdentity,
+    assess_product_page_identity,
     base_model_in_text,
     resolve_product_identity,
 )
@@ -424,11 +425,17 @@ def _candidate_fetch_view(
         "source_type",
         "authority_status",
         "authority_evidence_url",
+        "authority_evidence_kind",
+        "authority_evidence_excerpt",
+        "authority_checked_on",
+        "authority_rules_version",
+        "operator_relation",
+        "authority_scope",
         "model_relevance",
         "identity_relation",
     ):
         value = candidate.get(field_name)
-        result[field_name] = str(value) if value is not None else None
+        result[field_name] = value if field_name == "authority_rules_version" else (str(value) if value is not None else None)
     return cast(FetchResult, result)
 
 
@@ -437,48 +444,32 @@ def _verify_fetched_identity(
     candidate: Mapping[str, object],
     identity: ProductIdentity,
 ) -> FetchResult:
-    """Upgrade only a verification-fetch whose body proves the exact model.
-
-    Search query text is never evidence. The transition from unknown to
-    same-base-model is based on successfully fetched page content, while all
-    pre-fetch different-model decisions remain irreversible.
-    """
-    if source.get("status") != "success":
+    """Recheck every fetched HTML source against its main product object."""
+    if source.get("status") != "success" or source.get("document_type") != "html":
         return source
-    if candidate.get("identity_relation") != "unknown":
-        return source
-    if candidate.get("authority_status") != "verified":
-        return source
-    if candidate.get("source_type") not in {"manufacturer", "official_document"}:
-        return source
-    if not any(
-        "content verification" in str(reason).casefold()
-        for reason in candidate.get("relevance_reasons") or ()
-    ):
+    if candidate.get("identity_relation") == "different_model":
         return source
     model = identity.base_model or identity.commercial_model
-    html = str(source.get("html") or "")
-    soup = BeautifulSoup(html, "html.parser")
-    identity_texts = [
-        str(source.get("final_url") or ""),
-        soup.title.get_text(" ", strip=True) if soup.title else "",
-    ]
-    identity_texts.extend(
-        heading.get_text(" ", strip=True)
-        for heading in soup.find_all("h1", limit=3)
-    )
-    for selector in ('meta[property="og:title"]', 'meta[name="twitter:title"]'):
-        tag = soup.select_one(selector)
-        if tag and tag.get("content"):
-            identity_texts.append(str(tag.get("content")))
-    if not model or not base_model_in_text(model, " ".join(identity_texts)):
+    if not model:
         return source
-    source["model_relevance"] = "exact_base_model"
-    source["identity_relation"] = "same_base_model"
+    decision = assess_product_page_identity(
+        model, str(source.get("html") or ""),
+        str(source.get("final_url") or source.get("source_url") or ""),
+    )
+    if decision.relation == "exact":
+        source["model_relevance"] = "exact_base_model"
+        source["identity_relation"] = "same_base_model"
+    elif decision.relation in {"related_item", "different_variant"}:
+        source["model_relevance"] = "different_model"
+        source["identity_relation"] = "different_model"
+    else:
+        source["model_relevance"] = "unknown"
+        source["identity_relation"] = "unknown"
     metadata = dict(source.get("discovery_metadata") or candidate)
-    metadata["model_relevance"] = "exact_base_model"
-    metadata["identity_relation"] = "same_base_model"
-    metadata["content_identity_verified"] = True
+    metadata["model_relevance"] = source["model_relevance"]
+    metadata["identity_relation"] = source["identity_relation"]
+    metadata["content_identity_verified"] = decision.relation == "exact"
+    metadata["content_identity_evidence"] = decision.evidence
     source["discovery_metadata"] = metadata
     return source
 
@@ -546,19 +537,69 @@ def _resolve_authority_roles(sources: list[FetchResult], brand: str) -> None:
     """
     if not brand:
         return
+    # A search-result "official" claim is only a lead. It must not seed
+    # corroboration or survive as final verified authority, including when a
+    # reusable fetch result carries an old decision.
+    for source in sources:
+        old_evidence = source.get("authority_evidence_kind")
+        old_role = source.get("source_type")
+        if old_evidence not in {"search_hypothesis", "audited_registry", "contextual_anchor"} and not (
+            source.get("authority_status") == "verified"
+            and old_role in {"manufacturer", "official_document", "distributor"}
+        ):
+            continue
+        seed = find_seed(brand, _fetch_domain(source)) if old_role in {"manufacturer", "official_document", "distributor"} else None
+        metadata = dict(source.get("discovery_metadata") or {})
+        if seed is None:
+            source["authority_status"] = "unknown"
+            source["source_type"] = "other"
+            source["authority_evidence_kind"] = "none"
+            source["authority_evidence_excerpt"] = ""
+            source["authority_checked_on"] = ""
+            metadata.update(authority_status="unknown", source_type="other", authority_evidence_kind="none",
+                            authority_evidence_excerpt="", authority_checked_on="")
+        else:
+            source["authority_status"] = "verified"
+            source["source_type"] = (
+                "distributor" if not seed.first_party else (
+                    "official_document" if source.get("source_type") == "official_document"
+                    else "manufacturer"
+                )
+            )
+            source["authority_evidence_url"] = seed.evidence_url
+            source["authority_evidence_kind"] = "audited_registry"
+            source["authority_evidence_excerpt"] = seed.evidence_excerpt
+            source["authority_checked_on"] = seed.checked_on.isoformat()
+            source["authority_rules_version"] = seed.rules_version
+            source["operator_relation"] = seed.operator_relation
+            source["authority_scope"] = seed.scope
+            metadata.update(
+                authority_status="verified", source_type=source["source_type"],
+                authority_evidence_url=seed.evidence_url,
+                authority_evidence_kind="audited_registry",
+                authority_evidence_excerpt=seed.evidence_excerpt,
+                authority_checked_on=seed.checked_on.isoformat(),
+                authority_rules_version=seed.rules_version,
+                operator_relation=seed.operator_relation, authority_scope=seed.scope,
+            )
+        source["discovery_metadata"] = metadata
     trusted_sources = tuple(
-        TrustedSource(domain=_fetch_domain(source), html=str(source.get("html") or ""))
+        TrustedSource(
+            domain=_fetch_domain(source), html=str(source.get("html") or ""),
+            url=str(source.get("final_url") or source.get("source_url") or ""),
+        )
         for source in sources
         if source.get("status") == "success"
         and source.get("document_type") == "html"
         and source.get("authority_status") == "verified"
         and source.get("source_type") == "manufacturer"
+        and source.get("authority_evidence_kind") == "audited_registry"
         and _fetch_domain(source)
     )
     for source in sources:
         if source.get("status") != "success" or source.get("document_type") != "html":
             continue
-        if source.get("authority_status") not in (None, "unknown"):
+        if source.get("authority_status") not in (None, "unknown", "provisional"):
             continue
         domain = _fetch_domain(source)
         if not domain:
@@ -569,16 +610,30 @@ def _resolve_authority_roles(sources: list[FetchResult], brand: str) -> None:
         )
         source["authority_role"] = assessment.role
         if assessment.role not in ELEVATED_ROLES:
+            source["authority_status"] = "unknown"
+            metadata = dict(source.get("discovery_metadata") or {})
+            metadata.update(authority_status="unknown", authority_reason=assessment.reason)
+            source["discovery_metadata"] = metadata
             continue
-        evidence_url = str(source.get("final_url") or source.get("source_url") or "")
+        evidence_url = str(assessment.corroboration.evidence_url or "")
         source["authority_status"] = "verified"
         source["source_type"] = _role_source_type(assessment.role)
         source["authority_evidence_url"] = evidence_url
+        source["authority_evidence_kind"] = "contextual_anchor"
+        source["authority_evidence_excerpt"] = assessment.corroboration.evidence_excerpt
+        source["authority_checked_on"] = date.today().isoformat()
+        source["authority_rules_version"] = RULES_VERSION
+        source["operator_relation"] = assessment.corroboration.relation
         metadata = dict(source.get("discovery_metadata") or {})
         metadata["authority_status"] = source["authority_status"]
         metadata["source_type"] = source["source_type"]
         metadata["authority_evidence_url"] = evidence_url
         metadata["authority_reason"] = assessment.reason
+        metadata["authority_evidence_kind"] = "contextual_anchor"
+        metadata["authority_evidence_excerpt"] = assessment.corroboration.evidence_excerpt
+        metadata["authority_checked_on"] = date.today().isoformat()
+        metadata["authority_rules_version"] = RULES_VERSION
+        metadata["operator_relation"] = assessment.corroboration.relation
         source["discovery_metadata"] = metadata
 
 

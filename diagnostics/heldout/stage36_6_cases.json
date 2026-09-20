@@ -1,0 +1,16 @@
+{
+  "registered_on": "2026-09-20",
+  "purpose": "Deterministic, previously unused brands and products for authority and main-object identity regression.",
+  "identity": [
+    {"brand": "Helios", "model": "MixPro 620", "url": "https://helios.example/p/947", "heading": "Helios MixPro 620", "expected": "exact"},
+    {"brand": "Norva", "model": "T700", "url": "https://norva.example/p/t700", "heading": "Norva T700", "expected": "exact"},
+    {"brand": "Helios", "model": "MixPro 620", "url": "https://helios.example/parts/blade-for-mixpro-620", "heading": "Blade for MixPro 620", "expected": "related_item"},
+    {"brand": "Norva", "model": "T700", "url": "https://norva.example/p/t700-ultra", "heading": "Norva T700 Ultra", "expected": "different_variant"},
+    {"brand": "Arden", "model": "PureWash 5", "url": "https://arden.example/p/purewash-5-refill", "heading": "Arden PureWash 5 Refill", "expected": "different_variant"},
+    {"brand": "Valea", "model": "Trail 3", "url": "https://valea.example/p/trail-3-twin-pack", "heading": "Valea Trail 3 Twin Pack", "expected": "different_variant"}
+  ],
+  "authority": [
+    {"brand": "Helios", "domain": "helios-shop.example", "claim": "Official Helios distributor", "anchor": "Where to buy", "expected": "unknown"},
+    {"brand": "Norva", "domain": "norva-shop.example", "claim": "Authorized dealer of Norva", "anchor": "Authorized dealer", "expected": "authorized_dealer"}
+  ]
+}

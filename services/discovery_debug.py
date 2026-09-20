@@ -9,6 +9,7 @@ specifications.  It never extracts, validates, exports or localizes values.
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 from difflib import SequenceMatcher
 from dataclasses import asdict, dataclass, field, replace
 import re
@@ -17,19 +18,23 @@ import time
 from typing import Callable, Iterable, Literal
 from urllib.parse import unquote, urlparse
 
+from bs4 import BeautifulSoup
+
 from core.budget import WallClockBudget
+from core.authority import TrustedSource, resolve_authority
+from core.authority_registry import RULES_VERSION, find_seed
 from core.discovery import (
     Candidate,
     DiscoveryOutcome,
     DiscoveryRuntimeConfig,
     ResilientSearchSession,
     _page_kind,
-    _registrable_domain,
     _search_result_record,
     canonicalize_url,
     discover_with_status,
 )
 from core.document_identity import DocumentReader, read_pdf_text, verify_documents
+from core.identity import assess_product_page_identity
 from core.official_documents import (
     CANONICAL_FIELD,
     OfficialDocument,
@@ -66,6 +71,16 @@ class DiscoverySource:
     sku_relation: str = ""
     sku_suffix: str = ""
     page_role: str = "product"  # product | support | document
+    content_identity_verified: bool = False
+    identity_evidence: str = ""
+    authority_status: str = "unknown"
+    authority_evidence_url: str = ""
+    authority_evidence_kind: str = "none"
+    authority_evidence_excerpt: str = ""
+    authority_checked_on: str = ""
+    authority_rules_version: int = 0
+    operator_relation: str = "unknown"
+    authority_scope: str = "unknown"
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -158,6 +173,8 @@ def _authority(candidate: Candidate) -> tuple[str, DiscoveryGroup]:
         return "official support", "official"
     if verified and source_type == "manufacturer":
         return "manufacturer", "official"
+    if verified and source_type == "distributor":
+        return "independent distributor", "dealer"
     if verified and source_type == "retailer":
         return "authorized dealer", "dealer"
     return "secondary", "secondary"
@@ -166,6 +183,8 @@ def _authority(candidate: Candidate) -> tuple[str, DiscoveryGroup]:
 def _page_role(url: str, title: str) -> str:
     """Product page, support page, or document -- never mixed."""
     path = urlparse(url).path.lower()
+    if any(part in path.split("/") for part in ("forum", "forums", "discussions", "community")):
+        return "forum"
     if path.endswith(_DOCUMENT_SUFFIXES):
         return "document"
     if classify_document(url, title) is not None and not is_document_index(url, title):
@@ -177,6 +196,10 @@ def _page_role(url: str, title: str) -> str:
 
 def _candidate_view(candidate: Candidate, *, rejected: bool = False) -> DiscoverySource:
     authority, group = _authority(candidate)
+    role = _page_role(str(candidate.get("url") or ""), str(candidate.get("title") or ""))
+    if role == "forum" and group == "official":
+        group = "secondary"
+        authority = "official-host community content"
     if rejected:
         group = "rejected"
     reasons = list(candidate.get("relevance_reasons") or ())
@@ -198,7 +221,15 @@ def _candidate_view(candidate: Candidate, *, rejected: bool = False) -> Discover
         group=group,
         sku_relation=str(candidate.get("sku_relation") or ""),
         sku_suffix=str(candidate.get("sku_suffix") or ""),
-        page_role=_page_role(url, title),
+        page_role=role,
+        authority_status=str(candidate.get("authority_status") or "unknown"),
+        authority_evidence_url=str(candidate.get("authority_evidence_url") or ""),
+        authority_evidence_kind=str(candidate.get("authority_evidence_kind") or "none"),
+        authority_evidence_excerpt=str(candidate.get("authority_evidence_excerpt") or ""),
+        authority_checked_on=str(candidate.get("authority_checked_on") or ""),
+        authority_rules_version=int(candidate.get("authority_rules_version") or 0),
+        operator_relation=str(candidate.get("operator_relation") or "unknown"),
+        authority_scope=str(candidate.get("authority_scope") or "unknown"),
     )
 
 
@@ -208,10 +239,15 @@ def _official_hosts(candidates: Iterable[Candidate]) -> list[str]:
         if candidate.get("authority_status") == "verified" and candidate.get("source_type") in {
             "manufacturer", "official_document",
         }:
-            host = _registrable_domain(str(candidate.get("domain") or ""))
+            host = str(candidate.get("domain") or "").lower().removeprefix("www.")
             if host and host not in hosts:
                 hosts.append(host)
     return hosts
+
+
+def _first_party_seed(brand: str, url: str) -> bool:
+    seed = find_seed(brand, urlparse(url).hostname or "")
+    return bool(seed and seed.first_party)
 
 
 def _document_from_candidate(
@@ -345,7 +381,10 @@ def _result_from_outcome(
             rejected_documents.append(rejection)
 
     inspections: list[tuple[DiscoverySource, PageInspection]] = []
+    html_document_decisions: dict[str, object] = {}
     if fetch is not None:
+        product_decisions: dict[str, object] = {}
+        support_decisions: dict[str, object] = {}
         targets: list[tuple[DiscoverySource, str]] = []
         rank = {"exact": 0, "probable": 1, "weak": 2}
         for source in sorted(official_pages, key=lambda item: rank.get(item.model_match, 3))[:6]:
@@ -355,6 +394,15 @@ def _result_from_outcome(
                 break
             if not source.url.lower().split("?")[0].endswith(_DOCUMENT_SUFFIXES):
                 targets.append((source, "scan"))
+        # Search-level official claims are only leads. Inspect a bounded set
+        # of their pages so an independently anchored relationship can be
+        # resolved without granting trust from the snippet itself.
+        provisional = [
+            item for item in grouped["secondary"]
+            if item.authority_status == "provisional"
+            and item.page_role in {"product", "support"}
+        ]
+        targets.extend((item, "authority") for item in provisional[:4])
 
         def load(target: tuple[DiscoverySource, str]):
             return target, fetch(target[0].url)
@@ -366,8 +414,28 @@ def _result_from_outcome(
             if page is None:
                 continue
             final_url, html = page
+            if kind in {"product", "scan"} and not _first_party_seed(brand, final_url):
+                # A redirect can leave the audited host. The destination is
+                # a fresh authority decision, never inherited from the URL.
+                continue
             if kind == "product":
                 inspections.append((source, inspect_product_page(html, final_url)))
+                product_decisions[source.url] = assess_product_page_identity(model, html, final_url)
+                if product_decisions[source.url].relation != "exact":
+                    continue
+            elif kind == "scan" and source.page_role == "support":
+                support_decisions[source.url] = assess_product_page_identity(model, html, final_url)
+                if support_decisions[source.url].relation in {"different_variant", "related_item"}:
+                    continue
+            elif kind == "scan" and source.page_role == "document":
+                html_document_decisions[source.url] = assess_product_page_identity(model, html, final_url)
+                if html_document_decisions[source.url].relation != "exact":
+                    continue
+            elif kind == "authority" and source.page_role == "product":
+                product_decisions[source.url] = assess_product_page_identity(model, html, final_url)
+                continue
+            elif kind == "authority":
+                continue
             title_match = re.search(r"<title[^>]*>(.*?)</title>", html[:200_000], re.I | re.S)
             page_title = " ".join((title_match.group(1) if title_match else "").split())
             found, rejected_links = extract_documents(
@@ -382,8 +450,103 @@ def _result_from_outcome(
         # Links are for manual checking: show the spelling that actually loads
         # (canonicalisation drops trailing slashes some sites 404 without).
         working = {source.url: page[0] for (source, _), page in fetched if page}
-        official_pages = [replace(item, url=working.get(item.url, item.url)) for item in official_pages]
-        support_pages = [replace(item, url=working.get(item.url, item.url)) for item in support_pages]
+        reviewed_pages: list[DiscoverySource] = []
+        for item in official_pages:
+            final_url = working.get(item.url, item.url)
+            if final_url != item.url and not _first_party_seed(brand, final_url):
+                grouped["secondary"].append(replace(
+                    item, url=final_url, group="secondary", authority="unknown",
+                    authority_status="unknown", authority_evidence_kind="none",
+                    model_match="weak", reason=f"{item.reason}; redirected outside audited host",
+                ))
+                continue
+            decision = product_decisions.get(item.url)
+            if decision is None:
+                reviewed_pages.append(replace(
+                    item, model_match="weak", reason=f"{item.reason}; product content not verified",
+                ))
+                continue
+            if decision.relation == "exact":
+                reviewed_pages.append(replace(
+                    item, url=working.get(item.url, item.url), model_match="exact",
+                    content_identity_verified=True, identity_evidence=decision.evidence,
+                ))
+            else:
+                grouped["rejected"].append(replace(
+                    item, url=working.get(item.url, item.url), model_match="rejected",
+                    group="rejected", reason=f"{item.reason}; {decision.evidence}",
+                    identity_evidence=decision.evidence,
+                ))
+        official_pages = reviewed_pages
+        reviewed_support: list[DiscoverySource] = []
+        for item in support_pages:
+            final_url = working.get(item.url, item.url)
+            if final_url != item.url and not _first_party_seed(brand, final_url):
+                grouped["secondary"].append(replace(
+                    item, url=final_url, group="secondary", authority="unknown",
+                    authority_status="unknown", authority_evidence_kind="none",
+                    model_match="weak", reason=f"{item.reason}; redirected outside audited host",
+                ))
+                continue
+            decision = support_decisions.get(item.url)
+            if decision is None or decision.relation == "unknown":
+                reviewed_support.append(replace(item, url=final_url, model_match="weak"))
+            elif decision.relation == "exact":
+                reviewed_support.append(replace(
+                    item, url=final_url, model_match="exact", content_identity_verified=True,
+                    identity_evidence=decision.evidence,
+                ))
+            else:
+                grouped["rejected"].append(replace(
+                    item, url=final_url, group="rejected", model_match="rejected",
+                    identity_evidence=decision.evidence,
+                    reason=f"{item.reason}; {decision.evidence}",
+                ))
+        support_pages = reviewed_support
+        trusted = tuple(
+            TrustedSource(domain=urlparse(page[0]).hostname or "", html=page[1], url=page[0])
+            for (source, _kind), page in fetched
+            if page and source.authority_status == "verified"
+            and source.source_type == "manufacturer"
+            and _first_party_seed(brand, page[0])
+        )
+        for (source, kind), page in fetched:
+            if kind != "authority" or page is None:
+                continue
+            final_url, html = page
+            final_host = urlparse(final_url).hostname or ""
+            assessment = resolve_authority(html, BeautifulSoup(html, "html.parser").get_text(" ", strip=True), final_host, brand, trusted)
+            if assessment.role == "manufacturer":
+                decision = product_decisions.get(source.url)
+                if source.page_role == "product" and (decision is None or decision.relation != "exact"):
+                    continue
+                promoted = replace(
+                    source, url=final_url, group="official", authority="manufacturer",
+                    authority_status="verified", authority_evidence_url=assessment.corroboration.evidence_url or "",
+                    authority_evidence_kind="contextual_anchor",
+                    authority_evidence_excerpt=assessment.corroboration.evidence_excerpt,
+                    authority_checked_on=date.today().isoformat(), authority_rules_version=RULES_VERSION,
+                    operator_relation=assessment.corroboration.relation,
+                    model_match="exact" if decision else source.model_match,
+                    content_identity_verified=bool(decision),
+                    identity_evidence=decision.evidence if decision else "",
+                    reason=f"{source.reason}; {assessment.reason}",
+                )
+                grouped["secondary"].remove(source)
+                (official_pages if source.page_role == "product" else support_pages).append(promoted)
+            elif assessment.role in {"official_distributor", "authorized_dealer"}:
+                grouped["secondary"].remove(source)
+                grouped["dealer"].append(replace(
+                    source, url=final_url, group="dealer", authority=assessment.role,
+                    authority_status="verified", authority_evidence_url=assessment.corroboration.evidence_url or "",
+                    authority_evidence_kind="contextual_anchor",
+                    authority_evidence_excerpt=assessment.corroboration.evidence_excerpt,
+                    authority_checked_on=date.today().isoformat(), authority_rules_version=RULES_VERSION,
+                    operator_relation=assessment.corroboration.relation,
+                    reason=f"{source.reason}; {assessment.reason}",
+                ))
+        grouped["official"] = [*official_pages, *support_pages, *document_sources]
+        official_all = grouped["official"]
 
     # Document links surfaced by dedicated document queries.
     official_hosts = _official_hosts(outcome.candidates)
@@ -396,8 +559,8 @@ def _result_from_outcome(
         doc_type = classify_document(url, title)
         if doc_type is None:
             continue
-        host_root = _registrable_domain(urlparse(canonical).hostname or "")
-        if host_root not in official_hosts:
+        host = (urlparse(canonical).hostname or "").lower().removeprefix("www.")
+        if host not in official_hosts:
             rejected_documents.append(RejectedDocument(
                 canonical, doc_type, title, "document host is not a verified official domain",
             ))
@@ -415,6 +578,18 @@ def _result_from_outcome(
         ))
 
     merged_documents = merge_documents(documents)
+    # A title/URL or link from an exact product page is a document lead.
+    # HTML manuals need their own primary-object content before "exact".
+    merged_documents = [
+        replace(
+            document, model_match="unverified",
+            identity_evidence="HTML document content not verified",
+            reason=f"{document.reason}; HTML document content not verified",
+        ) if document.file_type != "pdf" and document.model_match == "exact"
+        and (document.url not in html_document_decisions or html_document_decisions[document.url].relation != "exact")
+        else document
+        for document in merged_documents
+    ]
     if document_reader is not None:
         merged_documents = _verify_document_identity(merged_documents, brand, model, document_reader)
     exact_official = any(item.model_match == "exact" for item in official_pages)

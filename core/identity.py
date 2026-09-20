@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
 import re
 import unicodedata
 from typing import Iterable, Literal, Mapping
+
+from urllib.parse import unquote, urlparse
 
 
 MarketScope = Literal["global", "regional", "unknown"]
@@ -83,6 +86,118 @@ def base_model_in_text(base_model: str | None, text: str | None) -> bool:
             continue
         return True
     return False
+
+
+@dataclass(frozen=True, slots=True)
+class PageIdentityAssessment:
+    """Identity of the page's main product, never inferred from a search query."""
+
+    relation: Literal["exact", "different_variant", "related_item", "unknown"]
+    primary_name: str
+    evidence: str
+
+
+def assess_product_page_identity(model: str, html: str, final_url: str) -> PageIdentityAssessment:
+    """Check the main page object instead of treating a URL or snippet as proof.
+
+    Only a primary heading or single Product structured-data object counts.
+    Body-wide matches are deliberately ignored: a parts page and a category
+    page can mention the requested model many times without being that model.
+    """
+    from bs4 import BeautifulSoup
+
+    from core.match import candidate_model_match
+    from core.sku import requested_sku, sku_relation
+
+    soup = BeautifulSoup(html or "", "html.parser")
+    heading = soup.find("h1")
+    primary = heading.get_text(" ", strip=True) if heading else ""
+    structured: list[dict] = []
+    for script in soup.find_all("script", attrs={"type": re.compile(r"application/ld\+json", re.I)}):
+        raw = script.string or script.get_text() or ""
+        if len(raw) > 1_000_000:
+            continue
+        try:
+            pending = [json.loads(raw)]
+        except (ValueError, TypeError):
+            continue
+        while pending:
+            item = pending.pop()
+            if isinstance(item, list):
+                pending.extend(item)
+            elif isinstance(item, dict):
+                types = item.get("@type", ())
+                types = [types] if isinstance(types, str) else types
+                if isinstance(types, list) and "product" in {str(t).casefold() for t in types}:
+                    structured.append(item)
+                pending.extend(value for value in item.values() if isinstance(value, (dict, list)))
+    if not primary and len(structured) == 1:
+        primary = str(structured[0].get("name") or "").strip()
+    if not primary:
+        return PageIdentityAssessment("unknown", "", "No primary product heading or unique Product object")
+
+    # A title of the form "brush for Model X" explicitly names a different
+    # main object, regardless of how often Model X appears in the page.
+    compatibility = re.search(r"\b(?:for|compatible\s+with|fits|replacement\s+for)\b", primary, re.I)
+    document_heading = bool(re.search(r"\b(?:manual|support|specifications|service|datasheet)\b", primary[:compatibility.start()] if compatibility else "", re.I))
+    if compatibility and not document_heading and base_model_in_text(model, primary[compatibility.end():]):
+        return PageIdentityAssessment("related_item", primary, "Main object is for/compatible with requested model")
+
+    configuration = re.compile(r"\b(?:refill|twin[ -]?pack|bundle|kit)\b", re.I)
+    if configuration.search(primary) and not configuration.search(model):
+        return PageIdentityAssessment("different_variant", primary, "Main object names a different package or refill")
+
+    # Unknown future variant names need not be enumerated. A distinctive
+    # suffix immediately after the requested model in *both* the primary
+    # product name and destination slug is positive evidence of a different
+    # commercial item. Generic descriptors such as "Washing machine" do not
+    # have this acronym/CamelCase shape.
+    model_parts = re.findall(r"[A-Za-z0-9]+", model)
+    phrase = re.compile(r"(?<!\w)" + r"[\s_-]*".join(map(re.escape, model_parts)) + r"(?!\w)", re.I) if model_parts else None
+    occurrence = phrase.search(primary) if phrase else None
+    if occurrence:
+        following = re.match(r"[\s:–-]+([A-Za-z0-9]+)", primary[occurrence.end():])
+        if following:
+            suffix = following.group(1)
+            distinctive = suffix.isupper() or suffix.isdigit() or any(ch.isupper() for ch in suffix[1:])
+            slug_parts = [part.casefold() for part in re.findall(r"[A-Za-z0-9]+", unquote(urlparse(final_url).path))]
+            expected_parts = [part.casefold() for part in model_parts]
+            follows_in_slug = any(
+                slug_parts[index:index + len(expected_parts)] == expected_parts
+                and index + len(expected_parts) < len(slug_parts)
+                and slug_parts[index + len(expected_parts)] == suffix.casefold()
+                for index in range(len(slug_parts))
+            )
+            # A market-looking suffix alone is insufficient to assert a
+            # distinct commercial variant without an explicit product SKU.
+            if distinctive and follows_in_slug and not re.fullmatch(r"[A-Z]{2}", suffix):
+                return PageIdentityAssessment("different_variant", primary, "Main product and URL name an extra commercial variant")
+
+    if occurrence and re.match(r"-([A-Z]{2})(?![A-Za-z0-9])", primary[occurrence.end():]):
+        return PageIdentityAssessment("unknown", primary, "Regional-looking suffix needs an explicit commercial identifier")
+
+    path = unquote(urlparse(final_url).path)
+    match = candidate_model_match(model, primary, path)
+    if match in {"different_variant", "mismatch"}:
+        return PageIdentityAssessment("different_variant", primary, "Main product identifies a different model or variant")
+
+    sku = requested_sku(model)
+    if sku is not None:
+        # A regional-looking suffix is a hypothesis until an explicit product
+        # identifier agrees. The URL may contain navigation/compatibility text,
+        # so the primary object takes precedence.
+        parts = [primary]
+        if len(structured) == 1:
+            parts.extend(str(structured[0].get(key) or "") for key in ("sku", "mpn", "model"))
+        relation = sku_relation(model, *parts)
+        if relation.kind in {"different_suffix", "different_variant"}:
+            return PageIdentityAssessment("different_variant", primary, f"Product SKU relation: {relation.kind}")
+        if relation.kind != "exact":
+            return PageIdentityAssessment("unknown", primary, f"Product SKU relation: {relation.kind}")
+
+    if base_model_in_text(model, primary) or match == "exact":
+        return PageIdentityAssessment("exact", primary, "Main product names the requested model")
+    return PageIdentityAssessment("unknown", primary, "Main product does not establish the requested identity")
 
 
 def _same(left: str | None, right: str | None) -> bool:

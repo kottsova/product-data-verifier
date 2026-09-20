@@ -329,13 +329,9 @@ def _same_official_family(url: str, base_url: str, brand: str, official_hosts: I
     base = (urlparse(base_url).hostname or "").lower().removeprefix("www.")
     if not host:
         return False
-    if host == base or host.endswith(f".{base}") or base.endswith(f".{host}"):
-        return True
-    if any(host == item or host.endswith(f".{item}") for item in official_hosts):
-        return True
-    brand_key = re.sub(r"[^a-z0-9]", "", brand.casefold())
-    labels = [re.sub(r"[^a-z0-9]", "", label) for label in host.split(".")[:-1]]
-    return bool(brand_key) and len(brand_key) >= 3 and any(label.startswith(brand_key) for label in labels)
+    return host == base or host in {
+        item.lower().removeprefix("www.") for item in official_hosts
+    }
 
 
 def extract_documents(
@@ -352,8 +348,9 @@ def extract_documents(
 ) -> tuple[list[OfficialDocument], list[RejectedDocument]]:
     """Extract and classify documents linked from one *official* page.
 
-    Anything linked from a verified official page inherits that page's
-    authority, even when a CDN hosts the file; the reason says so.
+    Document links are candidates. HTML support links must stay on an exact
+    audited host; linked files still require document identity verification
+    before their contents can establish an exact source.
     """
     parser = _AnchorParser()
     parser.feed(html or "")
