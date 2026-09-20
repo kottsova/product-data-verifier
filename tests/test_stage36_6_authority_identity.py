@@ -92,6 +92,19 @@ class ProductIdentityTests(unittest.TestCase):
         self.assertFalse(result.exact_official_found)
         self.assertEqual(result.official_pages, ())
 
+    def test_js_shell_keeps_known_operator_but_not_exact_identity(self):
+        url = "https://www.razer.com/gaming-mice/razer-deathadder-v3"
+        items = rank_candidates([(url, "Razer DeathAdder V3")], "Razer", "DeathAdder V3")
+        outcome = DiscoveryOutcome(items, "success", [], [], [])
+        result = _result_from_outcome(
+            "Razer DeathAdder V3", "Razer", "DeathAdder V3", "global", outcome, 0.1,
+            fetch=lambda page_url: (page_url, "<html><title>App</title></html>"),
+        )
+        self.assertFalse(result.exact_official_found)
+        self.assertEqual(result.status, "PARTIAL")
+        self.assertEqual(result.official_pages[0].model_match, "weak")
+        self.assertFalse(result.official_pages[0].content_identity_verified)
+
     def test_old_verified_search_hypothesis_cannot_bypass_final_gate(self):
         url = "https://acme.example/product/X100"
         old = candidate(url)

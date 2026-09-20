@@ -471,6 +471,12 @@ def _result_from_outcome(
                     item, url=working.get(item.url, item.url), model_match="exact",
                     content_identity_verified=True, identity_evidence=decision.evidence,
                 ))
+            elif decision.relation == "unknown":
+                reviewed_pages.append(replace(
+                    item, url=working.get(item.url, item.url), model_match="weak",
+                    content_identity_verified=False, identity_evidence=decision.evidence,
+                    reason=f"{item.reason}; product identity not established: {decision.evidence}",
+                ))
             else:
                 grouped["rejected"].append(replace(
                     item, url=working.get(item.url, item.url), model_match="rejected",
