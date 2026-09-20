@@ -69,6 +69,8 @@ SEEDS = (
     AuthoritySeed("Nike", "nike.com", "brand_operator", "Nike apparel and footwear", "https://www.nike.com/be/help/a/bedrijfsgegevens/nike-contact-lijst", date(2026, 9, 20)),
     AuthoritySeed("Samsung", "samsung.com", "brand_operator", "Samsung major appliances and displays", "https://news.samsung.com/global/terms", date(2026, 9, 20)),
     AuthoritySeed("DEWALT", "dewalt.co.uk", "licensed_brand_operator", "UK power tools", "https://www.dewalt.co.uk/en-gb/terms-use", date(2026, 9, 20)),
+    AuthoritySeed("Einhell", "einhell.co.uk", "brand_operator", "UK power tools", "https://www.einhell.co.uk/about-us/", date(2026, 9, 20)),
+    AuthoritySeed("STIHL", "stihl.co.uk", "brand_operator", "UK garden and outdoor tools", "https://www.stihl.co.uk/en/legal-info/terms-of-use", date(2026, 9, 20)),
 )
 
 # Short source fragments or tightly scoped paraphrases retained with each
@@ -103,6 +105,8 @@ _EVIDENCE_EXCERPTS = {
     "nike.com": "Nike company details identify Nike Retail B.V. as nike.com operator",
     "samsung.com": "Samsung Electronics newsroom terms identify Samsung Electronics as samsung.com operator",
     "dewalt.co.uk": "DEWALT terms identify DEWALT Industrial Power Tool Company Limited as site operator",
+    "einhell.co.uk": "Einhell UK company page identifies the UK subsidiary and its power-tool range",
+    "stihl.co.uk": "Site terms identify Andreas Stihl Limited as the operator of stihl.co.uk",
 }
 SEEDS = tuple(replace(seed, evidence_excerpt=_EVIDENCE_EXCERPTS[seed.host]) for seed in SEEDS)
 
@@ -138,6 +142,8 @@ _SEED_CATEGORIES = {
     "nike.com": ("apparel/footwear",),
     "samsung.com": ("major appliances", "TV/display"),
     "dewalt.co.uk": ("power tools",),
+    "einhell.co.uk": ("power tools",),
+    "stihl.co.uk": ("garden/outdoor tools",),
 }
 SEEDS = tuple(replace(seed, categories=_SEED_CATEGORIES[seed.host]) for seed in SEEDS)
 
@@ -160,3 +166,13 @@ def find_seed(brand: str, host: str, *, today: date | None = None,
               category: str = "unknown") -> AuthoritySeed | None:
     lead = find_host_seed_lead(brand, host, today=today)
     return lead if lead and category.casefold() in {item.casefold() for item in lead.categories} else None
+
+
+def single_first_party_host_hint(brand: str, *, today: date | None = None) -> str | None:
+    """One current audited host for a search hint; never an authority decision."""
+    hosts = tuple(dict.fromkeys(
+        seed.host for seed in SEEDS
+        if seed.first_party and normalize_model(seed.brand) == normalize_model(brand)
+        and find_host_seed_lead(brand, seed.host, today=today) is not None
+    ))
+    return hosts[0] if len(hosts) == 1 else None

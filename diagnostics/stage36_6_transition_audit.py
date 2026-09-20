@@ -35,6 +35,8 @@ CONFIRMED = {
     37: ("https://www.makita.co.nz/products/model/GA023GZ", "https://www.makita.co.nz/about/"),
     46: ("https://www.adidas.ae/en/ultraboost-5-shoes/JH9073.html", "https://www.adidas.ae/en/terms.html"),
     47: ("https://www.nike.com/dk/en/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010", "https://www.nike.com/be/help/a/bedrijfsgegevens/nike-contact-lijst"),
+    40: ("https://www.einhell.co.uk/p/4345310/", "https://www.einhell.co.uk/about-us/"),
+    41: ("https://www.stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794", "https://www.stihl.co.uk/en/legal-info/terms-of-use"),
 }
 
 

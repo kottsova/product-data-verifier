@@ -173,6 +173,32 @@ class CyrillicAndCanonicalizationTests(unittest.TestCase):
         self.assertEqual(page[0], "https://acme.ru/catalog/x_1825/")
         self.assertEqual(seen, ["https://acme.ru/catalog/x_1825", "https://acme.ru/catalog/x_1825/"])
 
+    def test_slash_variants_share_one_fetch_deadline(self):
+        timeouts = []
+
+        def unavailable(_url, *, timeout, **_kwargs):
+            timeouts.append(timeout)
+            if len(timeouts) == 1:
+                time.sleep(0.03)
+            return None
+
+        with patch("core.page_inspection.fetch_page_html", side_effect=unavailable):
+            self.assertIsNone(fetch_working_page("https://acme.ru/catalog/x", timeout=0.1))
+        self.assertEqual(len(timeouts), 2)
+        self.assertLess(timeouts[1], timeouts[0] - 0.02)
+
+    def test_page_fetch_records_http_block_and_working_variant(self):
+        attempts = []
+
+        class Session:
+            def get(self, url, **_kwargs):
+                return FakeResponse(url, "<h1>Acme X</h1>", 200 if url.endswith("/") else 403)
+
+        page = fetch_working_page("https://acme.ru/catalog/x", session=Session(), attempts=attempts)
+        self.assertEqual(page[0], "https://acme.ru/catalog/x/")
+        self.assertEqual([item["status"] for item in attempts], ["http_blocked", "loaded"])
+        self.assertEqual([item["http_status"] for item in attempts], [403, 200])
+
 
 class ProviderResilienceTests(unittest.TestCase):
     def setUp(self):

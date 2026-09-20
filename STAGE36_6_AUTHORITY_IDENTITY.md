@@ -231,7 +231,7 @@ Only Oral-B has a recorded loaded page among matched old exact URLs. All 26
 rows include some provider block, and 23 include a provider timeout; neither
 count establishes that the relevant manufacturer's page was blocked.
 
-Eleven transitions are **confirmed current false refusals**: rows 1 Bosch,
+The initial audit identified eleven **confirmed current false refusals**: rows 1 Bosch,
 4 Electrolux, 5 AEG, 6 Miele, 16 ASUS, 22 Logitech, 29 Epson, 30 Canon,
 37 Makita, 46 adidas and 47 Nike. The reviewed primary product page and
 brand-operator evidence for each are in the ledger. Evidence examples:
@@ -259,7 +259,8 @@ and [JH9073](https://www.adidas.ae/en/ultraboost-5-shoes/JH9073.html);
 and [FN4231-010](https://www.nike.com/dk/en/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010).
 This is a current-page adjudication; it cannot reconstruct the 36.6 network
 response. The old exact claims in rows 17 (TP-Link Czech distributor) and 49
-(Oral-B twin packs) were invalid. The other 13 losses remain unknown. Samsung's
+(Oral-B twin packs) were invalid. The other 13 losses were still unknown at
+this point. Samsung's
 `/EF` suffix and DEWALT's `-GB` suffix are examples requiring commercial SKU
 evidence, not automatic exact matches. LG C4 and similar family inputs cannot
 be described as a particular SKU.
@@ -447,3 +448,89 @@ before claiming aggregate Stage 36.6 performance, but is deferred until those
 causes and interruptibility are resolved. Stage 36.6 remains **PARTIAL**;
 PR #1 stays draft. The complete suite passed **1,149 tests**; Python
 compilation and `git diff --check` passed.
+
+## Follow-up: remaining name-only losses and fetch evidence
+
+This follow-up started from clean `8675fd3`, matching the remote branch and
+PR head. All live calls below used the archived input string and
+`DiscoveryDebugService.discover_name(name)` with no category argument. The
+first three-row attempt ran inside a network-restricted sandbox and produced
+socket-denial `FAIL` responses; it is excluded from product comparisons.
+The archived network-enabled runs and hash manifests are
+[remaining three](diagnostics/baselines/stage36_6/name_only_remaining_20260920_sanitized.zip),
+[fetch trace](diagnostics/baselines/stage36_6/name_only_fetch_trace_20260920_sanitized.zip),
+[unknown before](diagnostics/baselines/stage36_6/name_only_unknown_probe_20260920_sanitized.zip),
+[unknown after](diagnostics/baselines/stage36_6/name_only_unknown_scoped_20260920_sanitized.zip),
+[Einhell host hint](diagnostics/baselines/stage36_6/name_only_einhell_hint_20260920_sanitized.zip),
+and [Tefal reference](diagnostics/baselines/stage36_6/name_only_tefal_reference_20260920_sanitized.zip).
+The adjacent JSON summaries state inputs, identity levels, statuses, query
+counts, durations, and sanitized archive SHA-256 values.
+
+The [updated transition ledger](diagnostics/baselines/stage36_6/transition_causes.csv)
+has **13 confirmed current false refusals**, **2 invalid old exact claims**,
+and **11 historically unknown** transitions among the original 26. The two
+newly confirmed current refusals are model-level Einhell TC-PL 750 and STIHL
+MS 182. In a network-enabled run before the scoped seeds, their product
+pages loaded and named the requested main model, but neither operator was
+verified. [Einhell UK's company page](https://www.einhell.co.uk/about-us/)
+identifies its UK subsidiary and tool range; its [TC-PL 750 page](https://www.einhell.co.uk/p/4345310/)
+names the planer and item number 4345310. [STIHL UK's terms](https://www.stihl.co.uk/en/legal-info/terms-of-use)
+identify Andreas Stihl Limited as site operator; the [MS 182 page](https://www.stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794)
+names the chainsaw. The new seeds cover only Einhell power tools and STIHL
+garden/outdoor tools. Product category must come from the fetched primary
+object; wrong-category and unknown-category tests stay outside first-party.
+This is current evidence, not a reconstruction of the missing historical
+fetch responses.
+
+The revised [public saved-candidate replay](diagnostics/baselines/stage36_6/public_name_only_replay_followup_20260920.json)
+passes **12/13** confirmed pages without a category. Einhell UK is the one
+absent from the original Stage 36.6 candidate archive; a separate public
+method fixture passes when that reviewed URL is supplied. A direct fetch of
+the current UK page also confirms exact `TC-PL 750`, the `power tools`
+category from the primary product, and the scoped operator seed; the normal
+search did not supply this page in its latest run. The previously
+accepted ten URLs and six related-item/variant/forum negatives keep their
+earlier results: 6/10 accepted PASS without category, 7/10 with explicit
+category, and 0/6 negative exact official in either mode. Frostbite and
+Nautilus remain operator-unknown.
+
+| Current name-only live check | Result | Queries | Seconds | Observed cause |
+| --- | --- | ---: | ---: | --- |
+| Epson L6270, SKU | PASS | 3 | 19.1 | Fetched exact Epson product and verified European operator |
+| Electrolux EOD6P77WX, SKU | PARTIAL | 12 | 68.2 | Bulgarian product GET timed out after 13.0 s; other candidates were not fetched before budget exhaustion |
+| Miele TWD260WP, SKU | PARTIAL | 9 | 58.0 | UK, UAE and French product GETs returned HTTP 403 |
+| Einhell TC-PL 750, model | PARTIAL | 8 | 37.4 | Reviewed UK product URL absent from this search's candidates, including the bounded site query |
+| STIHL MS 182, model | PASS | 3 | 13.3 | Fetched exact model, observed outdoor-tool category, confirmed UK operator |
+| Tefal FV9845, labelled SKU | PARTIAL | 10 | 41.3 | Fetched product cards carry the distinct commercial reference FV9845G0 |
+
+The Tefal result revealed a latent false-exact risk: a primary heading can
+show base model `FV9845` while the same main card states `Reference: FV9845G0`.
+The identity check now uses such a nearby, unambiguous reference only to veto
+an exact SKU decision; references under unrelated-product headings do not
+count. The final live run classified all four fetched Tefal pages as different
+variants. Tefal was not added to the authority registry merely because an
+official-looking domain or an operator statement exists.
+
+For fetch diagnostics, both slash spellings now share a single 12-second
+request allowance; each attempt records timeout, HTTP block/error, content
+type rejection, or load. Loaded pages also record main-product relation,
+observed category, scoped-seed result, and JavaScript-shell status. The
+Electrolux attempt fell from 25.6 s before this fix to 13.0 s after it;
+requests can still exceed a nominal socket deadline, and the 75-second
+service budget still **cannot interrupt** an active external call. The
+runtime result continues to report this limit explicitly. The two
+Electrolux/Miele checks used 18 queries and 136.3 s before the fetch change,
+then 21 queries and 126.2 s after it; network variation and extra queries
+prevent a general speed claim. The selected Einhell/STIHL/Tefal three-row
+probe moved from 33 queries, 164.1 s, 0 PASS to 22 queries, 98.9 s, 1 PASS
+after the two scoped seeds; that is a selected-run comparison only.
+
+Across the selected live checks so far, seven distinct confirmed losses have
+passed without category: Bosch, ASUS, Logitech, Makita, Nike, Epson, and
+STIHL. Einhell remains a search-retrieval miss; Electrolux and Miele are
+fetch-limited; AEG, Canon, and adidas remain inaccessible on their selected
+runs. The 11 historical unknowns still lack response bodies, and a strict
+interruptible 75-second deadline remains unresolved. A full 50-item rerun
+would mix those unresolved conditions into aggregate figures, so Stage 36.6
+remains **PARTIAL**, PR #1 remains draft, and Stage 37 and retailer fallback
+remain deferred.

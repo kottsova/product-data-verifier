@@ -141,6 +141,39 @@ def assess_product_page_identity(model: str, html: str, final_url: str) -> PageI
     # main-object guard; use only a unique Product object whose identifier and
     # destination URL both carry the complete requested SKU.
     requested = requested_sku(model)
+    if requested is not None and heading is not None:
+        # Some product pages use a family/base code in <h1> while the actual
+        # commercial reference is printed directly beneath that heading.
+        # This nearby detail can veto an exact SKU; it must never establish
+        # identity from a body-wide match or a related-products section.
+        nearby: list[str] = []
+        size = 0
+        for node in heading.next_elements:
+            if getattr(node, "name", None) == "h1":
+                break
+            if (getattr(node, "name", None) == "h2"
+                    and not base_model_in_text(model, node.get_text(" ", strip=True))):
+                break
+            if not isinstance(node, str) or node.parent.name in {"script", "style"}:
+                continue
+            value = str(node).strip()
+            if not value:
+                continue
+            nearby.append(value)
+            size += len(value)
+            if size >= 1200:
+                break
+        references = set(re.findall(
+            r"\bReference\s*:\s*([A-Z0-9][A-Z0-9._/-]{4,})\b",
+            " ".join(nearby), re.I,
+        ))
+        if len(references) == 1:
+            reference_relation = sku_relation(model, next(iter(references)))
+            if reference_relation.kind in {"different_suffix", "different_variant"}:
+                return PageIdentityAssessment(
+                    "different_variant", primary,
+                    "Primary product reference names a different commercial variant",
+                )
     if requested is not None and len(structured) == 1:
         product = structured[0]
         product_code = " ".join(str(product.get(key) or "") for key in ("sku", "mpn", "model"))

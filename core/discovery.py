@@ -24,7 +24,7 @@ from urllib.request import Request, urlopen
 import requests
 
 from core.budget import WallClockBudget
-from core.authority_registry import RULES_VERSION, find_host_seed_lead, find_seed
+from core.authority_registry import RULES_VERSION, find_host_seed_lead, find_seed, single_first_party_host_hint
 from core.fetch import _blocked_reason as _detect_blocked_reason
 from core.sku import requested_sku, sku_in_text_loosely, sku_relation, sku_search_terms
 from core.match import (
@@ -5200,9 +5200,13 @@ def discover_with_status(
         # open a provider circuit before it has a chance to return product
         # pages for the exact model.
         brand_domain_hint = re.sub(r"[^a-z0-9]", "", brand.casefold())
+        # A single reviewed operator host is a better search hint than the
+        # mechanically guessed .com root. It grants no authority: the fetched
+        # primary product must still establish the host's reviewed category.
+        hinted_host = single_first_party_host_hint(brand)
         hinted_site_query = (
-            f'"{model}" site:{brand_domain_hint}.com'
-            if len(brand_domain_hint) >= 3 else None
+            f'"{model}" site:{hinted_host or brand_domain_hint + ".com"}'
+            if hinted_host or len(brand_domain_hint) >= 3 else None
         )
         queries: list[str] = list(base_queries)
         if hinted_site_query:

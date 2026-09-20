@@ -1,0 +1,85 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "b281399dc85859fcb7e86371eba701897d80fef86a3fc9569c9c309e1d923035",
+  "raw_sha256": {
+    "04.json": "9186dfbf67f28285f74452e36c18d5bb3e11385084ed33ecae52abfa7cd7f211",
+    "06.json": "ff000f488e66056b3e37d34f38d1542e74cee1e1fb40ed9d0b877cab6e4909bb",
+    "29.json": "0985e96268f635cdffcd1243581e2d485994c1b6123cac8805d407b6b5abf0e8"
+  },
+  "rows": [
+    {
+      "index": 4,
+      "input": "Electrolux EOD6P77WX",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 9,
+      "prior_seconds": 56.722,
+      "seconds": 75.351,
+      "budget_overrun_seconds": 0.351,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 1,
+        "budget_exhausted": 2
+      }
+    },
+    {
+      "index": 6,
+      "input": "Miele TWD260WP",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 9,
+      "prior_seconds": 63.885,
+      "seconds": 60.925,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 2
+      }
+    },
+    {
+      "index": 29,
+      "input": "Epson EcoTank L6270",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 10,
+      "queries": 3,
+      "prior_seconds": 76.059,
+      "seconds": 19.076,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.epson.eu/en_EU/products/printers/inkjet/consumer/ecotank-l6270-multifunction-wi-fi-ink-tank-a4-printer%2C-with-up-to-3-years-of-ink-included/p/30259"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 1,
+        "unavailable": 1
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 3,
+      "pass": 1
+    },
+    "model": {
+      "rows": 0,
+      "pass": 0
+    },
+    "family": {
+      "rows": 0,
+      "pass": 0
+    }
+  },
+  "prior_queries": 34,
+  "queries": 21,
+  "prior_seconds": 196.7,
+  "seconds": 155.4
+}

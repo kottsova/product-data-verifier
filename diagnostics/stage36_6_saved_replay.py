@@ -27,6 +27,8 @@ PRIMARY = {
     37: '<h1>GA023GZ 40Vmax XGT Brushless Angle Grinder</h1>',
     46: '<main><h1>Ultraboost 5 Shoes</h1><p>Product Code : JH9073</p></main>',
     47: '<title>Nike AeroSwift Men\'s Dri-FIT ADV Running Vest. Nike DK</title><main><h1>Nike AeroSwift</h1><p>Style: FN4231-010</p></main>',
+    40: '<title>Einhell Planer TC-PL 750</title><h1>TC-PL 750</h1>',
+    41: '<title>STIHL MS 182 Petrol Chainsaw</title><h1>MS 182 Petrol Chainsaw</h1>',
 }
 
 

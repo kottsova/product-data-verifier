@@ -939,13 +939,36 @@ class DiscoveryDebugService:
                     page_fetches.append({"url": url, "status": "budget_exhausted", "duration_seconds": 0.0})
                 else:
                     fetch_started = time.monotonic()
-                    page_cache[url] = fetch_working_page(url, timeout=min(12.0, remaining))
-                    page_fetches.append({
+                    attempts: list[dict[str, object]] = []
+                    page_cache[url] = fetch_working_page(
+                        url, timeout=min(12.0, remaining), attempts=attempts,
+                    )
+                    fetch_record: dict[str, object] = {
                         "url": url,
                         "status": "loaded" if page_cache[url] else "unavailable",
                         "duration_seconds": round(time.monotonic() - fetch_started, 3),
                         "final_url": page_cache[url][0] if page_cache[url] else "",
-                    })
+                        "attempts": attempts,
+                    }
+                    if page_cache[url]:
+                        final_url, html = page_cache[url]
+                        identity_check = assess_product_page_identity(model, html, final_url)
+                        observed_category, category_evidence = category_from_primary_product(
+                            model, html, identity_check,
+                        )
+                        host = urlparse(final_url).hostname or ""
+                        lead = find_host_seed_lead(brand, host)
+                        seed = find_seed(brand, host, category=observed_category)
+                        fetch_record.update({
+                            "main_product_relation": identity_check.relation,
+                            "main_product_evidence": identity_check.evidence,
+                            "observed_category": observed_category,
+                            "category_evidence": category_evidence,
+                            "host_seed_operator": lead.operator_relation if lead else "unknown",
+                            "scoped_seed_first_party": bool(seed and seed.first_party),
+                            "js_shell": inspect_product_page(html, final_url).js_shell,
+                        })
+                    page_fetches.append(fetch_record)
             return page_cache[url]
 
         def document_reader(url: str):

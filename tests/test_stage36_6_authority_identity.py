@@ -7,8 +7,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from core.authority import TrustedSource, resolve_authority
-from core.authority_registry import find_seed
-from core.discovery import DiscoveryOutcome, assess_candidate_relevance, canonicalize_url, rank_candidates
+from core.authority_registry import find_seed, single_first_party_host_hint
+from core.discovery import DiscoveryOutcome, assess_candidate_relevance, canonicalize_url, discover_with_status, rank_candidates
 from core.identity import assess_product_page_identity
 from core.official_documents import OfficialDocument
 from core.workflow import ProductWorkflowRequest, _resolve_authority_roles, run_product_workflow
@@ -27,6 +27,39 @@ from tests.test_workflow import FixtureServices, candidate
 
 
 class AuthorityContractTests(unittest.TestCase):
+    def test_single_reviewed_host_replaces_com_search_hint_without_granting_trust(self):
+        self.assertEqual(single_first_party_host_hint("Einhell"), "einhell.co.uk")
+        self.assertIsNone(single_first_party_host_hint("Bosch"))
+        self.assertIsNone(single_first_party_host_hint("Frostbite"))
+        seen = []
+
+        def searcher(query):
+            seen.append(query)
+            if query == '"TC-PL 750" site:einhell.co.uk':
+                return [("https://www.einhell.co.uk/p/4345310-tc-pl-750",
+                         "Einhell TC-PL 750 electric planer")]
+            return []
+
+        clear_official_domain_cache()
+        outcome = discover_with_status("Einhell", "TC-PL 750", searcher=searcher)
+        self.assertIn('"TC-PL 750" site:einhell.co.uk', seen)
+        self.assertTrue(any(item["url"].startswith("https://einhell.co.uk/")
+                            for item in outcome.candidates))
+        self.assertTrue(all(item["authority_status"] != "verified" for item in outcome.candidates))
+
+    def test_primary_reference_vetoes_base_code_exact_variant(self):
+        url = "https://www.tefal.co.uk/Linen-Care/Steam-Irons/Ultimate-Pure-FV9845/p/1830007280"
+        primary = ("<h1>TEFAL Ultimate Pure FV9845 Steam Iron</h1>"
+                   "<h2>TEFAL Ultimate Pure FV9845 Steam Iron</h2>"
+                   "<p>Powerful steam iron</p><p>Reference: FV9845G0</p>"
+                   "<h2>Product details</h2>")
+        self.assertEqual(assess_product_page_identity("Ultimate Pure FV9845", primary, url).relation,
+                         "different_variant")
+        unrelated = ("<h1>TEFAL Ultimate Pure FV9845 Steam Iron</h1>"
+                     "<h2>Related products</h2><p>Reference: FV9845G0</p>")
+        self.assertEqual(assess_product_page_identity("Ultimate Pure FV9845", unrelated, url).relation,
+                         "exact")
+
     def test_seed_is_brand_host_and_time_scoped(self):
         self.assertIsNotNone(find_seed("Razer", "www.razer.com", today=date(2026, 9, 20), category="computer/peripherals"))
         self.assertIsNone(find_seed("Razer", "community.razer.com", today=date(2026, 9, 20), category="computer/peripherals"))
@@ -60,6 +93,8 @@ class AuthorityContractTests(unittest.TestCase):
         self.assertIsNone(find_seed("Philips", "home-appliances.philips", category="personal care/skincare"))
         self.assertIsNone(find_seed("TP-Link", "tp-link.cz", category="power tools"))
         self.assertIsNone(find_seed("Bosch", "bosch-home.co.uk", category="power tools"))
+        self.assertIsNone(find_seed("Einhell", "einhell.co.uk", category="garden/outdoor tools"))
+        self.assertIsNone(find_seed("STIHL", "stihl.co.uk", category="power tools"))
         page = rank_candidates(
             [("https://www.bosch-professional.com/product/WAN28254GB", "Bosch WAN28254GB washing machine")],
             "Bosch", "WAN28254GB", product_category="major appliances",
@@ -264,10 +299,50 @@ class ProductIdentityTests(unittest.TestCase):
 
 
 class HeldoutCases(unittest.TestCase):
+    def test_name_only_new_operator_seeds_need_matching_primary_category(self):
+        cases = (
+            ("Einhell TC-PL 750", "https://www.einhell.co.uk/p/4345310-tc-pl-750",
+             "Einhell TC-PL 750 electric planer", "Einhell TC-PL 750 chainsaw"),
+            ("STIHL MS 182", "https://www.stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794",
+             "STIHL MS 182 petrol chainsaw", "STIHL MS 182 electric planer"),
+        )
+        for name, url, correct_heading, wrong_heading in cases:
+            for heading, expected in ((correct_heading, True), (wrong_heading, False)):
+                with self.subTest(name=name, heading=heading):
+                    clear_official_domain_cache()
+                    service = DiscoveryDebugService(
+                        providers=lambda: [SavedProvider(url, correct_heading)],
+                        document_reader=lambda _url: None,
+                    )
+                    with patch("services.discovery_debug.fetch_working_page",
+                               return_value=(url, f"<h1>{heading}</h1>")):
+                        result = service.discover_name(name)
+                    self.assertEqual(result.exact_official_found, expected)
+
+    def test_name_only_fetch_trace_records_primary_and_scope_checks(self):
+        url = "https://www.bosch-home.co.uk/en/product/laundry/WAN28254GB"
+        service = DiscoveryDebugService(
+            providers=lambda: [SavedProvider(url, "Bosch WAN28254GB washing machine")],
+            document_reader=lambda _url: None,
+        )
+        with patch("services.discovery_debug.fetch_working_page",
+                   return_value=(url, "<h1>Bosch WAN28254GB Washing machine</h1>")):
+            result = service.discover_name("Bosch WAN28254GB")
+        self.assertEqual(result.status, "PASS")
+        loaded = next(item for item in result.page_fetches if item["status"] == "loaded")
+        self.assertEqual(loaded["main_product_relation"], "exact")
+        self.assertEqual(loaded["observed_category"], "major appliances")
+        self.assertEqual(loaded["host_seed_operator"], "licensed_brand_operator")
+        self.assertTrue(loaded["scoped_seed_first_party"])
+        self.assertIn("js_shell", loaded)
+
     def test_public_name_only_replay_recovers_scoped_pages(self):
         outcomes = replay_public_losses()
-        self.assertEqual(len(outcomes), 11)
-        self.assertTrue(all(row["status"] == "PASS" for row in outcomes), outcomes)
+        self.assertEqual(len(outcomes), 13)
+        self.assertEqual({row["index"] for row in outcomes if row["status"] == "PASS"},
+                         set(CONFIRMED) - {40})
+        self.assertEqual(next(row for row in outcomes if row["index"] == 40)["status"],
+                         "candidate_absent")
 
     def test_public_name_only_replay_rechecks_all_ten_old_acceptances(self):
         for explicit in (False, True):
@@ -342,9 +417,13 @@ class HeldoutCases(unittest.TestCase):
 
     def test_confirmed_loss_candidate_replay(self):
         outcomes = replay_saved_losses()
-        self.assertEqual(len(outcomes), 11)
-        self.assertTrue(all(item["authority"] == "verified" for item in outcomes))
-        self.assertTrue(all(item["status"] == "PASS" for item in outcomes))
+        self.assertEqual(len(outcomes), 13)
+        self.assertEqual({item["index"] for item in outcomes if item["status"] == "PASS"},
+                         set(CONFIRMED) - {40})
+        self.assertEqual(next(item for item in outcomes if item["index"] == 40)["status"],
+                         "candidate_absent")
+        self.assertTrue(all(item["authority"] == "verified" for item in outcomes
+                            if item["status"] == "PASS"))
 
     def test_all_ten_accepted_urls_remain_separately_reviewed(self):
         headings = {
