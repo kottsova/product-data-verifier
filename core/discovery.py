@@ -24,7 +24,7 @@ from urllib.request import Request, urlopen
 import requests
 
 from core.budget import WallClockBudget
-from core.authority_registry import RULES_VERSION, find_seed
+from core.authority_registry import RULES_VERSION, find_host_seed_lead, find_seed
 from core.fetch import _blocked_reason as _detect_blocked_reason
 from core.sku import requested_sku, sku_in_text_loosely, sku_relation, sku_search_terms
 from core.match import (
@@ -333,7 +333,7 @@ NON_PRODUCT_CONTEXT_PATHS = {
 }
 TRACKING_PARAMETERS = {
     "_ga", "_gl", "fbclid", "gad_source", "gclid", "igshid",
-    "mc_cid", "mc_eid", "ref_", "srsltid", "yclid",
+    "mc_cid", "mc_eid", "position", "queryid", "ref_", "srsltid", "yclid",
 }
 
 SCORE_EXACT_MODEL = 60
@@ -1164,6 +1164,7 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
         authority_scope = "unknown"
         candidate_evidence = (official_domains or {}).get(matched_official_domain or "", authority_evidence_url)
         seed = find_seed(brand, domain, category=product_category)
+        host_lead = find_host_seed_lead(brand, domain) if seed is None else None
         if seed and seed.operator_relation != "operator_unknown" and source_type != "marketplace":
             source_type = "manufacturer" if seed.first_party else "distributor"
             authority_status = "verified"
@@ -1174,6 +1175,14 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
             authority_scope = seed.scope
             if seed.first_party and _is_official_document(url):
                 source_type = "official_document"
+        elif host_lead and host_lead.operator_relation != "operator_unknown" and source_type != "marketplace":
+            # A reviewed host is worth inspecting, but the page's product
+            # category must be established before this seed can be used.
+            source_type = "manufacturer" if host_lead.first_party else "distributor"
+            authority_status = "provisional"
+            authority_reason = "Audited host lead; product scope not yet verified."
+            evidence_kind = "scoped_seed_lead"
+            evidence_url = host_lead.evidence_url
         elif source_type == "manufacturer" and candidate_evidence:
             authority_status = "provisional"
             evidence_url = candidate_evidence
@@ -5157,6 +5166,7 @@ def discover_with_status(
     *,
     early_official_stop: bool = False,
     product_category: str = "unknown",
+    early_scoped_page_check: Callable[[str], bool] | None = None,
 ) -> DiscoveryOutcome:
     """Discover sources and retain blocked/error state as structured data.
 
@@ -5204,6 +5214,7 @@ def discover_with_status(
             ))
         budget_stopped = False
         official_page_reached = False
+        scoped_leads_checked: set[str] = set()
         for query in queries:
             attempted_queries.append(query)
             found, attempts, query_issues = _search_query(active_searcher, query)
@@ -5221,6 +5232,27 @@ def discover_with_status(
                 # remaining provider capacity (and wall clock) for documents.
                 official_page_reached = True
                 break
+            if early_official_stop and early_scoped_page_check and not official_page_reached:
+                for item in found:
+                    record = _search_result_record(item)
+                    url = canonicalize_url(record.url)
+                    if not url or url in scoped_leads_checked or len(scoped_leads_checked) >= 2:
+                        continue
+                    lead = find_host_seed_lead(brand, _host(url))
+                    if (not lead or not lead.first_party
+                            or not _same_model_match(model, record.title, urlparse(url).path)
+                            or _page_kind(url) in {"homepage", "catalog", "weak", "support"}
+                            or _has_accessory_context(url, record.title)
+                            or _has_non_product_context(url, record.title)
+                            or (_DISTINCT_CONFIGURATION.search(f"{record.title} {unquote(urlparse(url).path).replace('-', ' ')}")
+                                and not _DISTINCT_CONFIGURATION.search(model))):
+                        continue
+                    scoped_leads_checked.add(url)
+                    if early_scoped_page_check(url):
+                        official_page_reached = True
+                        break
+                if official_page_reached:
+                    break
         if cached is None:
             official_domains = dict(discover_global_official_domains(
                 brand,

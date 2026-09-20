@@ -1,0 +1,64 @@
+{
+  "conditions": {
+    "before": "discover_name(name), no product_category, commit 334ad11",
+    "after": "discover_name(name), no product_category, scoped product-page recovery",
+    "guided": "discover_name(name, product_category=PRODUCTS category), older selected live runs",
+    "same_selected_input_lines": true,
+    "same_live_network_state": false
+  },
+  "levels": {
+    "sku": {
+      "rows": 7,
+      "before_pass": 0,
+      "after_pass": 3,
+      "guided_pass": 4,
+      "before_queries": 61,
+      "after_queries": 43,
+      "guided_queries": 20,
+      "before_seconds": 471.6,
+      "after_seconds": 401.6,
+      "guided_seconds": 355.5
+    },
+    "model": {
+      "rows": 6,
+      "before_pass": 0,
+      "after_pass": 3,
+      "guided_pass": 3,
+      "before_queries": 61,
+      "after_queries": 47,
+      "guided_queries": 22,
+      "before_seconds": 289.9,
+      "after_seconds": 250.5,
+      "guided_seconds": 134.2
+    },
+    "family": {
+      "rows": 2,
+      "before_pass": 0,
+      "after_pass": 2,
+      "guided_pass": 2,
+      "before_queries": 18,
+      "after_queries": 14,
+      "guided_queries": 6,
+      "before_seconds": 72.5,
+      "after_seconds": 55.4,
+      "guided_seconds": 34.2
+    }
+  },
+  "status_before": {
+    "PARTIAL": 15
+  },
+  "status_after": {
+    "PASS": 8,
+    "PARTIAL": 7
+  },
+  "status_guided": {
+    "PASS": 9,
+    "PARTIAL": 6
+  },
+  "queries_before": 140,
+  "queries_after": 104,
+  "queries_guided": 48,
+  "seconds_before": 834.0,
+  "seconds_after": 707.4,
+  "seconds_guided": 523.9
+}

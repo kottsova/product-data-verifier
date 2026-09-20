@@ -142,8 +142,8 @@ _SEED_CATEGORIES = {
 SEEDS = tuple(replace(seed, categories=_SEED_CATEGORIES[seed.host]) for seed in SEEDS)
 
 
-def find_seed(brand: str, host: str, *, today: date | None = None,
-              category: str = "unknown") -> AuthoritySeed | None:
+def find_host_seed_lead(brand: str, host: str, *, today: date | None = None) -> AuthoritySeed | None:
+    """Find an audited host for page inspection; this grants no authority."""
     now = today or date.today()
     brand_key = normalize_model(brand)
     host = host.lower().removeprefix("www.").rstrip(".")
@@ -153,5 +153,10 @@ def find_seed(brand: str, host: str, *, today: date | None = None,
         and seed.host == host
         and seed.rules_version == RULES_VERSION
         and timedelta(0) <= now - seed.checked_on <= MAX_AGE
-        and category.casefold() in {item.casefold() for item in seed.categories}
     ), None)
+
+
+def find_seed(brand: str, host: str, *, today: date | None = None,
+              category: str = "unknown") -> AuthoritySeed | None:
+    lead = find_host_seed_lead(brand, host, today=today)
+    return lead if lead and category.casefold() in {item.casefold() for item in lead.categories} else None

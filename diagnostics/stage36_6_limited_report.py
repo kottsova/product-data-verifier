@@ -34,6 +34,7 @@ def report(source: Path, output: Path) -> dict:
             old = baseline[index - 1]
             rows.append({
                 "index": index, "input": row.get("input"), "identity_level": PRODUCTS[index - 1][3],
+                "category_argument": row.get("category_argument", "unrecorded"),
                 "prior_status": old.get("status"), "status": row.get("status", "ERROR"),
                 "prior_queries": len(old.get("attempted_queries", ())),
                 "queries": len(row.get("attempted_queries", ())),
@@ -49,6 +50,8 @@ def report(source: Path, output: Path) -> dict:
     } for level in ("sku", "model", "family")}
     result = {
         "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+        "category_argument": (rows[0]["category_argument"] if len({row["category_argument"] for row in rows}) == 1
+                              else "mixed"),
         "archive_sha256": hashlib.sha256(output.read_bytes()).hexdigest(),
         "raw_sha256": hashes,
         "rows": rows,

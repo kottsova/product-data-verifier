@@ -4,15 +4,23 @@ import unittest
 import json
 from datetime import date
 from pathlib import Path
+from unittest.mock import patch
 
 from core.authority import TrustedSource, resolve_authority
 from core.authority_registry import find_seed
-from core.discovery import DiscoveryOutcome, assess_candidate_relevance, rank_candidates
+from core.discovery import DiscoveryOutcome, assess_candidate_relevance, canonicalize_url, rank_candidates
 from core.identity import assess_product_page_identity
 from core.official_documents import OfficialDocument
 from core.workflow import ProductWorkflowRequest, _resolve_authority_roles, run_product_workflow
 from diagnostics.stage36_5_baseline import PRODUCTS
 from diagnostics.stage36_6_saved_replay import replay as replay_saved_losses
+from diagnostics.stage36_6_public_replay import SavedProvider, replay as replay_public_losses, replay_accepted, replay_negatives
+from diagnostics.stage36_6_saved_replay import PRIMARY
+from diagnostics.stage36_6_transition_audit import CONFIRMED, _key
+from diagnostics.stage36_5_baseline import load_archive
+from bot.handlers import handle_discovery_query
+from core.discovery import clear_official_domain_cache
+from services.discovery_debug import DiscoveryDebugService
 from services.discovery_debug import DiscoverySource, _candidate_view, _result_from_outcome
 from services.raw_extraction import RawExtractionService
 from tests.test_workflow import FixtureServices, candidate
@@ -256,6 +264,82 @@ class ProductIdentityTests(unittest.TestCase):
 
 
 class HeldoutCases(unittest.TestCase):
+    def test_public_name_only_replay_recovers_scoped_pages(self):
+        outcomes = replay_public_losses()
+        self.assertEqual(len(outcomes), 11)
+        self.assertTrue(all(row["status"] == "PASS" for row in outcomes), outcomes)
+
+    def test_public_name_only_replay_rechecks_all_ten_old_acceptances(self):
+        for explicit in (False, True):
+            outcomes = replay_accepted(explicit_category=explicit)
+            self.assertEqual(len(outcomes), 10)
+            by_index = {row["index"]: row for row in outcomes}
+            self.assertEqual({index for index, row in by_index.items() if row["status"] == "PASS"},
+                             {2, 7, 12, 14, 23, 33, 50} if explicit else {2, 7, 14, 23, 33, 50})
+            self.assertTrue(all(not by_index[index]["exact_official_found"] for index in (19, 43, 44)))
+
+    def test_public_name_only_negative_replay_never_grants_exact_official(self):
+        for explicit in (False, True):
+            outcomes = replay_negatives(explicit_category=explicit)
+            self.assertEqual(len(outcomes), 6)
+            self.assertTrue(all(not row["exact_official_found"] for row in outcomes), outcomes)
+
+    def test_public_route_checks_product_scope_not_search_title(self):
+        cases = (
+            ("TP-Link Deco BE85", "https://www.tp-link.cz/cs/deco-be85", "TP-Link Deco BE85 Mesh Router", "TP-Link Deco BE85 Mesh Router"),
+            ("Bosch WAN28254GB", "https://www.bosch-professional.com/product/WAN28254GB", "Bosch WAN28254GB power tools", "Bosch WAN28254GB Washing machine"),
+            ("Philips Sonicare HX9992/12", "https://home-appliances.philips/products/HX9992_12", "Philips HX9992/12 air fryer", "Philips Sonicare HX9992/12 electric toothbrush"),
+            ("ASUS RT-BE88U", "https://www.asus.com/us/product/rt-be88u", "ASUS RT-BE88U router", "ASUS RT-BE88U electric toothbrush"),
+            ("ASUS RT-BE88U", "https://www.asus.com/us/product/rt-be88u", "ASUS RT-BE88U router", "ASUS RT-BE88U"),
+        )
+        for name, url, search_title, heading in cases:
+            with self.subTest(name=name, heading=heading):
+                clear_official_domain_cache()
+                service = DiscoveryDebugService(providers=lambda: [SavedProvider(url, search_title)],
+                                                document_reader=lambda _url: None)
+                with patch("services.discovery_debug.fetch_working_page", return_value=(url, f"<h1>{heading}</h1>")):
+                    result = service.discover_name(name)
+                self.assertFalse(result.exact_official_found)
+                self.assertFalse(result.official_pages)
+                if name.startswith("TP-Link"):
+                    self.assertTrue(result.dealers)
+                    self.assertTrue(all(item.source_type != "manufacturer" for item in result.dealers))
+
+    def test_explicit_category_cannot_override_conflicting_primary_product(self):
+        cases = (
+            ("Bosch WAN28254GB", "https://www.bosch-professional.com/product/WAN28254GB", "power tools", "Bosch WAN28254GB Washing machine"),
+            ("Philips Sonicare HX9992/12", "https://home-appliances.philips/products/HX9992_12", "small appliances", "Philips Sonicare HX9992/12 electric toothbrush"),
+            ("ASUS RT-BE88U", "https://www.asus.com/us/product/rt-be88u", "networking", "ASUS RT-BE88U electric toothbrush"),
+            ("ASUS RT-BE88U", "https://www.asus.com/us/product/rt-be88u", "networking", "ASUS RT-BE88U"),
+        )
+        for name, url, category, heading in cases:
+            with self.subTest(name=name, heading=heading):
+                clear_official_domain_cache()
+                service = DiscoveryDebugService(providers=lambda: [SavedProvider(url, heading)],
+                                                document_reader=lambda _url: None)
+                with patch("services.discovery_debug.fetch_working_page", return_value=(url, f"<h1>{heading}</h1>")):
+                    result = service.discover_name(name, product_category=category)
+                self.assertFalse(result.exact_official_found)
+                self.assertFalse(result.official_pages)
+
+    def test_category_is_not_inferred_from_navigation(self):
+        from core.identity import assess_product_page_identity
+        from core.product_scope import category_from_primary_product
+        html = ("<nav>WiFi routers, power supplies, washing machines</nav>"
+                "<h1>ASUS RT-BE88U</h1>")
+        identity = assess_product_page_identity("RT-BE88U", html, "https://www.asus.com/us/product/rt-be88u")
+        self.assertEqual(category_from_primary_product("RT-BE88U", html, identity)[0], "unknown")
+        unrelated_product = ("<h1>ASUS RT-BE88U</h1><script type='application/ld+json'>"
+                             '{"@type":"Product","name":"Other Router","category":"WiFi Routers"}'
+                             "</script>")
+        identity = assess_product_page_identity("RT-BE88U", unrelated_product,
+                                                "https://www.asus.com/us/product/rt-be88u")
+        self.assertEqual(category_from_primary_product("RT-BE88U", unrelated_product, identity)[0], "unknown")
+
+    def test_search_tracking_parameters_do_not_duplicate_product_url(self):
+        base = "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x"
+        self.assertEqual(canonicalize_url(base + "?position=4&queryID=abc"), base.replace("www.", ""))
+
     def test_confirmed_loss_candidate_replay(self):
         outcomes = replay_saved_losses()
         self.assertEqual(len(outcomes), 11)
@@ -316,6 +400,30 @@ class HeldoutCases(unittest.TestCase):
                     case["brand"], (trusted,),
                 )
                 self.assertEqual(decision.role, case["expected"])
+
+
+class BotNameOnlyScopeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_bot_uses_same_scoped_recovery_without_category_argument(self):
+        rows = load_archive(Path("diagnostics/baselines/stage36_6/raw_sanitized.zip"))
+        for index in (1, 16, 22, 37, 47):
+            page_url, _ = CONFIRMED[index]
+            row = rows[index - 1]
+            match = next(item for item in row["secondary"] if _key(item["url"]) == _key(page_url))
+            clear_official_domain_cache()
+            service = DiscoveryDebugService(
+                providers=lambda url=match["url"], title=match["title"]: [SavedProvider(url, title)],
+                document_reader=lambda _url: None,
+            )
+            replies = []
+
+            async def reply(message):
+                replies.append(message)
+
+            with self.subTest(index=index), patch("services.discovery_debug.fetch_working_page",
+                                                 return_value=(page_url, PRIMARY[index])):
+                result = await handle_discovery_query(row["input"], index, service, reply=reply)
+                self.assertEqual(result.status, "PASS")
+                self.assertTrue(replies)
 
 
 if __name__ == "__main__":

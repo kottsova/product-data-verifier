@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 
 from core.budget import WallClockBudget
 from core.authority import TrustedSource, resolve_authority
-from core.authority_registry import RULES_VERSION, find_seed
+from core.authority_registry import RULES_VERSION, find_host_seed_lead, find_seed
 from core.discovery import (
     Candidate,
     DiscoveryOutcome,
@@ -47,6 +47,7 @@ from core.official_documents import (
     merge_documents,
 )
 from core.page_inspection import PageInspection, fetch_working_page, inspect_product_page
+from core.product_scope import category_from_primary_product
 from core.sku import requested_sku, sku_relation
 
 
@@ -389,6 +390,7 @@ def _result_from_outcome(
     if fetch is not None:
         product_decisions: dict[str, object] = {}
         support_decisions: dict[str, object] = {}
+        scope_denied: set[str] = set()
         targets: list[tuple[DiscoverySource, str]] = []
         rank = {"exact": 0, "probable": 1, "weak": 2}
         for source in sorted(official_pages, key=lambda item: rank.get(item.model_match, 3))[:6]:
@@ -406,6 +408,8 @@ def _result_from_outcome(
             if item.authority_status == "provisional"
             and item.page_role in {"product", "support"}
         ]
+        provisional.sort(key=lambda item: (item.authority_evidence_kind != "scoped_seed_lead",
+                                           rank.get(item.model_match, 3)))
         targets.extend((item, "authority") for item in provisional[:4])
 
         def load(target: tuple[DiscoverySource, str]):
@@ -427,6 +431,14 @@ def _result_from_outcome(
                 product_decisions[source.url] = assess_product_page_identity(model, html, final_url)
                 if product_decisions[source.url].relation != "exact":
                     continue
+                if source.authority_evidence_kind == "audited_registry":
+                    observed_category, _ = category_from_primary_product(model, html, product_decisions[source.url])
+                    seed = find_seed(brand, urlparse(final_url).hostname or "", category=observed_category)
+                    explicit_seed = find_seed(brand, urlparse(final_url).hostname or "", category=product_category)
+                    if seed is None and (observed_category != "unknown"
+                                         or explicit_seed is None or len(explicit_seed.categories) > 1):
+                        scope_denied.add(source.url)
+                        continue
             elif kind == "scan" and source.page_role == "support":
                 support_decisions[source.url] = assess_product_page_identity(model, html, final_url)
                 if support_decisions[source.url].relation in {"different_variant", "related_item"}:
@@ -457,6 +469,13 @@ def _result_from_outcome(
         reviewed_pages: list[DiscoverySource] = []
         for item in official_pages:
             final_url = working.get(item.url, item.url)
+            if item.url in scope_denied:
+                grouped["secondary"].append(replace(
+                    item, url=final_url, group="secondary", authority="unknown",
+                    authority_status="unknown", authority_evidence_kind="none",
+                    model_match="weak", reason=f"{item.reason}; fetched product scope not verified",
+                ))
+                continue
             if final_url != item.url and not _first_party_seed(brand, final_url, product_category):
                 grouped["secondary"].append(replace(
                     item, url=final_url, group="secondary", authority="unknown",
@@ -518,6 +537,7 @@ def _result_from_outcome(
             for (source, _kind), page in fetched
             if page and source.authority_status == "verified"
             and source.source_type == "manufacturer"
+            and source.url not in scope_denied
             and _first_party_seed(brand, page[0], product_category)
         )
         for (source, kind), page in fetched:
@@ -525,6 +545,34 @@ def _result_from_outcome(
                 continue
             final_url, html = page
             final_host = urlparse(final_url).hostname or ""
+            decision = product_decisions.get(source.url)
+            if source.page_role == "product" and decision is not None:
+                observed_category, category_evidence = category_from_primary_product(model, html, decision)
+                scoped_seed = find_seed(brand, final_host, category=observed_category)
+                if scoped_seed and decision.relation == "exact" and scoped_seed.operator_relation != "operator_unknown":
+                    group = "official" if scoped_seed.first_party else "dealer"
+                    promoted = replace(
+                        source, url=final_url, group=group,
+                        source_type="manufacturer" if scoped_seed.first_party else "distributor",
+                        authority="manufacturer" if scoped_seed.first_party else "independent distributor",
+                        authority_status="verified", authority_evidence_url=scoped_seed.evidence_url,
+                        authority_evidence_kind="audited_registry",
+                        authority_evidence_excerpt=scoped_seed.evidence_excerpt,
+                        authority_checked_on=scoped_seed.checked_on.isoformat(),
+                        authority_rules_version=RULES_VERSION,
+                        operator_relation=scoped_seed.operator_relation,
+                        authority_scope=scoped_seed.scope, product_category=observed_category,
+                        model_match="exact", content_identity_verified=True,
+                        identity_evidence=decision.evidence,
+                        reason=f"{source.reason}; {category_evidence}; audited scoped operator",
+                    )
+                    grouped["secondary"].remove(source)
+                    (official_pages if scoped_seed.first_party else grouped["dealer"]).append(promoted)
+                    continue
+            if find_host_seed_lead(brand, final_host) is not None:
+                # A known host with an unproved or out-of-scope category may
+                # not regain authority through a broader contextual link.
+                continue
             assessment = resolve_authority(html, BeautifulSoup(html, "html.parser").get_text(" ", strip=True), final_host, brand, trusted)
             if assessment.role == "manufacturer":
                 decision = product_decisions.get(source.url)
@@ -905,6 +953,16 @@ class DiscoveryDebugService:
                 document_cache[url] = self._document_reader(url) if budget.remaining_seconds >= 5.0 else None
             return document_cache[url]
 
+        def early_scoped_page_check(url: str) -> bool:
+            page = fetch(url)
+            if page is None:
+                return False
+            final_url, html = page
+            decision = assess_product_page_identity(model, html, final_url)
+            category, _ = category_from_primary_product(model, html, decision)
+            seed = find_seed(brand, urlparse(final_url).hostname or "", category=category)
+            return bool(seed and seed.first_party and decision.relation == "exact")
+
         provider_chain = list(self._providers()) if self._providers is not None else None
         with ResilientSearchSession(
             market, provider_chain, config=runtime, budget=budget,
@@ -912,6 +970,7 @@ class DiscoveryDebugService:
             outcome = discover_with_status(
                 brand, model, market=market, searcher=session.search_with_status,
                 early_official_stop=True, product_category=product_category,
+                early_scoped_page_check=early_scoped_page_check if product_category == "unknown" else None,
             )
             result = _result_from_outcome(
                 name, brand, model, market, outcome, time.monotonic() - started, fetch=fetch,

@@ -1,0 +1,318 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "3096f52c9d0c172a7706c16661c87dc4085f285ffdfe576461c60faa7a1fd05f",
+  "raw_sha256": {
+    "01.json": "d0bdcb55c0d70c9e76270218d4c0f47a1dc1e3fe10b6faec47fafa69ac85a3c1",
+    "05.json": "e686a411c0adee22e49cc2986d18cf763e9e1bab3b8d624157ac7a852dc02a15",
+    "12.json": "69f4cb60df3d9d5fae87d0215744bb6bb3745d016495e9006e130dfa6958fca9",
+    "16.json": "a90524889513349eee530c6a61166153f3475202c70f095707230ede2181dd91",
+    "17.json": "12e1c284dc22376589f72f1baae7eb7be291e57cccb14f5f1cc9dbc41ee0fbe7",
+    "19.json": "7ac9587f4985f483bf31e5fc4013ebcde166926b7db268e7c9d6c67251ff9c9e",
+    "22.json": "e06bf66ccc60229cf12dd21027f098dbb834bd89d61158ed0d2bee67a85ff46a",
+    "23.json": "ea15cfd51d7c56d558686e546affa071040d5fb67b3cf8474770068f427f74c3",
+    "30.json": "d7ca0d9c492ef9cead76659dffba33803b8ceab2cf4b2dac5d36b6c73ad7349b",
+    "33.json": "1d37ace94677df6f4c8354a58c77dac10f9d6f915fea6147c3b6b5cf9af629bd",
+    "37.json": "2b22344a97cabf4223c0e7a48ccf940b4560feff096218b12d3338ae585fb470",
+    "46.json": "6417f4357ebf2260ed3a531f089a41a7e0aac9b5903a4b24a5a584de01e00944",
+    "47.json": "3dcd73a5b053e2ccc3fbb8b8393af9cc34bb09d8cc7aabc2fcec01fa1b01e6bf",
+    "49.json": "6afc50cb2ddbeefa60954051a75153b0b4a81b68ebd2f9e32018421f17bb366b",
+    "50.json": "057dadb9c272288a07779e0f954e8a50e15d2a9817aa2e87b29496cd9c10bad7"
+  },
+  "rows": [
+    {
+      "index": 1,
+      "input": "Bosch WAN28254GB",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 7,
+      "queries": 3,
+      "prior_seconds": 75.435,
+      "seconds": 65.155,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.bosch-home.co.uk/en/product/laundry/washing-machines/front-load-washing-machine/WAN28254GB"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 5,
+      "input": "AEG IKE64441FB",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 10,
+      "queries": 9,
+      "prior_seconds": 65.287,
+      "seconds": 75.455,
+      "budget_overrun_seconds": 0.455,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 1
+      }
+    },
+    {
+      "index": 12,
+      "input": "Roborock S8 MaxV Ultra",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 10,
+      "prior_seconds": 12.093,
+      "seconds": 37.148,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 16,
+      "input": "ASUS RT-BE88U",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 10,
+      "queries": 3,
+      "prior_seconds": 75.642,
+      "seconds": 50.234,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.asus.com/us/networking-iot-servers/wifi-routers/asus-gaming-routers/rt-be88u/"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 3,
+        "unavailable": 1
+      }
+    },
+    {
+      "index": 17,
+      "input": "TP-Link Deco BE85",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 8,
+      "queries": 12,
+      "prior_seconds": 32.969,
+      "seconds": 56.901,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 5
+      }
+    },
+    {
+      "index": 19,
+      "input": "NETGEAR GS308EP",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 10,
+      "prior_seconds": 16.792,
+      "seconds": 25.083,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 22,
+      "input": "Logitech MX Keys S",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 11,
+      "queries": 3,
+      "prior_seconds": 31.872,
+      "seconds": 15.424,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.logitech.com/en-us/shop/p/mx-keys-s"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 3
+      }
+    },
+    {
+      "index": 23,
+      "input": "Razer DeathAdder V3",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 13.538,
+      "seconds": 14.878,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.razer.com/gaming-mice/razer-deathadder-v3"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 2
+      }
+    },
+    {
+      "index": 30,
+      "input": "Canon CanoScan LiDE 400",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 11,
+      "prior_seconds": 75.655,
+      "seconds": 76.04,
+      "budget_overrun_seconds": 1.04,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 1,
+        "budget_exhausted": 3
+      }
+    },
+    {
+      "index": 33,
+      "input": "Corsair RM850x",
+      "identity_level": "family",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 11,
+      "prior_seconds": 21.43,
+      "seconds": 40.722,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na",
+        "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na?position=4&queryID=14935d4a070df3e57f28ea6047508544",
+        "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na?position=4&queryID=6fcd6bba088eaec0445642fa307176af"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 5
+      }
+    },
+    {
+      "index": 37,
+      "input": "Makita GA023GZ",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 8,
+      "queries": 3,
+      "prior_seconds": 76.003,
+      "seconds": 50.224,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.makita.co.nz/products/model/GA023GZ"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 1
+      }
+    },
+    {
+      "index": 46,
+      "input": "adidas Ultraboost 5 JH9073",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 11,
+      "queries": 9,
+      "prior_seconds": 60.45,
+      "seconds": 60.026,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 4
+      }
+    },
+    {
+      "index": 47,
+      "input": "Nike AeroSwift FN4231-010",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 9,
+      "queries": 6,
+      "prior_seconds": 82.86,
+      "seconds": 75.379,
+      "budget_overrun_seconds": 0.379,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 2,
+        "budget_exhausted": 2
+      }
+    },
+    {
+      "index": 49,
+      "input": "Oral-B iO Series 10",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 8,
+      "prior_seconds": 31.573,
+      "seconds": 50.08,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://oralb.com/en-us/products/io-series-10-rechargeable-electric-toothbrush-stardust-white-dd/"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 50,
+      "input": "CeraVe Hydrating Facial Cleanser",
+      "identity_level": "family",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 30.014,
+      "seconds": 14.691,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 7,
+      "pass": 3
+    },
+    "model": {
+      "rows": 6,
+      "pass": 3
+    },
+    "family": {
+      "rows": 2,
+      "pass": 2
+    }
+  },
+  "prior_queries": 104,
+  "queries": 104,
+  "prior_seconds": 701.6,
+  "seconds": 707.4
+}

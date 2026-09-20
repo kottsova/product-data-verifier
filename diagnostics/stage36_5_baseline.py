@@ -2,10 +2,12 @@
 
 Live: python -m diagnostics.stage36_5_baseline --live --output DIR
 Corrected inputs: add --structured-inputs (reported separately)
+Category-guided counterfactual: add --explicit-category (never the default)
 Replay: python -m diagnostics.stage36_5_baseline --archive diagnostics/stage36_5/raw.zip
 
-The live run uses structured brand/model inputs. It never silently resumes an
-earlier run: choose a new output directory for every run.
+The default live run sends the archived product string to the same public
+``discover_name(name)`` call as the bot. It never silently resumes an earlier
+run: choose a new output directory for every run.
 """
 
 from __future__ import annotations
@@ -109,6 +111,7 @@ def manifest_rows(rows: list[dict]) -> list[dict]:
 def live(
     output: Path, *, structured_inputs: bool = False,
     max_items: int = 50, selected_indices: set[int] | None = None,
+    explicit_category: bool = False,
 ) -> None:
     if output.exists():
         raise SystemExit(f"Output directory already exists: {output}")
@@ -124,12 +127,15 @@ def live(
         started = time.monotonic()
         try:
             # A fresh service per row matches the archived harness.
-            result = DiscoveryDebugService().discover_name(name, product_category=category)
+            service = DiscoveryDebugService()
+            result = (service.discover_name(name, product_category=category)
+                      if explicit_category else service.discover_name(name))
             row = result.to_dict()
         except Exception as exc:  # preserve each failed attempt
             row = {"error": repr(exc)}
         row.update(index=i, input=name, category=category, identity_level=level,
-                   input_mode="structured" if structured_inputs else "historical")
+                   input_mode="structured" if structured_inputs else "historical",
+                   category_argument="explicit" if explicit_category else "omitted")
         (output / f"{i:02d}.json").write_text(json.dumps(row, ensure_ascii=False, indent=1), encoding="utf-8")
         print(i, row["input"], row.get("status", row.get("error")), round(time.monotonic() - started, 1), flush=True)
         time.sleep(2)
@@ -142,6 +148,8 @@ def main() -> None:
     parser.add_argument("--live", action="store_true")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--structured-inputs", action="store_true")
+    parser.add_argument("--explicit-category", action="store_true",
+                        help="Diagnostic counterfactual; not the bot's normal input route")
     parser.add_argument("--max-items", type=int, default=50)
     parser.add_argument("--indices", help="Comma-separated row numbers for a separate diagnostic run")
     args = parser.parse_args()
@@ -159,7 +167,7 @@ def main() -> None:
             if not selected or any(index < 1 or index > args.max_items for index in selected):
                 parser.error("--indices must be within 1..max-items")
         live(args.output, structured_inputs=args.structured_inputs, max_items=args.max_items,
-             selected_indices=selected)
+             selected_indices=selected, explicit_category=args.explicit_category)
     elif args.archive:
         rows = load_archive(args.archive)
         print(json.dumps(manifest_rows(rows) if args.rows else summary(rows), ensure_ascii=False, indent=2))

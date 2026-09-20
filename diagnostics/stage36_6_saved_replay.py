@@ -19,14 +19,14 @@ PRIMARY = {
     1: "<h1>Series 4 Washing machine, front loader WAN28254GB</h1>",
     4: '<h1>Мултифункционална фурна</h1><script type="application/ld+json">{"@type":"Product","name":"Мултифункционална фурна","sku":"EOD6P77WX"}</script>',
     5: '<h1>Plaque de cuisson Induction Série 6000 Bridge</h1><script type="application/ld+json">{"@type":"Product","name":"Plaque de cuisson Induction","sku":"IKE64441FB"}</script>',
-    6: "<h1>TWD260WP 8kg Lotus white</h1>",
-    16: "<h1>ASUS RT-BE88U</h1>",
-    22: "<h1>MX Keys S</h1>",
-    30: "<h1>CanoScan LiDE 400</h1>",
+    6: "<title>TWD260WP heat pump dryer | Miele</title><h1>TWD260WP 8kg Lotus white</h1>",
+    16: "<title>RT-BE88U WiFi Routers | ASUS</title><h1>ASUS RT-BE88U</h1>",
+    22: "<title>Buy MX Keys S Keyboard | Logitech</title><h1>MX Keys S</h1>",
+    30: "<title>CanoScan LiDE 400 Scanner | Canon</title><h1>CanoScan LiDE 400</h1>",
     29: "<h1>EcoTank L6270 Multifunction Wi-Fi Ink Tank A4 Printer</h1>",
     37: '<h1>GA023GZ 40Vmax XGT Brushless Angle Grinder</h1>',
     46: '<main><h1>Ultraboost 5 Shoes</h1><p>Product Code : JH9073</p></main>',
-    47: '<main><h1>Nike AeroSwift</h1><p>Style: FN4231-010</p></main>',
+    47: '<title>Nike AeroSwift Men\'s Dri-FIT ADV Running Vest. Nike DK</title><main><h1>Nike AeroSwift</h1><p>Style: FN4231-010</p></main>',
 }
 
 

@@ -1,0 +1,67 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "7b4d6a74c8748e2ad635457ee02a4d245470a1b8acaf4e0b013f7280624dec92",
+  "raw_sha256": {
+    "33.json": "0565b48f4f10b397091b860d0ba3fe9cad5a98cfa4f69da07a9688ca8035dfd1",
+    "47.json": "8e7ebb60d826b81cab0e4e017a2d1f65eea0a26550ae2dcb8b17d7f23147a125"
+  },
+  "rows": [
+    {
+      "index": 33,
+      "input": "Corsair RM850x",
+      "identity_level": "family",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PASS",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 21.43,
+      "seconds": 16.575,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 2
+      }
+    },
+    {
+      "index": 47,
+      "input": "Nike AeroSwift FN4231-010",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 9,
+      "queries": 3,
+      "prior_seconds": 82.86,
+      "seconds": 71.559,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.nike.com/gb/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 1
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 1,
+      "pass": 1
+    },
+    "model": {
+      "rows": 0,
+      "pass": 0
+    },
+    "family": {
+      "rows": 1,
+      "pass": 1
+    }
+  },
+  "prior_queries": 12,
+  "queries": 6,
+  "prior_seconds": 104.3,
+  "seconds": 88.1
+}

@@ -282,14 +282,20 @@ object identifies commercial code `GS308EP-100NAS`. Corsair RM850x and CeraVe
 cleanser are family requests; their accepted pages do not establish an exact
 SKU for the family.
 
-| Selected like-for-like indices | Prior 36.6 queries | New queries | Prior seconds | New seconds | New PASS |
+| Selected indices with explicit benchmark category | Prior 36.6 queries | Guided queries | Prior seconds | Guided seconds | Guided PASS |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | 1, 5, 17, 22, 30, 49 | 51 | 22 | 312.8 | 222.0 | 1/6 |
 | 1, 16, 22, 37, 46, 47 | 56 | 17 | 402.3 | 297.0 | 5/6 |
 | 12, 19, 23, 33, 50 | 15 | 15 | 93.9 | 83.2 | 4/5 |
 
-For the 15 distinct selected inputs, using the latest run for repeated Bosch
-and Logitech rows, results by input level are:
+These guided runs are **not comparable with the historical name-only route**:
+the harness supplied `PRODUCTS` category labels to `discover_name`, while the
+bot and the Stage 36.5/36.6 historical runs supplied only the product string.
+The 104-to-48 query comparison and five live recoveries describe the
+category-guided diagnostic only; they do not establish user-route recovery.
+
+For the 15 distinct guided inputs, using the latest run for repeated Bosch
+and Logitech rows, results by input level were:
 
 | Input level | Rows | PASS | Prior queries | New queries | Prior seconds | New seconds |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -326,8 +332,8 @@ duplicates rose from 2,248 to 5,902 across the saved run, showing repeated
 retrieval of the same leads. The plan also included near-duplicate `specs` /
 `specifications` searches plus document queries without an official host.
 The latter two requests were removed; document queries now require a verified
-host. The selected comparisons above measure the improvement without
-extrapolating to all 50. Page fetch outcomes and actual elapsed time are now
+host. The selected guided comparisons cannot be extrapolated to the 50-item
+name-only baseline. Page fetch outcomes and actual elapsed time are now
 recorded. The synchronous external fetch/Playwright stack cannot forcibly
 interrupt active work at precisely 75 seconds; results explicitly expose
 `timeout_can_interrupt_active_requests=false` and
@@ -341,3 +347,103 @@ last complete 50-item comparison. A fresh full 50 was not run: 13 transition
 causes remain unverified from the saved evidence, some confirmed pages are
 still inaccessible to the fetcher, and a strict interruptible 75-second
 deadline remains open. **Stage 36.6 remains PARTIAL and PR #1 remains draft.**
+
+## Name-only route correction after review of commit `334ad11`
+
+The benchmark harness in `334ad11` mistakenly sent each row's labelled
+`PRODUCTS` category to `discover_name`. The historical 50-item run and the
+Telegram `/discover` and discovery-only text paths send the product string
+without that argument. With category `unknown`, `find_seed` correctly refused
+every scoped seed, so the apparent guided recoveries did not establish
+production recovery. The harness now defaults to `discover_name(name)`;
+`--explicit-category` is an opt-in counterfactual, recorded in each row.
+
+Before the correction, a public-method replay of the 11 confirmed loss URLs
+with saved candidate leads and short current-page primary-object fixtures
+returned **0/11 PASS without category**, versus **11/11 with explicit labelled
+category**. It used a local saved-result provider, not the live provider chain;
+the original Stage 36.6 archive lacks page bodies. This controlled replay
+proves the contract gap, not historical network availability.
+
+The production name-only path now treats an exact audited host as a bounded
+*inspection lead*, never as verified authority. It fetches at most two such
+leads during the search plan. Early stopping requires the fetched page to
+identify the exact primary product, a single supported category from the
+primary heading, matching Product object or product-specific title, and a
+first-party seed whose category includes that observed category. Search
+snippets and navigation are excluded. A page with conflicting or ambiguous
+category stays unverified; a known out-of-scope host cannot regain authority
+through contextual links. Explicit-category pages are also downgraded if
+their fetched main product contradicts the supplied scope, or if a
+multi-category seed has no product category evidence.
+
+The [public route replay](diagnostics/stage36_6_public_replay.py) and its
+[saved results](diagnostics/baselines/stage36_6/public_name_only_replay_20260920.json)
+exercise the same `DiscoveryDebugService.discover_name(name)` method as the bot,
+with a saved candidate provider and abbreviated page fixtures:
+
+| Saved check | Name only | Explicit category | Interpretation |
+| --- | ---: | ---: | --- |
+| 11 confirmed loss pages | 11 PASS | 11 PASS | All scoped product decisions now recover without the benchmark label |
+| 10 previously accepted URLs | 6 PASS | 7 PASS | Roborock's current primary header/title omit the vacuum category; NETGEAR is SKU-uncertain and Frostbite/Nautilus have unconfirmed operators |
+| 6 related-item/variant/forum URLs | 0 exact official | 0 exact official | Accessories, HyperSpeed, SHIFT, refill, twin pack and forum stay outside exact official |
+
+The public service and bot path tests cover Bosch, ASUS, Logitech, Makita and
+Nike without a category argument. Negative tests cover TP-Link's independent
+Czech distributor, Bosch Professional on a washing-machine page, Philips
+domestic appliances on a toothbrush page, an ASUS page outside the two
+audited categories, and a search title that says router while the fetched
+primary object has no category. The category extractor intentionally leaves
+Roborock's currently fetched `S8 MaxV Ultra with 8-in-1 RockDock Ultra`
+header/title unknown: neither calls the product a vacuum. Its guided PASS
+depends on the explicit category, and the ordinary route remains PARTIAL.
+
+The selected live runs used the **same 15 archived input strings**, a fresh
+service per row, reset search hypothesis cache, default provider chain,
+global market and nominal 75-second service budget. Both new runs omitted
+`product_category`. The older guided runs supplied `PRODUCTS` categories and
+were collected under a different network state. Raw outputs were sanitized
+into [before](diagnostics/baselines/stage36_6/live_user_route_prefix_20260920_sanitized.zip),
+[after 15](diagnostics/baselines/stage36_6/live_user_route_scoped_20260920_sanitized.zip)
+and [final Nike/Corsair](diagnostics/baselines/stage36_6/live_user_route_final_20260920_sanitized.zip)
+archives with adjacent hash manifests. Per-row statuses, queries, durations
+and accepted URLs are in the [initial comparison](diagnostics/baselines/stage36_6/name_only_route_comparison.csv)
+and [latest comparison](diagnostics/baselines/stage36_6/name_only_route_final_comparison.csv).
+
+| Input level | Rows | Name-only before PASS | Name-only after 15 PASS | Latest name-only PASS | Older guided PASS |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| SKU | 7 | 0 | 3 | 4 | 4 |
+| Model | 6 | 0 | 3 | 3 | 3 |
+| Family | 2 | 0 | 2 | 2 | 2 |
+| **Total** | **15** | **0** | **8** | **9** | **9** |
+
+The single 15-row name-only batch moved from **140 to 104 queries** and
+**834.0 to 707.4 seconds**. Replacing its Nike and Corsair rows with the
+final targeted reruns gives **93 queries, 679.5 seconds and 9 PASS**. The
+older category-guided 15-row view was **48 queries, 523.9 seconds and 9
+PASS**; that comparison remains a separate diagnostic, not an estimate of
+name-only performance. The original archived 15-row Stage 36.6 subset was
+104 queries and 701.6 seconds. Network conditions and code changed between
+runs, so these selected comparisons do not establish a 50-item speedup.
+
+Name-only live PASS now includes Bosch, ASUS, Logitech, Makita and Nike among
+the 11 confirmed losses. AEG, Canon and adidas remained PARTIAL on selected
+live checks; Electrolux, Miele and Epson were not included. Razer's base
+DeathAdder V3 and Corsair's base RM850x page passed, while HyperSpeed and
+SHIFT remained outside exact. Oral-B passed on an individual iO Series 10
+toothbrush page; its three twin-pack candidates stayed outside exact. The
+NETGEAR forum and commercial SKU variant stayed outside exact. Corsair's
+search `position` and `queryID` parameters are now removed during URL
+canonicalization; its final rerun produced one accepted base URL. The family
+results (Corsair, CeraVe) establish the primary family product, not an exact
+commercial SKU.
+
+The 75-second limit still cannot interrupt a running external request;
+selected rows again exceeded it. A Playwright helper emitted an `EPIPE` during
+cleanup after the 15 row files were written. This remains a runtime concern.
+The 13 historically unknown transitions and inaccessible AEG/Canon/adidas
+pages still prevent a complete cause audit. A full 50-item repeat is needed
+before claiming aggregate Stage 36.6 performance, but is deferred until those
+causes and interruptibility are resolved. Stage 36.6 remains **PARTIAL**;
+PR #1 stays draft. The complete suite passed **1,149 tests**; Python
+compilation and `git diff --check` passed.
