@@ -17,7 +17,7 @@ import unittest
 from core.discovery import canonicalize_url
 from core.process_containment import pid_alive
 from services.discovery_debug import DiscoveryDebugService
-from services.discovery_isolation import ReplayState
+from services.discovery_isolation import ReplayState, _replay_bounded
 from tests.isolation_hooks import EXACT_URL as _RAW_EXACT_URL
 
 EXACT_URL = canonicalize_url(_RAW_EXACT_URL)  # discovery drops the leading www.
@@ -156,6 +156,33 @@ class HardDeadlineTests(unittest.TestCase):
         pids = [pid for result in results for pid in result.performance["isolation"]["contained_pids"]]
         self.assertEqual(len(pids), len(set(pids)))  # each request had its own tree
 
+    def test_stop_lands_inside_the_documented_kill_window(self) -> None:
+        budget, grace = 5.0, 4.0
+        result = _service("hang_in_serp", budget, grace).discover_name("Bosch WAN28254GB")
+        isolation = result.performance["isolation"]
+        # kill = budget + half of the grace; the other half is the replay window.
+        self.assertGreaterEqual(isolation["worker_running_seconds"], budget)
+        self.assertLessEqual(isolation["worker_running_seconds"], budget + grace / 2 + 0.5)
+        self.assertTrue(isolation["replay_complete"])
+        self.assertLessEqual(isolation["replay_seconds"], grace / 2 + 0.5)
+
+    def test_large_recorded_page_cannot_stretch_the_return_time(self) -> None:
+        budget, grace = 24.0, 2.0
+        started = time.monotonic()
+        result = _service("big_page_then_document_hang", budget, grace).discover_name(
+            "Bosch WAN28254GB")
+        elapsed = time.monotonic() - started
+        isolation = result.performance["isolation"]
+        self.assertTrue(isolation["hard_stop"])
+        self.assertEqual(isolation["stopped_in"]["target"], "hang_on_documents")
+        self.assertEqual(isolation["pages_recorded"], 1)
+        # Whether the 2 MB page was fully re-analysed, skipped or the replay degraded,
+        # the call returns inside budget + grace (plus scheduling slack).
+        self.assertLessEqual(elapsed, budget + grace + REPLAY_SLACK_SECONDS)
+        self.assertLessEqual(isolation["replay_seconds"], grace / 2 + 0.5)
+        self.assertIn(EXACT_URL, _urls(result))
+        self.assertNoSurvivors(result)
+
     def test_worker_crash_is_a_structured_result(self) -> None:
         result = _service("crash_in_worker", 10.0, 2.0).discover_name("Bosch WAN28254GB")
         isolation = result.performance["isolation"]
@@ -181,7 +208,7 @@ class HardDeadlineTests(unittest.TestCase):
 class ConfigurationTests(unittest.TestCase):
     def test_public_route_is_isolated_by_default(self) -> None:
         self.assertTrue(DiscoveryDebugService().isolated)
-        self.assertEqual(DiscoveryDebugService().hard_stop_grace_seconds, 5.0)
+        self.assertEqual(DiscoveryDebugService().hard_stop_grace_seconds, 6.0)
 
     def test_injected_providers_stay_inline_unless_hooks_rebuild_them(self) -> None:
         self.assertFalse(DiscoveryDebugService(providers=lambda: []).isolated)
@@ -191,6 +218,54 @@ class ConfigurationTests(unittest.TestCase):
     def test_missing_identity_still_raises_before_any_process(self) -> None:
         with self.assertRaises(ValueError):
             DiscoveryDebugService().discover_name("   ")
+
+
+class BoundedReplayTests(unittest.TestCase):
+    def _state(self) -> ReplayState:
+        state = ReplayState()
+        state.apply({"e": "session", "t": 1.0, "kind": "query_start", "payload": ("q", ())})
+        state.apply({"e": "session", "t": 1.1, "kind": "results", "payload": [
+            (EXACT_URL, "Bosch WAN28254GB"), ("https://www.example.test/other", "Other")]})
+        state.apply({"e": "session", "t": 1.2, "kind": "query_end", "payload": None})
+        return state
+
+    def test_replay_that_cannot_finish_degrades_without_granting_trust(self) -> None:
+        class SlowService:
+            def _discover_inline(self, *_, **__):
+                time.sleep(3.0)
+
+        started = time.monotonic()
+        result, info = _replay_bounded(SlowService(), "Bosch WAN28254GB", "global",
+                                       "unknown", self._state(), allowance=0.3)
+        self.assertLess(time.monotonic() - started, 1.0)
+        self.assertFalse(info["replay_complete"])
+        self.assertTrue(result.performance["replay_incomplete"])
+        self.assertEqual(result.status, "PARTIAL")
+        self.assertFalse(result.exact_official_found)
+        self.assertEqual(len(result.secondary), 2)  # nothing collected is dropped
+        self.assertTrue(all(item.authority_status == "unknown" for item in result.secondary))
+        self.assertEqual(result.official, ())
+
+    def test_replay_errors_are_contained(self) -> None:
+        class BrokenService:
+            def _discover_inline(self, *_, **__):
+                raise RuntimeError("boom")
+
+        result, info = _replay_bounded(BrokenService(), "Bosch WAN28254GB", "global",
+                                       "unknown", self._state(), allowance=1.0)
+        self.assertFalse(info["replay_complete"])
+        self.assertIn("boom", info["replay_note"])
+        self.assertEqual(len(result.secondary), 2)
+
+    def test_pages_are_not_analysed_after_the_replay_deadline(self) -> None:
+        state = self._state()
+        state.apply({"e": "fetch_done", "t": 2.0, "url": "u", "page": ("u", "<h1>x</h1>"),
+                     "record": {"duration_seconds": 1.0}})
+        state.page_deadline = time.monotonic() - 1.0
+        self.assertIsNone(state.page("u"))
+        self.assertEqual(state.pages_skipped_after_deadline, ["u"])
+        state.page_deadline = None
+        self.assertEqual(state.page("u"), ("u", "<h1>x</h1>"))
 
 
 class ReplayStateTests(unittest.TestCase):

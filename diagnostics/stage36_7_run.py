@@ -38,7 +38,7 @@ def main() -> None:
         "working_tree_before_run": _git("status", "--short"),
         "route": "DiscoveryDebugService.discover_name(name)", "category_argument": "omitted",
         "indices": sorted(selected) if selected else "all 50",
-        "budget_seconds": 75, "hard_stop_grace_seconds": 5,
+        "budget_seconds": 75, "hard_stop_grace_seconds": 6,
         "provider_environment": {k: v for k, v in os.environ.items()
                                  if k.startswith("PDV_")},
     }, indent=2) + "\n", encoding="utf-8")

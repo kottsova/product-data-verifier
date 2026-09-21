@@ -1,0 +1,158 @@
+{
+  "products": 50,
+  "old": {
+    "PASS": 9,
+    "PARTIAL": 34,
+    "FAIL": 7,
+    "over_75s": 32,
+    "max_runtime_seconds": 314.594,
+    "median_runtime_seconds": 77.964,
+    "total_runtime_seconds": 4241.4,
+    "unique_candidates": 2640.0,
+    "zero_candidate_products": 4,
+    "queries_attempted": 309.0,
+    "page_fetches": 108.0,
+    "pages_loaded": 44.0,
+    "exact_official_pages": 9.0,
+    "support_pages": 0.0,
+    "documents": 0.0,
+    "net_provider_blocks": 226.0,
+    "net_http_403": 5.0,
+    "net_http_429": 0.0,
+    "net_provider_timeouts": 66.0,
+    "provider_other_errors": 2.0,
+    "program_fault_rows": 0
+  },
+  "new": {
+    "PASS": 13,
+    "PARTIAL": 37,
+    "FAIL": 0,
+    "over_75s": 17,
+    "max_runtime_seconds": 96.973,
+    "median_runtime_seconds": 67.942,
+    "total_runtime_seconds": 3020.0,
+    "unique_candidates": 3750.0,
+    "zero_candidate_products": 0,
+    "queries_attempted": 358.0,
+    "page_fetches": 126.0,
+    "pages_loaded": 68.0,
+    "exact_official_pages": 13.0,
+    "support_pages": 0.0,
+    "documents": 0.0,
+    "net_provider_blocks": 178.0,
+    "net_http_403": 20.0,
+    "net_http_429": 0.0,
+    "net_provider_timeouts": 56.0,
+    "provider_other_errors": 0.0,
+    "program_fault_rows": 0,
+    "hard_stops": 2,
+    "max_over_budget_seconds": 21.973,
+    "max_post_result_cleanup_seconds": 2.057
+  },
+  "status_changes": [
+    {
+      "index": 14,
+      "input": "Braun MultiQuick 9 MQ9187XLI",
+      "old": "FAIL",
+      "new": "PASS"
+    },
+    {
+      "index": 16,
+      "input": "ASUS RT-BE88U",
+      "old": "PARTIAL",
+      "new": "PASS"
+    },
+    {
+      "index": 29,
+      "input": "Epson EcoTank L6270",
+      "old": "PARTIAL",
+      "new": "PASS"
+    },
+    {
+      "index": 34,
+      "input": "ASUS TUF Gaming GeForce RTX 5070 Ti",
+      "old": "FAIL",
+      "new": "PARTIAL"
+    },
+    {
+      "index": 37,
+      "input": "Makita GA023GZ",
+      "old": "FAIL",
+      "new": "PASS"
+    },
+    {
+      "index": 38,
+      "input": "Milwaukee M18 FHX-502X",
+      "old": "FAIL",
+      "new": "PARTIAL"
+    },
+    {
+      "index": 39,
+      "input": "Bosch Professional GCM 8 SJL",
+      "old": "FAIL",
+      "new": "PARTIAL"
+    },
+    {
+      "index": 40,
+      "input": "Einhell TC-PL 750",
+      "old": "FAIL",
+      "new": "PARTIAL"
+    },
+    {
+      "index": 41,
+      "input": "STIHL MS 182",
+      "old": "FAIL",
+      "new": "PASS"
+    },
+    {
+      "index": 49,
+      "input": "Oral-B iO Series 10",
+      "old": "PASS",
+      "new": "PARTIAL"
+    }
+  ],
+  "accepted_lost": [
+    {
+      "index": 47,
+      "input": "Nike AeroSwift FN4231-010",
+      "urls": "nike.com/gb/t/aeroswift-mens-dri-fit-adv-running-vest-vsx0gdly/fn4231-010"
+    },
+    {
+      "index": 49,
+      "input": "Oral-B iO Series 10",
+      "urls": "oralb.com/en-us/products/electric-toothbrushes/io-series-10-rechargeable-electric-toothbrush-cosmic-black"
+    }
+  ],
+  "accepted_new_needing_manual_review": [
+    {
+      "index": 14,
+      "input": "Braun MultiQuick 9 MQ9187XLI",
+      "urls": "braunhousehold.com/en/p/multiquick-9-multiquick-9-hand-blender-mq-9187xli/hb901-mq9187xli.html?pid=0x22111376"
+    },
+    {
+      "index": 16,
+      "input": "ASUS RT-BE88U",
+      "urls": "asus.com/us/networking-iot-servers/wifi-routers/asus-gaming-routers/rt-be88u"
+    },
+    {
+      "index": 29,
+      "input": "Epson EcoTank L6270",
+      "urls": "epson.eu/en_eu/products/printers/inkjet/consumer/ecotank-l6270-multifunction-wi-fi-ink-tank-a4-printer%2c-with-up-to-3-years-of-ink-included/p/30259"
+    },
+    {
+      "index": 37,
+      "input": "Makita GA023GZ",
+      "urls": "makita.co.nz/products/model/ga023gz"
+    },
+    {
+      "index": 41,
+      "input": "STIHL MS 182",
+      "urls": "stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794"
+    },
+    {
+      "index": 47,
+      "input": "Nike AeroSwift FN4231-010",
+      "urls": "nike.com/dk/en/t/aeroswift-mens-dri-fit-adv-running-vest-vsx0gdly/fn4231-010"
+    }
+  ]
+}

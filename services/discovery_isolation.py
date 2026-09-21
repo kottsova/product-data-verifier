@@ -35,6 +35,10 @@ from core.discovery import ProviderAttempt, ProviderQueryOutcome
 from core.process_containment import ContainedProcess, pid_alive
 
 POLL_SECONDS = 0.05
+# The grace beyond the budget is split: half lets a nearly-finished worker
+# tear down before its process tree is killed, half bounds the in-parent replay
+# of the checkpoints (a CPU-bound re-run of ranking and page analysis).
+KILL_SHARE_OF_GRACE = 0.5
 # After a complete result is checkpointed the worker only has to tear down its
 # providers; this bounds how long we wait for that before killing the tree.
 RESULT_EXIT_WAIT_SECONDS = 2.0
@@ -134,6 +138,9 @@ class ReplayState:
         self.documents: dict[str, object] = {}
         self.last_event_time: float | None = None
         self.completed_query_count = 0
+        # Monotonic time after which recorded pages are no longer analysed.
+        self.page_deadline: float | None = None
+        self.pages_skipped_after_deadline: list[str] = []
 
     def apply(self, event: dict) -> None:
         self.last_event_time = event["t"]
@@ -189,6 +196,9 @@ class ReplayState:
 
     # -- pipeline replay hooks (see DiscoveryDebugService._discover_inline) --
     def page(self, url: str) -> object:
+        if self.page_deadline is not None and time.monotonic() > self.page_deadline:
+            self.pages_skipped_after_deadline.append(url)
+            return None
         return self.pages.get(url)
 
     def fetch_meta(self, url: str) -> dict[str, object]:
@@ -247,6 +257,83 @@ class _ReplaySession:
         ),))
 
 
+def _light_result(product_name: str, market: str, state: ReplayState, reason: str):
+    """Degraded but structured result when replay cannot finish in time.
+
+    Every candidate the worker collected is listed with *no* verdict: nothing
+    is ranked, verified or trusted, so this can lose information but never
+    grant authority.
+    """
+    from urllib.parse import urlparse
+
+    from core.discovery import canonicalize_url
+    from services.discovery_debug import (
+        DiscoveryDebugResult, DiscoverySource, parse_discovery_product_name,
+    )
+
+    brand, model = parse_discovery_product_name(product_name) or ("", "")
+    outcomes = [o for queue in state.completed.values() for o in queue]
+    outcomes.append(ProviderQueryOutcome(
+        tuple(state.inflight_results), tuple(state.inflight_attempts)))
+    seen: dict[str, DiscoverySource] = {}
+    attempts: list[ProviderAttempt] = []
+    for outcome in outcomes:
+        attempts.extend(outcome.attempts)
+        for item in outcome.results:
+            url, title = (item.url, item.title) if hasattr(item, "url") else item
+            key = canonicalize_url(url)
+            if key and key not in seen:
+                seen[key] = DiscoverySource(
+                    key, urlparse(key).hostname or "", "other", title or "", "weak",
+                    "unassessed", "Collected before the hard stop; not analysed.",
+                    "secondary", authority_status="unknown",
+                )
+    failures = tuple(
+        {"provider": a.provider, "query": a.query, "status": a.status, "message": a.message or ""}
+        for a in attempts if a.status != "success"
+    )
+    return DiscoveryDebugResult(
+        product_name=product_name, brand=brand, model=model, market=market,
+        status="PARTIAL" if seen else "FAIL", exact_official_found=False,
+        official=(), dealers=(), secondary=tuple(seen.values()), rejected=(),
+        runtime_seconds=0.0, search_status="timeout",
+        attempted_queries=tuple(dict.fromkeys(q for q, _ in state.completed)),
+        providers=tuple(dict.fromkeys(a.provider for a in attempts)),
+        provider_failures=failures,
+        candidate_counts={"provider_raw": len(seen), "unique": len(seen), "accepted": 0,
+                          "rejected": 0, "official": 0, "dealer": 0, "secondary": len(seen),
+                          "documents": 0},
+        performance={"replay_incomplete": True, "replay_incomplete_reason": reason},
+    )
+
+
+def _replay_bounded(service, product_name: str, market: str, category: str,
+                    state: ReplayState, allowance: float):
+    """Run the replay for at most ``allowance`` seconds, else degrade."""
+    started = time.monotonic()
+    state.page_deadline = started + allowance * 0.6
+    box: dict[str, object] = {}
+
+    def run() -> None:
+        try:
+            box["result"] = service._discover_inline(
+                product_name, market=market, product_category=category, replay=state)
+        except BaseException as error:  # noqa: BLE001 - reported, never raised past the limit
+            box["error"] = repr(error)
+
+    worker = threading.Thread(target=run, name="pdv-replay", daemon=True)
+    worker.start()
+    worker.join(allowance)
+    seconds = round(time.monotonic() - started, 3)
+    if "result" in box:
+        return box["result"], {"replay_seconds": seconds, "replay_complete": True,
+                               "pages_not_analysed": len(state.pages_skipped_after_deadline)}
+    reason = box.get("error") or f"replay exceeded {allowance:.1f}s"
+    return _light_result(product_name, market, state, str(reason)), {
+        "replay_seconds": seconds, "replay_complete": False, "replay_note": str(reason),
+        "pages_not_analysed": len(state.pages_skipped_after_deadline)}
+
+
 def read_events(path: Path) -> list[dict]:
     events: list[dict] = []
     if not path.is_file():
@@ -285,6 +372,7 @@ def run_isolated(
     started = time.monotonic()
     started_epoch = time.time()
     hard_limit = budget_seconds + grace_seconds
+    kill_at = budget_seconds + grace_seconds * KILL_SHARE_OF_GRACE
     directory = Path(tempfile.mkdtemp(prefix="pdv-discovery-"))
     (directory / "args.json").write_text(json.dumps({
         "name": product_name, "market": market, "product_category": product_category,
@@ -317,7 +405,7 @@ def run_isolated(
             if result_seen_at is not None and now - result_seen_at >= RESULT_EXIT_WAIT_SECONDS:
                 stop_reason = "cleanup_exceeded_grace"
                 break
-            if now - started >= hard_limit:
+            if now - started >= kill_at:
                 stop_reason = "hard_deadline"
                 break
             time.sleep(POLL_SECONDS)
@@ -352,10 +440,12 @@ def run_isolated(
             service = DiscoveryDebugService(
                 wall_clock_budget_seconds=budget_seconds, isolation="inline",
             )
-            result = service._discover_inline(
-                product_name, market=market, product_category=product_category, replay=state,
-            )
+            # The replay window is what remains of the hard limit.
+            window = max(0.2, hard_limit - (time.monotonic() - started))
+            result, replay_info = _replay_bounded(
+                service, product_name, market, product_category, state, window)
         else:
+            replay_info = {}
             stalled = {"kind": "post_result_cleanup" if stop_reason else "none", "target": "",
                        "stalled_seconds": None}
         elapsed = round(time.monotonic() - started, 3)
@@ -390,6 +480,7 @@ def run_isolated(
             "queries_completed": state.completed_query_count,
             "pages_recorded": len(state.pages),
             "pages_in_flight": len(state.fetch_started),
+            **replay_info,
         }
         performance = {
             **result.performance,
@@ -408,6 +499,9 @@ def run_isolated(
                 handle.close()
             except Exception:  # noqa: BLE001
                 pass
+        keep = os.environ.get("PDV_KEEP_WORKER_DIR")
+        if keep:  # diagnostics only: preserve the checkpoints for offline profiling
+            shutil.copytree(directory, Path(keep) / directory.name, dirs_exist_ok=True)
         shutil.rmtree(directory, ignore_errors=True)
 
 

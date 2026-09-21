@@ -11,8 +11,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
+
+from diagnostics.import_stage36_5 import _contains_sensitive_key, _contains_sensitive_url, sanitize
 
 from diagnostics.stage36_7_time_audit import BUDGET, load_rows
 
@@ -142,11 +146,41 @@ def compare(new_dir: Path, output: Path) -> dict:
     return summary
 
 
+def archive(run_dir: Path, output: Path) -> None:
+    """Sanitised, hash-recorded copy of the raw rows (never overwrites)."""
+    files = sorted((run_dir / "raw").glob("[0-9][0-9].json"))
+    archive_path = output / "raw_sanitized.zip"
+    if archive_path.exists():
+        raise FileExistsError(archive_path)
+    output.mkdir(parents=True, exist_ok=True)
+    hashes: dict[str, str] = {}
+    with ZipFile(archive_path, "w", ZIP_DEFLATED, compresslevel=9) as bundle:
+        for path in files:
+            row = json.loads(path.read_text(encoding="utf-8"))
+            cleaned = sanitize(row)
+            if _contains_sensitive_key(cleaned) or _contains_sensitive_url(cleaned):
+                raise ValueError(f"Sensitive data remains in {path.name}")
+            hashes[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+            bundle.writestr(path.name, json.dumps(cleaned, ensure_ascii=False, separators=(",", ":")))
+    preflight = json.loads((run_dir / "preflight.json").read_text(encoding="utf-8"))
+    (output / "manifest.json").write_text(json.dumps({
+        "code_commit": preflight["head"], "rows": len(files), "indices": preflight["indices"],
+        "route": preflight["route"], "category_argument": preflight["category_argument"],
+        "budget_seconds": preflight["budget_seconds"],
+        "hard_stop_grace_seconds": preflight["hard_stop_grace_seconds"],
+        "source_original_sha256": hashes,
+        "sanitized_archive_sha256": hashlib.sha256(archive_path.read_bytes()).hexdigest(),
+    }, indent=2) + "\n", encoding="utf-8")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--new", required=True, type=Path, help="directory of NN.json rows")
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--run-dir", type=Path, help="run directory (raw/ + preflight.json) to archive")
     args = parser.parse_args()
+    if args.run_dir:
+        archive(args.run_dir, args.output)
     print(json.dumps(compare(args.new, args.output), ensure_ascii=False, indent=2))
 
 

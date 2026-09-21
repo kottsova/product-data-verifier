@@ -906,7 +906,7 @@ class DiscoveryDebugService:
         providers: Callable[[], Iterable[object]] | None = None,
         document_reader: DocumentReader | None = None,
         isolation: Literal["auto", "process", "inline"] = "auto",
-        hard_stop_grace_seconds: float = 5.0,
+        hard_stop_grace_seconds: float = 6.0,
         worker_hooks: str | None = None,
     ) -> None:
         if wall_clock_budget_seconds <= 0:

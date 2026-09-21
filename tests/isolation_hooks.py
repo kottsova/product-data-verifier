@@ -164,3 +164,25 @@ def saved_case() -> dict:
 
     debug.fetch_working_page = lambda url, **_: (case["url"], case["html"])
     return {"providers": lambda: [Saved()], "document_reader": lambda _url: None}
+
+
+class DocumentHangProvider(FastProvider):
+    """Healthy for identity queries, hangs on the document search that follows."""
+
+    name = "hang_on_documents"
+
+    def search(self, query: str):
+        if "manual pdf" in query or "declaration of conformity" in query:
+            _note_pid("worker", os.getpid())
+            while True:
+                time.sleep(3600)
+        return super().search(query)
+
+
+def big_page_then_document_hang() -> dict:
+    """A ~2 MB verified product page (about 1 s of CPU per analysis) is recorded, then the worker stalls."""
+    import services.discovery_debug as debug
+
+    html = "<h1>Bosch WAN28254GB washing machine</h1>" + "<p>WAN28254GB specification row</p>" * 30_000
+    debug.fetch_working_page = lambda url, **_: (EXACT_URL, html)
+    return {"providers": lambda: [DocumentHangProvider()]}
