@@ -905,10 +905,32 @@ class DiscoveryDebugService:
         self, *, wall_clock_budget_seconds: float = 75.0,
         providers: Callable[[], Iterable[object]] | None = None,
         document_reader: DocumentReader | None = None,
+        isolation: Literal["auto", "process", "inline"] = "auto",
+        hard_stop_grace_seconds: float = 5.0,
+        worker_hooks: str | None = None,
     ) -> None:
         if wall_clock_budget_seconds <= 0:
             raise ValueError("wall_clock_budget_seconds must be positive")
+        if hard_stop_grace_seconds < 0:
+            raise ValueError("hard_stop_grace_seconds must not be negative")
         self.wall_clock_budget_seconds = float(wall_clock_budget_seconds)
+        # A budget is only a promise while every call cooperates. The public
+        # route therefore runs each discovery in a supervised child process
+        # that is killed (with its whole process tree) at budget + grace.
+        # Injected in-memory providers/readers cannot cross a process boundary,
+        # so those diagnostics run inline unless ``worker_hooks`` ("module:fn")
+        # rebuilds them inside the worker.
+        if isolation not in {"auto", "process", "inline"}:
+            raise ValueError("isolation must be auto, process or inline")
+        injected = providers is not None or document_reader is not None
+        self.isolated = (
+            isolation == "process"
+            or (isolation == "auto" and (not injected or worker_hooks is not None))
+        )
+        if self.isolated and injected and worker_hooks is None:
+            raise ValueError("process isolation of injected providers needs worker_hooks")
+        self.hard_stop_grace_seconds = float(hard_stop_grace_seconds)
+        self.worker_hooks = worker_hooks
         # Diagnostics only: restrict the provider chain (e.g. official-only, no SERP).
         self._providers = providers
         self._document_reader = document_reader or read_pdf_text
@@ -919,6 +941,27 @@ class DiscoveryDebugService:
         self, product_name: str, *, market: str = "global", chat_id: int | None = None,
         product_category: str = "unknown",
     ) -> DiscoveryDebugResult:
+        if self.isolated:
+            from services.discovery_isolation import run_isolated
+            result = run_isolated(
+                product_name, market=market, product_category=product_category,
+                budget_seconds=self.wall_clock_budget_seconds,
+                grace_seconds=self.hard_stop_grace_seconds, worker_hooks=self.worker_hooks,
+            )
+            if chat_id is not None:
+                with self._lock:
+                    self._last_by_chat[chat_id] = result
+            return result
+        return self._discover_inline(
+            product_name, market=market, chat_id=chat_id, product_category=product_category,
+        )
+
+    def _discover_inline(
+        self, product_name: str, *, market: str = "global", chat_id: int | None = None,
+        product_category: str = "unknown", recorder: object | None = None,
+        replay: object | None = None,
+    ) -> DiscoveryDebugResult:
+        """The cooperative pipeline; ``recorder``/``replay`` serve the supervisor."""
         identity = parse_discovery_product_name(product_name)
         if identity is None:
             raise ValueError("brand and model are required")
@@ -934,15 +977,20 @@ class DiscoveryDebugService:
         def fetch(url: str) -> tuple[str, str] | None:
             if url not in page_cache:
                 remaining = budget.remaining_seconds
-                if remaining < 8.0:
+                if replay is None and remaining < 8.0:
                     page_cache[url] = None
                     page_fetches.append({"url": url, "status": "budget_exhausted", "duration_seconds": 0.0})
                 else:
                     fetch_started = time.monotonic()
                     attempts: list[dict[str, object]] = []
-                    page_cache[url] = fetch_working_page(
-                        url, timeout=min(12.0, remaining), attempts=attempts,
-                    )
+                    if replay is not None:
+                        page_cache[url] = replay.page(url)
+                    else:
+                        if recorder is not None:
+                            recorder.fetch_start(url)
+                        page_cache[url] = fetch_working_page(
+                            url, timeout=min(12.0, remaining), attempts=attempts,
+                        )
                     fetch_record: dict[str, object] = {
                         "url": url,
                         "status": "loaded" if page_cache[url] else "unavailable",
@@ -968,12 +1016,23 @@ class DiscoveryDebugService:
                             "scoped_seed_first_party": bool(seed and seed.first_party),
                             "js_shell": inspect_product_page(html, final_url).js_shell,
                         })
+                    if replay is not None:
+                        fetch_record.update(replay.fetch_meta(url))
                     page_fetches.append(fetch_record)
+                    if recorder is not None:
+                        recorder.fetch_done(url, page_cache[url], fetch_record)
             return page_cache[url]
 
         def document_reader(url: str):
             if url not in document_cache:
-                document_cache[url] = self._document_reader(url) if budget.remaining_seconds >= 5.0 else None
+                if replay is not None:
+                    document_cache[url] = replay.document(url)
+                elif budget.remaining_seconds >= 5.0:
+                    document_cache[url] = self._document_reader(url)
+                    if recorder is not None:
+                        recorder.document(url, document_cache[url])
+                else:
+                    document_cache[url] = None
             return document_cache[url]
 
         def early_scoped_page_check(url: str) -> bool:
@@ -987,9 +1046,15 @@ class DiscoveryDebugService:
             return bool(seed and seed.first_party and decision.relation == "exact")
 
         provider_chain = list(self._providers()) if self._providers is not None else None
-        with ResilientSearchSession(
-            market, provider_chain, config=runtime, budget=budget,
-        ) as session:
+        if replay is not None:
+            session_cm = replay.session()
+        else:
+            session_cm = ResilientSearchSession(
+                market, provider_chain, config=runtime, budget=budget,
+            )
+            if recorder is not None:
+                session_cm.progress = recorder.session_event
+        with session_cm as session:
             outcome = discover_with_status(
                 brand, model, market=market, searcher=session.search_with_status,
                 early_official_stop=True, product_category=product_category,
@@ -1034,11 +1099,15 @@ class DiscoveryDebugService:
                         fetch=fetch, extra_results=[_search_result_record(item) for item in extra],
                         document_reader=document_reader, product_category=product_category,
                     )
-        elapsed = round(time.monotonic() - started, 3)
-        result = replace(result, runtime_seconds=elapsed, page_fetches=tuple(page_fetches),
-                         performance={**result.performance, "runtime_seconds": elapsed,
-                                      "budget_overrun_seconds": round(max(0.0, elapsed - self.wall_clock_budget_seconds), 3),
-                                      "timeout_can_interrupt_active_requests": False})
+            # Finalised before provider cleanup so a slow browser shutdown can
+            # never delay (or lose) an already complete result.
+            elapsed = round(time.monotonic() - started, 3)
+            result = replace(result, runtime_seconds=elapsed, page_fetches=tuple(page_fetches),
+                             performance={**result.performance, "runtime_seconds": elapsed,
+                                          "budget_overrun_seconds": round(max(0.0, elapsed - self.wall_clock_budget_seconds), 3),
+                                          "timeout_can_interrupt_active_requests": False})
+            if recorder is not None:
+                recorder.result_ready(result)
         if chat_id is not None:
             with self._lock:
                 self._last_by_chat[chat_id] = result

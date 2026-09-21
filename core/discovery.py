@@ -4412,6 +4412,24 @@ def _provider_discovery_telemetry(provider: SearchProvider) -> dict[str, object]
     }
 
 
+class _ObservedList(list):
+    """List that reports appended items so an outside recorder sees them at once."""
+
+    def __init__(self, notify: Callable[[list], None]) -> None:
+        super().__init__()
+        self._notify = notify
+
+    def append(self, item) -> None:  # noqa: D401
+        super().append(item)
+        self._notify([item])
+
+    def extend(self, items) -> None:
+        items = list(items)
+        super().extend(items)
+        if items:
+            self._notify(items)
+
+
 class ResilientSearchSession:
     """Try fallback providers only after structured primary failure.
 
@@ -4507,6 +4525,14 @@ class ResilientSearchSession:
         self._provider_elapsed: dict[int, float] = {}
         self._brand = ""
         self._model = ""
+        # Optional observer ``progress(kind, payload)``: lets a supervising
+        # process persist every provider attempt/result the moment it exists,
+        # so a hard stop keeps everything found before the stalled call.
+        self.progress: Callable[[str, object], None] | None = None
+
+    def _emit(self, kind: str, payload: object) -> None:
+        if self.progress is not None:
+            self.progress(kind, payload)
 
     def configure_identity(self, brand: str, model: str) -> None:
         self._brand = " ".join((brand or "").split())
@@ -4554,8 +4580,11 @@ class ResilientSearchSession:
         query (the official-site probes cannot answer a document search), so
         their cached product hits neither short-circuit nor slow the chain.
         """
-        attempts: list[ProviderAttempt] = []
-        collected: list[SearchResultLike] = []
+        self._emit("query_start", (query, tuple(sorted(skip_providers))))
+        attempts: list[ProviderAttempt] = _ObservedList(
+            lambda items: self._emit("attempts", items))
+        collected: list[SearchResultLike] = _ObservedList(
+            lambda items: self._emit("results", items))
         productive_provider_found = False
         for index, provider in enumerate(self.providers):
             if provider.name in skip_providers:
@@ -4675,6 +4704,7 @@ class ResilientSearchSession:
                     continue
             started = self._clock()
             retried = False
+            self._emit("provider_start", (provider.name, timeout_seconds))
             for attempt_number in range(2):
                 try:
                     bounded_search = getattr(provider, "search_with_timeout", None)
@@ -4918,6 +4948,7 @@ class ResilientSearchSession:
                 ))
             ):
                 productive_provider_found = True
+        self._emit("query_end", None)
         return ProviderQueryOutcome(tuple(collected), tuple(attempts))
 
     def search(self, query: str) -> list[SearchResultLike]:
