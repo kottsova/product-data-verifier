@@ -1,0 +1,10 @@
+[
+  {
+    "index": 14,
+    "run_status": "FAIL",
+    "run_observation": "The live search retained 11 secondary candidates and checked no product page; the exact Braun Household URL did not enter the discovered candidate set.",
+    "current_primary_url": "https://www.braunhousehold.com/en/p/multiquick-9-multiquick-9-hand-blender-mq-9187xli/HB901-MQ9187XLI.html",
+    "current_operator_url": "https://www.delonghigroup.com/en/brand/braun",
+    "current_verdict": "An independently reviewed exact primary product page and licensed household-brand operator exist; this run is a search-retrieval miss, not evidence of absence."
+  }
+]

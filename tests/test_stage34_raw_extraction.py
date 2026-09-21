@@ -144,7 +144,7 @@ def _payload() -> dict:
 class ServiceUsesDiscovery(unittest.TestCase):
     def setUp(self):
         self.fetched: list[str] = []
-        html = "<table><tr><td>Voltage</td><td>18 V</td></tr></table>"
+        html = "<h1>ABC1234X</h1><table><tr><td>Voltage</td><td>18 V</td></tr></table>"
 
         def fetch_html(url):
             self.fetched.append(url)

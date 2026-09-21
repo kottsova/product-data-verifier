@@ -353,7 +353,7 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(candidates[0]["source_type"], "retailer")
         self.assertEqual(candidates[0]["authority_status"], "unknown")
 
-    def test_manufacturer_with_evidence_is_verified_and_ranks_first(self) -> None:
+    def test_manufacturer_search_evidence_is_provisional_and_ranks_first(self) -> None:
         evidence = "https://bosch-home.com/"
         candidates = rank_candidates([
             ("https://amazon.fr/dp/PUE611BB5E", "Bosch PUE611BB5E"),
@@ -361,7 +361,7 @@ class DiscoveryTests(unittest.TestCase):
         ], "Bosch", "PUE611BB5E", official_domain="bosch-home.com",
             authority_evidence_url=evidence)
         self.assertEqual(candidates[0]["source_type"], "manufacturer")
-        self.assertEqual(candidates[0]["authority_status"], "verified")
+        self.assertEqual(candidates[0]["authority_status"], "provisional")
         self.assertEqual(candidates[0]["authority_evidence_url"], evidence)
 
     def test_lower_google_result_official_exact_product_ranks_first(self) -> None:
@@ -377,7 +377,7 @@ class DiscoveryTests(unittest.TestCase):
             official_domains={"acme.example": "https://acme.example/"},
         )
         self.assertEqual(candidates[0]["url"], "https://acme.example/product/X100")
-        self.assertEqual(candidates[0]["authority_status"], "verified")
+        self.assertEqual(candidates[0]["authority_status"], "provisional")
 
     def test_official_support_page_is_not_lost_to_product_url_heuristics(self) -> None:
         results = [
@@ -395,7 +395,7 @@ class DiscoveryTests(unittest.TestCase):
             "https://acme.example/de/supportdetail/X100-01",
         )
         self.assertEqual(candidates[0]["source_type"], "official_document")
-        self.assertEqual(candidates[0]["authority_status"], "verified")
+        self.assertEqual(candidates[0]["authority_status"], "provisional")
 
     def test_brand_domain_exact_model_boost_does_not_upgrade_authority(self) -> None:
         candidates = rank_candidates([
@@ -573,7 +573,7 @@ class DiscoveryTests(unittest.TestCase):
             authority_evidence_url="https://acme.example/")
         homepage = next(item for item in candidates if item["domain"] == "acme.example")
         retailer = next(item for item in candidates if item["domain"] == "mvideo.ru")
-        self.assertEqual(homepage["authority_status"], "verified")
+        self.assertEqual(homepage["authority_status"], "provisional")
         self.assertEqual(homepage["model_relevance"], "unknown")
         self.assertEqual(retailer["authority_status"], "unknown")
         self.assertEqual(retailer["model_relevance"], "exact_base_model")
@@ -622,7 +622,7 @@ class DiscoveryTests(unittest.TestCase):
         )
         self.assertEqual(outcome.queries, ["Acme X100 net weight"])
         self.assertEqual(calls, ["Acme official website", "Acme X100 net weight"])
-        self.assertEqual(outcome.candidates[0]["authority_status"], "verified")
+        self.assertEqual(outcome.candidates[0]["authority_status"], "provisional")
         self.assertEqual(outcome.candidates[0]["identity_relation"], "same_base_model")
 
     def test_person_name_collision_is_rejected_before_fetch_selection(self) -> None:
@@ -971,7 +971,7 @@ class SearchFallbackTests(unittest.TestCase):
         outcome = discover_with_status("Acme", "X100", searcher=searcher)
 
         self.assertIn("Acme X100", calls)
-        self.assertIn('"X100" Acme specifications', calls)
+        self.assertIn('"X100" Acme specs', calls)
         self.assertTrue(outcome.candidates)
         self.assertEqual(outcome.search_status, "partial")
         self.assertEqual(outcome.issues[0].query, "Acme official website")
@@ -1466,7 +1466,7 @@ class SearchFallbackTests(unittest.TestCase):
         )
 
         self.assertEqual(product["source_type"], "manufacturer")
-        self.assertEqual(product["authority_status"], "verified")
+        self.assertEqual(product["authority_status"], "provisional")
         self.assertEqual(product["authority_evidence_url"], "https://acme.example/")
 
     def test_fallback_official_claim_without_domain_consistency_stays_unverified(self) -> None:

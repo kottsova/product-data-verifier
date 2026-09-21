@@ -1,0 +1,81 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "0212f7a7e6146be6ab8cf1524c511993891bffb48616631c3e10b0e9d4fe5cc3",
+  "raw_sha256": {
+    "13.json": "0994f08a5f848d33df5db4fedaa5d22cdb7fe29a790936a3b2c58cfbf4de77af",
+    "40.json": "049bc480cc61589f2cc397e99b3998753162413a1306663dc0e04917a5cf1783",
+    "41.json": "a83e498ec32ac87dd50fd8cfd8966c70510d56fb8277ee051b8e69fab61e5c96"
+  },
+  "rows": [
+    {
+      "index": 13,
+      "input": "Tefal Ultimate Pure FV9845",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 14,
+      "queries": 11,
+      "prior_seconds": 58.827,
+      "seconds": 47.52,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 40,
+      "input": "Einhell TC-PL 750",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 8,
+      "prior_seconds": 66.863,
+      "seconds": 38.069,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {}
+    },
+    {
+      "index": 41,
+      "input": "STIHL MS 182",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 9,
+      "queries": 3,
+      "prior_seconds": 149.797,
+      "seconds": 13.275,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 1
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 1,
+      "pass": 0
+    },
+    "model": {
+      "rows": 2,
+      "pass": 1
+    },
+    "family": {
+      "rows": 0,
+      "pass": 0
+    }
+  },
+  "prior_queries": 35,
+  "queries": 22,
+  "prior_seconds": 275.5,
+  "seconds": 98.9
+}

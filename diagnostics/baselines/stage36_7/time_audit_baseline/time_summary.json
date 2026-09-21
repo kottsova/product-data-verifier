@@ -1,0 +1,30 @@
+{
+  "products": 50,
+  "over_budget": 32,
+  "max_runtime_seconds": 314.594,
+  "totals_seconds": {
+    "search_providers": 1350.1,
+    "direct_probes": 1512.5,
+    "browser": 554.2,
+    "document_queries": 32.5,
+    "other_providers": 0.0,
+    "page_load": 127.6,
+    "unattributed": 665.7
+  },
+  "crossing_provider_counts": {
+    "no_recorded_provider_call": 9,
+    "duckduckgo_html": 5,
+    "seznam": 5,
+    "naver": 4,
+    "google": 4,
+    "bing": 2,
+    "direct_domain_probe": 2,
+    "browser_official_discovery": 1
+  },
+  "zero_candidate_products": [
+    "Makita GA023GZ",
+    "Milwaukee M18 FHX-502X",
+    "Bosch Professional GCM 8 SJL",
+    "Einhell TC-PL 750"
+  ]
+}

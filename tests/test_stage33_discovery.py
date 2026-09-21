@@ -115,14 +115,14 @@ class ClassificationTests(unittest.TestCase):
         product = by_url["https://acme.co.uk/products/x100"]
         manual = by_url["https://support.acme.co.uk/manuals/x100.pdf"]
         self.assertEqual((product["source_type"], product["authority_status"]),
-                         ("manufacturer", "verified"))
+                         ("manufacturer", "provisional"))
         self.assertEqual((manual["source_type"], manual["authority_status"]),
-                         ("official_document", "verified"))
+                         ("official_document", "provisional"))
 
     def test_authorized_dealer_requires_independent_corroboration(self):
         dealer = '<p>Acme authorized dealer</p><meta property="og:site_name" content="Acme">'
         trusted = [TrustedSource(
-            "acme.com", '<a href="https://acme-shop.example/dealers">Dealer</a>',
+            "acme.com", '<a href="https://acme-shop.example/dealers">Authorized dealer</a>',
         )]
         assessment = resolve_authority(
             dealer, "Acme authorized dealer", "acme-shop.example", "Acme", trusted,
@@ -162,10 +162,10 @@ class ClassificationTests(unittest.TestCase):
 
         result = discover_with_status("Acme", "X100", searcher=searcher)
         by_url = {candidate["url"]: candidate for candidate in result.candidates}
-        self.assertEqual(by_url["https://acme-home.co.uk/en/product/x100"]["authority_status"], "verified")
+        self.assertEqual(by_url["https://acme-home.co.uk/en/product/x100"]["authority_status"], "provisional")
         self.assertNotEqual(by_url["https://acme-shop.co.uk/products/x100"]["authority_status"], "verified")
 
-    def test_regional_sku_suffix_is_the_same_official_model(self):
+    def test_regional_sku_suffix_requires_content_confirmation(self):
         def searcher(query):
             if query == "Acme official website":
                 return []
@@ -173,9 +173,9 @@ class ClassificationTests(unittest.TestCase):
 
         result = discover_with_status("Acme", "X100", searcher=searcher)
         item = result.candidates[0]
-        self.assertEqual(item["authority_status"], "verified")
-        # Stage 33.1: a market code on the exact base SKU is the same model.
-        self.assertEqual(item["relevance_relation"], "exact")
+        self.assertEqual(item["authority_status"], "provisional")
+        # A syntactically regional suffix is not proof of commercial equality.
+        self.assertEqual(item["relevance_relation"], "likely_variant")
         self.assertEqual(item["sku_relation"], "regional_suffix")
         self.assertEqual(item["sku_suffix"], "GB")
 

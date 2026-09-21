@@ -1,0 +1,82 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "3565ce48ac2df045d2a538165d15edd00ef3953d2a2cf538bbb6bdf912e6df48",
+  "raw_sha256": {
+    "13.json": "9059a1430fc0ab6d451a27f18c3410b9364f77d9a1ca46f8799fd542add67c2f",
+    "40.json": "095a30fcd0f3b97d6a33218dc8cf013035742d61d6cef49a7b1b296b5622eaa3",
+    "41.json": "842c4bcb3effd872a554d6552c994bf6294e2770a21ed1627fa03f2dfc846123"
+  },
+  "rows": [
+    {
+      "index": 13,
+      "input": "Tefal Ultimate Pure FV9845",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 14,
+      "queries": 11,
+      "prior_seconds": 58.827,
+      "seconds": 51.168,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 40,
+      "input": "Einhell TC-PL 750",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 11,
+      "prior_seconds": 66.863,
+      "seconds": 64.839,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 41,
+      "input": "STIHL MS 182",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 9,
+      "queries": 11,
+      "prior_seconds": 149.797,
+      "seconds": 48.115,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 1,
+        "loaded": 2
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 1,
+      "pass": 0
+    },
+    "model": {
+      "rows": 2,
+      "pass": 0
+    },
+    "family": {
+      "rows": 0,
+      "pass": 0
+    }
+  },
+  "prior_queries": 35,
+  "queries": 33,
+  "prior_seconds": 275.5,
+  "seconds": 164.1
+}

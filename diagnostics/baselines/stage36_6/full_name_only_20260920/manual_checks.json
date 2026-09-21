@@ -1,0 +1,83 @@
+[
+  {
+    "index": 1,
+    "url": "https://www.bosch-home.co.uk/en/product/laundry/washing-machines/front-load-washing-machine/WAN28254GB",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.bosch-home.co.uk/en/product/laundry/washing-machines/front-load-washing-machine/WAN28254GB",
+    "operator_evidence": "https://media3.bsh-group.com/Documents/9001351957_A.pdf",
+    "note": "Primary washing-machine page names WAN28254GB; site footer identifies BSH Home Appliances Ltd."
+  },
+  {
+    "index": 2,
+    "url": "https://www.siemens-home.bsh-group.com/uk/en/mkt-product/SN23EI03ME",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.siemens-home.bsh-group.com/uk/en/mkt-product/SN23EI03ME",
+    "operator_evidence": "https://press.siemens-home.bsh-group.com/",
+    "note": "Primary dishwasher page names SN23EI03ME, although discontinued; BSH states it is the Siemens home-appliance trademark licensee and links this host."
+  },
+  {
+    "index": 7,
+    "url": "https://www.haier-europe.com/en_GB/products/34005047-hcr5919ehmb-uk",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.haier-europe.com/en_GB/products/34005047-hcr5919ehmb-uk",
+    "operator_evidence": "https://corporate.haier-europe.com/our-brands/haier/",
+    "note": "Main product and commercial-code table name HCR5919EHMB; Haier Europe lists the brand, and the commerce footer names its UK operator."
+  },
+  {
+    "index": 22,
+    "url": "https://www.logitech.com/en-us/shop/p/mx-keys-s",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.logitech.com/en-us/shop/p/mx-keys-s",
+    "operator_evidence": "https://www.logitech.com/en-us/legal/services-privacy-statement",
+    "note": "Primary keyboard heading names MX Keys S; Logitech International identifies itself as operator of its linked web sites. Combo variants were rejected."
+  },
+  {
+    "index": 23,
+    "url": "https://www.razer.com/gaming-mice/razer-deathadder-v3",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.razer.com/gaming-mice/razer-deathadder-v3",
+    "operator_evidence": "https://www.razer.com/legal/general-terms-of-use",
+    "note": "Main product is the wired DeathAdder V3; Razer Inc. states that it manages razer.com. HyperSpeed is a separate product and the live identity check rejected it."
+  },
+  {
+    "index": 33,
+    "url": "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.corsair.com/ww/en/p/psu/cp-9020270-na/rmx-series-rm850x-fully-modular-power-supply-cp-9020270-na",
+    "operator_evidence": "https://www.corsair.com/us/en/s/terms-of-use",
+    "note": "Primary heading names RMx Series RM850x, SKU CP-9020270-NA; Corsair terms identify Corsair Memory Inc. as operator of corsair.com. SHIFT is a distinct series and was not accepted."
+  },
+  {
+    "index": 47,
+    "url": "https://www.nike.com/gb/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.nike.com/gb/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010",
+    "operator_evidence": "https://www.nike.com/gb/help/a/blue-light-card-promo-terms-eu",
+    "note": "Primary Nike UK product lists Style FN4231-010 in its main product details; Nike UK's current promotion terms name NIKE Retail B.V. for Nike.com UK purchases."
+  },
+  {
+    "index": 49,
+    "url": "https://oralb.com/en-us/products/electric-toothbrushes/io-series-10-rechargeable-electric-toothbrush-cosmic-black/",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://oralb.com/en-us/products/electric-toothbrushes/io-series-10-rechargeable-electric-toothbrush-cosmic-black/",
+    "operator_evidence": "https://us.pg.com/brands/",
+    "note": "Primary card is one iO Series 10 toothbrush (Cosmic Black), not a twin pack; P&G's brand directory lists Oral-B and links directly to oralb.com."
+  },
+  {
+    "index": 50,
+    "url": "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser",
+    "identity_verdict": "confirmed",
+    "first_party_verdict": "confirmed",
+    "primary_evidence": "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser",
+    "operator_evidence": "https://www.loreal.com/fr/division-beaute-dermatologique/cerave/",
+    "note": "Primary page is Hydrating Facial Cleanser, not a refill product; L'Oreal's CeraVe brand page links to cerave.com as the brand site."
+  }
+]

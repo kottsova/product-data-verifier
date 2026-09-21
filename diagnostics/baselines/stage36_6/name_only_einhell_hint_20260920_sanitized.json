@@ -1,0 +1,43 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "07b62025f6d666b0193b903ae8d95b8f7b2a2f34e394b0da8e35378b6ed6b8f0",
+  "raw_sha256": {
+    "40.json": "f4a46debf4001f8c0ba9e1c3d645cdbf98d16387fff783c844ed8068f5909fc1"
+  },
+  "rows": [
+    {
+      "index": 40,
+      "input": "Einhell TC-PL 750",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 8,
+      "prior_seconds": 66.863,
+      "seconds": 37.418,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {}
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 0,
+      "pass": 0
+    },
+    "model": {
+      "rows": 1,
+      "pass": 0
+    },
+    "family": {
+      "rows": 0,
+      "pass": 0
+    }
+  },
+  "prior_queries": 12,
+  "queries": 8,
+  "prior_seconds": 66.9,
+  "seconds": 37.4
+}

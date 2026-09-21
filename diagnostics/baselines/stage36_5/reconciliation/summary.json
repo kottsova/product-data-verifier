@@ -1,0 +1,37 @@
+{
+  "baseline_automatic": {
+    "runs": 50,
+    "automatic_pass": 31,
+    "automatic_exact_product": 31,
+    "automatic_any_official": 36,
+    "documents_listed": 26,
+    "provider_failures": 729,
+    "runtime_seconds": 2234.6
+  },
+  "archive_candidate_count": 1940,
+  "screen_counts": {
+    "requires_content": 1906,
+    "variant_or_region_requires_content": 7,
+    "old_exact_requires_main_content": 1,
+    "related_item_named_in_saved_title": 6,
+    "different_package_named_in_saved_title": 5,
+    "forum_not_editorial_product": 11,
+    "title_url_reject_requires_review": 4
+  },
+  "by_input_identity_level": {
+    "sku": {
+      "queries": 23,
+      "automatic_pass": 14
+    },
+    "model": {
+      "queries": 19,
+      "automatic_pass": 13
+    },
+    "family": {
+      "queries": 8,
+      "automatic_pass": 4
+    }
+  },
+  "historical_manual_verdicts_reconstructible": 0,
+  "note": "Saved URL/title screens are not content verification or first-party/exact precision."
+}

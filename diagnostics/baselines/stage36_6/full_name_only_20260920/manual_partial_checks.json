@@ -1,0 +1,75 @@
+[
+  {
+    "index": 3,
+    "run_status": "PARTIAL",
+    "run_observation": "Spanish and French Samsung pages loaded; primary SKU evidence was regional /EF or absent, so the unsuffixed requested SKU stayed unproved.",
+    "current_primary_url": "https://www.samsung.com/es/business/refrigerators/bottom-mount-freezer/bespoke-bmfreezer-with-smartthings-ai-energy-mode-387l-silver-rb38c7b6as9-ef/",
+    "current_operator_url": "https://www.samsung.com/es/support/model/RB38C7B6AS9/EF/",
+    "current_verdict": "Official Samsung regional variant /EF exists; do not promote to exact unsuffixed SKU."
+  },
+  {
+    "index": 4,
+    "run_status": "PARTIAL",
+    "run_observation": "Bulgarian Electrolux product GET timed out; subsequent candidates were budget exhausted.",
+    "current_primary_url": "https://www.electrolux.bg/kitchen/cooking/ovens/oven/eod6p77wx/",
+    "current_operator_url": "https://www.electrolux.bg/overlays/terms-and-conditions/",
+    "current_verdict": "Current manufacturer product page identifies the exact oven; live run did not load it."
+  },
+  {
+    "index": 5,
+    "run_status": "PARTIAL",
+    "run_observation": "French AEG product GET timed out.",
+    "current_primary_url": "https://www.aeg.fr/kitchen/cooking/hobs/induction-hob/ike64441fb/",
+    "current_operator_url": "https://www.aeg.fr/overlays/shop-terms-and-conditions/",
+    "current_verdict": "Current exact hob page and Electrolux France site operator are established; live run did not load it."
+  },
+  {
+    "index": 6,
+    "run_status": "PARTIAL",
+    "run_observation": "Miele product page returned HTTP 403 on both URL spellings; another candidate was budget exhausted.",
+    "current_primary_url": "https://www.miele.co.uk/product/11871790/t1-heat-pump-dryer-twd260wp-8kg-lotus-white",
+    "current_operator_url": "https://www.miele.com/de/com/2185.htm",
+    "current_verdict": "Current Miele page names TWD260WP as its main heat-pump dryer; live run had no loaded body."
+  },
+  {
+    "index": 8,
+    "run_status": "PARTIAL",
+    "run_observation": "Official De'Longhi product candidates were discovered, but each selected page was budget exhausted before fetch.",
+    "current_primary_url": "https://www.delonghi.com/en/p/eletta-explore-eletta-explore-automatic-coffee-maker-ecam450.86.t/ECAM450.86.T.html",
+    "current_operator_url": "https://www.delonghi.com/en-us/privacy-policy",
+    "current_verdict": "Current De'Longhi product page names ECAM450.86.T and company privacy terms identify management of delonghi.com; live run had no page body."
+  },
+  {
+    "index": 12,
+    "run_status": "PARTIAL",
+    "run_observation": "Roborock's main S8 MaxV Ultra page loaded and main identity was exact; its delivered primary block did not give the conservative category classifier enough evidence for scoped trust. Accessory candidates remained rejected.",
+    "current_primary_url": "https://us.roborock.com/products/roborock-s8-maxv-ultra",
+    "current_operator_url": "https://us.roborock.com/pages/terms-and-conditions",
+    "current_verdict": "Current manufacturer page and Roborock Technology Co. store terms support an exact robot-vacuum model and operator; the live scope remains unproved by its classifier."
+  },
+  {
+    "index": 13,
+    "run_status": "PARTIAL",
+    "run_observation": "Four Tefal candidate page checks were budget exhausted in the full 50 run; an earlier bounded live probe loaded G0 variant pages. The original archived request remains in the SKU denominator.",
+    "current_primary_url": "https://www.tefal.co.uk/Linen-Care/Steam-Irons/Professional-Results/Ultimate-Pure-FV9845-Steam-Iron-Black-%26-Rose-Gold/p/1830007280",
+    "additional_model_url": "https://www.tefal.com/ultimate-pure",
+    "current_operator_url": "https://www.tefal.co.uk/privacy",
+    "current_verdict": "FV9845 is a base model, not a separately evidenced commercial SKU: the UK main card calls it FV9845 but states reference FV9845G0; the global Tefal model comparison lists FV9845E0. First-party model-level identity is independently supported, but neither variant is exact for the unsuffixed SKU contract."
+  },
+  {
+    "index": 9,
+    "run_status": "PARTIAL",
+    "run_observation": "Philips domestic-appliance URL returned HTTP 200, but the delivered body had no primary product heading or unique Product object.",
+    "current_primary_url": "https://www.home-appliances.philips/de/de/p/HD9876_90",
+    "current_operator_url": "https://www.philips.com/c-dam/corporate/newscenter/de/press-releases/2023/202302-philips-da-wird-versuni/2302_PRESSEINFORMATION_Versuni.pdf",
+    "current_verdict": "A separate current page read identifies HD9876/90 and Versuni; the run's delivered response did not prove identity."
+  },
+  {
+    "index": 26,
+    "run_status": "PARTIAL",
+    "run_observation": "Four LG regional TV pages loaded, but the automatic main identity and scoped first-party checks remained unknown; no page was accepted.",
+    "current_primary_url": "https://www.lg.com/africa/tvs/lg-oled55c46la-55-inch-oled-evo-4k-c4-smart-tv",
+    "current_operator_url": "https://www.lg.com/africa/lge-terms",
+    "current_verdict": "Independent current LG product content calls OLED55C46LA an OLED evo C4 TV, supporting the C4 family; LG's terms identify LG Electronics Africa Logistics FZE as the /africa operator. The live parser did not establish the primary family object and scope."
+  }
+]

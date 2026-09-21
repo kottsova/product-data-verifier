@@ -1,0 +1,108 @@
+{
+  "products": 16,
+  "old": {
+    "PASS": 4,
+    "PARTIAL": 7,
+    "FAIL": 5,
+    "over_75s": 12,
+    "max_runtime_seconds": 314.594,
+    "median_runtime_seconds": 108.272,
+    "total_runtime_seconds": 1863.0,
+    "unique_candidates": 728.0,
+    "zero_candidate_products": 3,
+    "queries_attempted": 76.0,
+    "page_fetches": 28.0,
+    "pages_loaded": 13.0,
+    "exact_official_pages": 4.0,
+    "support_pages": 0.0,
+    "documents": 0.0,
+    "net_provider_blocks": 58.0,
+    "net_http_403": 0.0,
+    "net_http_429": 0.0,
+    "net_provider_timeouts": 19.0,
+    "provider_other_errors": 2.0,
+    "program_fault_rows": 0
+  },
+  "new": {
+    "PASS": 7,
+    "PARTIAL": 9,
+    "FAIL": 0,
+    "over_75s": 3,
+    "max_runtime_seconds": 80.251,
+    "median_runtime_seconds": 47.013,
+    "total_runtime_seconds": 770.2,
+    "unique_candidates": 1142.0,
+    "zero_candidate_products": 0,
+    "queries_attempted": 101.0,
+    "page_fetches": 34.0,
+    "pages_loaded": 23.0,
+    "exact_official_pages": 7.0,
+    "support_pages": 0.0,
+    "documents": 0.0,
+    "net_provider_blocks": 45.0,
+    "net_http_403": 12.0,
+    "net_http_429": 0.0,
+    "net_provider_timeouts": 14.0,
+    "provider_other_errors": 0.0,
+    "program_fault_rows": 0,
+    "hard_stops": 0,
+    "max_over_budget_seconds": 5.251,
+    "max_post_result_cleanup_seconds": 2.031
+  },
+  "status_changes": [
+    {
+      "index": 14,
+      "input": "Braun MultiQuick 9 MQ9187XLI",
+      "old": "FAIL",
+      "new": "PASS"
+    },
+    {
+      "index": 29,
+      "input": "Epson EcoTank L6270",
+      "old": "PARTIAL",
+      "new": "PASS"
+    },
+    {
+      "index": 38,
+      "input": "Milwaukee M18 FHX-502X",
+      "old": "FAIL",
+      "new": "PARTIAL"
+    },
+    {
+      "index": 39,
+      "input": "Bosch Professional GCM 8 SJL",
+      "old": "FAIL",
+      "new": "PARTIAL"
+    },
+    {
+      "index": 40,
+      "input": "Einhell TC-PL 750",
+      "old": "FAIL",
+      "new": "PARTIAL"
+    },
+    {
+      "index": 41,
+      "input": "STIHL MS 182",
+      "old": "FAIL",
+      "new": "PASS"
+    }
+  ],
+  "accepted_lost": [],
+  "accepted_new_needing_manual_review": [
+    {
+      "index": 14,
+      "input": "Braun MultiQuick 9 MQ9187XLI",
+      "urls": "braunhousehold.com/en/p/multiquick-9-multiquick-9-hand-blender-mq-9187xli/hb901-mq9187xli.html?pid=0x22111376"
+    },
+    {
+      "index": 29,
+      "input": "Epson EcoTank L6270",
+      "urls": "epson.eu/en_eu/products/printers/inkjet/consumer/ecotank-l6270-multifunction-wi-fi-ink-tank-a4-printer%2c-with-up-to-3-years-of-ink-included/p/30259"
+    },
+    {
+      "index": 41,
+      "input": "STIHL MS 182",
+      "urls": "stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "recorded_at_utc": "2026-09-21T12:27:57.967672+00:00",
+  "head": "2607eec0a3e7b2de7b820fb1e566e1572a0356e4",
+  "branch": "stage36-6-authority-identity",
+  "working_tree_before_run": "",
+  "route": "DiscoveryDebugService.discover_name(name)",
+  "category_argument": "omitted",
+  "indices": "all 50",
+  "budget_seconds": 75,
+  "hard_stop_grace_seconds": 5,
+  "provider_environment": {}
+}

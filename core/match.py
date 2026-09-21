@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from urllib.parse import unquote, urlparse
+from functools import lru_cache
 import unicodedata
 
 MODEL_TOKEN_RE = re.compile(r"(?<!\w)[\w]+(?:[./_-][\w]+)*(?!\w)", re.UNICODE)
@@ -14,6 +15,7 @@ MODEL_FAMILY_MODIFIERS = {
 }
 
 
+@lru_cache(maxsize=8192)
 def normalize_model(value: str | None) -> str:
     text = unicodedata.normalize("NFKC", value or "").upper().replace("Ё", "Е")
     return "".join(character for character in text if character.isalnum())

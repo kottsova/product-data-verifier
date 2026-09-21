@@ -1,0 +1,357 @@
+{
+  "recorded_at_utc": "2026-09-20T17:39:38.931784+00:00",
+  "head": "8d5865c7d4d51ae3fcaf5d56455306631f4ffaf3",
+  "branch": "stage36-6-authority-identity",
+  "working_tree_before_run": "M diagnostics/stage36_5_baseline.py\n?? diagnostics/stage36_6_full_run.py",
+  "route": "DiscoveryDebugService.discover_name(name)",
+  "category_argument": "omitted",
+  "input_mode": "historical archived strings; no structural corrections",
+  "market": "global",
+  "product_count": 50,
+  "service_budget_seconds": 75,
+  "service_instance": "fresh per row",
+  "cache_reset_per_row": "clear_official_domain_cache (domain and surface caches)",
+  "cache_sizes_before_run": {
+    "official_domain": 0,
+    "official_surface": 0
+  },
+  "provider_health": {
+    "enabled": false,
+    "persisted_file_present": false,
+    "persisted_file_sha256": null
+  },
+  "provider_names": [
+    "direct_domain_probe",
+    "browser_official_discovery",
+    "duckduckgo_html",
+    "naver",
+    "seznam",
+    "duckduckgo_lite",
+    "bing",
+    "google"
+  ],
+  "provider_initial_local_circuits": {},
+  "runtime_config": {
+    "provider_timeouts": {
+      "bing": 8.0,
+      "google": 8.0,
+      "duckduckgo_html": 8.0,
+      "duckduckgo_lite": 8.0,
+      "naver": 8.0,
+      "seznam": 8.0,
+      "direct_domain_probe": 36.0,
+      "browser_official_discovery": 20.0
+    },
+    "circuit_breaker_failures": 1,
+    "provider_time_share": 0.25,
+    "blocked_cooldown_seconds": 6.0,
+    "max_blocked_reopens": 3
+  },
+  "provider_environment": {},
+  "pause_between_rows_seconds": 2,
+  "archive_sha256": "be35e4cfd941ffd11a3cce92ebebbc75158f7ae4cb20eb1c1143fc91aeb8eeef",
+  "harness_sha256": "9cb491698a8ceec3d3f42eb3637604f95965696303572d391f941029faa3ceb1",
+  "runner_sha256": "111a9f10b59f89f7a1787e667aab0465be23d47d6c5ca707a9b53d4702e005fa",
+  "inputs": [
+    {
+      "index": 1,
+      "name": "Bosch WAN28254GB",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "major appliances"
+    },
+    {
+      "index": 2,
+      "name": "Siemens SN23EI03ME",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "major appliances"
+    },
+    {
+      "index": 3,
+      "name": "Samsung RB38C7B6AS9",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "major appliances"
+    },
+    {
+      "index": 4,
+      "name": "Electrolux EOD6P77WX",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "major appliances"
+    },
+    {
+      "index": 5,
+      "name": "AEG IKE64441FB",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "major appliances"
+    },
+    {
+      "index": 6,
+      "name": "Miele TWD260WP",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "major appliances"
+    },
+    {
+      "index": 7,
+      "name": "Haier HCR5919EHMB",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "major appliances"
+    },
+    {
+      "index": 8,
+      "name": "DeLonghi Eletta Explore ECAM450.86.T",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 9,
+      "name": "Philips Airfryer Combi XXL HD9876/90",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 10,
+      "name": "Dyson V15 Detect",
+      "identity_level": "model",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 11,
+      "name": "Kärcher K5 Power Control",
+      "identity_level": "model",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 12,
+      "name": "Roborock S8 MaxV Ultra",
+      "identity_level": "model",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 13,
+      "name": "Tefal Ultimate Pure FV9845",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 14,
+      "name": "Braun MultiQuick 9 MQ9187XLI",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 15,
+      "name": "Kenwood Titanium Chef Patissier XL KWL90",
+      "identity_level": "model",
+      "category_annotation_not_passed": "small appliances"
+    },
+    {
+      "index": 16,
+      "name": "ASUS RT-BE88U",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "networking"
+    },
+    {
+      "index": 17,
+      "name": "TP-Link Deco BE85",
+      "identity_level": "model",
+      "category_annotation_not_passed": "networking"
+    },
+    {
+      "index": 18,
+      "name": "Ubiquiti UniFi U7 Pro",
+      "identity_level": "model",
+      "category_annotation_not_passed": "networking"
+    },
+    {
+      "index": 19,
+      "name": "NETGEAR GS308EP",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "networking"
+    },
+    {
+      "index": 20,
+      "name": "Synology DS923+",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "networking"
+    },
+    {
+      "index": 21,
+      "name": "APC Back-UPS BX1600MI",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 22,
+      "name": "Logitech MX Keys S",
+      "identity_level": "model",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 23,
+      "name": "Razer DeathAdder V3",
+      "identity_level": "model",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 24,
+      "name": "SteelSeries Arctis Nova Pro Wireless",
+      "identity_level": "model",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 25,
+      "name": "Samsung Odyssey OLED G8 G80SD",
+      "identity_level": "model",
+      "category_annotation_not_passed": "TV/display"
+    },
+    {
+      "index": 26,
+      "name": "LG OLED evo C4",
+      "identity_level": "family",
+      "category_annotation_not_passed": "TV/display"
+    },
+    {
+      "index": 27,
+      "name": "Apple Mac mini M4",
+      "identity_level": "family",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 28,
+      "name": "Lenovo ThinkPad X1 Carbon Gen 13 Aura Edition",
+      "identity_level": "model",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 29,
+      "name": "Epson EcoTank L6270",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 30,
+      "name": "Canon CanoScan LiDE 400",
+      "identity_level": "model",
+      "category_annotation_not_passed": "computer/peripherals"
+    },
+    {
+      "index": 31,
+      "name": "WD My Passport 5TB",
+      "identity_level": "family",
+      "category_annotation_not_passed": "PC components"
+    },
+    {
+      "index": 32,
+      "name": "Crucial T705",
+      "identity_level": "family",
+      "category_annotation_not_passed": "PC components"
+    },
+    {
+      "index": 33,
+      "name": "Corsair RM850x",
+      "identity_level": "family",
+      "category_annotation_not_passed": "PC components"
+    },
+    {
+      "index": 34,
+      "name": "ASUS TUF Gaming GeForce RTX 5070 Ti",
+      "identity_level": "family",
+      "category_annotation_not_passed": "PC components"
+    },
+    {
+      "index": 35,
+      "name": "MSI MAG X870 TOMAHAWK WIFI",
+      "identity_level": "model",
+      "category_annotation_not_passed": "PC components"
+    },
+    {
+      "index": 36,
+      "name": "DEWALT DCD805P2T",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "power tools"
+    },
+    {
+      "index": 37,
+      "name": "Makita GA023GZ",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "power tools"
+    },
+    {
+      "index": 38,
+      "name": "Milwaukee M18 FHX-502X",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "power tools"
+    },
+    {
+      "index": 39,
+      "name": "Bosch Professional GCM 8 SJL",
+      "identity_level": "model",
+      "category_annotation_not_passed": "power tools"
+    },
+    {
+      "index": 40,
+      "name": "Einhell TC-PL 750",
+      "identity_level": "model",
+      "category_annotation_not_passed": "power tools"
+    },
+    {
+      "index": 41,
+      "name": "STIHL MS 182",
+      "identity_level": "model",
+      "category_annotation_not_passed": "garden/outdoor tools"
+    },
+    {
+      "index": 42,
+      "name": "Husqvarna 525LK",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "garden/outdoor tools"
+    },
+    {
+      "index": 43,
+      "name": "Frostbite Drench 39ML",
+      "identity_level": "model",
+      "category_annotation_not_passed": "fishing"
+    },
+    {
+      "index": 44,
+      "name": "Nautilus X Series XL MAX",
+      "identity_level": "model",
+      "category_annotation_not_passed": "fishing"
+    },
+    {
+      "index": 45,
+      "name": "Namazu Bionic 90 N41-90-52",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "fishing"
+    },
+    {
+      "index": 46,
+      "name": "adidas Ultraboost 5 JH9073",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "apparel/footwear"
+    },
+    {
+      "index": 47,
+      "name": "Nike AeroSwift FN4231-010",
+      "identity_level": "sku",
+      "category_annotation_not_passed": "apparel/footwear"
+    },
+    {
+      "index": 48,
+      "name": "The North Face Nuptse",
+      "identity_level": "family",
+      "category_annotation_not_passed": "apparel/footwear"
+    },
+    {
+      "index": 49,
+      "name": "Oral-B iO Series 10",
+      "identity_level": "model",
+      "category_annotation_not_passed": "personal care/skincare"
+    },
+    {
+      "index": 50,
+      "name": "CeraVe Hydrating Facial Cleanser",
+      "identity_level": "family",
+      "category_annotation_not_passed": "personal care/skincare"
+    }
+  ]
+}

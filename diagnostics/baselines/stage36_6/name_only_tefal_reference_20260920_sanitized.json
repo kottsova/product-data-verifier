@@ -1,0 +1,45 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "67ab537e0658d1dd4780e52d9657e8a50d58a50b73a73a43ff464f485ed3bcce",
+  "raw_sha256": {
+    "13.json": "bc93e476a1f8b5fc13793359837046d5da03c72be3a65b73245c4fc7685144f9"
+  },
+  "rows": [
+    {
+      "index": 13,
+      "input": "Tefal Ultimate Pure FV9845",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 14,
+      "queries": 10,
+      "prior_seconds": 58.827,
+      "seconds": 41.259,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 1,
+      "pass": 0
+    },
+    "model": {
+      "rows": 0,
+      "pass": 0
+    },
+    "family": {
+      "rows": 0,
+      "pass": 0
+    }
+  },
+  "prior_queries": 14,
+  "queries": 10,
+  "prior_seconds": 58.8,
+  "seconds": 41.3
+}

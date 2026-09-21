@@ -4,11 +4,13 @@ from __future__ import annotations
 
 import time
 import unittest
+from datetime import date
 from unittest.mock import patch
 
 import requests
 
 from bot.discovery_formatters import format_discovery_result
+from core.authority_registry import AuthoritySeed
 from core.discovery import (
     DirectDomainProbeProvider,
     DiscoveryRuntimeConfig,
@@ -87,7 +89,7 @@ class SkuStructureTests(unittest.TestCase):
 
         outcome = discover_with_status("Acme", "X100P2", searcher=searcher)
         accepted = {item["url"]: item for item in outcome.candidates}
-        self.assertEqual(accepted["https://acme.co.uk/en-gb/product/x100p2-gb/drill"]["relevance_relation"], "exact")
+        self.assertEqual(accepted["https://acme.co.uk/en-gb/product/x100p2-gb/drill"]["relevance_relation"], "likely_variant")
         self.assertEqual(accepted["https://acme.co.uk/en-gb/product/x100p2-gb/drill"]["sku_suffix"], "GB")
         rejected = {item["url"] for item in outcome.rejected_candidates}
         self.assertIn("https://acme.co.uk/en-gb/product/x100p2t-gb/drill", rejected)
@@ -139,7 +141,7 @@ class CyrillicAndCanonicalizationTests(unittest.TestCase):
 
         outcome = discover_with_status("Acme", "GAF-1825", searcher=searcher)
         self.assertEqual(outcome.candidates[0]["relevance_relation"], "exact")
-        self.assertEqual(outcome.candidates[0]["authority_status"], "verified")
+        self.assertEqual(outcome.candidates[0]["authority_status"], "provisional")
 
     def test_sibling_model_in_a_catalog_list_is_rejected_not_dropped(self):
         def searcher(query):
@@ -170,6 +172,32 @@ class CyrillicAndCanonicalizationTests(unittest.TestCase):
         page = fetch_working_page("https://acme.ru/catalog/x_1825", session=Session())
         self.assertEqual(page[0], "https://acme.ru/catalog/x_1825/")
         self.assertEqual(seen, ["https://acme.ru/catalog/x_1825", "https://acme.ru/catalog/x_1825/"])
+
+    def test_slash_variants_share_one_fetch_deadline(self):
+        timeouts = []
+
+        def unavailable(_url, *, timeout, **_kwargs):
+            timeouts.append(timeout)
+            if len(timeouts) == 1:
+                time.sleep(0.03)
+            return None
+
+        with patch("core.page_inspection.fetch_page_html", side_effect=unavailable):
+            self.assertIsNone(fetch_working_page("https://acme.ru/catalog/x", timeout=0.1))
+        self.assertEqual(len(timeouts), 2)
+        self.assertLess(timeouts[1], timeouts[0] - 0.02)
+
+    def test_page_fetch_records_http_block_and_working_variant(self):
+        attempts = []
+
+        class Session:
+            def get(self, url, **_kwargs):
+                return FakeResponse(url, "<h1>Acme X</h1>", 200 if url.endswith("/") else 403)
+
+        page = fetch_working_page("https://acme.ru/catalog/x", session=Session(), attempts=attempts)
+        self.assertEqual(page[0], "https://acme.ru/catalog/x/")
+        self.assertEqual([item["status"] for item in attempts], ["http_blocked", "loaded"])
+        self.assertEqual([item["http_status"] for item in attempts], [403, 200])
 
 
 class ProviderResilienceTests(unittest.TestCase):
@@ -244,7 +272,7 @@ class DirectProbeAuthorityTests(unittest.TestCase):
     def setUp(self):
         clear_official_domain_cache()
 
-    def test_page_confirmed_brand_verifies_a_title_that_omits_the_brand(self):
+    def test_page_confirmed_brand_remains_provisional_until_operator_check(self):
         def searcher(query):
             return [SearchResultRecord(
                 "https://acme.co.uk/en-gb/product/x100p2-gb/drill", "18V Brushless Drill",
@@ -255,10 +283,10 @@ class DirectProbeAuthorityTests(unittest.TestCase):
 
         outcome = discover_with_status("Acme", "X100P2", searcher=searcher, early_official_stop=True)
         item = outcome.candidates[0]
-        self.assertEqual(item["authority_status"], "verified")
-        self.assertEqual(item["relevance_relation"], "exact")
+        self.assertEqual(item["authority_status"], "provisional")
+        self.assertEqual(item["relevance_relation"], "likely_variant")
         self.assertEqual(outcome.attempted_queries[:1], outcome.queries[:1])
-        self.assertLess(len(outcome.attempted_queries), len(outcome.queries))  # stopped early
+        self.assertEqual(len(outcome.attempted_queries), len(outcome.queries))
 
     def test_the_same_title_from_a_search_engine_does_not_verify_authority(self):
         def searcher(query):
@@ -553,6 +581,16 @@ class DocumentQueryTests(unittest.TestCase):
 class BotOutputTests(unittest.TestCase):
     def setUp(self):
         clear_official_domain_cache()
+        seed = AuthoritySeed(
+            "Acme", "acme.com", "brand_operator", "fixtures",
+            "https://independent.example/acme", date.today(),
+        )
+        patcher = patch("core.discovery.find_seed", side_effect=lambda brand, host, **kwargs: seed if brand == "Acme" and host == "acme.com" else None)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        service_patcher = patch("services.discovery_debug.find_seed", side_effect=lambda brand, host, **kwargs: seed if brand == "Acme" and host == "acme.com" else None)
+        service_patcher.start()
+        self.addCleanup(service_patcher.stop)
 
     def test_groups_are_separate_and_links_are_shown(self):
         def searcher(query):
@@ -562,6 +600,7 @@ class BotOutputTests(unittest.TestCase):
 
         outcome = discover_with_status("Acme", "X100", searcher=searcher)
         html = (
+            '<h1>Acme X100 drill</h1>'
             '<a href="/docs/x100-manual.pdf">X100 user manual</a>'
             '<button aria-expanded="false">Show all specifications</button>'
         )

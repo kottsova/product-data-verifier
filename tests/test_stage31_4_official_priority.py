@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import replace
 import unittest
+from unittest.mock import patch
 
 from core.discovery import (
     DiscoveryOutcome,
@@ -46,7 +47,17 @@ from tests.test_bot import (
     make_result,
 )
 from services.product_verifier import VerifyProductRequest, _to_result
-from tests.test_workflow import FixtureServices, candidate, fetch_result, raw
+from tests.test_workflow import FixtureServices, candidate, fetch_result, raw, fixture_authority_seed
+
+
+def setUpModule():
+    global _registry_patch
+    _registry_patch = patch("core.workflow.find_seed", side_effect=fixture_authority_seed)
+    _registry_patch.start()
+
+
+def tearDownModule():
+    _registry_patch.stop()
 
 
 OFFICIAL = "https://acme.example/product/X100"
@@ -339,7 +350,7 @@ class OfficialDomainDiscoveryTests(unittest.TestCase):
         self.assertIn("-site:support.acme.example", expansion[0])
         self.assertIn("https://carrier.acme.example/phones/x100", urls)
         carrier = next(i for i in outcome.candidates if "carrier" in i["url"])
-        self.assertEqual(carrier["authority_status"], "verified")
+        self.assertEqual(carrier["authority_status"], "provisional")
         self.assertEqual(carrier["source_type"], "manufacturer")
 
 
@@ -384,7 +395,7 @@ class OfficialPageDiscoveryRegressionTests(unittest.TestCase):
         )
         self.assertEqual(len(ranked), 1)
         self.assertEqual(ranked[0]["source_type"], "manufacturer")
-        self.assertEqual(ranked[0]["authority_status"], "verified")
+        self.assertEqual(ranked[0]["authority_status"], "provisional")
         self.assertEqual(ranked[0]["model_match"], "exact")
 
 

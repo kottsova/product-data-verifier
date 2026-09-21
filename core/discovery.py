@@ -24,6 +24,7 @@ from urllib.request import Request, urlopen
 import requests
 
 from core.budget import WallClockBudget
+from core.authority_registry import RULES_VERSION, find_host_seed_lead, find_seed, single_first_party_host_hint
 from core.fetch import _blocked_reason as _detect_blocked_reason
 from core.sku import requested_sku, sku_in_text_loosely, sku_relation, sku_search_terms
 from core.match import (
@@ -49,6 +50,12 @@ class Candidate(TypedDict):
     authority_status: str
     authority_evidence_url: str | None
     authority_reason: str | None
+    authority_evidence_kind: str
+    authority_evidence_excerpt: str
+    authority_checked_on: str
+    authority_rules_version: int
+    operator_relation: str
+    authority_scope: str
     product_match_evidence: str | None
     market_scope: str
     model_match: str
@@ -306,6 +313,8 @@ ACCESSORY_CONTEXT_TERMS = {
     "assembly", "case", "cover", "digitizer", "protector", "replacement",
     "refurbished", "renewed", "spare", "wallet", "hülle", "кейс", "чехол", "케이스",
 }
+_COMPATIBILITY_LEAD = re.compile(r"\b(?:for|compatible\s+with|fits|replacement\s+for)\b", re.I)
+_DISTINCT_CONFIGURATION = re.compile(r"\b(?:refill|twin[ -]?pack|bundle|combo|kit|for[ -]mac)\b", re.I)
 SPECIALIZED_REFERENCE_DOMAINS = {
     "gsmarena.com", "manua.ls", "manuals.co.uk", "manualslib.com",
     "manuals.plus", "manymanuals.com", "nanoreview.net",
@@ -319,12 +328,12 @@ NON_PRODUCT_CONTEXT_DOMAINS = {
     "espn.com", "fifa.com", "imdb.com", "transfermarkt.com", "wikipedia.org",
 }
 NON_PRODUCT_CONTEXT_PATHS = {
-    "athlete", "biography", "forum", "forums", "people", "person", "profile",
+    "athlete", "biography", "discussions", "forum", "forums", "people", "person", "profile",
     "roster", "sports", "wiki",
 }
 TRACKING_PARAMETERS = {
     "_ga", "_gl", "fbclid", "gad_source", "gclid", "igshid",
-    "mc_cid", "mc_eid", "ref_", "srsltid", "yclid",
+    "mc_cid", "mc_eid", "position", "queryid", "ref_", "srsltid", "yclid",
 }
 
 SCORE_EXACT_MODEL = 60
@@ -364,7 +373,46 @@ MARKET_GOOGLE_PARAMS = {
 # separate from package dimensions, net weight separate from gross/shipping
 # weight, and prioritize identifiers such as GTIN/EAN/UPC and MPN/article.
 
-_OFFICIAL_DOMAIN_CACHE: dict[tuple[str, str], tuple[tuple[str, str], ...]] = {}
+@dataclass(frozen=True, slots=True)
+class AuthoritySearchHypothesis:
+    """Short lived search lead. This cache never grants verified authority."""
+
+    host: str
+    relation: str
+    scope: str
+    evidence_url: str
+    evidence_excerpt: str
+    checked_at: float
+    rules_version: int
+
+
+_OFFICIAL_DOMAIN_CACHE: dict[tuple[str, str], tuple[AuthoritySearchHypothesis, ...]] = {}
+_OFFICIAL_HYPOTHESIS_MAX_AGE_SECONDS = 3600
+
+
+def _cached_official_hypotheses(key: tuple[str, str]) -> dict[str, str] | None:
+    rows = _OFFICIAL_DOMAIN_CACHE.get(key)
+    if rows is None:
+        return None
+    if any(
+        row.rules_version != RULES_VERSION
+        or time.time() - row.checked_at > _OFFICIAL_HYPOTHESIS_MAX_AGE_SECONDS
+        for row in rows
+    ):
+        _OFFICIAL_DOMAIN_CACHE.pop(key, None)
+        return None
+    return {row.host: row.evidence_url for row in rows}
+
+
+def _cache_official_hypotheses(key: tuple[str, str], domains: Mapping[str, str]) -> None:
+    _OFFICIAL_DOMAIN_CACHE[key] = tuple(
+        AuthoritySearchHypothesis(
+            host=host, relation="unknown", scope=key[1], evidence_url=url,
+            evidence_excerpt="Search-level official claim; operator unverified",
+            checked_at=time.time(), rules_version=RULES_VERSION,
+        )
+        for host, url in domains.items()
+    )
 
 
 def browser_headless() -> bool:
@@ -386,7 +434,6 @@ def build_search_queries(brand: str, model: str, article: str | None = None) -> 
         f'"{brand} {model}"',
         f'"{model}" {brand}',
         f'"{model}" {brand} specs',
-        f'"{model}" {brand} specifications',
     ]
     if article and article.strip():
         article = " ".join(article.split())
@@ -570,9 +617,9 @@ def discover_global_official_domains(
     product_results: Iterable[SearchResultLike] = (),
     model: str | None = None,
 ) -> list[tuple[str, str]]:
-    """Return conservatively proven official domains and their evidence URLs.
+    """Return search-level official-domain hypotheses and their evidence URLs.
 
-    An explicit search-result claim remains sufficient. A provider that omits
+    An explicit search-result claim remains a hypothesis. A provider that omits
     the word "official" may use the stricter fallback: exact brand/root-domain
     equality plus a separate exact-model result on that same root domain.
     """
@@ -823,6 +870,24 @@ def _has_accessory_context(url: str, title: str) -> bool:
     return bool(tokens & ACCESSORY_CONTEXT_TERMS)
 
 
+def _names_compatible_item(url: str, title: str, model: str) -> bool:
+    """A product *for* the requested model is not the requested product.
+
+    The check uses the relation between the main object and the model, not a
+    list of accessory names. A compatible part can be a bag, brush, dock, or
+    an entirely new kind of part.
+    """
+    from urllib.parse import unquote
+
+    for text in (title, unquote(urlparse(url).path).replace("-", " ")):
+        if not _COMPATIBILITY_LEAD.search(text):
+            continue
+        match = _COMPATIBILITY_LEAD.search(text)
+        if match and base_model_in_text(model, text[match.end():]):
+            return True
+    return False
+
+
 def _path_names_complete_model(url: str, brand: str, model: str) -> bool:
     """Require the complete model in the destination, not just a SERP title."""
     path = unquote(urlparse(url).path)
@@ -908,23 +973,28 @@ def assess_candidate_relevance(
         return "reject", ["Search result has person, sports, profile, wiki, or forum context."]
     if _has_accessory_context(url, title):
         return "reject", ["Search result describes an accessory or replacement part, not the product."]
+    if _names_compatible_item(url, title, model):
+        return "reject", ["Primary item is compatible with the requested model, not the model itself."]
+    # A bundle/refill has a different commercial configuration. If the
+    # request itself names one, it remains eligible for an exact match.
+    if _DISTINCT_CONFIGURATION.search(f"{title} {unquote(urlparse(url).path).replace('-', ' ')}") and not _DISTINCT_CONFIGURATION.search(model):
+        return "likely_variant", ["Candidate names a distinct bundle, kit, or refill configuration."]
     if _page_kind(url) == "product":
         path_key = normalize_model(unquote(urlparse(url).path))
         meaningful_parts = [normalize_model(part) for part in re.findall(r"[^\W_]+", model)
                             if len(normalize_model(part)) >= 3]
         if meaningful_parts and not any(part in path_key for part in meaningful_parts):
+            if base_model_in_text(model, title):
+                return "weak", ["Product title names the model; identity requires primary page content because URL does not."]
             return "reject", ["Product URL identifies another item, not the requested model."]
     sku = sku_relation(model, title, unquote(urlparse(url).path))
     candidate["sku_relation"] = sku.kind
     candidate["sku_suffix"] = sku.suffix
     if match == "likely_variant":
         if sku.kind == "regional_suffix" and requested_sku(model) is not None:
-            # Base SKU agrees exactly and the tail is a market/bundle code
-            # (DCD796P2 -> DCD796P2-GB).  Real variants (DCD796P2T, DCD796D2)
-            # never reach this branch: they are variants/mismatches above.
-            return "exact", [
-                f"Requested base SKU matches; suffix '{sku.suffix}' is a regional/market "
-                "code, not a different product variant."
+            return "likely_variant", [
+                f"Requested base SKU matches, but suffix '{sku.suffix}' needs "
+                "product-content evidence before equivalence can be established."
             ]
         return "likely_variant", ["Requested base model appears with an explicit variant suffix."]
     if match == "exact" or exact_phrase or component_relation == "exact":
@@ -1068,7 +1138,8 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
                     article: str | None = None, official_domain: str | None = None,
                     authority_evidence_url: str | None = None,
                     market: str = "global",
-                    official_domains: dict[str, str] | None = None) -> list[Candidate]:
+                    official_domains: dict[str, str] | None = None,
+                    product_category: str = "unknown") -> list[Candidate]:
     candidates: dict[str, Candidate] = {}
     for item in results:
         record = _search_result_record(item)
@@ -1088,11 +1159,35 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
         authority_status = "unknown"
         evidence_url = None
         authority_reason = None
+        evidence_kind = "none"
+        operator_relation = "unknown"
+        authority_scope = "unknown"
         candidate_evidence = (official_domains or {}).get(matched_official_domain or "", authority_evidence_url)
-        if source_type == "manufacturer" and candidate_evidence:
+        seed = find_seed(brand, domain, category=product_category)
+        host_lead = find_host_seed_lead(brand, domain) if seed is None else None
+        if seed and seed.operator_relation != "operator_unknown" and source_type != "marketplace":
+            source_type = "manufacturer" if seed.first_party else "distributor"
             authority_status = "verified"
+            evidence_url = seed.evidence_url
+            authority_reason = f"Audited brand-host relationship: {seed.operator_relation}; scope: {seed.scope}."
+            evidence_kind = "audited_registry"
+            operator_relation = seed.operator_relation
+            authority_scope = seed.scope
+            if seed.first_party and _is_official_document(url):
+                source_type = "official_document"
+        elif host_lead and host_lead.operator_relation != "operator_unknown" and source_type != "marketplace":
+            # A reviewed host is worth inspecting, but the page's product
+            # category must be established before this seed can be used.
+            source_type = "manufacturer" if host_lead.first_party else "distributor"
+            authority_status = "provisional"
+            authority_reason = "Audited host lead; product scope not yet verified."
+            evidence_kind = "scoped_seed_lead"
+            evidence_url = host_lead.evidence_url
+        elif source_type == "manufacturer" and candidate_evidence:
+            authority_status = "provisional"
             evidence_url = candidate_evidence
-            authority_reason = "Domain verified from conservative brand official-search evidence."
+            authority_reason = "Search/domain evidence is a hypothesis pending independent operator verification."
+            evidence_kind = "search_hypothesis"
             if _is_official_document(url):
                 source_type = "official_document"
         # Provider snippets are useful ranking context but are not identity
@@ -1111,6 +1206,14 @@ def rank_candidates(results: Iterable[SearchResultLike], brand: str, model: str,
             "url": url, "domain": domain, "title": " ".join((title or "").split()),
             "source_type": source_type, "authority_status": authority_status,
             "authority_evidence_url": evidence_url, "authority_reason": authority_reason,
+            "authority_evidence_kind": evidence_kind,
+            "authority_evidence_excerpt": seed.evidence_excerpt if seed else (
+                "Search-level official claim; operator unverified" if evidence_kind == "search_hypothesis" else ""
+            ),
+            "authority_checked_on": seed.checked_on.isoformat() if seed else "",
+            "authority_rules_version": RULES_VERSION,
+            "operator_relation": operator_relation, "authority_scope": authority_scope,
+            "product_category": product_category,
             "product_match_evidence": product_match_evidence,
             "market_scope": "unknown",
             "model_match": match,
@@ -4309,6 +4412,24 @@ def _provider_discovery_telemetry(provider: SearchProvider) -> dict[str, object]
     }
 
 
+class _ObservedList(list):
+    """List that reports appended items so an outside recorder sees them at once."""
+
+    def __init__(self, notify: Callable[[list], None]) -> None:
+        super().__init__()
+        self._notify = notify
+
+    def append(self, item) -> None:  # noqa: D401
+        super().append(item)
+        self._notify([item])
+
+    def extend(self, items) -> None:
+        items = list(items)
+        super().extend(items)
+        if items:
+            self._notify(items)
+
+
 class ResilientSearchSession:
     """Try fallback providers only after structured primary failure.
 
@@ -4404,6 +4525,14 @@ class ResilientSearchSession:
         self._provider_elapsed: dict[int, float] = {}
         self._brand = ""
         self._model = ""
+        # Optional observer ``progress(kind, payload)``: lets a supervising
+        # process persist every provider attempt/result the moment it exists,
+        # so a hard stop keeps everything found before the stalled call.
+        self.progress: Callable[[str, object], None] | None = None
+
+    def _emit(self, kind: str, payload: object) -> None:
+        if self.progress is not None:
+            self.progress(kind, payload)
 
     def configure_identity(self, brand: str, model: str) -> None:
         self._brand = " ".join((brand or "").split())
@@ -4451,8 +4580,11 @@ class ResilientSearchSession:
         query (the official-site probes cannot answer a document search), so
         their cached product hits neither short-circuit nor slow the chain.
         """
-        attempts: list[ProviderAttempt] = []
-        collected: list[SearchResultLike] = []
+        self._emit("query_start", (query, tuple(sorted(skip_providers))))
+        attempts: list[ProviderAttempt] = _ObservedList(
+            lambda items: self._emit("attempts", items))
+        collected: list[SearchResultLike] = _ObservedList(
+            lambda items: self._emit("results", items))
         productive_provider_found = False
         for index, provider in enumerate(self.providers):
             if provider.name in skip_providers:
@@ -4572,6 +4704,7 @@ class ResilientSearchSession:
                     continue
             started = self._clock()
             retried = False
+            self._emit("provider_start", (provider.name, timeout_seconds))
             for attempt_number in range(2):
                 try:
                     bounded_search = getattr(provider, "search_with_timeout", None)
@@ -4815,6 +4948,7 @@ class ResilientSearchSession:
                 ))
             ):
                 productive_provider_found = True
+        self._emit("query_end", None)
         return ProviderQueryOutcome(tuple(collected), tuple(attempts))
 
     def search(self, query: str) -> list[SearchResultLike]:
@@ -5025,26 +5159,21 @@ def _same_model_match(model: str, title: str, path: str) -> bool:
 
 def _official_exact_page_reached(
     results: Iterable[SearchResultLike], brand: str, model: str,
+    product_category: str = "unknown",
 ) -> bool:
     """True when a result is an exact-model page on a brand-rooted domain.
 
-    Domain equality with the brand label, the brand in the title and the
-    complete model in the URL together are the same corroboration
-    ``discover_global_official_domains`` demands, so stopping here cannot
-    promote a lookalike.
+    A fresh first-party registry seed is required before an early stop.
     """
-    brand_key = re.sub(r"[^a-z0-9]", "", brand.casefold())
-    if len(brand_key) < 3 or not model:
+    if not model:
         return False
     for item in results:
         record = _search_result_record(item)
         url = record.url
         if not url or _is_search_landing_url(url):
             continue
-        label = _registrable_domain_label(_host(url))
-        if not (label == brand_key or label.startswith(brand_key)):
-            continue
-        if not _brand_evidence(record, brand):
+        seed = find_seed(brand, _host(url), category=product_category)
+        if seed is None or not seed.first_party:
             continue
         if (
             _same_model_match(model, record.title, urlparse(url).path)
@@ -5052,6 +5181,8 @@ def _official_exact_page_reached(
             and _page_kind(url) not in {"homepage", "catalog", "weak", "support"}
             and not _has_accessory_context(url, record.title)
             and not _has_non_product_context(url, record.title)
+            and not (_DISTINCT_CONFIGURATION.search(f"{record.title} {unquote(urlparse(url).path).replace('-', ' ')}")
+                     and not _DISTINCT_CONFIGURATION.search(model))
         ):
             return True
     return False
@@ -5065,6 +5196,8 @@ def discover_with_status(
     searcher: Searcher | None = None,
     *,
     early_official_stop: bool = False,
+    product_category: str = "unknown",
+    early_scoped_page_check: Callable[[str], bool] | None = None,
 ) -> DiscoveryOutcome:
     """Discover sources and retain blocked/error state as structured data.
 
@@ -5085,7 +5218,7 @@ def discover_with_status(
     ) -> DiscoveryOutcome:
         _configure_searcher_identity(active_searcher, brand, model)
         cache_key = (normalize_model(brand), market)
-        cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
+        cached = _cached_official_hypotheses(cache_key)
         official_domains = dict(cached or ())
         raw_results: list[SearchResultLike] = []
         official_results: list[SearchResultLike] = []
@@ -5098,9 +5231,13 @@ def discover_with_status(
         # open a provider circuit before it has a chance to return product
         # pages for the exact model.
         brand_domain_hint = re.sub(r"[^a-z0-9]", "", brand.casefold())
+        # A single reviewed operator host is a better search hint than the
+        # mechanically guessed .com root. It grants no authority: the fetched
+        # primary product must still establish the host's reviewed category.
+        hinted_host = single_first_party_host_hint(brand)
         hinted_site_query = (
-            f'"{model}" site:{brand_domain_hint}.com'
-            if len(brand_domain_hint) >= 3 else None
+            f'"{model}" site:{hinted_host or brand_domain_hint + ".com"}'
+            if hinted_host or len(brand_domain_hint) >= 3 else None
         )
         queries: list[str] = list(base_queries)
         if hinted_site_query:
@@ -5112,6 +5249,7 @@ def discover_with_status(
             ))
         budget_stopped = False
         official_page_reached = False
+        scoped_leads_checked: set[str] = set()
         for query in queries:
             attempted_queries.append(query)
             found, attempts, query_issues = _search_query(active_searcher, query)
@@ -5123,12 +5261,33 @@ def discover_with_status(
             if any(item.budget_exhausted for item in attempts):
                 budget_stopped = True
                 break
-            if early_official_stop and _official_exact_page_reached(found, brand, model):
+            if early_official_stop and _official_exact_page_reached(found, brand, model, product_category):
                 # A first-party page that already names the exact model is the
                 # goal of every remaining identity/bootstrap query; keep the
                 # remaining provider capacity (and wall clock) for documents.
                 official_page_reached = True
                 break
+            if early_official_stop and early_scoped_page_check and not official_page_reached:
+                for item in found:
+                    record = _search_result_record(item)
+                    url = canonicalize_url(record.url)
+                    if not url or url in scoped_leads_checked or len(scoped_leads_checked) >= 2:
+                        continue
+                    lead = find_host_seed_lead(brand, _host(url))
+                    if (not lead or not lead.first_party
+                            or not _same_model_match(model, record.title, urlparse(url).path)
+                            or _page_kind(url) in {"homepage", "catalog", "weak", "support"}
+                            or _has_accessory_context(url, record.title)
+                            or _has_non_product_context(url, record.title)
+                            or (_DISTINCT_CONFIGURATION.search(f"{record.title} {unquote(urlparse(url).path).replace('-', ' ')}")
+                                and not _DISTINCT_CONFIGURATION.search(model))):
+                        continue
+                    scoped_leads_checked.add(url)
+                    if early_scoped_page_check(url):
+                        official_page_reached = True
+                        break
+                if official_page_reached:
+                    break
         if cached is None:
             official_domains = dict(discover_global_official_domains(
                 brand,
@@ -5136,7 +5295,7 @@ def discover_with_status(
                 product_results=raw_results,
                 model=model,
             ))
-            _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
+            _cache_official_hypotheses(cache_key, official_domains)
         relevant_domains = [
             domain for domain in official_domains
             if any(
@@ -5192,7 +5351,7 @@ def discover_with_status(
                 break
         ranked_candidates = rank_candidates(
             raw_results, brand, model, article, market=market,
-            official_domains=official_domains,
+            official_domains=official_domains, product_category=product_category,
         )
         candidates, rejected_candidates = _partition_relevance_candidates(
             ranked_candidates, brand, model, article,
@@ -5340,7 +5499,7 @@ def discover_identity_query_with_status(
     ) -> DiscoveryOutcome:
         _configure_searcher_identity(active_searcher, identity.brand, model)
         cache_key = (normalize_model(identity.brand), market)
-        cached = _OFFICIAL_DOMAIN_CACHE.get(cache_key)
+        cached = _cached_official_hypotheses(cache_key)
         official_domains = dict(cached or ())
         issues: list[DiscoveryIssue] = []
         provider_attempts: list[ProviderAttempt] = []
@@ -5363,7 +5522,7 @@ def discover_identity_query_with_status(
                 discover_global_official_domains(identity.brand, authority_results)
             )
             if any(item.budget_exhausted for item in attempts):
-                _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
+                _cache_official_hypotheses(cache_key, official_domains)
                 ranked_candidates = rank_candidates(
                     raw_results,
                     identity.brand,
@@ -5403,7 +5562,7 @@ def discover_identity_query_with_status(
                 product_results=raw_results,
                 model=model,
             ))
-            _OFFICIAL_DOMAIN_CACHE[cache_key] = tuple(official_domains.items())
+            _cache_official_hypotheses(cache_key, official_domains)
 
         ranked_candidates = rank_candidates(
             raw_results,

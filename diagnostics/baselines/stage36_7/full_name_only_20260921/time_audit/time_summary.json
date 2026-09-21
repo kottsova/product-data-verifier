@@ -1,0 +1,21 @@
+{
+  "products": 50,
+  "over_budget": 10,
+  "max_runtime_seconds": 81.108,
+  "totals_seconds": {
+    "search_providers": 978.2,
+    "direct_probes": 981.6,
+    "browser": 403.2,
+    "document_queries": 59.7,
+    "other_providers": 0.0,
+    "page_load": 181.9,
+    "unattributed": 208.8
+  },
+  "crossing_provider_counts": {
+    "naver": 4,
+    "google": 2,
+    "no_recorded_provider_call": 2,
+    "seznam": 2
+  },
+  "zero_candidate_products": []
+}

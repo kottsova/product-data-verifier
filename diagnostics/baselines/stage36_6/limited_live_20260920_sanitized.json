@@ -1,0 +1,133 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "archive_sha256": "fa7014e52cb8687edd9675250cfb0ab1aecd3d76370df23afb4b233346ac16cb",
+  "raw_sha256": {
+    "01.json": "6fd38657de93909b801ace28542163877062de847c5cc016e1b73410084aab70",
+    "05.json": "bd41714849a631b8a62f70f6c4785b7ce25ded9198fcf669de179db2c291f8aa",
+    "17.json": "fcae1216ea2c4d6d099b34fe9099374f7182354f1c8ad90a8f5f0790f865d55c",
+    "22.json": "85398dfa9239e942e9ae61c67155af03698486fa30c6fb15eea5e473c7ed1157",
+    "30.json": "f999388adc713d24196fae929da76250e9056305950744598a98269b2b3cd8f4",
+    "49.json": "f43d891a6e756073903ed49937f9814698d1d60ec2071e5cc81904901fdb8dd8"
+  },
+  "rows": [
+    {
+      "index": 1,
+      "input": "Bosch WAN28254GB",
+      "identity_level": "sku",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 7,
+      "queries": 3,
+      "prior_seconds": 75.435,
+      "seconds": 61.227,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 5,
+      "input": "AEG IKE64441FB",
+      "identity_level": "sku",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 10,
+      "queries": 3,
+      "prior_seconds": 65.287,
+      "seconds": 54.547,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 1
+      }
+    },
+    {
+      "index": 17,
+      "input": "TP-Link Deco BE85",
+      "identity_level": "model",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 8,
+      "queries": 7,
+      "prior_seconds": 32.969,
+      "seconds": 34.007,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 3
+      }
+    },
+    {
+      "index": 22,
+      "input": "Logitech MX Keys S",
+      "identity_level": "model",
+      "prior_status": "PARTIAL",
+      "status": "PASS",
+      "prior_queries": 11,
+      "queries": 3,
+      "prior_seconds": 31.872,
+      "seconds": 17.055,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [
+        "https://www.logitech.com/en-us/shop/p/mx-keys-s",
+        "https://www.logitech.com/en-us/shop/p/mx-keys-s-combo",
+        "https://www.logitech.com/en-us/shop/p/mx-keys-s-combo-for-mac"
+      ],
+      "page_fetch_outcomes": {
+        "loaded": 3
+      }
+    },
+    {
+      "index": 30,
+      "input": "Canon CanoScan LiDE 400",
+      "identity_level": "model",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 3,
+      "prior_seconds": 75.655,
+      "seconds": 24.13,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 2,
+        "loaded": 1
+      }
+    },
+    {
+      "index": 49,
+      "input": "Oral-B iO Series 10",
+      "identity_level": "model",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 3,
+      "prior_seconds": 31.573,
+      "seconds": 31.012,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 2,
+      "pass": 0
+    },
+    "model": {
+      "rows": 4,
+      "pass": 1
+    },
+    "family": {
+      "rows": 0,
+      "pass": 0
+    }
+  },
+  "prior_queries": 51,
+  "queries": 22,
+  "prior_seconds": 312.8,
+  "seconds": 222.0
+}

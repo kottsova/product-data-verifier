@@ -1,0 +1,297 @@
+{
+  "comparison": "same selected indices against archived Stage 36.6, not a 50-item rerun",
+  "category_argument": "omitted",
+  "archive_sha256": "d82f999a8f74d415b3d79dacfb0fbbe05e8104bf95b8ffd87e7c5bab4e5c4ff0",
+  "raw_sha256": {
+    "01.json": "e95ff1008fdef3f03f966ad83a6cf1a8b729628a875f21b21edd6bc25724cfca",
+    "05.json": "23a05cf0b6ed3f1a8e6e401fe6d307d3a3beca9fa07bc79d27c43d35971b3144",
+    "12.json": "0c8d16fee420c5371370bf4b3a57993e0627f0b36542bb2cbb6fa66d3798b337",
+    "16.json": "d5c0a83cddb67825dac96116b8fbeea4576419bf1fa9ae839a5fb44d6ab32fea",
+    "17.json": "6fdcb6ba3d1fc02a95d8b13253f22a05c3d8c825e2d9f2e04fdb352276ec1ff1",
+    "19.json": "16aece33871e99635f4b99112a7ce0d8a83314cca14ae8daab7846d01857d1e1",
+    "22.json": "f441cdb3778e994ad764967c183c1795dc385723d4e5269dd64d2523a04d61bc",
+    "23.json": "f6a28de8f94a3fa1f660d7275012a10294cfe94701a5397f90ddd320f4b1f328",
+    "30.json": "6fa91481dfb5d967761012bcff7978af2e424539ef1511c85d31b6e3806d3db5",
+    "33.json": "f03373edc9d8b047df7f660d832ac887a8935d6ccaab5f3118d28c1c14a7b050",
+    "37.json": "1ecb4f096e2309720e65c35144ca061e3e434241ce68be35f39dd45ddb33eec4",
+    "46.json": "d2890557490cf94225cfb0b16c02adaa259de1db32bf9adcbf0f17c8e8d96290",
+    "47.json": "6bcab1cafbf9c4058f7a7de4a395c4d0b40841f194cb192ac292a18bbc70862a",
+    "49.json": "725e90d2da961dcf65f0061f2e2cf50210905bff8ec27feca5c3703deb625e5f",
+    "50.json": "76cf3750d50e256b607ac277d7c1243f939c55a7d426282eba732aedfa283fdc"
+  },
+  "rows": [
+    {
+      "index": 1,
+      "input": "Bosch WAN28254GB",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 7,
+      "queries": 6,
+      "prior_seconds": 75.435,
+      "seconds": 75.474,
+      "budget_overrun_seconds": 0.474,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "budget_exhausted": 4
+      }
+    },
+    {
+      "index": 5,
+      "input": "AEG IKE64441FB",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 10,
+      "queries": 9,
+      "prior_seconds": 65.287,
+      "seconds": 84.588,
+      "budget_overrun_seconds": 9.588,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 1
+      }
+    },
+    {
+      "index": 12,
+      "input": "Roborock S8 MaxV Ultra",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 10,
+      "prior_seconds": 12.093,
+      "seconds": 39.143,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 3
+      }
+    },
+    {
+      "index": 16,
+      "input": "ASUS RT-BE88U",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 10,
+      "queries": 10,
+      "prior_seconds": 75.642,
+      "seconds": 77.21,
+      "budget_overrun_seconds": 2.21,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "budget_exhausted": 4
+      }
+    },
+    {
+      "index": 17,
+      "input": "TP-Link Deco BE85",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 8,
+      "queries": 12,
+      "prior_seconds": 32.969,
+      "seconds": 53.712,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 19,
+      "input": "NETGEAR GS308EP",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 10,
+      "prior_seconds": 16.792,
+      "seconds": 23.891,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 22,
+      "input": "Logitech MX Keys S",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 11,
+      "queries": 8,
+      "prior_seconds": 31.872,
+      "seconds": 22.967,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 23,
+      "input": "Razer DeathAdder V3",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 9,
+      "prior_seconds": 13.538,
+      "seconds": 33.194,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 2
+      }
+    },
+    {
+      "index": 30,
+      "input": "Canon CanoScan LiDE 400",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 12,
+      "queries": 12,
+      "prior_seconds": 75.655,
+      "seconds": 70.843,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "budget_exhausted": 4
+      }
+    },
+    {
+      "index": 33,
+      "input": "Corsair RM850x",
+      "identity_level": "family",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 9,
+      "prior_seconds": 21.43,
+      "seconds": 36.432,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    },
+    {
+      "index": 37,
+      "input": "Makita GA023GZ",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 8,
+      "queries": 10,
+      "prior_seconds": 76.003,
+      "seconds": 75.476,
+      "budget_overrun_seconds": 0.476,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "budget_exhausted": 3
+      }
+    },
+    {
+      "index": 46,
+      "input": "adidas Ultraboost 5 JH9073",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 11,
+      "queries": 10,
+      "prior_seconds": 60.45,
+      "seconds": 59.217,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "unavailable": 4
+      }
+    },
+    {
+      "index": 47,
+      "input": "Nike AeroSwift FN4231-010",
+      "identity_level": "sku",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 9,
+      "queries": 6,
+      "prior_seconds": 82.86,
+      "seconds": 75.764,
+      "budget_overrun_seconds": 0.764,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "budget_exhausted": 4
+      }
+    },
+    {
+      "index": 49,
+      "input": "Oral-B iO Series 10",
+      "identity_level": "model",
+      "category_argument": "omitted",
+      "prior_status": "PARTIAL",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 10,
+      "prior_seconds": 31.573,
+      "seconds": 70.024,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "budget_exhausted": 4
+      }
+    },
+    {
+      "index": 50,
+      "input": "CeraVe Hydrating Facial Cleanser",
+      "identity_level": "family",
+      "category_argument": "omitted",
+      "prior_status": "PASS",
+      "status": "PARTIAL",
+      "prior_queries": 3,
+      "queries": 9,
+      "prior_seconds": 30.014,
+      "seconds": 36.058,
+      "budget_overrun_seconds": 0.0,
+      "verified_exact_urls": [],
+      "page_fetch_outcomes": {
+        "loaded": 4
+      }
+    }
+  ],
+  "levels": {
+    "sku": {
+      "rows": 7,
+      "pass": 0
+    },
+    "model": {
+      "rows": 6,
+      "pass": 0
+    },
+    "family": {
+      "rows": 2,
+      "pass": 0
+    }
+  },
+  "prior_queries": 104,
+  "queries": 140,
+  "prior_seconds": 701.6,
+  "seconds": 834.0
+}

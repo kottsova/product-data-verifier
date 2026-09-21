@@ -16,7 +16,7 @@ class ResolveAuthorityAdversarialTests(unittest.TestCase):
         html = "<html><body><footer>© 2003-2026 Janome. All rights reserved.</footer></body></html>"
         text = "© 2003-2026 Janome. All rights reserved."
         result = resolve_authority(html, text, "janome.club", "Janome", trusted_sources=())
-        self.assertEqual(result.role, "retailer")
+        self.assertEqual(result.role, "unknown")
         self.assertEqual(result.self_declared.role, "manufacturer")
         self.assertFalse(result.corroboration.found)
 
@@ -24,7 +24,7 @@ class ResolveAuthorityAdversarialTests(unittest.TestCase):
         html = "<html><body><p>Janome Shop - official authorized dealer of Janome sewing machines</p></body></html>"
         text = "Janome Shop - official authorized dealer of Janome sewing machines"
         result = resolve_authority(html, text, "janome-shop.example", "Janome", trusted_sources=())
-        self.assertEqual(result.role, "retailer")
+        self.assertEqual(result.role, "unknown")
         self.assertEqual(result.self_declared.role, "authorized_dealer")
         self.assertFalse(result.corroboration.found)
 
@@ -35,7 +35,7 @@ class ResolveAuthorityAdversarialTests(unittest.TestCase):
             "</script></head><body></body></html>"
         )
         result = resolve_authority(html, "", "janome.club", "Janome", trusted_sources=())
-        self.assertEqual(result.role, "retailer")
+        self.assertEqual(result.role, "unknown")
         self.assertFalse(result.corroboration.found)
 
     def test_4_marketplace_seller_is_never_elevated_regardless_of_claims(self):
@@ -54,12 +54,12 @@ class ResolveAuthorityAdversarialTests(unittest.TestCase):
         text = "© 2024 Acme"
         result = resolve_authority(html, text, "acme.example", "Acme", trusted_sources=())
         self.assertEqual(result.self_declared.role, "manufacturer")
-        self.assertEqual(result.role, "retailer")
+        self.assertEqual(result.role, "unknown")
 
     def test_6_independently_corroborated_authorized_dealer_is_elevated(self):
         html = "<html><body><p>Acme Shop is an authorized dealer of Acme products.</p></body></html>"
         text = "Acme Shop is an authorized dealer of Acme products."
-        anchor_html = '<html><body><a href="https://acme-shop.example/store">Find a dealer</a></body></html>'
+        anchor_html = '<html><body><a href="https://acme-shop.example/store">Authorized dealer</a></body></html>'
         trusted = (TrustedSource(domain="acme.example", html=anchor_html),)
         result = resolve_authority(html, text, "acme-shop.example", "Acme", trusted_sources=trusted)
         self.assertEqual(result.role, "authorized_dealer")
@@ -69,7 +69,7 @@ class ResolveAuthorityAdversarialTests(unittest.TestCase):
     def test_7_independently_corroborated_official_distributor_is_elevated(self):
         html = "<html><body><p>Acme Import LLC - official distributor of Acme in this region.</p></body></html>"
         text = "Acme Import LLC - official distributor of Acme in this region."
-        anchor_html = '<html><body><a href="https://acme-import.example/">Regional distributor</a></body></html>'
+        anchor_html = '<html><body><a href="https://acme-import.example/">Official distributor</a></body></html>'
         trusted = (TrustedSource(domain="acme.example", html=anchor_html),)
         result = resolve_authority(html, text, "acme-import.example", "Acme", trusted_sources=trusted)
         self.assertEqual(result.role, "official_distributor")
@@ -97,7 +97,7 @@ class ResolveAuthorityAdversarialTests(unittest.TestCase):
         text = "Официальные поставки в Россию"
         result = resolve_authority(html, text, "acme-shop.example", "Acme", trusted_sources=())
         self.assertEqual(result.self_declared.role, "official_distributor")
-        self.assertEqual(result.role, "retailer")
+        self.assertEqual(result.role, "unknown")
 
     def test_corroboration_requires_matching_domain_not_just_any_link(self):
         html = "<html><body><p>Acme Shop is an authorized dealer of Acme products.</p></body></html>"
@@ -105,7 +105,7 @@ class ResolveAuthorityAdversarialTests(unittest.TestCase):
         anchor_html = '<html><body><a href="https://unrelated.example/">Somewhere else</a></body></html>'
         trusted = (TrustedSource(domain="acme.example", html=anchor_html),)
         result = resolve_authority(html, text, "acme-shop.example", "Acme", trusted_sources=trusted)
-        self.assertEqual(result.role, "retailer")
+        self.assertEqual(result.role, "unknown")
         self.assertFalse(result.corroboration.found)
 
 

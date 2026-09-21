@@ -17,6 +17,7 @@ from dataclasses import asdict, dataclass, field
 from html.parser import HTMLParser
 import json
 import re
+import time
 from typing import Literal
 
 Tri = Literal["true", "false", "unknown"]
@@ -335,40 +336,58 @@ def _drop_default_port(url: str) -> str:
 
 
 def fetch_page_html(
-    url: str, *, timeout: float = 12.0, max_bytes: int = 4 * 1024 * 1024, session: object | None = None,
+    url: str, *, timeout: float = 12.0, max_bytes: int = 4 * 1024 * 1024,
+    session: object | None = None, attempts: list[dict[str, object]] | None = None,
 ) -> tuple[str, str] | None:
     """Bounded GET of one official page.  Returns ``(final_url, html)`` or ``None``."""
     import requests
 
     client = session or requests
+    started = time.monotonic()
+
+    def record(status: str, http_status: int | None = None) -> None:
+        if attempts is not None:
+            attempts.append({"url": url, "status": status, "http_status": http_status,
+                             "duration_seconds": round(time.monotonic() - started, 3)})
+
     try:
         response = client.get(  # type: ignore[union-attr]
             url, headers=_FETCH_HEADERS, timeout=timeout, allow_redirects=True, stream=True,
         )
-    except requests.RequestException:
+    except requests.RequestException as error:
+        record("timeout" if isinstance(error, requests.Timeout) else "connection_error"
+               if isinstance(error, requests.ConnectionError) else "request_error")
         return None
     try:
-        if int(getattr(response, "status_code", 0)) >= 400:
+        http_status = int(getattr(response, "status_code", 0))
+        if http_status >= 400:
+            record("http_blocked" if http_status in {401, 403, 429} else "http_error", http_status)
             return None
         content_type = str(getattr(response, "headers", {}).get("content-type", "")).lower()
         if content_type and "html" not in content_type and "xml" not in content_type and "json" not in content_type:
+            record("unsupported_content_type", http_status)
             return None
-        if isinstance(response, requests.Response):
-            chunks: list[bytes] = []
-            size = 0
-            for chunk in response.iter_content(64 * 1024):
-                chunks.append(chunk)
-                size += len(chunk)
-                if size >= max_bytes:
-                    break
-            body = b"".join(chunks)[:max_bytes]
-            encoding = response.encoding or "utf-8"
-            try:
-                text = body.decode(encoding, errors="replace")
-            except LookupError:
-                text = body.decode("utf-8", errors="replace")
-        else:
-            text = str(getattr(response, "text", "") or "")[:max_bytes]
+        try:
+            if isinstance(response, requests.Response):
+                chunks: list[bytes] = []
+                size = 0
+                for chunk in response.iter_content(64 * 1024):
+                    chunks.append(chunk)
+                    size += len(chunk)
+                    if size >= max_bytes:
+                        break
+                body = b"".join(chunks)[:max_bytes]
+                encoding = response.encoding or "utf-8"
+                try:
+                    text = body.decode(encoding, errors="replace")
+                except LookupError:
+                    text = body.decode("utf-8", errors="replace")
+            else:
+                text = str(getattr(response, "text", "") or "")[:max_bytes]
+        except requests.RequestException as error:
+            record("timeout" if isinstance(error, requests.Timeout) else "body_read_error", http_status)
+            return None
+        record("loaded", http_status)
         return _drop_default_port(str(getattr(response, "url", url))), text
     finally:
         close = getattr(response, "close", None)
@@ -394,10 +413,15 @@ def url_variants(url: str) -> list[str]:
 
 def fetch_working_page(
     url: str, *, timeout: float = 12.0, session: object | None = None,
+    attempts: list[dict[str, object]] | None = None,
 ) -> tuple[str, str] | None:
-    """Fetch ``url`` trying both slash spellings; returns ``(working_url, html)``."""
+    """Fetch both slash spellings within one shared request deadline."""
+    deadline = time.monotonic() + max(0.0, timeout)
     for variant in url_variants(url):
-        page = fetch_page_html(variant, timeout=timeout, session=session)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        page = fetch_page_html(variant, timeout=remaining, session=session, attempts=attempts)
         if page is not None:
             return page
     return None

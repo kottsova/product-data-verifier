@@ -1,0 +1,537 @@
+{
+  "conditions": "Saved candidate provider, short manually transcribed product HTML; public discover_name call",
+  "name_only": {
+    "confirmed_losses": [
+      {
+        "index": 1,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.bosch-home.co.uk/en/product/laundry/washing-machines/front-load-washing-machine/WAN28254GB"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 4,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.electrolux.bg/kitchen/cooking/ovens/oven/eod6p77wx/"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 5,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.aeg.fr/kitchen/cooking/hobs/induction-hob/ike64441fb/"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 6,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.miele.co.uk/product/11871790/t1-heat-pump-dryer-twd260wp-8kg-lotus-white"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 16,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.asus.com/us/networking-iot-servers/wifi-routers/asus-gaming-routers/rt-be88u/"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 22,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.logitech.com/en-us/shop/p/mx-keys-s"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 30,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.usa.canon.com/shop/p/canoscan-lide-400"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 29,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.epson.eu/en_EU/products/printers/inkjet/consumer/ecotank-l6270-multifunction-wi-fi-ink-tank-a4-printer%2C-with-up-to-3-years-of-ink-included/p/30259"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 37,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.makita.co.nz/products/model/GA023GZ"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 46,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.adidas.ae/en/ultraboost-5-shoes/JH9073.html"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 47,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.nike.com/dk/en/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 40,
+        "status": "candidate_absent"
+      },
+      {
+        "index": 41,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794"
+        ],
+        "page_fetches": 1
+      }
+    ],
+    "accepted_urls": [
+      {
+        "index": 2,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.siemens-home.bsh-group.com/uk/en/mkt-product/SN23EI03ME"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 7,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.haier-europe.com/en_GB/products/34005047-hcr5919ehmb-uk"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 12,
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "queries": 10,
+        "official_exact_urls": [],
+        "page_fetches": 1
+      },
+      {
+        "index": 14,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.braunhousehold.com/en/p/multiquick-9-multiquick-9-hand-blender-mq-9187xli/HB901-MQ9187XLI.html"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 19,
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "queries": 8,
+        "official_exact_urls": [],
+        "page_fetches": 1
+      },
+      {
+        "index": 23,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.razer.com/gaming-mice/razer-deathadder-v3"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 33,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.corsair.com/br/pt/p/psu/cp-9020270-ww/rmx-series-rm850x-fully-modular-power-supply-ww-cp-9020270-ww"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 43,
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "queries": 8,
+        "official_exact_urls": [],
+        "page_fetches": 0
+      },
+      {
+        "index": 44,
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "queries": 8,
+        "official_exact_urls": [],
+        "page_fetches": 0
+      },
+      {
+        "index": 50,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser"
+        ],
+        "page_fetches": 1
+      }
+    ],
+    "negative_urls": [
+      {
+        "index": 12,
+        "url": "https://us.roborock.com/products/s8-maxv-ultra-dust-bag",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 23,
+        "url": "https://www.razer.com/gaming-mice/razer-deathadder-v3-hyperspeed",
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 33,
+        "url": "https://www.corsair.com/us/en/p/psu/rm850x-shift",
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 50,
+        "url": "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser-refill",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 49,
+        "url": "https://oralb.com/en-us/products/io-series-10-twin-pack",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 19,
+        "url": "https://community.netgear.com/t5/Smart-Plus-and-Smart-Pro/GS308EP/td-p/123",
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      }
+    ]
+  },
+  "explicit_category": {
+    "confirmed_losses": [
+      {
+        "index": 1,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.bosch-home.co.uk/en/product/laundry/washing-machines/front-load-washing-machine/WAN28254GB"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 4,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.electrolux.bg/kitchen/cooking/ovens/oven/eod6p77wx/"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 5,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.aeg.fr/kitchen/cooking/hobs/induction-hob/ike64441fb/"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 6,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.miele.co.uk/product/11871790/t1-heat-pump-dryer-twd260wp-8kg-lotus-white"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 16,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.asus.com/us/networking-iot-servers/wifi-routers/asus-gaming-routers/rt-be88u/"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 22,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.logitech.com/en-us/shop/p/mx-keys-s"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 30,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.usa.canon.com/shop/p/canoscan-lide-400"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 29,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.epson.eu/en_EU/products/printers/inkjet/consumer/ecotank-l6270-multifunction-wi-fi-ink-tank-a4-printer%2C-with-up-to-3-years-of-ink-included/p/30259"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 37,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.makita.co.nz/products/model/GA023GZ"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 46,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.adidas.ae/en/ultraboost-5-shoes/JH9073.html"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 47,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.nike.com/dk/en/t/aeroswift-mens-dri-fit-adv-running-vest-vSX0Gdly/FN4231-010"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 40,
+        "status": "candidate_absent"
+      },
+      {
+        "index": 41,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.stihl.co.uk/en/p/chainsaws-ms-182-petrol-chainsaw-145794"
+        ],
+        "page_fetches": 1
+      }
+    ],
+    "accepted_urls": [
+      {
+        "index": 2,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.siemens-home.bsh-group.com/uk/en/mkt-product/SN23EI03ME"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 7,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.haier-europe.com/en_GB/products/34005047-hcr5919ehmb-uk"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 12,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://us.roborock.com/products/roborock-s8-maxv-ultra"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 14,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.braunhousehold.com/en/p/multiquick-9-multiquick-9-hand-blender-mq-9187xli/HB901-MQ9187XLI.html"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 19,
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "queries": 3,
+        "official_exact_urls": [],
+        "page_fetches": 1
+      },
+      {
+        "index": 23,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.razer.com/gaming-mice/razer-deathadder-v3"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 33,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.corsair.com/br/pt/p/psu/cp-9020270-ww/rmx-series-rm850x-fully-modular-power-supply-ww-cp-9020270-ww"
+        ],
+        "page_fetches": 1
+      },
+      {
+        "index": 43,
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "queries": 8,
+        "official_exact_urls": [],
+        "page_fetches": 0
+      },
+      {
+        "index": 44,
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "queries": 8,
+        "official_exact_urls": [],
+        "page_fetches": 0
+      },
+      {
+        "index": 50,
+        "status": "PASS",
+        "exact_official_found": true,
+        "queries": 3,
+        "official_exact_urls": [
+          "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser"
+        ],
+        "page_fetches": 1
+      }
+    ],
+    "negative_urls": [
+      {
+        "index": 12,
+        "url": "https://us.roborock.com/products/s8-maxv-ultra-dust-bag",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 0
+      },
+      {
+        "index": 23,
+        "url": "https://www.razer.com/gaming-mice/razer-deathadder-v3-hyperspeed",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 33,
+        "url": "https://www.corsair.com/us/en/p/psu/rm850x-shift",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 50,
+        "url": "https://www.cerave.com/skincare/cleansers/hydrating-facial-cleanser-refill",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 49,
+        "url": "https://oralb.com/en-us/products/io-series-10-twin-pack",
+        "status": "FAIL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      },
+      {
+        "index": 19,
+        "url": "https://community.netgear.com/t5/Smart-Plus-and-Smart-Pro/GS308EP/td-p/123",
+        "status": "PARTIAL",
+        "exact_official_found": false,
+        "page_fetches": 1
+      }
+    ]
+  }
+}

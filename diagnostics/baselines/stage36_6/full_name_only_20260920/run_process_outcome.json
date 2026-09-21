@@ -1,0 +1,13 @@
+{
+  "started_at_utc": "2026-09-20T17:39:38.931784+00:00",
+  "last_product_completed_at_utc": "2026-09-20T18:52:04.498093+00:00",
+  "product_files_written": 50,
+  "process_exit_code": 0,
+  "post_result_stderr": {
+    "component": "Playwright Node driver",
+    "code": "EPIPE",
+    "operation": "PipeTransport.send",
+    "phase": "cleanup after row 50 was saved"
+  },
+  "archive_audit": "python -m diagnostics.stage36_6_report --audit --output diagnostics/baselines/stage36_6/full_name_only_20260920: OK"
+}
