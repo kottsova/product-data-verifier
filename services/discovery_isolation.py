@@ -305,12 +305,14 @@ def run_isolated(
             on_worker_started(process)
         result_path = directory / "result.pkl"
         result_seen_at: float | None = None
+        exited_at: float | None = None
         stop_reason: str | None = None
         while True:
             now = time.monotonic()
             if result_seen_at is None and result_path.is_file():
                 result_seen_at = now
             if process.poll() is not None:
+                exited_at = now
                 break
             if result_seen_at is not None and now - result_seen_at >= RESULT_EXIT_WAIT_SECONDS:
                 stop_reason = "cleanup_exceeded_grace"
@@ -368,6 +370,13 @@ def run_isolated(
             "hard_limit_seconds": hard_limit,
             "wall_seconds": elapsed,
             "worker_running_seconds": round(stop_at - started, 3),
+            "result_ready_seconds": (
+                round(result_seen_at - started, 3) if result_seen_at is not None else None),
+            # Time the worker spent tearing providers/browser down after its
+            # result was already saved (bounded by RESULT_EXIT_WAIT_SECONDS).
+            "post_result_cleanup_seconds": (
+                round((exited_at or stop_at) - result_seen_at, 3)
+                if result_seen_at is not None else None),
             "kill_seconds": round(killed_at - stop_at, 3),
             "process_tree_terminated": terminated,
             "worker_exit_code": exit_code,

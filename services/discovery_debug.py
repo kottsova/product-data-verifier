@@ -1060,10 +1060,12 @@ class DiscoveryDebugService:
                 early_official_stop=True, product_category=product_category,
                 early_scoped_page_check=early_scoped_page_check if product_category == "unknown" else None,
             )
+            discovery_done = time.monotonic()
             result = _result_from_outcome(
                 name, brand, model, market, outcome, time.monotonic() - started, fetch=fetch,
                 document_reader=document_reader, product_category=product_category,
             )
+            assembly_done = time.monotonic()
             # Documents linked from the official pages are the cheap, reliable
             # source.  Search-engine document queries only run when they did
             # not already produce a manual-type document.
@@ -1102,8 +1104,14 @@ class DiscoveryDebugService:
             # Finalised before provider cleanup so a slow browser shutdown can
             # never delay (or lose) an already complete result.
             elapsed = round(time.monotonic() - started, 3)
+            phases = {
+                "provider_discovery": round(discovery_done - started, 3),
+                "page_loads_and_assembly": round(assembly_done - discovery_done, 3),
+                "document_queries_and_reassembly": round(time.monotonic() - assembly_done, 3),
+            }
             result = replace(result, runtime_seconds=elapsed, page_fetches=tuple(page_fetches),
                              performance={**result.performance, "runtime_seconds": elapsed,
+                                          "phase_seconds": phases,
                                           "budget_overrun_seconds": round(max(0.0, elapsed - self.wall_clock_budget_seconds), 3),
                                           "timeout_can_interrupt_active_requests": False})
             if recorder is not None:
