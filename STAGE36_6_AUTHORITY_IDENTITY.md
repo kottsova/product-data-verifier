@@ -538,3 +538,7 @@ remain deferred.
 ## Complete 50-row name-only measurement
 
 The full rerun now supersedes the preceding deferral. Results, evidence, limits and verdict are in [the complete Stage 36.6 measurement](STAGE36_6_FULL_NAME_ONLY_20260920.md). The 11 historical transition causes remain unknown; PR #1 remains draft.
+
+## Bounded runtime follow-up
+
+The runtime limit that the 50-row measurement reported as unresolved is now enforced by an external process boundary (75 s budget plus 6 s grace, 81 s worst case measured 81.1 s). Time analysis of the 32 overruns, the live limited and full reruns, and what remains open are in [the bounded-runtime report](STAGE36_6_BOUNDED_RUNTIME.md). Stage 36.6 stays **PARTIAL** and PR #1 stays draft: support pages and documents remain 0 and 0 and need a separate evaluation.

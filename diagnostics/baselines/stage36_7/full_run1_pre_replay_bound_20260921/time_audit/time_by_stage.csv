@@ -1,0 +1,51 @@
+index,input,runtime_seconds,over_budget,over_budget_seconds,search_status,unique_candidates,search_providers_seconds,direct_probes_seconds,browser_seconds,document_queries_seconds,other_providers_seconds,page_load_seconds_sum,page_load_count,unattributed_seconds,slowest_provider,slowest_status,slowest_seconds,slowest_timeout,slowest_page_seconds,slowest_page_status,crossing_provider,crossing_status,crossing_query,crossing_start_seconds,crossing_duration_seconds,crossing_configured_timeout,crossing_overshoot_of_own_timeout,crossing_failure_reason,tail_after_crossing_call_seconds
+1,Bosch WAN28254GB,67.942,False,0.0,partial,10,1.015,36.02,20.027,0.0,0.0,6.594,4,4.286,direct_domain_probe,timeout,36.019705,36.0,2.194,loaded,,,,,,,,,
+2,Siemens SN23EI03ME,61.44,False,0.0,partial,10,1.548,34.294,7.221,13.843,0.0,1.514,1,3.021,direct_domain_probe,empty,34.293803,36.0,1.514,loaded,,,,,,,,,
+3,Samsung RB38C7B6AS9,77.131,True,2.131,partial,83,23.406,32.422,8.32,0.0,0.0,4.77,4,8.214,direct_domain_probe,empty,32.421742,36.0,2.422,loaded,google,timeout,Samsung official website,70.955,4.064352,4.044580535613932,0.02,,2.111
+4,Electrolux EOD6P77WX,74.742,False,0.0,partial,90,37.47,20.728,2.015,0.0,0.0,12.706,3,1.824,direct_domain_probe,empty,10.158279,36.0,12.706,unavailable,,,,,,,,,
+5,AEG IKE64441FB,76.847,True,1.847,partial,59,25.817,20.132,15.063,0.0,0.0,12.645,1,3.191,browser_official_discovery,empty,15.06263,20.0,12.645,unavailable,no_recorded_provider_call,,,,,,,,
+6,Miele TWD260WP,61.333,False,0.0,partial,116,30.583,20.192,6.998,0.0,0.0,1.758,2,1.802,direct_domain_probe,empty,20.192375,36.0,1.109,unavailable,,,,,,,,,
+7,Haier HCR5919EHMB,59.607,False,0.0,partial,11,1.649,23.901,10.653,14.12,0.0,6.93,3,2.353,direct_domain_probe,success,17.995454,36.0,2.66,loaded,,,,,,,,,
+8,DeLonghi Eletta Explore ECAM450.86.T,37.174,False,0.0,partial,75,12.822,17.164,4.093,0.0,0.0,1.971,2,1.124,direct_domain_probe,success,9.147224,36.0,1.148,loaded,,,,,,,,,
+9,Philips Airfryer Combi XXL HD9876/90,43.829,False,0.0,partial,109,21.084,12.808,7.912,0.0,0.0,0.46,1,1.565,direct_domain_probe,success,10.647194,36.0,0.46,loaded,,,,,,,,,
+10,Dyson V15 Detect,63.926,False,0.0,partial,207,36.133,18.801,2.126,0.0,0.0,6.548,4,0.318,direct_domain_probe,success,9.786928,36.0,2.776,loaded,,,,,,,,,
+11,Kärcher K5 Power Control,39.232,False,0.0,partial,132,30.532,6.513,0.929,0.0,0.0,0,0,1.258,google,timeout,8.020928,8.0,,,,,,,,,,,
+12,Roborock S8 MaxV Ultra,43.739,False,0.0,partial,102,14.031,13.782,10.158,0.0,0.0,2.874,4,2.894,browser_official_discovery,empty,10.157678,20.0,1.14,loaded,,,,,,,,,
+13,Tefal Ultimate Pure FV9845,49.353,False,0.0,partial,108,21.982,19.757,3.483,0.0,0.0,4.4,4,0.0,direct_domain_probe,success,11.385813,36.0,1.613,loaded,,,,,,,,,
+14,Braun MultiQuick 9 MQ9187XLI,47.069,False,0.0,partial,10,1.87,34.818,5.973,2.098,0.0,1.194,1,1.116,direct_domain_probe,success,34.817779,36.0,1.194,loaded,,,,,,,,,
+15,Kenwood Titanium Chef Patissier XL KWL90,70.032,False,0.0,partial,153,30.07,14.885,19.495,0.0,0.0,3.346,5,2.237,browser_official_discovery,empty,19.494777,20.0,1.915,loaded,,,,,,,,,
+16,ASUS RT-BE88U,60.642,False,0.0,partial,10,1.633,37.06,8.648,2.191,0.0,10.344,4,0.766,direct_domain_probe,timeout,37.060463,36.0,5.465,loaded,,,,,,,,,
+17,TP-Link Deco BE85,51.392,False,0.0,partial,101,14.297,19.77,10.904,0.0,0.0,6.268,5,0.153,browser_official_discovery,empty,10.904233,20.0,2.306,loaded,,,,,,,,,
+18,Ubiquiti UniFi U7 Pro,72.759,False,0.0,partial,110,28.865,25.344,16.268,0.0,0.0,0.0,4,2.283,browser_official_discovery,empty,16.267657,20.0,0.0,budget_exhausted,,,,,,,,,
+19,NETGEAR GS308EP,41.942,False,0.0,success,44,0.0,15.819,16.311,0.0,0.0,5.665,4,4.147,browser_official_discovery,success,16.311292,20.0,1.598,loaded,,,,,,,,,
+20,Synology DS923+,76.813,True,1.813,partial,178,31.141,31.66,10.359,0.0,0.0,0.0,4,3.653,direct_domain_probe,empty,31.659789,36.0,0.0,budget_exhausted,duckduckgo_html,timeout,"""DS923+"" site:kb.synology.com",73.408,1.612095,1.5924813856254332,0.02,,1.793
+21,APC Back-UPS BX1600MI,75.867,True,0.867,partial,27,21.463,35.559,16.98,0.0,0.0,0,0,1.864,direct_domain_probe,empty,35.55949,36.0,,,google,timeout,"""Back-UPS BX1600MI"" site:apc.com",70.592,4.417943,4.408447915571742,0.009,,0.858
+22,Logitech MX Keys S,17.737,False,0.0,success,3,3.551,7.568,0.0,2.755,0.0,2.767,3,1.097,direct_domain_probe,success,7.567677,36.0,0.959,loaded,,,,,,,,,
+23,Razer DeathAdder V3,15.871,False,0.0,success,2,3.457,5.761,0.0,2.651,0.0,2.294,2,1.707,direct_domain_probe,success,5.761443,36.0,1.231,loaded,,,,,,,,,
+24,SteelSeries Arctis Nova Pro Wireless,71.129,False,0.0,partial,151,37.036,16.029,14.393,0.0,0.0,0.0,4,3.671,direct_domain_probe,empty,15.628609,36.0,0.0,budget_exhausted,,,,,,,,,
+25,Samsung Odyssey OLED G8 G80SD,79.572,True,4.572,partial,15,13.432,46.318,11.649,0.0,0.0,2.341,4,5.831,direct_domain_probe,timeout,46.318122,36.0,2.341,loaded,naver,timeout,"""Odyssey OLED G8 G80SD"" Samsung specs",74.189,3.080214,0.8113258249941282,2.269,,2.303
+26,LG OLED evo C4,96.973,True,21.973,partial,159,48.337,9.655,0.0,0.0,0.0,22.546,4,16.435,direct_domain_probe,success,9.653225,22.386782531277277,7.657,loaded,no_recorded_provider_call,,,,,,,,
+27,Apple Mac mini M4,76.554,True,1.554,partial,79,24.506,26.568,22.608,0.0,0.0,0.0,4,2.872,direct_domain_probe,empty,26.567827,36.0,0.0,budget_exhausted,google,timeout,Apple official website,71.122,3.924793,3.878072892082855,0.047,,1.507
+28,Lenovo ThinkPad X1 Carbon Gen 13 Aura Edition,74.805,False,0.0,partial,168,38.564,19.207,11.514,0.0,0.0,0.0,4,5.52,direct_domain_probe,success,19.207385,36.0,0.0,budget_exhausted,,,,,,,,,
+29,Epson EcoTank L6270,49.668,False,0.0,success,2,12.342,26.884,0.0,4.665,0.0,2.416,2,3.361,direct_domain_probe,success,26.883583,36.0,1.548,unavailable,,,,,,,,,
+30,Canon CanoScan LiDE 400,85.148,True,10.148,partial,166,31.215,30.863,15.361,0.0,0.0,2.323,4,5.386,direct_domain_probe,timeout,16.188,6.90709704515757,2.323,unavailable,no_recorded_provider_call,,,,,,,,
+31,WD My Passport 5TB,40.002,False,0.0,partial,123,33.779,2.174,0.0,0.0,0.0,0,0,4.048,google,timeout,8.029882,8.0,,,,,,,,,,,
+32,Crucial T705,35.524,False,0.0,partial,96,13.246,13.38,2.506,0.0,0.0,2.623,3,3.769,google,timeout,8.03543,8.0,0.906,loaded,,,,,,,,,
+33,Corsair RM850x,22.273,False,0.0,success,2,1.043,9.534,0.0,4.804,0.0,3.131,2,3.761,direct_domain_probe,success,9.533823,36.0,2.795,loaded,,,,,,,,,
+34,ASUS TUF Gaming GeForce RTX 5070 Ti,76.222,True,1.222,partial,15,8.308,38.05,13.974,0.0,0.0,12.594,2,3.296,direct_domain_probe,timeout,38.050066,36.0,7.381,loaded,naver,timeout,"""TUF Gaming GeForce RTX 5070 Ti"" ASUS specs",72.453,2.938691,2.5473287203349173,0.391,,0.831
+35,MSI MAG X870 TOMAHAWK WIFI,49.511,False,0.0,partial,103,29.567,10.728,2.672,0.0,0.0,11.508,4,0.0,direct_domain_probe,success,9.810432,36.0,3.425,unavailable,,,,,,,,,
+36,DEWALT DCD805P2T,77.139,True,2.139,partial,110,28.819,21.892,21.707,0.0,0.0,0.765,1,3.955,direct_domain_probe,success,21.892465,36.0,0.765,loaded,no_recorded_provider_call,,,,,,,,
+37,Makita GA023GZ,75.731,True,0.731,partial,10,1.596,41.312,10.872,14.294,0.0,5.155,3,2.502,direct_domain_probe,timeout,41.312314,36.0,2.77,loaded,no_recorded_provider_call,,,,,,,,
+38,Milwaukee M18 FHX-502X,76.447,True,1.447,partial,34,25.658,39.337,8.881,0.0,0.0,0,0,2.571,direct_domain_probe,timeout,39.336973,36.0,,,seznam,timeout,"""M18 FHX-502X"" Milwaukee official",74.114,1.124519,0.8856830226723105,0.239,,1.208
+39,Bosch Professional GCM 8 SJL,76.58,True,1.58,partial,30,13.088,37.41,18.104,0.0,0.0,2.007,3,5.97,direct_domain_probe,timeout,37.410301,36.0,1.103,loaded,no_recorded_provider_call,,,,,,,,
+40,Einhell TC-PL 750,77.563,True,2.563,partial,157,35.677,30.696,6.003,0.0,0.0,0.0,4,5.187,direct_domain_probe,success,30.696233,36.0,0.0,budget_exhausted,naver,blocked,"""TC-PL 750"" site:einhell.co",74.434,1.774342,0.5662575577152893,1.208,,1.355
+41,STIHL MS 182,25.148,False,0.0,success,3,1.132,15.907,0.0,1.703,0.0,1.451,1,4.955,direct_domain_probe,success,15.906576,36.0,1.451,loaded,,,,,,,,,
+42,Husqvarna 525LK,52.203,False,0.0,partial,96,14.613,17.234,17.738,0.0,0.0,0,0,2.618,browser_official_discovery,empty,17.73836,20.0,,,,,,,,,,,
+43,Frostbite Drench 39ML,46.17,False,0.0,partial,26,29.241,12.909,2.62,0.0,0.0,0,0,1.401,direct_domain_probe,empty,11.795524,36.0,,,,,,,,,,,
+44,Nautilus X Series XL MAX,69.928,False,0.0,partial,92,39.744,20.994,6.544,0.0,0.0,0,0,2.645,direct_domain_probe,empty,20.993932,36.0,,,,,,,,,,,
+45,Namazu Bionic 90 N41-90-52,59.819,False,0.0,partial,22,33.009,21.555,1.468,0.0,0.0,0,0,3.788,direct_domain_probe,empty,21.554758,36.0,,,,,,,,,,,
+46,adidas Ultraboost 5 JH9073,79.419,True,4.419,partial,124,35.478,13.52,18.311,0.0,0.0,0.721,3,11.389,browser_official_discovery,empty,18.310493,20.0,0.721,unavailable,no_recorded_provider_call,,,,,,,,
+47,Nike AeroSwift FN4231-010,79.276,True,4.276,partial,25,16.277,33.254,19.044,0.0,0.0,1.108,1,9.593,direct_domain_probe,empty,33.25429,36.0,1.108,loaded,google,timeout,"""FN4231-010"" manual site:nike.com",68.939,6.086724,6.060720290115569,0.026,,4.25
+48,The North Face Nuptse,69.282,False,0.0,partial,175,37.946,20.618,5.783,0.0,0.0,0,0,4.935,direct_domain_probe,empty,20.61772,36.0,,,,,,,,,,,
+49,Oral-B iO Series 10,75.564,True,0.564,partial,13,8.114,46.265,20.01,0.0,0.0,0.0,4,1.175,direct_domain_probe,timeout,46.264857,36.0,0.0,budget_exhausted,naver,timeout,"""iO Series 10"" Oral-B",71.668,3.526351,3.3321906740311533,0.194,,0.37
+50,CeraVe Hydrating Facial Cleanser,35.945,False,0.0,success,4,12.819,10.498,0.0,3.459,0.0,2.843,4,6.326,direct_domain_probe,success,10.498019,36.0,1.14,loaded,,,,,,,,,

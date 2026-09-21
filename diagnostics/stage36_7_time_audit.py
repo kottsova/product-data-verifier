@@ -150,9 +150,31 @@ def write_reports(rows: list[dict], output: Path) -> None:
         "crossing_provider_counts": _count(item.get("crossing_provider") for item in over),
         "zero_candidate_products": [item["input"] for item in zero],
     }
+    lines = [
+        "| # | Product | Runtime s | Over s | Call that crossed the budget | Its own limit s | Ran s | "
+        "After that call s | Slowest page s | Unattributed s |",
+        "| ---: | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for item in over:
+        call = item.get("crossing_provider", "")
+        if call and call != "no_recorded_provider_call":
+            call = f"{call} ({item.get('crossing_status')})"
+        elif call:
+            call = "none recorded: the last provider call ended before the budget"
+        lines.append("| {i} | {n} | {r:.1f} | {o:.1f} | {c} | {t} | {d} | {a} | {p} | {u:.1f} |".format(
+            i=item["index"], n=item["input"], r=item["runtime_seconds"], o=item["over_budget_seconds"],
+            c=call, t=_fmt(item.get("crossing_configured_timeout")),
+            d=_fmt(item.get("crossing_duration_seconds")),
+            a=_fmt(item.get("tail_after_crossing_call_seconds")),
+            p=_fmt(item.get("slowest_page_seconds")), u=item["unattributed_seconds"]))
+    (output / "overruns.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     (output / "time_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+
+def _fmt(value) -> str:
+    return "" if value is None or value == "" else f"{float(value):.1f}"
 
 
 def _count(values) -> dict[str, int]:

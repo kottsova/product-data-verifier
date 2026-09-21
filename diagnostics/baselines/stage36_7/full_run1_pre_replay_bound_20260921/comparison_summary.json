@@ -24,38 +24,32 @@
     "program_fault_rows": 0
   },
   "new": {
-    "PASS": 15,
-    "PARTIAL": 34,
-    "FAIL": 1,
-    "over_75s": 10,
-    "max_runtime_seconds": 81.108,
-    "median_runtime_seconds": 61.551,
-    "total_runtime_seconds": 2800.8,
-    "unique_candidates": 3787.0,
+    "PASS": 13,
+    "PARTIAL": 37,
+    "FAIL": 0,
+    "over_75s": 17,
+    "max_runtime_seconds": 96.973,
+    "median_runtime_seconds": 67.942,
+    "total_runtime_seconds": 3020.0,
+    "unique_candidates": 3750.0,
     "zero_candidate_products": 0,
-    "queries_attempted": 362.0,
-    "page_fetches": 119.0,
-    "pages_loaded": 76.0,
-    "exact_official_pages": 15.0,
+    "queries_attempted": 358.0,
+    "page_fetches": 126.0,
+    "pages_loaded": 68.0,
+    "exact_official_pages": 13.0,
     "support_pages": 0.0,
     "documents": 0.0,
-    "net_provider_blocks": 183.0,
-    "net_http_403": 22.0,
+    "net_provider_blocks": 178.0,
+    "net_http_403": 20.0,
     "net_http_429": 0.0,
-    "net_provider_timeouts": 50.0,
+    "net_provider_timeouts": 56.0,
     "provider_other_errors": 0.0,
     "program_fault_rows": 0,
-    "hard_stops": 1,
-    "max_over_budget_seconds": 6.108,
-    "max_post_result_cleanup_seconds": 2.044
+    "hard_stops": 2,
+    "max_over_budget_seconds": 21.973,
+    "max_post_result_cleanup_seconds": 2.057
   },
   "status_changes": [
-    {
-      "index": 9,
-      "input": "Philips Airfryer Combi XXL HD9876/90",
-      "old": "PARTIAL",
-      "new": "PASS"
-    },
     {
       "index": 14,
       "input": "Braun MultiQuick 9 MQ9187XLI",
@@ -111,10 +105,10 @@
       "new": "PASS"
     },
     {
-      "index": 45,
-      "input": "Namazu Bionic 90 N41-90-52",
-      "old": "PARTIAL",
-      "new": "FAIL"
+      "index": 49,
+      "input": "Oral-B iO Series 10",
+      "old": "PASS",
+      "new": "PARTIAL"
     }
   ],
   "accepted_lost": [
@@ -122,14 +116,14 @@
       "index": 47,
       "input": "Nike AeroSwift FN4231-010",
       "urls": "nike.com/gb/t/aeroswift-mens-dri-fit-adv-running-vest-vsx0gdly/fn4231-010"
+    },
+    {
+      "index": 49,
+      "input": "Oral-B iO Series 10",
+      "urls": "oralb.com/en-us/products/electric-toothbrushes/io-series-10-rechargeable-electric-toothbrush-cosmic-black"
     }
   ],
   "accepted_new_needing_manual_review": [
-    {
-      "index": 9,
-      "input": "Philips Airfryer Combi XXL HD9876/90",
-      "urls": "home-appliances.philips/de/de/p/hd9876_90"
-    },
     {
       "index": 14,
       "input": "Braun MultiQuick 9 MQ9187XLI",
